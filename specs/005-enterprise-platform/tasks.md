@@ -37,14 +37,14 @@
 
 ## Phase E3 — Provisioning & lifecycle (SCIM)
 
-- [ ] T518 SCIM 2.0 server: Users create/update/deactivate; conformance-style cycle tests (F-005-06).
-- [ ] T519 Group→role mappings: tenant-admin-approved mapping records only; no silent grants from group membership.
-- [ ] T520 JIT provisioning: assertion-created identity, asserting tenant only, zero study roles until a grant event (F-005-07).
-- [ ] T521 Deprovisioning pipeline: deactivation event → sessions revoked, keys closed to new appends, next-request effective (F-005-05, both halves).
-- [ ] T522 Key-lifecycle completion: adjudicator re-enrollment with tenant-admin countersign; deprovisioned-identity key sweep.
-- [ ] T523 Identity directory: PII off-ledger under ordinary data controls; random actor IDs; directory erasure path that never touches a chain.
-- [ ] T524 Lifecycle admin API (no console yet): tenant admins manage membership, grants, revocations — all as platform-ledger events.
-- [ ] T525 Phase exit: re-assessment + Spec 002 battery.
+- [x] T518 SCIM 2.0 server: Users create/update/deactivate; conformance-style cycle tests (F-005-06).
+- [x] T519 Group→role mappings: tenant-admin-approved mapping records only; no silent grants from group membership.
+- [x] T520 JIT provisioning: assertion-created identity, asserting tenant only, zero study roles until a grant event (F-005-07).
+- [x] T521 Deprovisioning pipeline: deactivation event → sessions revoked, keys closed to new appends, next-request effective (F-005-05, both halves).
+- [x] T522 Key-lifecycle completion: adjudicator re-enrollment with tenant-admin countersign; deprovisioned-identity key sweep.
+- [x] T523 Identity directory: PII off-ledger under ordinary data controls; random actor IDs; directory erasure path that never touches a chain.
+- [x] T524 Lifecycle admin API (no console yet): tenant admins manage membership, grants, revocations — all as platform-ledger events.
+- [x] T525 Phase exit: re-assessment + Spec 002 battery.
 
 ## Phase E4 — Tenancy hardening + isolation battery
 

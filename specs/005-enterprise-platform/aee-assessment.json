@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
   "methodology_version": "1.0",
-  "project": "project",
+  "project": "tekmerion",
   "phase": "after_implement",
   "outcome": "gather_evidence",
-  "summary": "Assessed 31 claim(s); found 136 failure mode(s); 13 claim(s) below the 0.70 confidence threshold.",
-  "created_at": "2026-10-12T13:45:46.820073Z",
+  "summary": "Assessed 31 claim(s); found 136 failure mode(s); 10 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T16:15:16.390298Z",
   "claims": [
     {
       "id": "CLM-005-01",
@@ -144,7 +144,7 @@
       "id": "CLM-005-02",
       "text": "The platform acts as a SAML 2.0 service provider with per-tenant IdP configuration (entity ID, metadata, attribute mapping), so Shibboleth / InCommon-class federated IdPs authenticate their tenants; unsigned or untrusted assertions are never accepted.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: SAML 2.0 Web Browser SSO profile, SP-initiated and IdP-initiated (E2)",
         "Excludes SAML artifact binding and federation-metadata aggregate automation in v1 (manual per-tenant metadata, refreshed on a schedule)"
@@ -481,7 +481,7 @@
       "id": "CLM-005-04",
       "text": "Key enrollment, rotation, and revocation are appended, timestamped events in the platform record; rotation supersedes a binding without editing it, and signatures made before a revocation continue to verify after it.",
       "kind": "requirement",
-      "status": "partially_supported",
+      "status": "supported",
       "boundary": [
         "Scope: the identity/key registry (platform plane), E1 with lifecycle completion in E3",
         "Excludes the DN-005 break-glass erasure certificate, which governs payload keys, not actor signing keys"
@@ -523,10 +523,10 @@
           "content_hash": null
         },
         {
-          "ref": "E1 discharges the lifecycle core; SCIM-driven completion is E3 per this claim's boundary \u2014 status stays partially_supported until then",
+          "ref": "E3 completion (tests/test_e3_scim.py): an adjudicator whose key reached a terminal state cannot self-reenroll \u2014 the refusal names the countersign path \u2014 and re-enrollment succeeds only as a tenant-admin-countersigned enrollment (key.enrolled carries countersigned_by_actor_id); a deprovisioned identity's still-accepted keys are closed by the key sweep (test_adjudicator_reenrollment_requires_countersign, test_countersign_refusals, test_key_sweep_closes_stragglers_of_deprovisioned_identities)",
           "kind": "observed",
           "direction": "supports",
-          "source_quality": "primary",
+          "source_quality": "test",
           "description": "",
           "source_id": "",
           "independent_of": [],
@@ -643,7 +643,7 @@
       "id": "CLM-005-05",
       "text": "Deprovisioning an identity ends its ability to append and to read \u2014 effective at the next authenticated request after the deactivation event \u2014 while every historical append, signature, and attribution by that identity remains intact and verifiable.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: deprovisioning via SCIM deactivate, tenant-admin action, or IdP-driven lifecycle (E3)",
         "Excludes erasure of off-ledger directory PII under legal duty, which follows ordinary data controls and never touches ledger content"
@@ -672,6 +672,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e3_scim.py::test_deprovisioning_ends_appends_and_preserves_history: after the deactivation event the next append is refused despite a valid key+session, a fresh login is refused, and the study ledger verifies with every pre-deactivation event byte-identical and its signature still verifying against the recorded public key (F-005-05, both halves)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_e3_scim.py: SCIM PATCH active=false and SCIM DELETE drive the same deactivation core (identity.deactivated via=scim); an API-key principal deactivated mid-life loses append ability at the next request (test_scim_deactivate_and_delete_use_the_same_core, test_deprovisioned_api_key_principal_cannot_append)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -683,8 +705,8 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-05-IRREDUCIBILITY-CHALLENGE",
@@ -733,7 +755,7 @@
       "id": "CLM-005-06",
       "text": "SCIM 2.0 provisioning from the tenant's IdP (create, update, deactivate) is honored as the tenant's lifecycle source of truth, and a SCIM deactivate produces exactly CLM-005-05 deprovisioning semantics.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: SCIM 2.0 Users resource (E3); Groups map to role grants only via recorded tenant-admin-approved mappings",
         "Excludes SCIM as an authentication mechanism \u2014 SCIM provisions, IdPs authenticate"
@@ -762,6 +784,17 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e3_scim.py (39 tests): RFC 7643/7644-shaped Users and Groups with create/read/list/replace/PATCH/delete, per-tenant bearer credentials (hash-only storage, cross-tenant presentation refused and ledgered before any state change), duplicate userName/externalId as 409 uniqueness, membership granting nothing without a recorded tenant-admin-approved mapping, and SCIM deactivate/Delete producing exactly CLM-005-05 deprovisioning semantics through the shared lifecycle core",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -773,8 +806,8 @@
       "severity": "medium",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-06-IRREDUCIBILITY-CHALLENGE",
@@ -843,7 +876,7 @@
       "id": "CLM-005-07",
       "text": "Just-in-time provisioning creates an identity only in the tenant whose IdP asserted it, with no study role by default (least privilege); a role exists only after a recorded grant.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: first-login provisioning for OIDC and SAML tenants without SCIM (E3)",
         "Excludes platform-admin bootstrap for a brand-new tenant, which is a named, audited platform event"
@@ -872,6 +905,17 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e3_scim.py: identity.created carries provisioning=jit on both doors (OIDC and SAML); a JIT identity holds zero study roles and its append is refused until a recorded grant; a SAML assertion creates the identity only in the asserting tenant (test_jit_oidc_identity_has_no_role_until_grant, test_jit_saml_identity_asserting_tenant_only)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -883,8 +927,8 @@
       "severity": "medium",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-07-IRREDUCIBILITY-CHALLENGE",
@@ -1631,10 +1675,10 @@
           "content_hash": null
         },
         {
-          "ref": "SCIM sync outcomes (E3) and break-glass use (CLM-005-10) are not yet emittable events \u2014 partially_supported until E4 completion per this claim's boundary",
+          "ref": "E3 discharges the SCIM half: scim.sync_succeeded / scim.sync_failed (failures recorded before the raise, incl. cross-tenant credential presentation), scim.token_issued/revoked, scim.group_mapping_approved/revoked, scim.group_membership_granted/revoked, identity.reactivated and identity.pii_erased are all emittable platform-ledger events (tests/test_e3_scim.py::test_e3_surface_events_and_chain_verification; the E1 AU sweep battery was extended to exercise the grown vocabulary). Residue: break-glass use (CLM-005-10) is not yet an emittable event \u2014 partially_supported until E4 completion per this claim's boundary",
           "kind": "observed",
           "direction": "supports",
-          "source_quality": "primary",
+          "source_quality": "test",
           "description": "",
           "source_id": "",
           "independent_of": [],
@@ -3319,51 +3363,45 @@
     },
     "CLM-005-05": {
       "claim_id": "CLM-005-05",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-06": {
       "claim_id": "CLM-005-06",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-07": {
       "claim_id": "CLM-005-07",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-08": {
       "claim_id": "CLM-005-08",

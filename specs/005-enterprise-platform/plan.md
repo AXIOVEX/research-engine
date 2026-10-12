@@ -148,3 +148,35 @@ signatures are real, its message shapes are ours), the in-repo
 exclusive canonicalizer against production namespace-heavy
 assertions, and SP request-signing / encrypted-assertion support
 (both refused-or-absent by recorded v1 scope, not by oversight).
+
+**E3 — SCIM + identity lifecycle: EXITED 2026-10-12** (branch
+`enterprise/e3-scim`, commit `a1a0f3a`; PR #9 opened for CI, run
+38276407663 success; merging is the coordinator's). Delivered: the
+SCIM 2.0 provisioning surface — Users and Groups in RFC 7643/7644
+shapes with per-tenant bearer provisioning credentials (hash-only
+storage; cross-tenant presentation refused and ledgered in the
+addressed tenant before any state change) (T518); group→role
+mappings only as recorded tenant-admin-approved records, with
+grant-source tracking so roles survive exactly while a source
+justifies them (T519); JIT least privilege marked on both login
+doors (T520); the deprovisioning pipeline through one shared
+lifecycle core — SCIM deactivate/Delete and admin deactivation are
+the same act (T521); adjudicator re-enrollment by tenant-admin
+countersign plus the deprovisioned-identity key sweep (T522);
+off-ledger directory PII with an erasure path that never touches a
+chain (T523); the lifecycle admin API (T524); phase exit with
+re-assessment (T525). Tests: 288 passed locally and in CI (249 prior
++ 39 new), including F-005-05 in both halves and the refusal battery.
+Claims at exit (bundle v0.5.0, re-assessed `after_implement`, outcome
+`gather_evidence` — 10 claims remain below threshold, all unbuilt
+E4–E6 scope): supported — CLM-005-04 (E3 completion), 05, 06, 07
+(joining the E1/E2 set); partially_supported — CLM-005-14 (SCIM half
+discharged; residue is E4 break-glass only — completion at E4 per
+the claim map), 09, 26 unchanged. CMMC maintenance: matrix reviewed,
+no classification changes (rows 3.5.5/3.9.2's E3 bases now exist);
+crypto inventory gains no row (SCIM credentials reuse the row-8
+hashing operation and row-10 generation). What remains not
+understood at this exit: live SCIM-client interoperability (no
+Entra/Okta tenant exercised — fixtures only), SCIM↔login account
+linking (unspecced; the dual-door fact now has a third door), and
+provisioning behavior at institutional directory volumes.

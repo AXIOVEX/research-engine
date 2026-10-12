@@ -34,18 +34,32 @@ from .directory import (
     SamlIdPConfig, Session, Tenant, hash_api_secret,
 )
 from .errors import AuthenticationError, AuthorizationDenied, ConfigurationError, GateDenied
-from .keys import DelegatedSigner, KeyRecord, KeyRegistry, fingerprint
+from .keys import (
+    STATUS_CLOSED, STATUS_REVOKED, DelegatedSigner, KeyRecord, KeyRegistry,
+    fingerprint,
+)
 from .ledger import (
     APIKEY_ISSUED, APIKEY_REVOKED, AUTH_APIKEY_FAILED, AUTH_LOGIN_FAILED,
     AUTH_LOGIN_SUCCEEDED, AUTH_LOGOUT, AUTH_STEPUP, AUTHZ_DENIED,
-    IDENTITY_CREATED, IDENTITY_DEACTIVATED, IDENTITY_UPDATED, IDP_CONFIGURED,
-    IDP_UPDATED, PLATFORM_BOOTSTRAPPED, ROLE_GRANTED, ROLE_REVOKED,
-    SESSION_REVOKED, TENANT_CREATED, TENANT_UPDATED, PlatformLedger,
+    DIRECTORY_PII_ERASED, GROUP_MAPPING_APPROVED, GROUP_MAPPING_REVOKED,
+    GROUP_MEMBERSHIP_GRANTED, GROUP_MEMBERSHIP_REVOKED, IDENTITY_CREATED,
+    IDENTITY_DEACTIVATED, IDENTITY_REACTIVATED, IDENTITY_UPDATED,
+    IDP_CONFIGURED, IDP_UPDATED, PLATFORM_BOOTSTRAPPED, ROLE_GRANTED,
+    ROLE_REVOKED, SCIM_SYNC_FAILED, SCIM_SYNC_SUCCEEDED, SCIM_TOKEN_ISSUED,
+    SCIM_TOKEN_REVOKED, SESSION_REVOKED, TENANT_CREATED, TENANT_UPDATED,
+    PlatformLedger,
 )
 from .oidc import OIDCClient, pkce_pair
 from .saml import (
     CLOCK_SKEW_SECONDS, SamlAssertion, SamlIdPSettings, build_authn_request,
     new_request_id, parse_metadata, redirect_binding_url, validate_response,
+)
+from .scim import (
+    SCIM_ISSUER, GroupRoleMapping, ProvisionedUser, ScimCredential,
+    ScimDirectory, ScimError, ScimAuthenticationError, ScimBadRequestError,
+    ScimGroup, ScimNotFoundError, ScimUniquenessError, display_name_of,
+    group_resource, list_response, matches_filter, new_prefixed_id,
+    new_scim_id, paginate, parse_filter, primary_email, user_resource,
 )
 from .x509 import parse_certificate
 
@@ -94,6 +108,7 @@ class PlatformService:
         self.authz = AuthorizationService()
         self.oidc = oidc_client or OIDCClient(now=now)
         self.delegated_signer = DelegatedSigner()
+        self.scim = ScimDirectory()
         deployment_path = self.root / "deployment.axmr"
         if deployment_path.exists():
             self.deployment_ledger = PlatformLedger.open(str(deployment_path), scope="deployment")
@@ -452,7 +467,7 @@ class PlatformService:
             ledger.record(IDENTITY_CREATED, actor_id=identity.actor_id,
                           target=f"identity:{identity.identity_id}",
                           identity_id=identity.identity_id, subject_actor_id=identity.actor_id,
-                          via="oidc", at=self._now())
+                          via="oidc", provisioning="jit", at=self._now())
         session = self.directory.new_session(
             identity, amr=claims.amr, acr=claims.acr, mfa=claims.mfa, now=self._now())
         policy = self.directory.tenant(tenant_id).policy
@@ -583,7 +598,7 @@ class PlatformService:
                           target=f"identity:{identity.identity_id}",
                           identity_id=identity.identity_id,
                           subject_actor_id=identity.actor_id,
-                          via="saml", at=self._now())
+                          via="saml", provisioning="jit", at=self._now())
         session = self.directory.new_session(
             identity, amr=claims.amr, acr=claims.acr, mfa=claims.mfa, now=self._now())
         policy = self.directory.tenant(tenant_id).policy
@@ -684,29 +699,57 @@ class PlatformService:
             principal_class="service", at=self._now())
         return ident
 
-    def deactivate_identity(self, session_token: str, *, identity_id: str,
-                            reason: str = "") -> None:
-        """The E1 mechanism of deprovisioning (§4; SCIM wires to this
-        in E3): deactivation event, sessions revoked, keys closed —
-        effective at the next request. History is untouched."""
-        identity = self.directory.identity(identity_id)
+    def _deactivate_identity_core(self, identity: Identity, *, actor_id: str,
+                                  reason: str, via: str) -> None:
+        """The one deprovisioning mechanism (§4), whatever door drives
+        it — tenant admin (E1), SCIM deactivate/delete (E3), the
+        lifecycle API (E3): deactivation event, sessions revoked, keys
+        closed — effective at the next request. History is untouched:
+        nothing here (or anywhere) rewrites an earlier event."""
         tenant_id = identity.tenant_id
-        _, admin = self._require(session_token, authz.TENANT_MEMBER_MANAGE, tenant_id=tenant_id)
         ledger = self._tenant_ledger(tenant_id)
         identity.active = False
-        ledger.record(IDENTITY_DEACTIVATED, actor_id=admin.actor_id,
-                      target=f"identity:{identity_id}",
-                      identity_id=identity_id, subject_actor_id=identity.actor_id,
-                      reason=reason, at=self._now())
-        n = self.directory.revoke_sessions_for(identity_id)
+        ledger.record(IDENTITY_DEACTIVATED, actor_id=actor_id,
+                      target=f"identity:{identity.identity_id}",
+                      identity_id=identity.identity_id,
+                      subject_actor_id=identity.actor_id,
+                      reason=reason, via=via, at=self._now())
+        n = self.directory.revoke_sessions_for(identity.identity_id)
         if n:
-            ledger.record(SESSION_REVOKED, actor_id=admin.actor_id,
-                          target=f"identity:{identity_id}",
-                          identity_id=identity_id, subject_actor_id=identity.actor_id,
-                          sessions_revoked=n, reason="deactivation", at=self._now())
+            ledger.record(SESSION_REVOKED, actor_id=actor_id,
+                          target=f"identity:{identity.identity_id}",
+                          identity_id=identity.identity_id,
+                          subject_actor_id=identity.actor_id,
+                          sessions_revoked=n, reason="deactivation", via=via,
+                          at=self._now())
         self.registry(tenant_id).close_for_identity(
-            identity_id=identity_id, recorded_by_actor_id=admin.actor_id,
+            identity_id=identity.identity_id, recorded_by_actor_id=actor_id,
             reason="deactivation")
+
+    def _reactivate_identity_core(self, identity: Identity, *, actor_id: str,
+                                  via: str) -> None:
+        """Reactivation restores append ability PROSPECTIVELY only:
+        it is its own event; sessions are not restored (the identity
+        signs in again); keys stay closed (re-enrollment is the only
+        way back, §3); role grants were never revoked by deactivation
+        — they are separate events — so they resume as the ledger
+        projects them."""
+        identity.active = True
+        self._tenant_ledger(identity.tenant_id).record(
+            IDENTITY_REACTIVATED, actor_id=actor_id,
+            target=f"identity:{identity.identity_id}",
+            identity_id=identity.identity_id,
+            subject_actor_id=identity.actor_id, via=via, at=self._now())
+
+    def deactivate_identity(self, session_token: str, *, identity_id: str,
+                            reason: str = "") -> None:
+        """Tenant-admin deprovisioning (§4): the E1 mechanism; SCIM
+        deactivate/delete (E3) drive the same core."""
+        identity = self.directory.identity(identity_id)
+        _, admin = self._require(session_token, authz.TENANT_MEMBER_MANAGE,
+                                 tenant_id=identity.tenant_id)
+        self._deactivate_identity_core(
+            identity, actor_id=admin.actor_id, reason=reason, via="admin")
 
     def update_identity(self, session_token: str, *, identity_id: str, **attrs) -> Identity:
         identity = self.directory.identity(identity_id)
@@ -733,6 +776,7 @@ class PlatformService:
                         proof_signature: bytes, nonce: str) -> KeyRecord:
         session, identity = self._resolve_session(session_token)
         self._require_stepup_if_adjudicator(identity, session)
+        self._guard_adjudicator_reenrollment(identity)
         return self.registry(identity.tenant_id).enroll(
             identity_id=identity.identity_id, actor_id=identity.actor_id,
             public_key=public_key, custody="self",
@@ -745,6 +789,7 @@ class PlatformService:
         and proof of possession is the signer signing the nonce."""
         session, identity = self._resolve_session(session_token)
         self._require_stepup_if_adjudicator(identity, session)
+        self._guard_adjudicator_reenrollment(identity)
         public_key = ed25519.publickey_from_seed(bytes.fromhex(seed_hex))
         fp = self.delegated_signer.hold(seed_hex)
         assert fp == fingerprint(public_key)
@@ -764,6 +809,23 @@ class PlatformService:
             policy = self.directory.tenant(identity.tenant_id).policy
             if not session.has_fresh_stepup(policy, self._now()):
                 raise GateDenied("adjudicator key enrollment requires a fresh step-up")
+
+    def _guard_adjudicator_reenrollment(self, identity: Identity) -> None:
+        """§3 recovery rule (T522): an adjudicator whose key was
+        revoked or closed re-enrolls ONLY with a tenant-admin
+        countersign — self-service refuses and names the countersigned
+        path. First enrollments, and enrollments while a prior key is
+        merely superseded by rotation, are unaffected."""
+        roles = self.roles_of(identity.identity_id, identity.tenant_id)
+        if authz.ADJUDICATOR not in roles:
+            return
+        registry = self.registry(identity.tenant_id)
+        terminal = [k for k in registry.keys_for_identity(identity.identity_id)
+                    if k.status in (STATUS_REVOKED, STATUS_CLOSED)]
+        if terminal:
+            raise GateDenied(
+                "adjudicator re-enrollment after key revocation/closure "
+                "requires a tenant-admin countersign (T522)")
 
     def rotate_key(self, session_token: str, *, old_fingerprint: str,
                    new_public_key: bytes, proof_signature: bytes, nonce: str) -> KeyRecord:
@@ -828,6 +890,906 @@ class PlatformService:
         self._tenant_ledger(tenant_id).record(
             APIKEY_REVOKED, actor_id=admin.actor_id, target=f"apikey:{key_id}",
             key_id=key_id, at=self._now())
+
+    # -- provisioning & lifecycle (E3: T518–T524) --------------------------------
+    #
+    # SCIM provisions; the lifecycle core deprovisions. The SCIM
+    # operations take (tenant_id, credential_id, secret) — the tenant
+    # from the endpoint path, the credential from the bearer header an
+    # HTTP adapter would strip — and return (status, document) in
+    # RFC 7644 shapes. Refusals raise ScimError subclasses AFTER the
+    # failure is ledgered (the E1/E2 refusal discipline).
+
+    def issue_scim_token(self, session_token: str, *, tenant_id: str) -> tuple[ScimCredential, str]:
+        """Issue a tenant's SCIM provisioning credential (T518). The
+        secret is shown once; only its SHA-256 hash is stored (§9)."""
+        _, admin = self._require(session_token, authz.TENANT_PROVISIONING_MANAGE,
+                                 tenant_id=tenant_id)
+        secret = _secrets.token_urlsafe(32)
+        cred = ScimCredential(
+            credential_id=new_prefixed_id("scim_"), tenant_id=tenant_id,
+            secret_hash=hash_api_secret(secret),
+            created_by_actor_id=admin.actor_id, created_at=self._now())
+        self.scim.add_credential(cred)
+        self._tenant_ledger(tenant_id).record(
+            SCIM_TOKEN_ISSUED, actor_id=admin.actor_id,
+            target=f"scim-token:{cred.credential_id}",
+            credential_id=cred.credential_id, at=self._now())
+        return cred, secret
+
+    def revoke_scim_token(self, session_token: str, *, tenant_id: str,
+                          credential_id: str) -> None:
+        _, admin = self._require(session_token, authz.TENANT_PROVISIONING_MANAGE,
+                                 tenant_id=tenant_id)
+        found = self.scim.find_credential(credential_id)
+        if found is None or found[0] != tenant_id:
+            raise ConfigurationError(
+                f"unknown SCIM credential for tenant: {credential_id}")
+        found[1].revoked = True
+        self._tenant_ledger(tenant_id).record(
+            SCIM_TOKEN_REVOKED, actor_id=admin.actor_id,
+            target=f"scim-token:{credential_id}",
+            credential_id=credential_id, at=self._now())
+
+    # -- SCIM plumbing -----------------------------------------------------------
+
+    def _record_scim_failure(self, tenant_id: str, *, actor_id: str, op: str,
+                             target: str, reason: str) -> None:
+        """A SCIM refusal is a record before it is a response: tenant-
+        scope failures land in the addressed tenant's ledger; a
+        failure addressed to a tenant that does not exist lands in
+        the deployment ledger, the only scope that can carry it."""
+        ledger = (self._tenant_ledger(tenant_id)
+                  if tenant_id in self.directory.tenants else self.deployment_ledger)
+        ledger.record(SCIM_SYNC_FAILED, actor_id=actor_id, target=target,
+                      outcome="failed", op=op, reason=reason, via="scim",
+                      tenant_id=tenant_id, at=self._now())
+
+    def _scim_auth(self, tenant_id: str, credential_id: str, secret: str,
+                   *, op: str) -> ScimCredential:
+        actor = f"scim:{credential_id}"
+        target = f"tenant:{tenant_id}"
+        if tenant_id not in self.directory.tenants:
+            self._record_scim_failure(tenant_id, actor_id=actor, op=op,
+                                      target=target, reason="unknown tenant")
+            raise ScimNotFoundError(f"unknown tenant: {tenant_id}")
+        found = self.scim.find_credential(credential_id)
+        if found is None or not _secrets.compare_digest(
+                found[1].secret_hash, hash_api_secret(secret)):
+            self._record_scim_failure(
+                tenant_id, actor_id=actor, op=op, target=target,
+                reason="unknown credential or bad secret")
+            raise ScimAuthenticationError("SCIM credential authentication failed")
+        owner, cred = found
+        if owner != tenant_id:
+            self._record_scim_failure(
+                tenant_id, actor_id=actor, op=op, target=target,
+                reason="credential belongs to another tenant")
+            raise ScimAuthenticationError(
+                "SCIM credential is not valid for this tenant")
+        if cred.revoked:
+            self._record_scim_failure(
+                tenant_id, actor_id=actor, op=op, target=target,
+                reason="credential revoked")
+            raise ScimAuthenticationError("SCIM credential is revoked")
+        return cred
+
+    def _scim_ok(self, tenant_id: str, cred: ScimCredential, *, op: str,
+                 target: str, identity: Optional[Identity] = None, **fields) -> None:
+        extra = {}
+        if identity is not None:
+            extra = {"identity_id": identity.identity_id,
+                     "subject_actor_id": identity.actor_id}
+        self._tenant_ledger(tenant_id).record(
+            SCIM_SYNC_SUCCEEDED, actor_id=f"scim:{cred.credential_id}",
+            target=target, op=op, via="scim", **extra, **fields, at=self._now())
+
+    def _scim_write(self, tenant_id: str, credential_id: str, secret: str,
+                    *, op: str, target: str, fn):
+        """Authenticate + run one mutating SCIM operation. Operation
+        refusals are ledgered before the raise; the operations
+        validate before they mutate, so a refused operation leaves
+        directory state unchanged."""
+        cred = self._scim_auth(tenant_id, credential_id, secret, op=op)
+        try:
+            return fn(cred)
+        except ScimError as exc:
+            self._record_scim_failure(
+                tenant_id, actor_id=f"scim:{credential_id}", op=op,
+                target=target, reason=exc.detail)
+            raise
+
+    # -- mapping-driven grants (T519) ----------------------------------------------
+
+    def _scim_grant_role(self, tenant_id: str, identity: Identity, role: str,
+                         *, group_ref: str, mapping_id: str) -> None:
+        """A mapping-driven grant: recorded as the platform's act
+        (actor "system"), naming the approved mapping that authorized
+        it — never silent, always replayable."""
+        self._tenant_ledger(tenant_id).record(
+            ROLE_GRANTED, actor_id=SYSTEM_ACTOR,
+            target=f"identity:{identity.identity_id}",
+            identity_id=identity.identity_id,
+            subject_actor_id=identity.actor_id, role=role, tenant_id=tenant_id,
+            via="scim-group-mapping", group_ref=group_ref,
+            mapping_id=mapping_id, at=self._now())
+
+    def _scim_role_sources(self, tenant_id: str, identity: Identity,
+                           role: str) -> set:
+        """The sources CURRENTLY justifying (identity, role): "grant"
+        when a direct (non-mapping) grant is in force per the ledger,
+        plus the group_ref of each active mapping whose group the
+        identity currently belongs to. Computed from present state —
+        callers apply their withdrawal (member removed, mapping
+        deactivated) BEFORE consulting this, so a withdrawn source
+        never counts itself."""
+        sources: set = set()
+        direct = False
+        for ev in self._tenant_ledger(tenant_id).events():
+            p = ev["payload"]
+            if p.get("identity_id") != identity.identity_id or p.get("role") != role:
+                continue
+            if ev["type"] == ROLE_GRANTED and p.get("via") != "scim-group-mapping":
+                direct = True
+            elif ev["type"] == ROLE_REVOKED and p.get("via") != "scim-group-mapping":
+                direct = False
+        if direct:
+            sources.add("grant")
+        state = self.scim.tenant(tenant_id)
+        for m in state.mappings.values():
+            if not m.active or m.role != role:
+                continue
+            group = self.scim.group_by_ref(tenant_id, m.group_ref)
+            if group is not None and identity.identity_id in group.member_identity_ids:
+                sources.add(m.group_ref)
+        return sources
+
+    def _scim_revoke_role(self, tenant_id: str, identity: Identity, role: str,
+                          *, group_ref: str, reason: str) -> None:
+        """Complete a mapping-source withdrawal (membership removed
+        or mapping revoked — the caller has already applied it): if
+        no other source still justifies the role, record the
+        role.revoked event naming the mapping. Otherwise the
+        membership/mapping event alone carries the change and the
+        role correctly survives on its remaining source."""
+        if self._scim_role_sources(tenant_id, identity, role):
+            return
+        self._tenant_ledger(tenant_id).record(
+            ROLE_REVOKED, actor_id=SYSTEM_ACTOR,
+            target=f"identity:{identity.identity_id}",
+            identity_id=identity.identity_id,
+            subject_actor_id=identity.actor_id, role=role, tenant_id=tenant_id,
+            via="scim-group-mapping", group_ref=group_ref, reason=reason,
+            at=self._now())
+
+    def _scim_add_member(self, tenant_id: str, cred: ScimCredential,
+                         group: ScimGroup, identity: Identity) -> None:
+        """Add an identity to a SCIM group (directory state), record
+        the membership, and apply every approved mapping as a grant."""
+        group.member_identity_ids.add(identity.identity_id)
+        group.updated_at = self._now()
+        self._tenant_ledger(tenant_id).record(
+            GROUP_MEMBERSHIP_GRANTED, actor_id=f"scim:{cred.credential_id}",
+            target=f"scim-group:{group.scim_id}",
+            identity_id=identity.identity_id,
+            subject_actor_id=identity.actor_id, group_id=group.scim_id,
+            via="scim", at=self._now())
+        for mapping in self.scim.mapping_for(tenant_id, group):
+            self._scim_grant_role(tenant_id, identity, mapping.role,
+                                  group_ref=mapping.group_ref,
+                                  mapping_id=mapping.mapping_id)
+
+    def _scim_remove_member(self, tenant_id: str, group: ScimGroup,
+                            identity: Identity, *, actor_id: str) -> None:
+        group.member_identity_ids.discard(identity.identity_id)
+        group.updated_at = self._now()
+        self._tenant_ledger(tenant_id).record(
+            GROUP_MEMBERSHIP_REVOKED, actor_id=actor_id,
+            target=f"scim-group:{group.scim_id}",
+            identity_id=identity.identity_id,
+            subject_actor_id=identity.actor_id, group_id=group.scim_id,
+            via="scim", at=self._now())
+        for mapping in self.scim.mapping_for(tenant_id, group):
+            self._scim_revoke_role(tenant_id, identity, mapping.role,
+                                   group_ref=mapping.group_ref,
+                                   reason="group membership removed")
+
+    def _identities_of(self, tenant_id: str) -> dict:
+        state = self.scim.tenant(tenant_id)
+        return {u.identity_id: self.directory.identity(u.identity_id)
+                for u in state.users.values()}
+
+    def _group_or_bad_request(self, tenant_id: str, entry) -> ScimGroup:
+        ref = entry.get("value") if isinstance(entry, dict) else entry
+        group = self.scim.group_by_ref(tenant_id, ref) if ref else None
+        if group is None:
+            raise ScimBadRequestError(f"unknown group: {ref}",
+                                      scim_type="invalidValue")
+        return group
+
+    # -- SCIM Users (T518) ---------------------------------------------------------
+
+    def _scim_user_or_404(self, tenant_id: str, scim_id: str):
+        state = self.scim.tenant(tenant_id)
+        user = state.users.get(scim_id)
+        if user is None:
+            raise ScimNotFoundError(f"no such user: {scim_id}")
+        return state, user, self.directory.identity(user.identity_id)
+
+    def scim_get_user(self, tenant_id: str, credential_id: str, secret: str,
+                      scim_id: str) -> tuple[int, dict]:
+        self._scim_auth(tenant_id, credential_id, secret, op="user.get")
+        state, user, identity = self._scim_user_or_404(tenant_id, scim_id)
+        return 200, user_resource(state, user, identity)
+
+    def scim_list_users(self, tenant_id: str, credential_id: str, secret: str,
+                        *, filter_expr: Optional[str] = None, start_index: int = 1,
+                        count: Optional[int] = None) -> tuple[int, dict]:
+        self._scim_auth(tenant_id, credential_id, secret, op="user.list")
+        state = self.scim.tenant(tenant_id)
+        docs = [user_resource(state, u, self.directory.identity(u.identity_id))
+                for u in sorted(state.users.values(), key=lambda u: u.scim_id)]
+        if filter_expr:
+            parsed = parse_filter(filter_expr)
+            docs = [d for d in docs if matches_filter(d, parsed)]
+        page, start = paginate(docs, start_index=start_index, count=count)
+        return 200, list_response(page, total=len(docs), start_index=start)
+
+    def scim_create_user(self, tenant_id: str, credential_id: str, secret: str,
+                         doc: dict) -> tuple[int, dict]:
+        return self._scim_write(
+            tenant_id, credential_id, secret, op="user.create",
+            target=f"tenant:{tenant_id}",
+            fn=lambda cred: self._scim_create_user(tenant_id, cred, doc))
+
+    def _scim_create_user(self, tenant_id: str, cred: ScimCredential,
+                          doc: dict) -> tuple[int, dict]:
+        state = self.scim.tenant(tenant_id)
+        user_name = doc.get("userName")
+        if not isinstance(user_name, str) or not user_name.strip():
+            raise ScimBadRequestError("userName is required",
+                                      scim_type="invalidValue")
+        external_id = doc.get("externalId") or None
+        if external_id and self.scim.user_by_external_id(tenant_id, external_id):
+            raise ScimUniquenessError(f"externalId already exists: {external_id}")
+        if self.scim.user_by_user_name(tenant_id, user_name):
+            raise ScimUniquenessError(f"userName already exists: {user_name}")
+        groups = [self._group_or_bad_request(tenant_id, g)
+                  for g in doc.get("groups") or []]
+        identity, created = self.directory.get_or_create_identity(
+            tenant_id, SCIM_ISSUER, user_name, created_via="scim",
+            display_name=display_name_of(doc), email=primary_email(doc) or "")
+        reactivated = False
+        if not created and not identity.active:
+            # A create naming a deprovisioned identity (its SCIM
+            # record was deleted) reactivates THAT identity — same
+            # actor ID, same history; keys stay closed (§3).
+            self._reactivate_identity_core(identity, actor_id=SYSTEM_ACTOR,
+                                           via="scim")
+            reactivated = True
+        now = self._now()
+        user = ProvisionedUser(scim_id=new_scim_id(),
+                               identity_id=identity.identity_id,
+                               user_name=user_name, external_id=external_id,
+                               created_at=now, updated_at=now)
+        self.scim.add_user(tenant_id, user)
+        if created:
+            self._tenant_ledger(tenant_id).record(
+                IDENTITY_CREATED, actor_id=f"scim:{cred.credential_id}",
+                target=f"identity:{identity.identity_id}",
+                identity_id=identity.identity_id,
+                subject_actor_id=identity.actor_id,
+                via="scim", provisioning="scim", at=now)
+        self._scim_ok(tenant_id, cred, op="user.create",
+                      target=f"scim-user:{user.scim_id}", identity=identity,
+                      reactivated=reactivated)
+        for g in groups:
+            self._scim_add_member(tenant_id, cred, g, identity)
+        if doc.get("active") is False:
+            self._deactivate_identity_core(
+                identity, actor_id=SYSTEM_ACTOR,
+                reason="scim create with active=false", via="scim")
+        return 201, user_resource(state, user, identity)
+
+    def _scim_set_user_active(self, tenant_id: str, user: ProvisionedUser,
+                              identity: Identity, active: bool) -> None:
+        """active transitions ride the lifecycle cores — the same
+        events whatever door (SCIM PATCH/PUT/DELETE, admin) drives
+        them (T521)."""
+        if active and not identity.active:
+            self._reactivate_identity_core(identity, actor_id=SYSTEM_ACTOR,
+                                           via="scim")
+        elif not active and identity.active:
+            self._deactivate_identity_core(
+                identity, actor_id=SYSTEM_ACTOR,
+                reason="scim deactivate", via="scim")
+
+    def _scim_apply_user_doc(self, tenant_id: str, cred: ScimCredential,
+                             user: ProvisionedUser, identity: Identity,
+                             doc: dict) -> None:
+        """Replace semantics for the mutable profile fields. All
+        collision checks run before any mutation of this user."""
+        new_name = doc.get("userName", user.user_name)
+        if not isinstance(new_name, str) or not new_name.strip():
+            raise ScimBadRequestError("userName is required",
+                                      scim_type="invalidValue")
+        new_ext = doc.get("externalId") or None
+        if new_ext and new_ext != user.external_id:
+            holder = self.scim.user_by_external_id(tenant_id, new_ext)
+            if holder is not None and holder.scim_id != user.scim_id:
+                raise ScimUniquenessError(f"externalId already exists: {new_ext}")
+        if (new_name.casefold() != user.user_name.casefold()
+                and self.scim.user_by_user_name(tenant_id, new_name)):
+            raise ScimUniquenessError(f"userName already exists: {new_name}")
+        changed = []
+        if new_name != user.user_name:
+            self.directory.change_subject(identity, new_name)
+            user.user_name = new_name
+            changed.append("userName")
+        if "externalId" in doc and new_ext != user.external_id:
+            user.external_id = new_ext
+            changed.append("externalId")
+        if "displayName" in doc or "name" in doc:
+            display = display_name_of(doc)
+            if display != identity.display_name:
+                identity.display_name = display
+                changed.append("displayName")
+        if "emails" in doc:
+            email = primary_email(doc) or ""
+            if email != identity.email:
+                identity.email = email
+                changed.append("emails")
+        if changed:
+            self._tenant_ledger(tenant_id).record(
+                IDENTITY_UPDATED, actor_id=f"scim:{cred.credential_id}",
+                target=f"identity:{identity.identity_id}",
+                identity_id=identity.identity_id,
+                subject_actor_id=identity.actor_id,
+                fields=sorted(changed), via="scim", at=self._now())
+        user.updated_at = self._now()
+
+    @staticmethod
+    def _profile_doc(user: ProvisionedUser, identity: Identity) -> dict:
+        """The user's current profile as a SCIM document — the base a
+        single-field PATCH merges into before replace semantics run."""
+        doc: dict = {"userName": user.user_name,
+                     "displayName": identity.display_name,
+                     "emails": ([{"value": identity.email, "primary": True}]
+                                if identity.email else [])}
+        if user.external_id:
+            doc["externalId"] = user.external_id
+        return doc
+
+    def scim_replace_user(self, tenant_id: str, credential_id: str, secret: str,
+                          scim_id: str, doc: dict) -> tuple[int, dict]:
+        def op(cred):
+            state, user, identity = self._scim_user_or_404(tenant_id, scim_id)
+            wanted = None
+            if "groups" in doc:
+                wanted = [self._group_or_bad_request(tenant_id, g)
+                          for g in doc.get("groups") or []]
+            self._scim_apply_user_doc(tenant_id, cred, user, identity, doc)
+            if "active" in doc:
+                self._scim_set_user_active(tenant_id, user, identity,
+                                           bool(doc["active"]))
+            if wanted is not None:
+                wanted_ids = {g.scim_id for g in wanted}
+                for g in list(state.groups.values()):
+                    member = user.identity_id in g.member_identity_ids
+                    if member and g.scim_id not in wanted_ids:
+                        self._scim_remove_member(
+                            tenant_id, g, identity,
+                            actor_id=f"scim:{cred.credential_id}")
+                    elif not member and g.scim_id in wanted_ids:
+                        self._scim_add_member(tenant_id, cred, g, identity)
+            self._scim_ok(tenant_id, cred, op="user.replace",
+                          target=f"scim-user:{scim_id}", identity=identity)
+            return 200, user_resource(state, user, identity)
+        return self._scim_write(tenant_id, credential_id, secret,
+                                op="user.replace", target=f"scim-user:{scim_id}",
+                                fn=op)
+
+    def scim_patch_user(self, tenant_id: str, credential_id: str, secret: str,
+                        scim_id: str, doc: dict) -> tuple[int, dict]:
+        def op(cred):
+            state, user, identity = self._scim_user_or_404(tenant_id, scim_id)
+            operations = doc.get("Operations")
+            if not isinstance(operations, list) or not operations:
+                raise ScimBadRequestError(
+                    "PatchOp requires a non-empty Operations list",
+                    scim_type="invalidValue")
+            for operation in operations:
+                self._scim_patch_user_op(tenant_id, cred, user, identity, operation)
+            self._scim_ok(tenant_id, cred, op="user.patch",
+                          target=f"scim-user:{scim_id}", identity=identity)
+            return 200, user_resource(state, user, identity)
+        return self._scim_write(tenant_id, credential_id, secret,
+                                op="user.patch", target=f"scim-user:{scim_id}",
+                                fn=op)
+
+    def _scim_patch_user_op(self, tenant_id: str, cred: ScimCredential,
+                            user: ProvisionedUser, identity: Identity,
+                            operation) -> None:
+        if not isinstance(operation, dict):
+            raise ScimBadRequestError("patch operation must be an object",
+                                      scim_type="invalidValue")
+        action = str(operation.get("op", "")).lower()
+        if action not in ("add", "remove", "replace"):
+            raise ScimBadRequestError(
+                f"unsupported patch op: {operation.get('op')!r}",
+                scim_type="invalidValue")
+        path = operation.get("path")
+        value = operation.get("value")
+        profile = self._profile_doc(user, identity)
+        if path is None:
+            if not isinstance(value, dict):
+                raise ScimBadRequestError(
+                    "pathless patch requires an object value",
+                    scim_type="invalidValue")
+            merged = {**profile, **value}
+            if "active" in merged:
+                self._scim_set_user_active(tenant_id, user, identity,
+                                           bool(merged.pop("active")))
+            self._scim_apply_user_doc(tenant_id, cred, user, identity, merged)
+            return
+        low = str(path).strip().casefold()
+        if low == "active":
+            if action == "remove":
+                raise ScimBadRequestError("active cannot be removed",
+                                          scim_type="invalidPath")
+            self._scim_set_user_active(tenant_id, user, identity, bool(value))
+        elif low == "groups":
+            refs = value if isinstance(value, list) else [value]
+            groups = [self._group_or_bad_request(tenant_id, e) for e in refs]
+            for g in groups:
+                member = user.identity_id in g.member_identity_ids
+                if action == "remove":
+                    if member:
+                        self._scim_remove_member(
+                            tenant_id, g, identity,
+                            actor_id=f"scim:{cred.credential_id}")
+                elif not member:
+                    self._scim_add_member(tenant_id, cred, g, identity)
+        elif low in ("displayname", "externalid", "username"):
+            key = {"displayname": "displayName", "externalid": "externalId",
+                   "username": "userName"}[low]
+            if action == "remove":
+                if key == "userName":
+                    raise ScimBadRequestError("userName cannot be removed",
+                                              scim_type="invalidPath")
+                profile[key] = "" if key == "displayName" else None
+            else:
+                profile[key] = value
+            self._scim_apply_user_doc(tenant_id, cred, user, identity, profile)
+        elif low == "emails" or low.startswith("emails[") or low.startswith("emails."):
+            # emails[type eq "work"].value & friends: set the primary email.
+            if action == "remove":
+                profile["emails"] = []
+            elif isinstance(value, str):
+                profile["emails"] = [{"value": value, "primary": True}]
+            elif isinstance(value, list):
+                profile["emails"] = value
+            elif isinstance(value, dict) and value.get("value"):
+                profile["emails"] = [{"value": value["value"], "primary": True}]
+            else:
+                raise ScimBadRequestError(f"unsupported email patch: {path}",
+                                          scim_type="invalidPath")
+            self._scim_apply_user_doc(tenant_id, cred, user, identity, profile)
+        elif low.startswith("name."):
+            part = low.split(".", 1)[1]
+            if part not in ("givenname", "familyname", "formatted"):
+                raise ScimBadRequestError(f"unsupported path: {path}",
+                                          scim_type="invalidPath")
+            if part == "formatted":
+                profile["displayName"] = value or ""
+            else:
+                # The directory tracks one display name; a given/family
+                # patch rewrites its corresponding part.
+                parts = identity.display_name.split(" ", 1)
+                given = parts[0] if parts else ""
+                family = parts[1] if len(parts) > 1 else ""
+                if part == "givenname":
+                    given = value or ""
+                else:
+                    family = value or ""
+                profile["displayName"] = " ".join(
+                    p for p in (given, family) if p)
+            self._scim_apply_user_doc(tenant_id, cred, user, identity, profile)
+        else:
+            raise ScimBadRequestError(f"unsupported path: {path}",
+                                      scim_type="invalidPath")
+        user.updated_at = self._now()
+
+    def scim_delete_user(self, tenant_id: str, credential_id: str, secret: str,
+                         scim_id: str) -> tuple[int, None]:
+        def op(cred):
+            state, user, identity = self._scim_user_or_404(tenant_id, scim_id)
+            if identity.active:
+                self._deactivate_identity_core(
+                    identity, actor_id=SYSTEM_ACTOR,
+                    reason="scim delete", via="scim")
+            for g in list(state.groups.values()):
+                if user.identity_id in g.member_identity_ids:
+                    self._scim_remove_member(
+                        tenant_id, g, identity,
+                        actor_id=f"scim:{cred.credential_id}")
+            self.scim.remove_user(tenant_id, user)
+            self._scim_ok(tenant_id, cred, op="user.delete",
+                          target=f"scim-user:{scim_id}", identity=identity)
+            return 204, None
+        return self._scim_write(tenant_id, credential_id, secret,
+                                op="user.delete", target=f"scim-user:{scim_id}",
+                                fn=op)
+
+    # -- SCIM Groups (T518) ---------------------------------------------------------
+
+    def _scim_group_or_404(self, tenant_id: str, scim_id: str):
+        state = self.scim.tenant(tenant_id)
+        group = state.groups.get(scim_id)
+        if group is None:
+            raise ScimNotFoundError(f"no such group: {scim_id}")
+        return state, group
+
+    def _resolve_member_ids(self, tenant_id: str, member_docs) -> list:
+        """Group member refs are platform identity IDs of users
+        provisioned in THIS tenant; anything else is refused before
+        any state change."""
+        state = self.scim.tenant(tenant_id)
+        ids = []
+        for entry in member_docs or []:
+            ref = entry.get("value") if isinstance(entry, dict) else entry
+            if ref not in state.users_by_identity:
+                raise ScimBadRequestError(
+                    f"group member is not a provisioned user of this tenant: {ref}",
+                    scim_type="invalidValue")
+            ids.append(ref)
+        return ids
+
+    def _check_group_uniqueness(self, tenant_id: str, *, display_name: str,
+                                external_id: Optional[str],
+                                exclude_scim_id: Optional[str] = None) -> None:
+        state = self.scim.tenant(tenant_id)
+        for g in state.groups.values():
+            if g.scim_id == exclude_scim_id:
+                continue
+            if g.display_name == display_name:
+                raise ScimUniquenessError(
+                    f"group displayName already exists: {display_name}")
+            if external_id and g.external_id == external_id:
+                raise ScimUniquenessError(
+                    f"group externalId already exists: {external_id}")
+
+    def scim_get_group(self, tenant_id: str, credential_id: str, secret: str,
+                       scim_id: str) -> tuple[int, dict]:
+        self._scim_auth(tenant_id, credential_id, secret, op="group.get")
+        state, group = self._scim_group_or_404(tenant_id, scim_id)
+        return 200, group_resource(state, group, self._identities_of(tenant_id))
+
+    def scim_list_groups(self, tenant_id: str, credential_id: str, secret: str,
+                         *, filter_expr: Optional[str] = None, start_index: int = 1,
+                         count: Optional[int] = None) -> tuple[int, dict]:
+        self._scim_auth(tenant_id, credential_id, secret, op="group.list")
+        state = self.scim.tenant(tenant_id)
+        identities = self._identities_of(tenant_id)
+        docs = [group_resource(state, g, identities)
+                for g in sorted(state.groups.values(), key=lambda g: g.scim_id)]
+        if filter_expr:
+            parsed = parse_filter(filter_expr)
+            docs = [d for d in docs if matches_filter(d, parsed)]
+        page, start = paginate(docs, start_index=start_index, count=count)
+        return 200, list_response(page, total=len(docs), start_index=start)
+
+    def scim_create_group(self, tenant_id: str, credential_id: str, secret: str,
+                          doc: dict) -> tuple[int, dict]:
+        def op(cred):
+            state = self.scim.tenant(tenant_id)
+            display = doc.get("displayName")
+            if not isinstance(display, str) or not display.strip():
+                raise ScimBadRequestError("displayName is required",
+                                          scim_type="invalidValue")
+            external_id = doc.get("externalId") or None
+            self._check_group_uniqueness(tenant_id, display_name=display,
+                                         external_id=external_id)
+            member_ids = self._resolve_member_ids(tenant_id, doc.get("members"))
+            now = self._now()
+            group = ScimGroup(scim_id=new_scim_id(), display_name=display,
+                              external_id=external_id,
+                              created_at=now, updated_at=now)
+            self.scim.add_group(tenant_id, group)
+            self._scim_ok(tenant_id, cred, op="group.create",
+                          target=f"scim-group:{group.scim_id}",
+                          group_id=group.scim_id)
+            for iid in member_ids:
+                self._scim_add_member(tenant_id, cred, group,
+                                      self.directory.identity(iid))
+            return 201, group_resource(state, group,
+                                       self._identities_of(tenant_id))
+        return self._scim_write(tenant_id, credential_id, secret,
+                                op="group.create", target=f"tenant:{tenant_id}",
+                                fn=op)
+
+    def scim_replace_group(self, tenant_id: str, credential_id: str, secret: str,
+                           scim_id: str, doc: dict) -> tuple[int, dict]:
+        def op(cred):
+            state, group = self._scim_group_or_404(tenant_id, scim_id)
+            display = doc.get("displayName")
+            if not isinstance(display, str) or not display.strip():
+                raise ScimBadRequestError("displayName is required",
+                                          scim_type="invalidValue")
+            external_id = doc.get("externalId") or None
+            self._check_group_uniqueness(tenant_id, display_name=display,
+                                         external_id=external_id,
+                                         exclude_scim_id=scim_id)
+            member_ids = (self._resolve_member_ids(tenant_id, doc.get("members"))
+                          if "members" in doc else None)
+            group.display_name = display
+            group.external_id = external_id
+            group.updated_at = self._now()
+            if member_ids is not None:
+                wanted = set(member_ids)
+                for iid in sorted(wanted - group.member_identity_ids):
+                    self._scim_add_member(tenant_id, cred, group,
+                                          self.directory.identity(iid))
+                for iid in sorted(group.member_identity_ids - wanted):
+                    self._scim_remove_member(
+                        tenant_id, group, self.directory.identity(iid),
+                        actor_id=f"scim:{cred.credential_id}")
+            self._scim_ok(tenant_id, cred, op="group.replace",
+                          target=f"scim-group:{scim_id}", group_id=scim_id)
+            return 200, group_resource(state, group,
+                                       self._identities_of(tenant_id))
+        return self._scim_write(tenant_id, credential_id, secret,
+                                op="group.replace", target=f"scim-group:{scim_id}",
+                                fn=op)
+
+    def scim_patch_group(self, tenant_id: str, credential_id: str, secret: str,
+                         scim_id: str, doc: dict) -> tuple[int, dict]:
+        def op(cred):
+            state, group = self._scim_group_or_404(tenant_id, scim_id)
+            operations = doc.get("Operations")
+            if not isinstance(operations, list) or not operations:
+                raise ScimBadRequestError(
+                    "PatchOp requires a non-empty Operations list",
+                    scim_type="invalidValue")
+            for operation in operations:
+                if not isinstance(operation, dict):
+                    raise ScimBadRequestError("patch operation must be an object",
+                                              scim_type="invalidValue")
+                action = str(operation.get("op", "")).lower()
+                if action not in ("add", "remove", "replace"):
+                    raise ScimBadRequestError(
+                        f"unsupported patch op: {operation.get('op')!r}",
+                        scim_type="invalidValue")
+                path = operation.get("path")
+                value = operation.get("value")
+                low = str(path).strip().casefold() if path else ""
+                if path is None or low in ("displayname", "externalid"):
+                    merged = {"displayName": group.display_name,
+                              "externalId": group.external_id}
+                    if path is None:
+                        if not isinstance(value, dict):
+                            raise ScimBadRequestError(
+                                "pathless patch requires an object value",
+                                scim_type="invalidValue")
+                        merged.update(value)
+                    elif low == "displayname":
+                        merged["displayName"] = value
+                    else:
+                        merged["externalId"] = value
+                    display = merged.get("displayName")
+                    if not isinstance(display, str) or not display.strip():
+                        raise ScimBadRequestError("displayName is required",
+                                                  scim_type="invalidValue")
+                    self._check_group_uniqueness(
+                        tenant_id, display_name=display,
+                        external_id=merged.get("externalId") or None,
+                        exclude_scim_id=scim_id)
+                    group.display_name = display
+                    group.external_id = merged.get("externalId") or None
+                    group.updated_at = self._now()
+                elif low == "members":
+                    ids = self._resolve_member_ids(
+                        tenant_id, value if isinstance(value, list) else [value])
+                    for iid in ids:
+                        member = iid in group.member_identity_ids
+                        if action == "remove":
+                            if member:
+                                self._scim_remove_member(
+                                    tenant_id, group,
+                                    self.directory.identity(iid),
+                                    actor_id=f"scim:{cred.credential_id}")
+                        elif not member:
+                            self._scim_add_member(
+                                tenant_id, cred, group,
+                                self.directory.identity(iid))
+                else:
+                    raise ScimBadRequestError(f"unsupported path: {path}",
+                                              scim_type="invalidPath")
+            self._scim_ok(tenant_id, cred, op="group.patch",
+                          target=f"scim-group:{scim_id}", group_id=scim_id)
+            return 200, group_resource(state, group,
+                                       self._identities_of(tenant_id))
+        return self._scim_write(tenant_id, credential_id, secret,
+                                op="group.patch", target=f"scim-group:{scim_id}",
+                                fn=op)
+
+    def scim_delete_group(self, tenant_id: str, credential_id: str, secret: str,
+                          scim_id: str) -> tuple[int, None]:
+        def op(cred):
+            state, group = self._scim_group_or_404(tenant_id, scim_id)
+            for iid in sorted(group.member_identity_ids):
+                self._scim_remove_member(
+                    tenant_id, group, self.directory.identity(iid),
+                    actor_id=f"scim:{cred.credential_id}")
+            self.scim.remove_group(tenant_id, group)
+            self._scim_ok(tenant_id, cred, op="group.delete",
+                          target=f"scim-group:{scim_id}", group_id=scim_id)
+            return 204, None
+        return self._scim_write(tenant_id, credential_id, secret,
+                                op="group.delete", target=f"scim-group:{scim_id}",
+                                fn=op)
+
+    # -- group→role mapping administration (T519) -----------------------------------
+
+    def approve_group_mapping(self, session_token: str, *, tenant_id: str,
+                              group_ref: str, role: str) -> GroupRoleMapping:
+        """The ONLY door from group membership to a study role: a
+        tenant admin approves the mapping as a ledger event, and the
+        mapping applies to current and future members. Mapping to an
+        admin-plane role is refused by construction — groups grant
+        study roles, never plane powers."""
+        _, admin = self._require(session_token, authz.TENANT_PROVISIONING_MANAGE,
+                                 tenant_id=tenant_id)
+        if role not in authz.STUDY_ROLES:
+            raise ConfigurationError(
+                f"group mappings grant study roles only, not {role!r}")
+        state = self.scim.tenant(tenant_id)
+        for m in state.mappings.values():
+            if m.active and m.group_ref == group_ref and m.role == role:
+                return m
+        mapping = GroupRoleMapping(
+            mapping_id=new_prefixed_id("map_"), tenant_id=tenant_id,
+            group_ref=group_ref, role=role,
+            approved_by_actor_id=admin.actor_id)
+        self.scim.add_mapping(mapping)
+        self._tenant_ledger(tenant_id).record(
+            GROUP_MAPPING_APPROVED, actor_id=admin.actor_id,
+            target=f"scim-group:{group_ref}", group_ref=group_ref, role=role,
+            mapping_id=mapping.mapping_id, at=self._now())
+        group = self.scim.group_by_ref(tenant_id, group_ref)
+        if group is not None:
+            for iid in sorted(group.member_identity_ids):
+                self._scim_grant_role(
+                    tenant_id, self.directory.identity(iid), role,
+                    group_ref=group_ref, mapping_id=mapping.mapping_id)
+        return mapping
+
+    def revoke_group_mapping(self, session_token: str, *, tenant_id: str,
+                             mapping_id: str) -> None:
+        _, admin = self._require(session_token, authz.TENANT_PROVISIONING_MANAGE,
+                                 tenant_id=tenant_id)
+        state = self.scim.tenant(tenant_id)
+        mapping = state.mappings.get(mapping_id)
+        if mapping is None or not mapping.active:
+            raise ConfigurationError(f"unknown or inactive mapping: {mapping_id}")
+        mapping.active = False
+        self._tenant_ledger(tenant_id).record(
+            GROUP_MAPPING_REVOKED, actor_id=admin.actor_id,
+            target=f"scim-group:{mapping.group_ref}",
+            group_ref=mapping.group_ref, role=mapping.role,
+            mapping_id=mapping_id, at=self._now())
+        group = self.scim.group_by_ref(tenant_id, mapping.group_ref)
+        if group is not None:
+            for iid in sorted(group.member_identity_ids):
+                self._scim_revoke_role(
+                    tenant_id, self.directory.identity(iid), mapping.role,
+                    group_ref=mapping.group_ref,
+                    reason="group mapping revoked")
+
+    # -- lifecycle admin API (T522/T523/T524 — service layer; console is E5) ---------
+
+    def admin_create_identity(self, session_token: str, *, tenant_id: str,
+                              issuer: str, subject: str, display_name: str = "",
+                              email: str = "", affiliation: str = "") -> Identity:
+        """Tenant-admin membership creation (T524): an identity with
+        no roles, recorded as an admin act. Assertion-created (JIT)
+        and SCIM-created identities are the other doors; all three
+        converge on the same identity model and the same ledger."""
+        _, admin = self._require(session_token, authz.TENANT_MEMBER_MANAGE,
+                                 tenant_id=tenant_id)
+        if self.directory.find_identity(tenant_id, issuer, subject) is not None:
+            raise ConfigurationError(
+                "identity already exists for (tenant, issuer, subject)")
+        ident, _ = self.directory.get_or_create_identity(
+            tenant_id, issuer, subject, created_via="admin",
+            display_name=display_name, email=email, affiliation=affiliation)
+        self._tenant_ledger(tenant_id).record(
+            IDENTITY_CREATED, actor_id=admin.actor_id,
+            target=f"identity:{ident.identity_id}",
+            identity_id=ident.identity_id, subject_actor_id=ident.actor_id,
+            via="admin-api", at=self._now())
+        return ident
+
+    def reactivate_identity(self, session_token: str, *,
+                            identity_id: str) -> Identity:
+        """Tenant-admin reactivation (T524): prospective only — see
+        _reactivate_identity_core for what is NOT restored."""
+        identity = self.directory.identity(identity_id)
+        _, admin = self._require(session_token, authz.TENANT_MEMBER_MANAGE,
+                                 tenant_id=identity.tenant_id)
+        if identity.active:
+            raise ConfigurationError("identity is already active")
+        self._reactivate_identity_core(identity, actor_id=admin.actor_id,
+                                       via="admin")
+        return identity
+
+    def enroll_key_countersigned(self, admin_session_token: str, *,
+                                 identity_id: str, public_key: bytes,
+                                 proof_signature: bytes, nonce: str,
+                                 custody: str = "self") -> KeyRecord:
+        """Adjudicator re-enrollment (T522): the subject proves
+        possession of the new key (nonce from their own
+        begin_enrollment); a tenant admin countersigns — the
+        enrollment event names both actors. This is the only
+        enrollment path for an adjudicator whose prior key was
+        revoked or closed (§3 recovery is re-enrollment, never
+        retrieval)."""
+        identity = self.directory.identity(identity_id)
+        _, admin = self._require(admin_session_token, authz.TENANT_KEY_MANAGE,
+                                 tenant_id=identity.tenant_id)
+        if not identity.active:
+            raise GateDenied("cannot enroll keys for a deactivated identity")
+        if authz.ADJUDICATOR not in self.roles_of(identity_id, identity.tenant_id):
+            raise ConfigurationError(
+                "countersigned enrollment is the adjudicator re-enrollment "
+                "path; other identities enroll through their own session")
+        return self.registry(identity.tenant_id).enroll(
+            identity_id=identity_id, actor_id=identity.actor_id,
+            public_key=public_key, custody=custody,
+            proof_signature=proof_signature, nonce=nonce,
+            recorded_by_actor_id=admin.actor_id,
+            countersigned_by_actor_id=admin.actor_id)
+
+    def sweep_identity_keys(self, session_token: str, *,
+                            identity_id: str) -> int:
+        """The deprovisioned-identity key sweep (T522): close any key
+        a deactivation left accepted. Refuses for active identities —
+        closing a live identity's keys is revocation, a different
+        recorded act, not a sweep."""
+        identity = self.directory.identity(identity_id)
+        _, admin = self._require(session_token, authz.TENANT_KEY_MANAGE,
+                                 tenant_id=identity.tenant_id)
+        if identity.active:
+            raise ConfigurationError(
+                "key sweep applies to deprovisioned identities")
+        return self.registry(identity.tenant_id).close_for_identity(
+            identity_id=identity_id, recorded_by_actor_id=admin.actor_id,
+            reason="deprovision-sweep")
+
+    def erase_directory_pii(self, session_token: str, *,
+                            identity_id: str) -> bool:
+        """Directory erasure under a legal duty (T523): the off-ledger
+        directory forgets the identity (PII blanked, login lookup
+        dropped, SCIM record dropped); the ledgers — which never
+        carried PII — are untouched, and this erasure event is the
+        only new record. Deprovisioned identities only: erasing a
+        live identity's directory entry would orphan its sessions."""
+        identity = self.directory.identity(identity_id)
+        tenant_id = identity.tenant_id
+        _, admin = self._require(session_token, authz.TENANT_MEMBER_MANAGE,
+                                 tenant_id=tenant_id)
+        if identity.active:
+            raise ConfigurationError(
+                "directory erasure applies to deactivated identities "
+                "(deprovision first)")
+        self.scim.forget_identity(tenant_id, identity_id)
+        erased = self.directory.erase_identity_pii(identity_id)
+        self._tenant_ledger(tenant_id).record(
+            DIRECTORY_PII_ERASED, actor_id=admin.actor_id,
+            target=f"identity:{identity_id}",
+            identity_id=identity_id, subject_actor_id=identity.actor_id,
+            at=self._now())
+        return erased
 
     # -- append authorization (the gate core; consumed by gate.py) ------------------------------
 

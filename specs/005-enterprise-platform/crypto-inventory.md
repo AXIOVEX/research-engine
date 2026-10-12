@@ -23,6 +23,8 @@ its status on evidence.
 | 11 | TLS to IdP endpoints | Platform runtime | TLS 1.2+ | Python `urllib`/OpenSSL as deployed | Deployment-dependent; **no claim** |
 | 12 | SAML assertion/response signature verification (E2) | Platform service layer (`platform/saml.py`, `platform/xmlc14n.py`, `platform/x509.py`) | XML-DSig: RSA PKCS#1 v1.5 + SHA-256 (verify-only), SHA-256 reference digests, exclusive C14N | Pure-Python in this repo — the RS256 verifier is #6's; the canonicalizer and X.509 key extraction are new in E2, prototype-grade | **No** |
 
+**E3 note (2026-10-12):** E3 adds SCIM provisioning credentials (per-tenant Bearer secrets). Their generation uses the row-10 CSPRNG and their at-rest hashing is row 8’s operation (SHA-256 via the existing `hash_api_secret`, the same function that hashes API-key secrets) — no new algorithm, implementation, or operation class was introduced, so no new row is added. Credential IDs and secret hashes are what ledgers record; secret material never appears in a ledger, config, or SCIM resource.
+
 ## Reading this table
 
 - Rows 1–3 are the **Axiomere dependency**: closing them is a
