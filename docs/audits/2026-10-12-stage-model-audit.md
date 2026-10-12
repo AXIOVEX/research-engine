@@ -1,7 +1,7 @@
-# Tao Realignment Audit — Tekmerion, all work through Phase 5
+# Stage-Model Audit — Tekmerion, all work through Phase 5
 
 - **Date:** 2026-10-12
-- **Standard:** DN-010 (Tao realignment doctrine: five lifecycle stages — created / checked / explained / accepted / digested; decomposition; digestion as tracked work; attribution as a claim; anti-gradability; two lanes; provenance; inspectable records).
+- **Standard:** DN-010 (stage-model doctrine: five lifecycle stages — created / checked / explained / accepted / digested; decomposition; digestion as tracked work; attribution as a claim; anti-gradability; two lanes; provenance; inspectable records).
 - **Directive:** owner, 2026-10-12 (retroactive application; correct only by appending / reclassifying; label the unfixable as historical limitations).
 - **Scope:** every AEE claims bundle (Specs 001, 002, 003), every study ledger the program produced, every anchored bundle, and every presentation surface (README, phase records, Zenodo record text).
 

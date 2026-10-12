@@ -32,7 +32,7 @@ engine's own rules. The deposited record says exactly that.
   now exchanges the first distinct-actor pair); the historical
   INVALID stands as issued — the fixed control detects the swap on
   the demo ledger, and the demo verdict does not change.
-- The Tao audit appended stage-assignment events to the demo ledger
+- The stage-model audit appended stage-assignment events to the demo ledger
   (new checkpoint root `52e08f7a…7223`): the demo claim stands at
   *checked* (metadata level only), the run at "invalid — no stage
   earned", and the anchor demonstration at *accepted* — the one stage

@@ -12,7 +12,7 @@ never mutated), and compared screen-by-screen with
 are retained with the work records.
 
 Seed: study `ar1-demo-1905` — demo ledger copy (20 events, incl. the
-Tao-audit stage assignments and the v3 re-anchor), meta title as in
+stage-model audit stage assignments and the v3 re-anchor), meta title as in
 the wireframes, freeze sidecar = the frozen registration document
 from bundle-v2 (`registration_hash` re-verified against the
 ledger's `study.frozen` event), retrieved/citation sidecars from
@@ -91,7 +91,7 @@ the current export is a fresh UI export of the 20-event ledger
 and **two** anchor receipts are shown — the AR-1 v1 receipt
 (10.5281/zenodo.23311479, with its verify-vs-public-record PASS,
 computed live by `verify_anchor` from the held bundle-v2-successor
-export that carries the receipt) and the Tao-audit v3 re-anchor
+export that carries the receipt) and the stage-model audit v3 re-anchor
 (10.5281/zenodo.23317023, for which the workspace holds no public
 record, so no verify row is shown). The v1 verify row pairs the
 receipt with a bundle that *contains* it: the anchored bundle

@@ -28,7 +28,7 @@ for exactly that: *inconclusive* is an answer, not a failure.
 
 ## The two lanes
 
-Tekmerion's doctrine (design note DN-010, the "Tao realignment") keeps two
+Tekmerion's doctrine (design note DN-010, the stage model) keeps two
 lanes strictly separate:
 
 - **Lane 1 — machine-speed verification:** citation checks, domain
