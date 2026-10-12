@@ -1,0 +1,128 @@
+{
+  "run_verdict": "valid",
+  "run_outcome_in_bundle": {
+    "basis": "verdict.issued events in the exported ledger (an invalid run issues none, WS3 \u00a71)",
+    "controls_registered": [
+      "positive",
+      "negative",
+      "swap"
+    ],
+    "controls_replayed": [],
+    "invalid_reasons": [],
+    "mode": "confirmation",
+    "outcome": "valid",
+    "verdicts_issued": 5
+  },
+  "verdicts": {
+    "CLM-E-001": "supported",
+    "CLM-E-002": "supported",
+    "CLM-E-003": "inconclusive",
+    "CLM-E-004": "contradicted",
+    "CLM-E-005": "inconclusive"
+  },
+  "checkpoint_root": "a4c798715c05ae151849ddf0e7c4a3dcb7b119620757b088686bd18d24e6c049",
+  "registration_hash": "977c1db162e9ba06b3e34c633a5bbae96fe4779aa49c43356b564cc8c3b9ac9b",
+  "openalex_budget_units_spent": 14,
+  "pipeline": {
+    "CIT-E-101": {
+      "resolution": "resolved",
+      "agreement": "agree",
+      "content": "supports",
+      "origin_group": "EVG-001",
+      "source": "openalex"
+    },
+    "CIT-E-102": {
+      "resolution": "resolved",
+      "agreement": "agree",
+      "content": "supports",
+      "origin_group": "EVG-001",
+      "source": "openalex"
+    },
+    "CIT-E-103": {
+      "resolution": "not_found",
+      "agreement": null,
+      "content": null,
+      "origin_group": "EVG-002",
+      "source": null
+    },
+    "CIT-E-201": {
+      "resolution": "resolved",
+      "agreement": "agree",
+      "content": "supports",
+      "origin_group": "EVG-003",
+      "source": "openalex"
+    },
+    "CIT-E-202": {
+      "resolution": "resolved",
+      "agreement": "disagree",
+      "content": "metadata_only",
+      "origin_group": "EVG-004",
+      "source": "openalex"
+    },
+    "CIT-E-301": {
+      "resolution": "resolved",
+      "agreement": "agree",
+      "content": "supports",
+      "origin_group": "EVG-005",
+      "source": "openalex"
+    },
+    "CIT-E-302": {
+      "resolution": "resolved",
+      "agreement": "agree",
+      "content": "metadata_only",
+      "origin_group": "EVG-006",
+      "source": "openalex"
+    },
+    "CIT-E-401": {
+      "resolution": "resolved",
+      "agreement": "agree",
+      "content": "contradicts",
+      "origin_group": "EVG-007",
+      "source": "openalex"
+    },
+    "CIT-E-501": {
+      "resolution": "resolved",
+      "agreement": "agree",
+      "content": "supports",
+      "origin_group": "EVG-008",
+      "source": "openalex"
+    },
+    "CIT-E-502": {
+      "resolution": "resolved",
+      "agreement": "agree",
+      "content": "contextual",
+      "origin_group": "EVG-008",
+      "source": "openalex"
+    }
+  },
+  "decisions": {
+    "ADQ-001": "exclude",
+    "ADQ-002": "exclude",
+    "ADQ-003": "separate_origin",
+    "ADQ-004": "separate_origin"
+  },
+  "second_review_sampled": [
+    "ADQ-003"
+  ],
+  "receipt": {
+    "mechanism": "zenodo",
+    "root": "a4c798715c05ae151849ddf0e7c4a3dcb7b119620757b088686bd18d24e6c049",
+    "bundle_hash": "296786be0f31d212435b64c89f685a9c14b31cff6f36b6c603e41d05c21b10c2",
+    "registration_hash": "977c1db162e9ba06b3e34c633a5bbae96fe4779aa49c43356b564cc8c3b9ac9b",
+    "doi": "10.5281/zenodo.23319126",
+    "record_id": 23319126,
+    "locator": "https://doi.org/10.5281/zenodo.23319126",
+    "anchored_at": "2026-10-12T13:56:18.552121+00:00",
+    "approved_by": "adjudicator (named adjudicator actor in the study; Phase 7 evaluation registered approval step, 2026-10-12)",
+    "file": {
+      "name": "bundle-v1.zip",
+      "md5": "4f28bbc34390df9e660dfc941e308112",
+      "sha256": "ce24e30037850bb9e886d552e5e77d4efdd2a5458eefb0c014417979c594a3ff",
+      "bytes": 16047
+    }
+  },
+  "bundle_v1_hash": "296786be0f31d212435b64c89f685a9c14b31cff6f36b6c603e41d05c21b10c2",
+  "bundle_v2_hash": "a325a09a8bb47f52d7c6e895e057484c12f6c11220c01480832a9be703ed06c6",
+  "anchor_verified": true,
+  "execution_note": "run_evaluation.py executed the frozen run and stopped on a driver bug in the deposit leg; resume_deposit.py performed the deposit, anchor, and v2 export only (see EVALUATION-REPORT.md)."
+}

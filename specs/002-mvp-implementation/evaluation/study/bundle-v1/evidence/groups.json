@@ -1,0 +1,70 @@
+{
+  "groups": [
+    {
+      "claim_id": "CLM-E-001",
+      "contradiction_mass": 0.0,
+      "could_falsify": true,
+      "falsifier_observation": false,
+      "items": 2,
+      "metadata_only": false,
+      "origin_group": "EVG-001",
+      "support_mass": 0.8,
+      "verified": true
+    },
+    {
+      "claim_id": "CLM-E-002",
+      "contradiction_mass": 0.0,
+      "could_falsify": true,
+      "falsifier_observation": false,
+      "items": 1,
+      "metadata_only": false,
+      "origin_group": "EVG-003",
+      "support_mass": 0.8,
+      "verified": true
+    },
+    {
+      "claim_id": "CLM-E-003",
+      "contradiction_mass": 0.0,
+      "could_falsify": true,
+      "falsifier_observation": false,
+      "items": 1,
+      "metadata_only": false,
+      "origin_group": "EVG-005",
+      "support_mass": 0.8,
+      "verified": true
+    },
+    {
+      "claim_id": "CLM-E-003",
+      "contradiction_mass": 0.0,
+      "could_falsify": false,
+      "falsifier_observation": false,
+      "items": 1,
+      "metadata_only": true,
+      "origin_group": "EVG-006",
+      "support_mass": 0.0,
+      "verified": true
+    },
+    {
+      "claim_id": "CLM-E-004",
+      "contradiction_mass": 0.8,
+      "could_falsify": true,
+      "falsifier_observation": false,
+      "items": 1,
+      "metadata_only": false,
+      "origin_group": "EVG-007",
+      "support_mass": 0.0,
+      "verified": true
+    },
+    {
+      "claim_id": "CLM-E-005",
+      "contradiction_mass": 0.0,
+      "could_falsify": true,
+      "falsifier_observation": false,
+      "items": 2,
+      "metadata_only": false,
+      "origin_group": "EVG-008",
+      "support_mass": 0.8,
+      "verified": true
+    }
+  ]
+}

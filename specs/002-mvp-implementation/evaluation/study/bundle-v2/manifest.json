@@ -1,0 +1,119 @@
+{
+  "anchors": [
+    {
+      "anchored_at": "2026-10-12T13:56:18.552121+00:00",
+      "approved_by": "adjudicator (named adjudicator actor in the study; Phase 7 evaluation registered approval step, 2026-10-12)",
+      "bundle_hash": "296786be0f31d212435b64c89f685a9c14b31cff6f36b6c603e41d05c21b10c2",
+      "doi": "10.5281/zenodo.23319126",
+      "file": {
+        "bytes": 16047,
+        "md5": "4f28bbc34390df9e660dfc941e308112",
+        "name": "bundle-v1.zip",
+        "sha256": "ce24e30037850bb9e886d552e5e77d4efdd2a5458eefb0c014417979c594a3ff"
+      },
+      "locator": "https://doi.org/10.5281/zenodo.23319126",
+      "mechanism": "zenodo",
+      "record_id": 23319126,
+      "registration_hash": "977c1db162e9ba06b3e34c633a5bbae96fe4779aa49c43356b564cc8c3b9ac9b",
+      "root": "a4c798715c05ae151849ddf0e7c4a3dcb7b119620757b088686bd18d24e6c049"
+    }
+  ],
+  "bundle_hash": "a325a09a8bb47f52d7c6e895e057484c12f6c11220c01480832a9be703ed06c6",
+  "complete": true,
+  "content_substitutions": [],
+  "files": [
+    {
+      "bytes": 3579,
+      "path": "HUMAN-README.md",
+      "sha256": "b5a3c41469b159a78c1f95e9018ccbb657fa1fcc906e1c9e324738ff235cdb35"
+    },
+    {
+      "bytes": 2876,
+      "path": "adjudication.json",
+      "sha256": "2958b5c87aa7423c3231b2acb3027d26892f2c114a1d2a1c2337aa64b8b21cfc"
+    },
+    {
+      "bytes": 774,
+      "path": "anchors/00-zenodo.json",
+      "sha256": "16008b57ba30e213e2d86bab1fccc04190f7c7169fb67f22656b9071b44daae6"
+    },
+    {
+      "bytes": 2399,
+      "path": "claims.json",
+      "sha256": "57827bae97ae4b9fcb6deab647b0a835ab81d58941d4ee04c9d6cb9bee1a4b51"
+    },
+    {
+      "bytes": 1206,
+      "path": "controls.json",
+      "sha256": "39ca754f76950f4be8c66a177b4b0edfe792cce47a13a8252b3bf73772666095"
+    },
+    {
+      "bytes": 1597,
+      "path": "coverage.json",
+      "sha256": "45219ccef734963a1e73f4472f38273d4d974983be848388d89d265ff4ea4216"
+    },
+    {
+      "bytes": 1671,
+      "path": "evidence/groups.json",
+      "sha256": "3dd3d8d5a72e2ad736964d210998e8af79d805c426b93a375327c2364d743816"
+    },
+    {
+      "bytes": 2747,
+      "path": "evidence/items.json",
+      "sha256": "d0b113089a5fb1743c1aaef051d876a86699be2fdb8198326bf0fb27567582ad"
+    },
+    {
+      "bytes": 22047,
+      "path": "ledger/study.axmr",
+      "sha256": "d6a9b8affb471e035633e105fd10418be6483b507eb8d73ae85416b267ca622d"
+    },
+    {
+      "bytes": 1714,
+      "path": "queries.json",
+      "sha256": "2bc3e4137b638d1866a39965e15b28fe6757e22306785044a818de88f0057102"
+    },
+    {
+      "bytes": 3565,
+      "path": "registration.json",
+      "sha256": "330fa61917ae58bfe711c3a21fed5d2cf6980f82e6664d56bd1e38472e1f5da1"
+    },
+    {
+      "bytes": 1922,
+      "path": "verdicts.json",
+      "sha256": "87901cfc1fa55fb81598b5f7dc2fd56edafddeaf54f2cecbe9a005a0d89e1002"
+    },
+    {
+      "bytes": 9684,
+      "path": "verification.json",
+      "sha256": "f9791ef869646e85268dbdcdf84a6778e4f244a4d6f574ba353ceca33e1fdb4e"
+    }
+  ],
+  "format": "tekmerion-audit-bundle/1",
+  "schema_versions": {
+    "bundle": "1",
+    "ledger": "AXMR1",
+    "registration": "1"
+  },
+  "study": {
+    "checkpoint_root": "7c277327a93b029503df91107a036d03aaf0e33e87e488a3fcf6c12d4abb88da",
+    "checkpoints": [
+      {
+        "merkle_root": "a4c798715c05ae151849ddf0e7c4a3dcb7b119620757b088686bd18d24e6c049",
+        "seq": 36,
+        "upto_seq": 35
+      },
+      {
+        "merkle_root": "7c277327a93b029503df91107a036d03aaf0e33e87e488a3fcf6c12d4abb88da",
+        "seq": 45,
+        "upto_seq": 44
+      }
+    ],
+    "event_count": 45,
+    "frozen_event_seq": 35,
+    "head_hash": "a5e0845cd81ee0e79ab237f4ae09229faadbe8cd95410b6f79c63c6e2790aa8c",
+    "head_seq": 45,
+    "label": "spec002-phase7-evaluation",
+    "ledger_file": "ledger/study.axmr",
+    "registration_hash": "977c1db162e9ba06b3e34c633a5bbae96fe4779aa49c43356b564cc8c3b9ac9b"
+  }
+}

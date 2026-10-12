@@ -1,0 +1,17 @@
+{
+  "anchored_at": "2026-10-12T13:56:18.552121+00:00",
+  "approved_by": "adjudicator (named adjudicator actor in the study; Phase 7 evaluation registered approval step, 2026-10-12)",
+  "bundle_hash": "296786be0f31d212435b64c89f685a9c14b31cff6f36b6c603e41d05c21b10c2",
+  "doi": "10.5281/zenodo.23319126",
+  "file": {
+    "bytes": 16047,
+    "md5": "4f28bbc34390df9e660dfc941e308112",
+    "name": "bundle-v1.zip",
+    "sha256": "ce24e30037850bb9e886d552e5e77d4efdd2a5458eefb0c014417979c594a3ff"
+  },
+  "locator": "https://doi.org/10.5281/zenodo.23319126",
+  "mechanism": "zenodo",
+  "record_id": 23319126,
+  "registration_hash": "977c1db162e9ba06b3e34c633a5bbae96fe4779aa49c43356b564cc8c3b9ac9b",
+  "root": "a4c798715c05ae151849ddf0e7c4a3dcb7b119620757b088686bd18d24e6c049"
+}

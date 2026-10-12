@@ -16,6 +16,10 @@ not reimplemented here), requires the manifest checkpoint root to
 equal the latest Merkle checkpoint root in the exported ledger, and
 cross-checks the projections against the ledger they claim to
 project. A bundle that fails any check is not an audit bundle.
+Since Phase 7 the verdicts projection also states the run's outcome
+(`valid` / `invalid` / `not-run`, audit NC-6): an invalid run appends
+nothing, so without the projection a failed run was invisible from
+the bundle alone.
 
 Anchoring (AR-1): anchor receipts recorded in the ledger
 (`anchor.recorded` events, appended by `tekmerion.deposit`) are
@@ -34,8 +38,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
 
-from .claims import ClaimRegister
+from .claims import Claim, ClaimRegister
 from .freeze import registration_document, registration_hash
+from .verdicts import evaluate_run, swap_control_report
 from .verification import queue_state, second_review_report
 
 BUNDLE_FORMAT = "tekmerion-audit-bundle/1"
@@ -148,6 +153,95 @@ def coverage_report(register: ClaimRegister, events: list[dict[str, Any]]) -> di
     }
 
 
+# ------------------------------------------------------------------ run outcome
+
+def run_outcome_projection(
+    store: Any,
+    store_path: str,
+    *,
+    register: ClaimRegister,
+    controls: list,
+    doc: dict[str, Any],
+    events: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """The run's outcome, stated inside the bundle (audit NC-6).
+
+    An INVALID run appends nothing (WS3 §1), so without this
+    projection a bundle whose run failed is indistinguishable from
+    one that never ran: `verdicts.json` was `{"verdicts": []}` and
+    the outcome lived only in surrounding text. The projection is
+    derived, never asserted:
+
+    - If the ledger carries `verdict.issued` events, the run was
+      valid and its verdicts are those events.
+    - Otherwise the run-level checks are **replayed at export time**
+      through the production path (`tekmerion.verdicts.evaluate_run`)
+      on a register rebuilt from the frozen document plus this
+      export's evidence — the same replay the workspace performs.
+      INVALID carries the engine's reasons verbatim; a clean replay
+      with no issued verdicts is `not-run`.
+
+    The standalone verifier cross-checks everything about this
+    projection that is decidable from the bundle alone (verdict
+    counts, unverified evidence, the swap control replayed on the
+    bundle's own ledger copy); fixture-dependent control outcomes
+    are attested by this replay and bound by the manifest hashes,
+    like every other projection the bundle carries."""
+    issued = [e for e in events if e["type"] == "verdict.issued"]
+    registered_kinds = [c.get("kind") for c in doc.get("controls", [])]
+    if issued:
+        return {
+            "outcome": "valid",
+            "basis": "verdict.issued events in the exported ledger "
+                     "(an invalid run issues none, WS3 §1)",
+            "mode": doc.get("mode"),
+            "verdicts_issued": len(issued),
+            "invalid_reasons": [],
+            "controls_replayed": [],
+            "controls_registered": registered_kinds,
+        }
+    replay = ClaimRegister()
+    for cdoc in doc.get("claims", []):
+        replay.register(Claim(**cdoc))
+    for cid, items in register.evidence.items():
+        for item in items:
+            if cid in replay.claims:
+                replay.add_evidence(cid, item)
+    replay.frozen = True
+    result = evaluate_run(
+        replay,
+        mode=doc.get("mode", "confirmation"),
+        controls=list(controls),
+        chain_ok=True,  # export has already refused a broken chain above
+        linked_exploratory=list(doc.get("linked_exploratory") or []),
+        store=store,
+        store_path=store_path,
+    )
+    replayed_kinds = [getattr(c, "kind", None) for c in controls]
+    if result.run_verdict == "invalid":
+        return {
+            "outcome": "invalid",
+            "basis": "replayed at export time through tekmerion.verdicts.evaluate_run "
+                     "(production path); an invalid run appends nothing, so no "
+                     "verdict.issued events exist to state it",
+            "mode": doc.get("mode"),
+            "verdicts_issued": 0,
+            "invalid_reasons": list(result.invalid_reasons),
+            "controls_replayed": replayed_kinds,
+            "controls_registered": registered_kinds,
+        }
+    return {
+        "outcome": "not-run",
+        "basis": "no verdict.issued events in the exported ledger, and the "
+                 "run-level checks replayed at export time found no failure",
+        "mode": doc.get("mode"),
+        "verdicts_issued": 0,
+        "invalid_reasons": [],
+        "controls_replayed": replayed_kinds,
+        "controls_registered": registered_kinds,
+    }
+
+
 # ------------------------------------------------------------------ export
 
 def export_bundle(
@@ -193,6 +287,9 @@ def export_bundle(
     checkpoints = _checkpoints(events)
     if not checkpoints:
         raise ExportError("no Merkle checkpoint in the ledger — freeze the study first")
+
+    run_outcome = run_outcome_projection(
+        store, store_path, register=register, controls=controls, doc=doc, events=events)
 
     out = Path(out_dir)
     if out.exists() and any(out.iterdir()):
@@ -264,6 +361,7 @@ def export_bundle(
         "queries": [e["payload"] for e in events if e["type"] == "connector.query"],
     }))
     put("verdicts.json", _dump({
+        "run_outcome": run_outcome,
         "verdicts": [
             {"seq": e["seq"], "actor": e["actor"], **e["payload"]}
             for e in events if e["type"] == "verdict.issued"
@@ -297,7 +395,8 @@ def export_bundle(
         "content_substitutions": substitutions,
         "anchors": receipts,
     }
-    put("HUMAN-README.md", _human_readme(manifest_core, register, state).encode("utf-8"))
+    put("HUMAN-README.md", _human_readme(manifest_core, register, state,
+                                         run_outcome).encode("utf-8"))
 
     file_entries = [
         {"path": rel, "sha256": _sha256(data), "bytes": len(data)}
@@ -312,7 +411,8 @@ def export_bundle(
 
 
 def _human_readme(manifest: dict[str, Any], register: ClaimRegister,
-                  queue: dict[str, Any]) -> str:
+                  queue: dict[str, Any],
+                  run_outcome: Optional[dict[str, Any]] = None) -> str:
     study = manifest["study"]
     lines = [
         f"# Audit bundle — {study['label']}",
@@ -338,8 +438,11 @@ def _human_readme(manifest: dict[str, Any], register: ClaimRegister,
         "- `coverage.json` — support-check coverage per claim (WS5 §2):",
         "  how many origin groups were content-checked vs metadata-only.",
         "- `verdicts.json`, `controls.json`, `adjudication.json`,",
-        "  `queries.json` — the run's verdicts, controls, human decisions,",
-        "  and every connector query, verbatim.",
+        "  `queries.json` — the run's outcome and verdicts, controls,",
+        "  human decisions, and every connector query, verbatim. The",
+        "  outcome (`valid` / `invalid` / `not-run`) is stated in",
+        "  `verdicts.json` itself: an invalid run issues no verdicts,",
+        "  so without it the bundle could not show that the run failed.",
         "- `anchors/` — external anchor receipts, if any (see below).",
         "- `manifest.json` — the file list with SHA-256 hashes, the Merkle",
         "  checkpoint root, and the bundle hash that binds the set.",
@@ -347,6 +450,10 @@ def _human_readme(manifest: dict[str, Any], register: ClaimRegister,
         "## The study in numbers",
         "",
         f"- Ledger events: {study['event_count']}",
+        f"- Run outcome: **{(run_outcome or {}).get('outcome', 'unknown')}**"
+        + (f" — {'; '.join((run_outcome or {}).get('invalid_reasons') or [])}"
+           if (run_outcome or {}).get('outcome') == "invalid" else "")
+        + " (see `verdicts.json`)",
         f"- Claims in the register: {len(register.claims)}",
         f"- Adjudication items decided: {len(queue['decided'])}; "
         f"pending: {len(queue['pending'])}",
@@ -553,12 +660,85 @@ def verify_bundle(bundle_dir: str) -> BundleVerification:
     def count_events(kind: str) -> int:
         return sum(1 for e in events if e["type"] == kind)
 
+    def projection_matches(entries: Any, kind: str, *, envelope: bool) -> bool:
+        """A projection file's entries must equal the ledger's own
+        events of that kind — payload for payload, not just in count.
+        (Phase 7 K2 finding: a count-only check let a flipped verdict
+        string in verdicts.json pass verification on a rehashed
+        bundle; the ledger copy inside the bundle is the ground truth
+        the projection is checked against.)"""
+        if not isinstance(entries, list):
+            return False
+        expected = [
+            ({"seq": e["seq"], "actor": e["actor"], **e["payload"]}
+             if envelope else dict(e["payload"]))
+            for e in events if e["type"] == kind
+        ]
+        canon = lambda lst: sorted(json.dumps(x, sort_keys=True) for x in lst)
+        return canon(entries) == canon(expected)
+
     queries = load_json("queries.json")
-    if queries is not None and len(queries.get("queries", [])) != count_events("connector.query"):
+    if queries is not None and not projection_matches(queries.get("queries"), "connector.query", envelope=False):
         failures.append("queries.json does not match the ledger's connector.query events")
     verdicts = load_json("verdicts.json")
-    if verdicts is not None and len(verdicts.get("verdicts", [])) != count_events("verdict.issued"):
+    if verdicts is not None and not projection_matches(verdicts.get("verdicts"), "verdict.issued", envelope=True):
         failures.append("verdicts.json does not match the ledger's verdict.issued events")
+
+    # -- run-outcome projection (NC-6): cross-check what the bundle alone
+    # can decide. Bundles exported before the projection existed carry
+    # no `run_outcome`; absence is visible and not a failure — the
+    # projection's claims, where present, must not contradict the
+    # bundle's own record.
+    run_outcome = verdicts.get("run_outcome") if verdicts is not None else None
+    if run_outcome is not None:
+        checks["run_outcome"] = run_outcome.get("outcome")
+        n_issued = count_events("verdict.issued")
+        if run_outcome.get("verdicts_issued") != n_issued:
+            failures.append(
+                "verdicts.json run_outcome.verdicts_issued "
+                f"({run_outcome.get('verdicts_issued')}) does not match the ledger's "
+                f"verdict.issued events ({n_issued})")
+        stated = run_outcome.get("outcome")
+        reasons = run_outcome.get("invalid_reasons") or []
+        items_doc = load_json("evidence/items.json")
+        unverified = [i for i in (items_doc or {}).get("items", [])
+                      if i.get("verified") is False]
+        swap_detected: Optional[bool] = None
+        if events and ledger_path.exists():
+            swap_detected = swap_control_report(str(ledger_path))["detected"]
+        if stated == "valid" and n_issued == 0:
+            failures.append(
+                "verdicts.json run_outcome claims a valid run but the ledger "
+                "carries no verdict.issued events")
+        if stated in ("invalid", "not-run") and n_issued > 0:
+            failures.append(
+                f"verdicts.json run_outcome claims {stated} but the ledger "
+                "carries verdict.issued events")
+        if stated == "invalid":
+            if not reasons:
+                failures.append(
+                    "verdicts.json run_outcome is invalid but states no reasons")
+            if any("unverified citation" in r for r in reasons) and not unverified:
+                failures.append(
+                    "verdicts.json run_outcome cites unverified citations but "
+                    "evidence/items.json carries none")
+            if (any("swap control failed" in r for r in reasons)
+                    and swap_detected is True):
+                failures.append(
+                    "verdicts.json run_outcome cites a swap-control failure but "
+                    "the swap control replayed on the bundle's ledger detects "
+                    "the tamper")
+        if stated == "not-run":
+            if unverified:
+                failures.append(
+                    "verdicts.json run_outcome claims not-run but the bundle "
+                    "carries unverified evidence — a replayed run would be "
+                    "invalid")
+            if swap_detected is False:
+                failures.append(
+                    "verdicts.json run_outcome claims not-run but the swap "
+                    "control replayed on the bundle's ledger does not detect "
+                    "its tamper — a replayed run would be invalid")
 
     verification_doc = load_json("verification.json")
     if verification_doc is not None:

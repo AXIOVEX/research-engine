@@ -38,5 +38,5 @@ Evaluation corpus: a set of evidence questions with known-answer claims (positiv
 
 - **G1 (owner):** go-ahead on this spec before code.
 - **G2 (AR-1):** anchor implemented + demonstrated before any institutional pilot. **RATIFIED 2026-10-12 (DN-008)** on the live Zenodo anchor evidence (DOI 10.5281/zenodo.23311479).
-- **G3 (OD-5):** K3/K5 thresholds recorded by amendment before the evaluation freeze.
+- **G3 (OD-5):** K3/K5 thresholds recorded by amendment before the evaluation freeze. **RECORDED 2026-10-12** — owner block ratification of the coordinator's recommendations (Glossa-Lab chat, 2026-10-12): **K3 adjudicator audit-time budget = 2 hours per evidence-question bundle; K5 cost ceiling = $25 marginal cost per question.** Phase 7 authorized to start on the same ratification.
 - **G4 (spend):** any paid infrastructure, API tier, or service returns to the owner as its own decision. Free keys on owner accounts (OpenAlex, OSF, Zenodo) are within standing authorization per the founding brief.

@@ -146,9 +146,83 @@ def run_controls(controls: list[Control], store: Any = None, store_path: Optiona
     return failures
 
 
-def _swap_control(store_path: Optional[str]) -> list[str]:
+#: Actor written by the swap control when a ledger has no two events
+#: with distinct actors to exchange (single-actor ledgers, Phase 7 fix).
+SWAP_PROBE_ACTOR = "rt1-swap-probe"
+
+
+def _swap_tamper(lines: list[str]) -> Optional[tuple[list[str], str]]:
+    """Construct the swap control's tampered copy of a ledger's lines.
+
+    Returns (tampered lines, construction) or None when the ledger is
+    too short to tamper with. The construction is deterministic:
+
+    - **Distinct-actor exchange (preferred):** the first event line
+      and the first later event line whose `actor` differs — their
+      actor fields (provenance stubs) are exchanged.
+    - **Probe rewrite (single-actor ledgers):** no distinct pair
+      exists, so exchanging actors would change nothing — the defect
+      that made the Phase 5 demo study's control a no-op (its first
+      events share one actor, so the historical fixed lines-1/2
+      exchange swapped identical values and the verifier correctly
+      saw an intact chain). Instead the first event's actor is
+      rewritten to a probe actor: a genuine provenance forgery the
+      production verifier must catch.
+
+    Either way the tamper alters signed bytes; a verifier that still
+    reports the copy intact has failed the control."""
+    import json as _json
+
+    event_lines: list[tuple[int, dict[str, Any]]] = []
+    for idx, line in enumerate(lines):
+        try:
+            parsed = _json.loads(line)
+        except ValueError:
+            continue  # the AXMR magic header line, blanks
+        if isinstance(parsed, dict) and "actor" in parsed:
+            event_lines.append((idx, parsed))
+    if len(event_lines) < 2:
+        return None
+
+    def render(event: dict[str, Any]) -> str:
+        return _json.dumps(event, sort_keys=True, separators=(",", ":"))
+
+    first_idx, first = event_lines[0]
+    for idx, other in event_lines[1:]:
+        if other["actor"] != first["actor"]:
+            tampered = list(lines)
+            swapped_first = dict(first)
+            swapped_other = dict(other)
+            swapped_first["actor"], swapped_other["actor"] = other["actor"], first["actor"]
+            tampered[first_idx] = render(swapped_first)
+            tampered[idx] = render(swapped_other)
+            construction = (
+                f"actor exchange between ledger lines {first_idx + 1} and {idx + 1} "
+                f"(distinct actors {first['actor']!r} / {other['actor']!r})"
+            )
+            return tampered, construction
+
+    tampered = list(lines)
+    forged = dict(first)
+    forged["actor"] = SWAP_PROBE_ACTOR
+    tampered[first_idx] = render(forged)
+    construction = (
+        f"probe rewrite on ledger line {first_idx + 1}: single-actor ledger "
+        f"(every event actor is {first['actor']!r}), so no distinct pair exists "
+        f"to exchange; the first event's actor was rewritten to {SWAP_PROBE_ACTOR!r}"
+    )
+    return tampered, construction
+
+
+def swap_control_report(store_path: Optional[str]) -> dict[str, Any]:
+    """Run the swap control and report what it did: whether the
+    production verifier detected the tamper, and the construction
+    used (see `_swap_tamper`). `run_controls` consumes the failures;
+    callers that keep records (freeze, evaluation) use this report so
+    the construction is named in the record, not just the outcome."""
     if not store_path:
-        return ["swap control requires the study ledger path"]
+        return {"detected": False, "construction": "",
+                "failures": ["swap control requires the study ledger path"]}
     import shutil
     import tempfile
     from pathlib import Path
@@ -159,22 +233,23 @@ def _swap_control(store_path: Optional[str]) -> list[str]:
     with tempfile.TemporaryDirectory() as td:
         copy = Path(td) / src.name
         shutil.copyfile(src, copy)
-        text = copy.read_text(encoding="utf-8")
-        lines = text.splitlines()
-        if len(lines) < 3:
-            return ["swap control: ledger too short to swap provenance stubs"]
-        # Exchange two events' actor fields (provenance stubs) in the copy.
-        import json as _json
-        e1 = _json.loads(lines[1])
-        e2 = _json.loads(lines[2])
-        e1["actor"], e2["actor"] = e2["actor"], e1["actor"]
-        lines[1] = _json.dumps(e1, sort_keys=True, separators=(",", ":"))
-        lines[2] = _json.dumps(e2, sort_keys=True, separators=(",", ":"))
-        copy.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        lines = copy.read_text(encoding="utf-8").splitlines()
+        built = _swap_tamper(lines)
+        if built is None:
+            return {"detected": False, "construction": "",
+                    "failures": ["swap control: ledger too short to swap provenance stubs"]}
+        tampered, construction = built
+        copy.write_text("\n".join(tampered) + "\n", encoding="utf-8")
         ok, _count, _reason = ax.verify_file(str(copy))
         if ok:
-            return ["swap control failed: provenance swap NOT detected by production verification"]
-    return []
+            return {"detected": False, "construction": construction,
+                    "failures": ["swap control failed: provenance swap NOT detected by "
+                                 f"production verification (construction: {construction})"]}
+    return {"detected": True, "construction": construction, "failures": []}
+
+
+def _swap_control(store_path: Optional[str]) -> list[str]:
+    return swap_control_report(store_path)["failures"]
 
 
 def evaluate_run(

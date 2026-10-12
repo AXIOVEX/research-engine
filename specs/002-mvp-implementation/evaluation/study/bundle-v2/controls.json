@@ -1,0 +1,22 @@
+{
+  "controls": [
+    {
+      "expected": "supported",
+      "failure_mode": "retrieval/stance broken: known-true claim not supported",
+      "kind": "positive",
+      "representative_rationale": "known-answer control in the evaluation's own lead domain (sleep interventions), with the evidence shape Q1's claim was expected to have — if the engine cannot affirm this, Q1's verdict means nothing (corpus.md)"
+    },
+    {
+      "expected": "contradicted",
+      "failure_mode": "verification decorative: a refuted claim affirmed, or a falsifier observation ignored",
+      "kind": "negative",
+      "representative_rationale": "mirrors CLM-E-004's exact shape — a popular remedy claim a decisive synthesis refutes; if the engine cannot contradict this, Q4's CONTRADICTED is suspect (corpus.md)"
+    },
+    {
+      "expected": null,
+      "failure_mode": "provenance forgery undetected: an actor swap on the signed ledger verifies as intact",
+      "kind": "swap",
+      "representative_rationale": "RT-1 standard: provenance forgery is this study's realistic tamper — a multi-actor ledger whose signatures bind actors to events; Phase 7 fixed event selection (first distinct-actor pair)"
+    }
+  ]
+}

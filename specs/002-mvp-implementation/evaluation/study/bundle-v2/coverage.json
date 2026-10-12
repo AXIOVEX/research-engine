@@ -1,0 +1,55 @@
+{
+  "basis": "origin groups from ClaimRegister.group_masses (metadata_only per group, Phase 4); citation counts from citation.checked ledger events",
+  "per_claim": {
+    "CLM-E-001": {
+      "citations_checked": 3,
+      "citations_content_checked": 2,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 1,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-E-002": {
+      "citations_checked": 2,
+      "citations_content_checked": 1,
+      "citations_metadata_only": 1,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-E-003": {
+      "citations_checked": 2,
+      "citations_content_checked": 1,
+      "citations_metadata_only": 1,
+      "citations_unresolved": 0,
+      "group_coverage": 0.5,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 1,
+      "origin_groups": 2
+    },
+    "CLM-E-004": {
+      "citations_checked": 1,
+      "citations_content_checked": 1,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-E-005": {
+      "citations_checked": 2,
+      "citations_content_checked": 2,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    }
+  }
+}
