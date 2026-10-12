@@ -10,21 +10,21 @@
 
 ## Phase A — Math layer core
 
-- [ ] T301 Theorem schema: parent + five sub-claims registered in the production register (Spec 003 §2 id scheme, parent depends on all five).
-- [ ] T302 Composition: parent verdict from sub-verdicts + dispute state, §2 precedence; refuses without `remains_not_understood`; lane fields on every record.
-- [ ] T303 Digestion records + UNEXPLAINED risk state; lane-2 acceptance events (human-evidence only).
-- [ ] T304 Dispute registration + attribution-state projection (both sides' evidence required to register a dispute as evidenced).
-- [ ] T305 Reliability events + per-source projection; seeding discipline (identified claim + identified resolution or nothing).
+- [x] T301 Theorem schema: parent + five sub-claims registered in the production register (Spec 003 §2 id scheme, parent depends on all five).
+- [x] T302 Composition: parent verdict from sub-verdicts + dispute state, §2 precedence; refuses without `remains_not_understood`; lane fields on every record.
+- [x] T303 Digestion records + UNEXPLAINED risk state; lane-2 acceptance events (human-evidence only).
+- [x] T304 Dispute registration + attribution-state projection (both sides' evidence required to register a dispute as evidenced).
+- [x] T305 Reliability events + per-source projection; seeding discipline (identified claim + identified resolution or nothing).
 
 ## Phase B — Lean ingestion
 
-- [ ] T306 Ingestion: fetch by URL, SHA-256 content hash, sorry/admit counts, statement extraction; ingestion appended to the ledger.
-- [ ] T307 Compile runner over the local Lean toolchain: version + exit code + output hash; `#print axioms` probe where runnable; the three honesty states (`run_by_us` / `not_runnable_here` / `claimed_by_source`) as record vocabulary.
+- [x] T306 Ingestion: fetch by URL, SHA-256 content hash, sorry/admit counts, statement extraction; ingestion appended to the ledger.
+- [x] T307 Compile runner over the local Lean toolchain: version + exit code + output hash; `#print axioms` probe where runnable; the three honesty states (`run_by_us` / `not_runnable_here` / `claimed_by_source`) as record vocabulary.
 
 ## Phase C — Checks
 
-- [ ] T308 Openness check: primary status source fetch + Crossref/OpenAlex searches via `run_query` (queries ledgered); emits evidence only.
-- [ ] T309 Attribution check: connector literature search; dispute registration wired to T304.
+- [x] T308 Openness check (mathclaims.openness_check): primary status source fetch + Crossref/OpenAlex searches via `run_query` (queries ledgered); emits evidence only.
+- [x] T309 Attribution check (openness_check literature pass + mathclaims.register_dispute): connector literature search; dispute registration wired to T304.
 
 ## Phase D — Worked study
 
