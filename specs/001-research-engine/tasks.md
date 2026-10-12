@@ -30,10 +30,10 @@
 
 ## Owner gates (one at a time, never bundled)
 
-- [!] T016 OD-1 — approve MVP slice + kill criteria (spec §6).
+- [x] T016 OD-1 — MVP slice + kill criteria APPROVED by owner 2026-10-11 (DN-002).
 - [!] T017 OD-2 — deployment shape direction (hosted / local / hybrid).
 - [!] T018 Any spend or external signup beyond free API keys — none requested in this phase.
 
 ## Explicitly not in this phase
 
-- [ ] Implementation of any engine component — separate spec after T016/T017 and owner go-ahead.
+- [ ] Implementation of any engine component — Spec 002 to be drafted now that T016 is ratified; execution still gated on T017 (OD-2) and owner go-ahead.

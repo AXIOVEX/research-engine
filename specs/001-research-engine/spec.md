@@ -1,6 +1,6 @@
 # Spec 001 — Axiovex Research Engine (Design Phase)
 
-**Status:** Draft for owner review · **Date:** 2026-10-11 · **Constitution:** v1.0.0
+**Status:** Design ratified 2026-10-11 (OD-1, see DN-002); implementation governed by Spec 002 (to be drafted) · **Date:** 2026-10-11 · **Constitution:** v1.0.0
 **Scope of this spec:** the *design* of the engine and the definition of its MVP slice. Implementation is a later spec, gated on owner approval of this one (Constitution, Article XII).
 
 ## 1. Problem statement
@@ -42,7 +42,7 @@ Universities are adopting AI research tools whose outputs cannot be inspected: c
 
 No code, no vendor selection that costs money, no external signups beyond free API keys on owner accounts, no UI design beyond the role/workflow sketch in WS6.
 
-## 6. MVP slice + kill criteria — PROPOSED, owner decision OD-1
+## 6. MVP slice + kill criteria — RATIFIED 2026-10-11 (OD-1, DN-002)
 
 **Proposed slice:** one workflow end-to-end — *a systematic-review-style evidence question* (U2): registration → scholarly retrieval (OpenAlex + Crossref first) → claim register → origin-grouped evidence → verdicts → audit bundle export. It exercises every constitutional article in the smallest complete loop.
 
