@@ -1,0 +1,60 @@
+{
+  "claims": [
+    {
+      "claim_id": "CLM-E-001",
+      "dependencies": [],
+      "falsifier": "A source-of-record synthesis of CBT-I trials finds no clinically meaningful improvement in sleep outcomes, or the cited records do not exist or do not say this",
+      "kind": "data",
+      "margin": 0.1,
+      "statement": "Cognitive behavioral therapy for insomnia (CBT-I) is an effective treatment for adults with chronic insomnia",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-E-002",
+      "dependencies": [],
+      "falsifier": "The cited synthesis finds no improvement in anxiety or depression, or the cited records do not exist or do not say this",
+      "kind": "data",
+      "margin": 0.1,
+      "statement": "Meditation programs produce small-to-moderate reductions in anxiety and depression symptoms",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-E-003",
+      "dependencies": [],
+      "falsifier": "The cited syntheses find no reduction in depressive symptoms, or the cited records do not exist or do not say this",
+      "kind": "data",
+      "margin": 0.1,
+      "statement": "Exercise reduces symptoms of depression in adults",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-E-004",
+      "dependencies": [],
+      "falsifier": "A large-scale synthesis finds glucosamine does not reduce joint pain versus placebo (the registered falsifying observation is the Wandel 2010 network meta-analysis's conclusion)",
+      "kind": "data",
+      "margin": 0.1,
+      "statement": "Glucosamine reduces joint pain in patients with osteoarthritis of the hip or knee",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-E-005",
+      "dependencies": [],
+      "falsifier": "The Framingham records do not exist, or do not describe predictive risk-factor models",
+      "kind": "data",
+      "margin": 0.1,
+      "statement": "Risk-factor models derived from the Framingham Heart Study predict coronary heart disease risk",
+      "status": "proposed",
+      "sufficiency_floor": 2,
+      "supersedes": null
+    }
+  ],
+  "registration_hash": "977c1db162e9ba06b3e34c633a5bbae96fe4779aa49c43356b564cc8c3b9ac9b"
+}

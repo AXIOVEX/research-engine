@@ -1,0 +1,64 @@
+{
+  "queries": [
+    {
+      "connector": "crossref",
+      "limit": 10,
+      "query": "cognitive behavioral therapy chronic insomnia systematic review meta-analysis",
+      "results": 10
+    },
+    {
+      "connector": "openalex",
+      "limit": 10,
+      "query": "cognitive behavioral therapy chronic insomnia systematic review meta-analysis",
+      "results": 10
+    },
+    {
+      "connector": "crossref",
+      "limit": 10,
+      "query": "meditation programs psychological stress well-being systematic review meta-analysis",
+      "results": 10
+    },
+    {
+      "connector": "openalex",
+      "limit": 10,
+      "query": "meditation programs psychological stress well-being systematic review meta-analysis",
+      "results": 10
+    },
+    {
+      "connector": "crossref",
+      "limit": 10,
+      "query": "exercise for depression systematic review meta-analysis",
+      "results": 10
+    },
+    {
+      "connector": "openalex",
+      "limit": 10,
+      "query": "exercise for depression systematic review meta-analysis",
+      "results": 10
+    },
+    {
+      "connector": "crossref",
+      "limit": 10,
+      "query": "glucosamine chondroitin placebo osteoarthritis network meta-analysis",
+      "results": 10
+    },
+    {
+      "connector": "openalex",
+      "limit": 10,
+      "query": "glucosamine chondroitin placebo osteoarthritis network meta-analysis",
+      "results": 10
+    },
+    {
+      "connector": "crossref",
+      "limit": 10,
+      "query": "Framingham Heart Study cardiovascular risk prediction",
+      "results": 10
+    },
+    {
+      "connector": "openalex",
+      "limit": 10,
+      "query": "Framingham Heart Study cardiovascular risk prediction",
+      "results": 10
+    }
+  ]
+}

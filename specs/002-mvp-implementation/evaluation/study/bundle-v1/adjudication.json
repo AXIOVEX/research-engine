@@ -1,0 +1,91 @@
+{
+  "decided": [
+    {
+      "citation_id": "CIT-E-103",
+      "claim_id": "CLM-E-001",
+      "decided_by": "adjudicator",
+      "decision": "exclude",
+      "kind": "quarantine",
+      "queue_id": "ADQ-001",
+      "rationale": "DOI does not resolve at any source of record — fabricated; excluded from the evidence basis.",
+      "reason": "resolution failed",
+      "result": {
+        "agreement": null,
+        "citation_id": "CIT-E-103",
+        "claim_id": "CLM-E-001",
+        "content": null,
+        "detail": "",
+        "extractor": "tekmerion.keyword-stance/1",
+        "mismatches": [],
+        "origin_group": "EVG-002",
+        "resolution": "not_found",
+        "source": null,
+        "source_id": null
+      },
+      "second_reviews": [],
+      "status": "decided"
+    },
+    {
+      "citation_id": "CIT-E-202",
+      "claim_id": "CLM-E-002",
+      "decided_by": "adjudicator",
+      "decision": "exclude",
+      "kind": "quarantine",
+      "queue_id": "ADQ-002",
+      "rationale": "As cited, the authorship and year misstate the record of the work the DOI identifies — a corrupted citation; excluded as cited.",
+      "reason": "metadata disagreement: authors, year",
+      "result": {
+        "agreement": "disagree",
+        "citation_id": "CIT-E-202",
+        "claim_id": "CLM-E-002",
+        "content": "metadata_only",
+        "detail": "",
+        "extractor": "tekmerion.keyword-stance/1",
+        "mismatches": [
+          "authors",
+          "year"
+        ],
+        "origin_group": "EVG-004",
+        "resolution": "resolved",
+        "source": "openalex",
+        "source_id": "https://doi.org/10.1016/j.cpr.2013.05.005"
+      },
+      "second_reviews": [],
+      "status": "decided"
+    },
+    {
+      "citation_ids": [
+        "CIT-E-101",
+        "CIT-E-103"
+      ],
+      "decided_by": "adjudicator",
+      "decision": "separate_origin",
+      "kind": "grouping",
+      "queue_id": "ADQ-003",
+      "rationale": "CIT-E-103 identifies no work at any source of record (fabricated DOI, resolution failed); it cannot share an origin with the resolved Trauer record.",
+      "reason": "near-duplicate fingerprint (WS2 key 4): one origin or two?",
+      "second_reviews": [
+        {
+          "agrees": true,
+          "reviewer": "second-reviewer"
+        }
+      ],
+      "status": "decided"
+    },
+    {
+      "citation_ids": [
+        "CIT-E-102",
+        "CIT-E-103"
+      ],
+      "decided_by": "adjudicator",
+      "decision": "separate_origin",
+      "kind": "grouping",
+      "queue_id": "ADQ-004",
+      "rationale": "CIT-E-103 identifies no work at any source of record (fabricated DOI, resolution failed); it cannot share an origin with the resolved Trauer record.",
+      "reason": "near-duplicate fingerprint (WS2 key 4): one origin or two?",
+      "second_reviews": [],
+      "status": "decided"
+    }
+  ],
+  "pending": []
+}

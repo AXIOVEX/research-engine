@@ -259,6 +259,12 @@
           "kind": "observed",
           "ref": "tests/test_phase3.py::test_failing_control_invalidates_the_run (control exercised against the real ledger file)",
           "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "Phase 7 (2026-10-12): swap-control event-selection defect found by Phase 5 fixed (first distinct-actor pair; probe rewrite on single-actor ledgers) — tests/test_phase7_prep.py swap tests incl. the defect mechanism itself; the Phase 7 evaluation's registered positive/negative/swap controls all behaved on the frozen run (EVALUATION-REPORT.md §3)",
+          "source_quality": "test"
         }
       ],
       "falsification_tests": [
@@ -323,6 +329,18 @@
           "kind": "asserted",
           "ref": "Spec 001 CLM-001-05 carries the same commitment at product level",
           "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "Phase 7 frozen evaluation (2026-10-12): 10/10 citations accounted with exactly one citation.checked each (9 resolved, 1 not_found, 0 error); the seeded fabricated DOI was caught, quarantined, and excluded with zero evidence contribution; the seeded corrupted citation was caught at stage 2 (authors, year) and excluded as cited — specs/002-mvp-implementation/evaluation/EVALUATION-REPORT.md §2.1",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "Evaluation audit bundle, Zenodo DOI 10.5281/zenodo.23319126 (freeze root a4c798715c05ae151849ddf0e7c4a3dcb7b119620757b088686bd18d24e6c049); run VALID, bundle states its outcome in verdicts.json and verifies standalone; anchor verified against the public record",
+          "source_quality": "artifact"
         }
       ],
       "falsification_tests": [
@@ -332,11 +350,11 @@
       "kind": "prediction",
       "severity": "high",
       "source_ref": "specs/002-mvp-implementation/spec.md",
-      "status": "draft",
+      "status": "supported",
       "text": "The citation pipeline (existence, metadata agreement, content support) will drive fabricated or unsupported citations to zero in the evaluation corpus (kill criterion K1: 100% citation resolution).",
-      "uncertainty": "high",
-      "lifecycle_stage": "created",
-      "stage_basis": "K1 held draft by design: its falsifier is the Phase 7 frozen evaluation, which has not run. Created only."
+      "uncertainty": "medium",
+      "lifecycle_stage": "checked",
+      "stage_basis": "Checked 2026-10-12 by the Phase 7 frozen evaluation — the falsifier's own test, run by the author (checking, not acceptance; no external party has accepted this claim). On the operative K1 standard (100% accounted; fabrications caught and excluded; zero in the evidence basis) the frozen evidence supports it. The falsifier's literal wording vs the seeded-corpus design is addressed in EVALUATION-REPORT.md §2.1. What remains not understood: behaviour on far larger corpora and on subtler fabrications (a real DOI carrying a misstated finding stresses the lexical stance checker, EVALUATION-REPORT.md §4.2)."
     },
     {
       "boundary": [
@@ -759,6 +777,12 @@
           "kind": "observed",
           "ref": "tests/test_phase5.py::test_bundle_verifies_standalone, ::test_export_is_deterministic (two exports byte-identical)",
           "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "Phase 7 (2026-10-12): the bundle's record now also carries the run outcome — verdicts.json run_outcome projection (audit NC-6), cross-checked by the standalone verifier; the Phase 7 evaluation bundle states its valid outcome in-bundle (EVALUATION-REPORT.md §5)",
+          "source_quality": "artifact"
         }
       ],
       "falsification_tests": [
@@ -822,6 +846,12 @@
           "direction": "supports",
           "kind": "observed",
           "ref": "tests/test_phase5.py::test_truncated_ledger_fails_even_rehashed, ::test_tampered_ledger_payload_fails_production_verification, ::test_altered_manifest_root_fails_even_rehashed (all with attacker-rehashed manifests)",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "Phase 7 K2 (2026-10-12): the evaluation's tamper case flipped a verdict string in verdicts.json on a rehashed bundle and the count-only projection cross-check ACCEPTED it — gap found by the evaluation, fixed in-phase (projection entries now compared payload-for-payload against the ledger's events), regression test tests/test_phase7_prep.py::test_verdict_flip_in_rehashed_bundle_is_detected; honest replay from the bundle alone reproduces all five issued verdicts exactly (evaluation/replay_check.py)",
           "source_quality": "test"
         }
       ],
@@ -1582,6 +1612,6 @@
   ],
   "date": "2026-10-12",
   "spec": "002-mvp-implementation",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "audit_note": "2026-10-12 Tao realignment audit (DN-010 standard): lifecycle_stage + stage_basis added to every claim by reclassification only; no claim text, falsifier, or evidence was rewritten. Git history is the append-only trail for AEE bundles."
 }

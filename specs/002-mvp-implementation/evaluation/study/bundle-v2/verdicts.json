@@ -1,0 +1,82 @@
+{
+  "run_outcome": {
+    "basis": "verdict.issued events in the exported ledger (an invalid run issues none, WS3 §1)",
+    "controls_registered": [
+      "positive",
+      "negative",
+      "swap"
+    ],
+    "controls_replayed": [],
+    "invalid_reasons": [],
+    "mode": "confirmation",
+    "outcome": "valid",
+    "verdicts_issued": 5
+  },
+  "verdicts": [
+    {
+      "actor": "verdict-service",
+      "claim_id": "CLM-E-001",
+      "interval": [
+        0.6000000000000001,
+        1.0
+      ],
+      "origin_groups": 1,
+      "point": 0.8,
+      "reason": "falsifier test ran, did not fire; interval clears the margin",
+      "seq": 37,
+      "verdict": "supported"
+    },
+    {
+      "actor": "verdict-service",
+      "claim_id": "CLM-E-002",
+      "interval": [
+        0.6000000000000001,
+        1.0
+      ],
+      "origin_groups": 1,
+      "point": 0.8,
+      "reason": "falsifier test ran, did not fire; interval clears the margin",
+      "seq": 38,
+      "verdict": "supported"
+    },
+    {
+      "actor": "verdict-service",
+      "claim_id": "CLM-E-003",
+      "interval": [
+        -0.19999999999999996,
+        1.0
+      ],
+      "origin_groups": 2,
+      "point": 0.4,
+      "reason": "interval straddles the margin",
+      "seq": 39,
+      "verdict": "inconclusive"
+    },
+    {
+      "actor": "verdict-service",
+      "claim_id": "CLM-E-004",
+      "interval": [
+        -1.0,
+        -0.6000000000000001
+      ],
+      "origin_groups": 1,
+      "point": -0.8,
+      "reason": "interval clears the margin in the contradicting direction",
+      "seq": 40,
+      "verdict": "contradicted"
+    },
+    {
+      "actor": "verdict-service",
+      "claim_id": "CLM-E-005",
+      "interval": [
+        0.6000000000000001,
+        1.0
+      ],
+      "origin_groups": 1,
+      "point": 0.8,
+      "reason": "evidence groups 1 below sufficiency floor 2",
+      "seq": 41,
+      "verdict": "inconclusive"
+    }
+  ]
+}

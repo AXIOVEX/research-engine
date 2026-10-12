@@ -1,0 +1,323 @@
+{
+  "citation_outcomes": [
+    {
+      "agreement": "agree",
+      "citation_id": "CIT-E-101",
+      "claim_id": "CLM-E-001",
+      "content": "supports",
+      "detail": "",
+      "extractor": "tekmerion.keyword-stance/1",
+      "mismatches": [],
+      "origin_group": "EVG-001",
+      "resolution": "resolved",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.7326/m14-2841"
+    },
+    {
+      "agreement": "agree",
+      "citation_id": "CIT-E-102",
+      "claim_id": "CLM-E-001",
+      "content": "supports",
+      "detail": "",
+      "extractor": "tekmerion.keyword-stance/1",
+      "mismatches": [],
+      "origin_group": "EVG-001",
+      "resolution": "resolved",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.7326/m14-2841"
+    },
+    {
+      "agreement": null,
+      "citation_id": "CIT-E-103",
+      "claim_id": "CLM-E-001",
+      "content": null,
+      "detail": "",
+      "extractor": "tekmerion.keyword-stance/1",
+      "mismatches": [],
+      "origin_group": "EVG-002",
+      "resolution": "not_found",
+      "source": null,
+      "source_id": null
+    },
+    {
+      "agreement": "agree",
+      "citation_id": "CIT-E-201",
+      "claim_id": "CLM-E-002",
+      "content": "supports",
+      "detail": "",
+      "extractor": "tekmerion.keyword-stance/1",
+      "mismatches": [],
+      "origin_group": "EVG-003",
+      "resolution": "resolved",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.1001/jamainternmed.2013.13018"
+    },
+    {
+      "agreement": "disagree",
+      "citation_id": "CIT-E-202",
+      "claim_id": "CLM-E-002",
+      "content": "metadata_only",
+      "detail": "",
+      "extractor": "tekmerion.keyword-stance/1",
+      "mismatches": [
+        "authors",
+        "year"
+      ],
+      "origin_group": "EVG-004",
+      "resolution": "resolved",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.1016/j.cpr.2013.05.005"
+    },
+    {
+      "agreement": "agree",
+      "citation_id": "CIT-E-301",
+      "claim_id": "CLM-E-003",
+      "content": "supports",
+      "detail": "",
+      "extractor": "tekmerion.keyword-stance/1",
+      "mismatches": [],
+      "origin_group": "EVG-005",
+      "resolution": "resolved",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.1002/14651858.cd004366.pub6"
+    },
+    {
+      "agreement": "agree",
+      "citation_id": "CIT-E-302",
+      "claim_id": "CLM-E-003",
+      "content": "metadata_only",
+      "detail": "",
+      "extractor": "tekmerion.keyword-stance/1",
+      "mismatches": [],
+      "origin_group": "EVG-006",
+      "resolution": "resolved",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.1016/j.jpsychires.2016.02.023"
+    },
+    {
+      "agreement": "agree",
+      "citation_id": "CIT-E-401",
+      "claim_id": "CLM-E-004",
+      "content": "contradicts",
+      "detail": "",
+      "extractor": "tekmerion.keyword-stance/1",
+      "mismatches": [],
+      "origin_group": "EVG-007",
+      "resolution": "resolved",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.1136/bmj.c4675"
+    },
+    {
+      "agreement": "agree",
+      "citation_id": "CIT-E-501",
+      "claim_id": "CLM-E-005",
+      "content": "supports",
+      "detail": "",
+      "extractor": "tekmerion.keyword-stance/1",
+      "mismatches": [],
+      "origin_group": "EVG-008",
+      "resolution": "resolved",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.1161/01.cir.97.18.1837"
+    },
+    {
+      "agreement": "agree",
+      "citation_id": "CIT-E-502",
+      "claim_id": "CLM-E-005",
+      "content": "contextual",
+      "detail": "",
+      "extractor": "tekmerion.keyword-stance/1",
+      "mismatches": [],
+      "origin_group": "EVG-008",
+      "resolution": "resolved",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.1161/circulationaha.107.699579"
+    }
+  ],
+  "retrieved": {
+    "CIT-E-101": {
+      "authors": [
+        "James McCracken Trauer",
+        "Mary Y. Qian",
+        "Joseph Doyle",
+        "Shantha M. W. Rajaratnam",
+        "David Cunnington"
+      ],
+      "content_included": false,
+      "hosted_ok": true,
+      "license_basis": "openalex-metadata (no licence asserted)",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.7326/m14-2841",
+      "title": "Cognitive Behavioral Therapy for Chronic Insomnia",
+      "venue": "Annals of Internal Medicine",
+      "year": 2015
+    },
+    "CIT-E-102": {
+      "authors": [
+        "James McCracken Trauer",
+        "Mary Y. Qian",
+        "Joseph Doyle",
+        "Shantha M. W. Rajaratnam",
+        "David Cunnington"
+      ],
+      "content_included": false,
+      "hosted_ok": true,
+      "license_basis": "openalex-metadata (no licence asserted)",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.7326/m14-2841",
+      "title": "Cognitive Behavioral Therapy for Chronic Insomnia",
+      "venue": "Annals of Internal Medicine",
+      "year": 2015
+    },
+    "CIT-E-201": {
+      "authors": [
+        "Madhav Goyal",
+        "Sonal Singh",
+        "Erica Maria Smit Sibinga",
+        "Neda F Gould",
+        "Anastasia Rowland-Seymour",
+        "Ritu Sharma",
+        "Zackary Dov Berger",
+        "Dana Sleicher",
+        "David D Maron",
+        "Hasan M Shihab",
+        "Padmini D Ranasinghe",
+        "Shauna T. Linn",
+        "Shonali Saha",
+        "Eric B Bass",
+        "Jennifer A. Haythornthwaite"
+      ],
+      "content_included": false,
+      "hosted_ok": true,
+      "license_basis": "openalex-metadata (no licence asserted)",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.1001/jamainternmed.2013.13018",
+      "title": "Meditation Programs for Psychological Stress and Well-being",
+      "venue": "JAMA Internal Medicine",
+      "year": 2014
+    },
+    "CIT-E-202": {
+      "authors": [
+        "Bassam Khoury",
+        "Tania Lecomte",
+        "Guillaume Fortin",
+        "Marjolaine Massé",
+        "Phillip Thérien",
+        "Vanessa Bouchard",
+        "Marie-Andrée Chapleau",
+        "Karine Paquin",
+        "Stefan G. Hofmann"
+      ],
+      "content_included": false,
+      "hosted_ok": true,
+      "license_basis": "openalex-metadata (no licence asserted)",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.1016/j.cpr.2013.05.005",
+      "title": "Mindfulness-based therapy: A comprehensive meta-analysis",
+      "venue": "Clinical Psychology Review",
+      "year": 2013
+    },
+    "CIT-E-301": {
+      "authors": [
+        "Gary M Cooney",
+        "Kerry M. Dwan",
+        "Carolyn Anne Greig",
+        "Debbie A. Lawlor",
+        "Jane Rimer",
+        "Fiona R Waugh",
+        "Marion McMurdo",
+        "Gillian E Mead"
+      ],
+      "content_included": false,
+      "hosted_ok": true,
+      "license_basis": "openalex-metadata (no licence asserted)",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.1002/14651858.cd004366.pub6",
+      "title": "Exercise for depression",
+      "venue": "Cochrane Database of Systematic Reviews",
+      "year": 2013
+    },
+    "CIT-E-302": {
+      "authors": [
+        "Felipe Barreto Schuch",
+        "Davy Vancampfort",
+        "Justin A. Richards",
+        "Simon Rosenbaum",
+        "Philip B. Ward",
+        "Brendon Stubbs"
+      ],
+      "content_included": false,
+      "hosted_ok": true,
+      "license_basis": "openalex-metadata (no licence asserted)",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.1016/j.jpsychires.2016.02.023",
+      "title": "Exercise as a treatment for depression: A meta-analysis adjusting for publication bias",
+      "venue": "Journal of Psychiatric Research",
+      "year": 2016
+    },
+    "CIT-E-401": {
+      "authors": [
+        "Simon Wandel",
+        "Peter Jüni",
+        "Britta Tendal",
+        "Eveline Nüesch",
+        "Peter  Matthias Villiger",
+        "Nicky J. Welton",
+        "Stephan Reichenbach",
+        "Sven Trelle"
+      ],
+      "content_included": false,
+      "hosted_ok": true,
+      "license_basis": "openalex-metadata (no licence asserted)",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.1136/bmj.c4675",
+      "title": "Effects of glucosamine, chondroitin, or placebo in patients with osteoarthritis of hip or knee: network meta-analysis",
+      "venue": "BMJ",
+      "year": 2010
+    },
+    "CIT-E-501": {
+      "authors": [
+        "Peter W.F. Wilson",
+        "Ralph B. D’Agostino",
+        "Daniel A Levy",
+        "Albert J. Belanger",
+        "Halit Silbershatz",
+        "William B. Kannel"
+      ],
+      "content_included": false,
+      "hosted_ok": true,
+      "license_basis": "openalex-metadata (no licence asserted)",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.1161/01.cir.97.18.1837",
+      "title": "Prediction of Coronary Heart Disease Using Risk Factor Categories",
+      "venue": "Circulation",
+      "year": 1998
+    },
+    "CIT-E-502": {
+      "authors": [
+        "Ralph B. D’Agostino",
+        "Ramachandran Srini Vasan",
+        "Michael J. Pencina",
+        "Philip A. Wolf",
+        "Mark R. Cobain",
+        "Joseph M. Massaro",
+        "William B. Kannel"
+      ],
+      "content_included": false,
+      "hosted_ok": true,
+      "license_basis": "openalex-metadata (no licence asserted)",
+      "source": "openalex",
+      "source_id": "https://doi.org/10.1161/circulationaha.107.699579",
+      "title": "General Cardiovascular Risk Profile for Use in Primary Care",
+      "venue": "Circulation",
+      "year": 2008
+    }
+  },
+  "second_review": {
+    "anomaly": false,
+    "anomaly_reason": "",
+    "disagreement_rate": 0.0,
+    "disagreements": 0,
+    "second_reviews": 1
+  }
+}

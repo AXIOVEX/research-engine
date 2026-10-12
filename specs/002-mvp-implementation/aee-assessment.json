@@ -4,8 +4,8 @@
   "project": "project",
   "phase": "after_implement",
   "outcome": "iterate",
-  "summary": "Assessed 40 claim(s); found 167 failure mode(s); 1 claim(s) below the 0.70 confidence threshold.",
-  "created_at": "2026-10-12T12:52:58.128997Z",
+  "summary": "Assessed 40 claim(s); found 167 failure mode(s); 0 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T14:02:52.279347Z",
   "claims": [
     {
       "id": "CLM-002-01",
@@ -663,6 +663,17 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "Phase 7 (2026-10-12): swap-control event-selection defect found by Phase 5 fixed (first distinct-actor pair; probe rewrite on single-actor ledgers) \u2014 tests/test_phase7_prep.py swap tests incl. the defect mechanism itself; the Phase 7 evaluation's registered positive/negative/swap controls all behaved on the frozen run (EVALUATION-REPORT.md \u00a73)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -814,7 +825,7 @@
       "id": "CLM-002-10",
       "text": "The citation pipeline (existence, metadata agreement, content support) will drive fabricated or unsupported citations to zero in the evaluation corpus (kill criterion K1: 100% citation resolution).",
       "kind": "prediction",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: the Phase 7 frozen evaluation corpus",
         "This is kill criterion K1 (DN-002): failure kills the MVP slice"
@@ -843,6 +854,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "Phase 7 frozen evaluation (2026-10-12): 10/10 citations accounted with exactly one citation.checked each (9 resolved, 1 not_found, 0 error); the seeded fabricated DOI was caught, quarantined, and excluded with zero evidence contribution; the seeded corrupted citation was caught at stage 2 (authors, year) and excluded as cited \u2014 specs/002-mvp-implementation/evaluation/EVALUATION-REPORT.md \u00a72.1",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Evaluation audit bundle, Zenodo DOI 10.5281/zenodo.23319126 (freeze root a4c798715c05ae151849ddf0e7c4a3dcb7b119620757b088686bd18d24e6c049); run VALID, bundle states its outcome in verdicts.json and verifies standalone; anchor verified against the public record",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -850,12 +883,12 @@
       "falsification_tests": [
         "F-002-D10: the Phase 7 evaluation reports any fabricated or unresolvable citation in the frozen corpus (K1 fails; the MVP slice is killed per DN-002)."
       ],
-      "uncertainty": "high",
+      "uncertainty": "medium",
       "severity": "high",
       "source_ref": "specs/002-mvp-implementation/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 0.996802,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-002-10-IRREDUCIBILITY-CHALLENGE",
@@ -2077,6 +2110,17 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "Phase 7 (2026-10-12): the bundle's record now also carries the run outcome \u2014 verdicts.json run_outcome projection (audit NC-6), cross-checked by the standalone verifier; the Phase 7 evaluation bundle states its valid outcome in-bundle (EVALUATION-REPORT.md \u00a75)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -2349,6 +2393,17 @@
         },
         {
           "ref": "tests/test_phase5.py::test_truncated_ledger_fails_even_rehashed, ::test_tampered_ledger_payload_fails_production_verification, ::test_altered_manifest_root_fails_even_rehashed (all with attacker-rehashed manifests)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Phase 7 K2 (2026-10-12): the evaluation's tamper case flipped a verdict string in verdicts.json on a rehashed bundle and the count-only projection cross-check ACCEPTED it \u2014 gap found by the evaluation, fixed in-phase (projection entries now compared payload-for-payload against the ledger's events), regression test tests/test_phase7_prep.py::test_verdict_flip_in_rehashed_bundle_is_detected; honest replay from the bundle alone reproduces all five issued verdicts exactly (evaluation/replay_check.py)",
           "kind": "observed",
           "direction": "supports",
           "source_quality": "test",
@@ -3150,7 +3205,7 @@
       "id": "CLM-002-31",
       "text": "The study workspace is register-first: opening a study presents its claim register \u2014 claims with their falsifiers, lifecycle statuses, and verdicts \u2014 as the primary surface; no landing page, dashboard, or chat surface stands in front of the register.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: the Phase 6 study workspace (tekmerion.webui) over the existing Phase 2\u20135 services",
         "WS6 \u00a71: the home object is the study (registration \u2192 claims \u2192 evidence \u2192 verdicts \u2192 bundle), not a chat box"
@@ -3273,7 +3328,7 @@
       "id": "CLM-002-32",
       "text": "Registration through the UI obeys the engine's rules identically: a claim submitted without a falsifier is refused with the engine's RegistrationError, and nothing is appended to the study ledger \u2014 the refusal is the engine's, surfaced, not a UI-side gate that can diverge from it.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: the Phase 6 study workspace (tekmerion.webui) over the existing Phase 2\u20135 services",
         "The UI calls tekmerion.claims.ClaimRegister.register / StudyStore.register_claim; it implements no registration rule of its own"
@@ -3406,7 +3461,7 @@
       "id": "CLM-002-33",
       "text": "The UI exposes no edit or delete affordance for record objects: every mutation it offers is an append through the existing services (register/supersede, adjudication decision, second review, withdraw-as-dead, freeze, verdict, export); no UI endpoint mutates a stored event or snapshot in place.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: the Phase 6 study workspace (tekmerion.webui) over the existing Phase 2\u20135 services",
         "DN-005: absolute append-only; withdrawal is a dead snapshot, never a removal"
@@ -3539,7 +3594,7 @@
       "id": "CLM-002-34",
       "text": "Dead records render as dead: a withdrawn claim is displayed with its dead status, the recorded withdrawal reason, and score 0.0 \u2014 it is neither omitted from the register nor shown as live.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: the Phase 6 study workspace (tekmerion.webui) over the existing Phase 2\u20135 services",
         "Dead state read from the record layer (current view with dead records included), not reconstructed by the UI"
@@ -3642,7 +3697,7 @@
       "id": "CLM-002-35",
       "text": "An INVALID run renders as INVALID with its reasons and zero claim verdicts: the workspace never substitutes per-claim verdicts for a run the verdict service invalidated, and never softens the run verdict's presentation.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: the Phase 6 study workspace (tekmerion.webui) over the existing Phase 2\u20135 services",
         "Applies to runs executed through the workspace; issued verdicts render from verdict.issued ledger events"
@@ -3745,7 +3800,7 @@
       "id": "CLM-002-36",
       "text": "Metadata-only evidence is visibly metadata-only wherever the workspace presents evidence \u2014 claim evidence folds and citation outcomes carry the flag \u2014 so the basis of the RT-5 cap is inspectable from the surface rather than hidden behind an aggregate.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: the Phase 6 study workspace (tekmerion.webui) over the existing Phase 2\u20135 services",
         "Flag as recorded by the pipeline/register (EvidenceItem.metadata_only, citation.checked content=metadata_only); the UI adds no inference of its own"
@@ -3838,7 +3893,7 @@
       "id": "CLM-002-37",
       "text": "Adjudication through the UI is the engine's adjudication: decisions are named appends via tekmerion.verification.decide, a decision on an already-decided item is refused by the engine and the refusal is surfaced, and every decision records its adjudicator and rationale.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: the Phase 6 study workspace (tekmerion.webui) over the existing Phase 2\u20135 services",
         "Queue state is the ledger projection (verification.queue_state); the UI keeps no queue of its own"
@@ -3941,7 +3996,7 @@
       "id": "CLM-002-38",
       "text": "Role views bound the workspace's affordances per WS6 \u00a71: the integrity view offers no mutating action, adjudication actions are offered only in the adjudicator view, and every mutation records the acting identity as the event actor \u2014 identity is supplied to the server (the SSO hook: an actor header), not typed per action.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: the Phase 6 study workspace (tekmerion.webui) over the existing Phase 2\u20135 services",
         "Phase 6 scope is role views + the identity hook; full SSO integration is deployment work, not claimed here"
@@ -4044,7 +4099,7 @@
       "id": "CLM-002-39",
       "text": "Bundle export is reachable from the workspace and its verification result is shown truthfully: export refusals (unfrozen study, registration-hash mismatch, broken chain) and standalone-verifier failures surface with the engine's reasons, and a bundle is presented as verified only when tekmerion.export.verify_bundle passes on it.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: the Phase 6 study workspace (tekmerion.webui) over the existing Phase 2\u20135 services",
         "Export/verify are the Phase 5 production functions (export_bundle, verify_bundle); the UI adds no second verifier"
@@ -4137,7 +4192,7 @@
       "id": "CLM-002-40",
       "text": "An anchored study displays its anchor receipt from the record \u2014 mechanism, locator/DOI, and the checkpoint root it anchors \u2014 read from the study's anchor.recorded events, so what the UI shows is what the ledger holds.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: the Phase 6 study workspace (tekmerion.webui) over the existing Phase 2\u20135 services",
         "Receipt display only; deposit actions remain the Phase 5 adjudicator-approved path"
@@ -4356,19 +4411,17 @@
     },
     "CLM-002-10": {
       "claim_id": "CLM-002-10",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 0.996802,
+      "propagated_score": 0.996802,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 0.994186,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-002-11": {
       "claim_id": "CLM-002-11",
