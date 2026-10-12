@@ -1,0 +1,450 @@
+{
+ "fetched_via": "OSF API v2, authenticated (owner account, custom.osf-files surrogate via tekmerion_osf.py get-registration kcysa), 2026-10-12 \u2014 CLM-010-07 close-out verification",
+ "purpose": "CLM-010-07 close-out: after the embargo approval completed through OSF's email-link channel, the test registration kcysa is fetched back with the depositing account to establish the embargoed state from the provider's own record (the showing falsifier F-010-7 requires). Read-only: no OSF writes were performed by this verification.",
+ "approval_event": {
+  "channel": "OSF admin-notification email token link (Gmail), the provider's email-link channel \u2014 the token API cannot perform this approval (409/403 observed at build)",
+  "performed": "2026-10-12, ~14:27 EDT, coordinator's guarded browser task, owner-authorized decision (owner decision item 6A)",
+  "page_readback": "Embargoed registration \u2014 This registration is embargoed. It will remain private until Mon Oct 11 2027 (EDT display of the 2027-10-12T00:00:00Z embargo end)",
+  "not_clicked": "\"End embargo early\" was NOT clicked; the embargo runs to its set end date. Registrations 84dk7 and project dvrew untouched."
+ },
+ "observed_state": {
+  "embargoed": true,
+  "embargo_end_date": "2027-10-12T00:00:00Z",
+  "public": false,
+  "pending_embargo_approval": false,
+  "pending_registration_approval": false,
+  "reviews_state": "embargo",
+  "revision_state": "approved",
+  "date_registered": "2026-10-12T14:49:20.858553",
+  "withdrawn": false
+ },
+ "build_exit_state_for_comparison": {
+  "source": "records/embargo-test-registration.json (fetched 2026-10-12, pre-approval)",
+  "embargoed_attribute": false,
+  "pending_embargo_approval": true,
+  "embargo_end_date": "2027-10-12T00:00:00Z",
+  "public": false,
+  "reviews_state": "initial"
+ },
+ "unauthenticated_fetch": {
+  "request": "GET https://api.osf.io/v2/registrations/kcysa/ (no credential)",
+  "http_status": 401,
+  "reading": "the embargoed registration is not publicly fetchable, as expected while the embargo runs"
+ },
+ "result": {
+  "embargoed_true_on_fetched_record": true,
+  "embargo_end_date_as_set": true,
+  "not_public": true,
+  "falsifier_F-010-7": "satisfied \u2014 embargo support is claimed only now, on this fetched-back record showing embargoed = true and the embargo end date as set",
+  "ok": true
+ },
+ "registration": {
+  "attributes": {
+   "access_requests_enabled": false,
+   "archiving": false,
+   "article_doi": null,
+   "category": "project",
+   "collection": false,
+   "current_user_can_comment": true,
+   "current_user_is_contributor": true,
+   "current_user_is_contributor_or_group_member": true,
+   "current_user_permissions": [
+    "admin",
+    "write",
+    "read"
+   ],
+   "custom_citation": "",
+   "date_created": "2026-10-12T14:49:20.902057",
+   "date_modified": "2026-10-12T14:34:45.990847",
+   "date_registered": "2026-10-12T14:49:20.858553",
+   "date_withdrawn": null,
+   "description": "Tekmerion audit bundle (format tekmerion-audit-bundle/1).\nMerkle checkpoint root (anchored value): d7249d0db66b2a854ca9628a7882f9f3c7e0b2d5d34711d7e6f4eb837888f2fe\nBundle hash (SHA-256): 5e8b396be840938a700a6578284b3b9011b2fbcbc0505b889ecee9c349a82e70\nRegistration hash: 7f8790733864ffad0662f1518feeb0e8c5de6357768f416b8b6027f7d066eea6\nLedger events: 19",
+   "embargo_end_date": "2027-10-12T00:00:00Z",
+   "embargoed": true,
+   "fork": false,
+   "has_analytic_code": false,
+   "has_data": false,
+   "has_materials": false,
+   "has_papers": false,
+   "has_project": true,
+   "has_supplements": false,
+   "ia_url": null,
+   "node_license": null,
+   "pending_embargo_approval": false,
+   "pending_embargo_termination_approval": false,
+   "pending_registration_approval": false,
+   "pending_withdrawal": false,
+   "preprint": false,
+   "provider_specific_metadata": [],
+   "public": false,
+   "registered_meta": {
+    "summary": {
+     "extra": [],
+     "value": "Tekmerion audit bundle (format tekmerion-audit-bundle/1).\nMerkle checkpoint root (anchored value): d7249d0db66b2a854ca9628a7882f9f3c7e0b2d5d34711d7e6f4eb837888f2fe\nBundle hash (SHA-256): 5e8b396be840938a700a6578284b3b9011b2fbcbc0505b889ecee9c349a82e70\nRegistration hash: 7f8790733864ffad0662f1518feeb0e8c5de6357768f416b8b6027f7d066eea6\nLedger events: 19"
+    },
+    "uploader": {
+     "extra": [],
+     "value": ""
+    }
+   },
+   "registration": true,
+   "registration_responses": {
+    "summary": "Tekmerion audit bundle (format tekmerion-audit-bundle/1).\nMerkle checkpoint root (anchored value): d7249d0db66b2a854ca9628a7882f9f3c7e0b2d5d34711d7e6f4eb837888f2fe\nBundle hash (SHA-256): 5e8b396be840938a700a6578284b3b9011b2fbcbc0505b889ecee9c349a82e70\nRegistration hash: 7f8790733864ffad0662f1518feeb0e8c5de6357768f416b8b6027f7d066eea6\nLedger events: 19",
+    "uploader": []
+   },
+   "registration_supplement": "Open-Ended Registration",
+   "reviews_state": "embargo",
+   "revision_state": "approved",
+   "subjects": [
+    [
+     {
+      "id": "584240da54be81056cecaaaa",
+      "text": "Medicine and Health Sciences"
+     },
+     {
+      "id": "584240da54be81056cecab69",
+      "text": "Medical Specialties"
+     },
+     {
+      "id": "59baec7354be810242f552ec",
+      "text": "Sleep Medicine"
+     }
+    ]
+   ],
+   "tags": [
+    "audit bundle",
+    "research integrity",
+    "tekmerion"
+   ],
+   "title": "Tekmerion audit bundle \u2014 spec010-osf-embargo-test",
+   "wiki_enabled": true,
+   "withdrawal_justification": null,
+   "withdrawn": false
+  },
+  "id": "kcysa",
+  "links": {
+   "html": "https://osf.io/kcysa/",
+   "iri": "https://osf.io/kcysa",
+   "self": "https://api.osf.io/v2/registrations/kcysa/"
+  },
+  "relationships": {
+   "affiliated_institutions": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/institutions/",
+      "meta": {}
+     },
+     "self": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/relationships/institutions/",
+      "meta": {}
+     }
+    }
+   },
+   "bibliographic_contributors": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/bibliographic_contributors/",
+      "meta": {}
+     }
+    }
+   },
+   "cedar_metadata_records": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/cedar_metadata_records/",
+      "meta": {}
+     }
+    }
+   },
+   "children": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/children/",
+      "meta": {}
+     }
+    }
+   },
+   "citation": {
+    "data": {
+     "id": "kcysa",
+     "type": "citation"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/citation/",
+      "meta": {}
+     }
+    }
+   },
+   "collected_in": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/nodes/kcysa/collections/",
+      "meta": {}
+     }
+    }
+   },
+   "comments": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/comments/?filter%5Btarget%5D=kcysa",
+      "meta": {}
+     }
+    }
+   },
+   "contributors": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/contributors/",
+      "meta": {}
+     }
+    }
+   },
+   "files": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/files/",
+      "meta": {}
+     }
+    }
+   },
+   "forks": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/forks/",
+      "meta": {}
+     }
+    }
+   },
+   "identifiers": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/identifiers/",
+      "meta": {}
+     }
+    }
+   },
+   "implicit_contributors": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/implicit_contributors/",
+      "meta": {}
+     }
+    }
+   },
+   "latest_response": {
+    "data": {
+     "id": "6accf388f25447745730cf6a",
+     "type": "schema_responses"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/schema_responses/6accf388f25447745730cf6a/",
+      "meta": {}
+     }
+    }
+   },
+   "linked_by_nodes": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/linked_by_nodes/",
+      "meta": {}
+     }
+    }
+   },
+   "linked_by_registrations": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/linked_by_registrations/",
+      "meta": {}
+     }
+    }
+   },
+   "linked_nodes": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/linked_nodes/",
+      "meta": {}
+     },
+     "self": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/relationships/linked_nodes/",
+      "meta": {}
+     }
+    }
+   },
+   "linked_registrations": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/linked_registrations/",
+      "meta": {}
+     },
+     "self": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/relationships/linked_registrations/",
+      "meta": {}
+     }
+    }
+   },
+   "logs": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/logs/",
+      "meta": {}
+     }
+    }
+   },
+   "node_links": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/node_links/",
+      "meta": {}
+     }
+    }
+   },
+   "original_response": {
+    "data": {
+     "id": "6accf388f25447745730cf6a",
+     "type": "schema_responses"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/schema_responses/6accf388f25447745730cf6a/",
+      "meta": {}
+     }
+    }
+   },
+   "provider": {
+    "data": {
+     "id": "osf",
+     "type": "registration-providers"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/providers/registrations/osf/",
+      "meta": {}
+     }
+    }
+   },
+   "region": {
+    "data": {
+     "id": "us",
+     "type": "regions"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/regions/us/",
+      "meta": {}
+     }
+    }
+   },
+   "registered_by": {
+    "data": {
+     "id": "7m8yx",
+     "type": "users"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/users/7m8yx/",
+      "meta": {}
+     }
+    }
+   },
+   "registered_from": {
+    "data": {
+     "id": "xwdr5",
+     "type": "nodes"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/nodes/xwdr5/",
+      "meta": {}
+     }
+    }
+   },
+   "registration_schema": {
+    "data": {
+     "id": "5df83f7dd28338001ac0ab0d",
+     "type": "registration-schemas"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/schemas/registrations/5df83f7dd28338001ac0ab0d/",
+      "meta": {}
+     }
+    }
+   },
+   "requests": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/requests/",
+      "meta": {}
+     }
+    }
+   },
+   "resources": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/resources/",
+      "meta": {}
+     }
+    }
+   },
+   "review_actions": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/actions/",
+      "meta": {}
+     }
+    }
+   },
+   "root": {
+    "data": {
+     "id": "kcysa",
+     "type": "registrations"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/",
+      "meta": {}
+     }
+    }
+   },
+   "schema_responses": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/schema_responses/",
+      "meta": {}
+     }
+    }
+   },
+   "storage": {
+    "data": {
+     "id": "kcysa",
+     "type": "node-storage"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/nodes/kcysa/storage/",
+      "meta": {}
+     }
+    }
+   },
+   "view_only_links": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/view_only_links/",
+      "meta": {}
+     }
+    }
+   },
+   "wikis": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/kcysa/wikis/",
+      "meta": {}
+     }
+    }
+   }
+  },
+  "type": "registrations"
+ }
+}

@@ -108,3 +108,67 @@ below threshold: CLM-010-07) — seven claims at 0.98–1.00 /
 supported; **CLM-010-05 at 1.00 / supported**; CLM-010-07 at 0.25 /
 partially_supported. Full assessor output: `aee-assessment.json`
 (regenerated).
+
+## kcysa close-out (claims bundle v0.4.0) — Spec 010 closes
+
+The one claim T-P4b deliberately left open completes, through the
+same channel that completed the demo registration:
+
+1. **Approval completed 2026-10-12 via OSF's email-link channel.**
+   The embargo test registration `kcysa` sat in OSF's approval
+   window from build exit: its embargo terms were accepted and
+   recorded by the provider, but OSF takes an embargo into effect
+   only on admin approval, and that approval is not performable
+   through the token API (409/403 at build). On the owner's
+   decision (2026-10-12), the coordinator's guarded browser task
+   followed the admin-notification token link in the owner's Gmail
+   (~14:27 EDT) and approved the embargo. The OSF page then read:
+   "Embargoed registration — This registration is embargoed. It
+   will remain private until Mon Oct 11 2027" — the EDT display of
+   the 2027-10-12T00:00:00Z embargo end as set. The "End embargo
+   early" button was **not** clicked; the embargo runs to its set
+   end date. Registrations `84dk7` and project `dvrew` were
+   untouched.
+2. **The state is verified from the provider's own record.**
+   An authenticated re-fetch of `kcysa` through the OSF API (the
+   Spec 010 machinery, `tekmerion_osf.py get-registration`) shows:
+   `embargoed: true`, `embargo_end_date: 2027-10-12T00:00:00Z`
+   (as set), `public: false`, `pending_embargo_approval: false`,
+   `reviews_state: "embargo"`, `revision_state: "approved"`
+   (`records/embargo-test-verification.json`, with the
+   build-exit state recorded alongside for comparison). An
+   unauthenticated fetch of the same record returns HTTP 401 —
+   the registration is not publicly fetchable while the embargo
+   runs, as expected.
+3. **That is exactly the showing CLM-010-07 and its falsifier
+   F-010-7 demand**: embargo support is claimed only on a
+   fetched-back test registration record showing `embargoed =
+   true` and the embargo end date as set. The claim's text
+   required the demonstration, not an assertion; the
+   demonstration is now complete end to end.
+
+Claim movement (bundle v0.3.0 → v0.4.0): **CLM-010-07
+partially_supported → supported** — its build-exit contradicting
+residue (the fetched record read `embargoed: false` with
+`pending_embargo_approval: true`) is retained in the bundle as
+explicitly superseded evidence, per the CLM-010-05 precedent at
+T-P4b, replaced by the approval readback and the authenticated
+verification record. No other claim's text, evidence, or status
+changed. Re-assessed with AEE engine 1.0.4, phase
+`after_implement`, threshold 0.70: **outcome `iterate`** as
+computed (15 failure modes; the bundle outcome is recorded as
+computed, not rounded up) — **all 8 claims supported, 0 below
+threshold**; CLM-010-07 at **1.00** (contradiction penalty 0);
+the other seven at 0.98–1.00, unchanged. (The assessor exited 1
+while writing a valid assessment — the standing quirk observed at
+E3/E4; scores were verified by an identical re-run reproducing
+every score exactly.) Full assessor output: `aee-assessment.json`
+(regenerated).
+
+**Spec 010 final state: 8/8 claims supported, all at the checked
+stage** (DN-010: checking, not settlement — every live read-back
+here is the author's own runs against the provider's record).
+The embargo itself runs until 2027-10-12T00:00:00Z, when OSF
+lifts it automatically; nothing in this close-out shortens,
+extends, or otherwise touches it, and no further OSF writes were
+performed by the verification (read-only fetch).

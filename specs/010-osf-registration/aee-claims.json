@@ -1,5 +1,5 @@
 {
- "build_note": "2026-10-12 build (DN-012 pilot OSF workstream): claims moved only on shipped-test and live-provider evidence; CLM-010-05 and CLM-010-07 are partially_supported with the residue stated in their evidence \u2014 both wait on OSF admin approval through the provider's email-link channel, which the token API cannot perform (409/403 observed). Lifecycle stage checked throughout (author's own tests and live runs; DN-010 convention). FINALIZE (T-P4b, 2026-10-12, bundle v0.3.0): the demo registration's approval completed via the email-link channel; CLM-010-05 moved to supported on the issued live receipt + passed public verification (its build-exit residue is retained as superseded evidence). CLM-010-07 remains partially_supported \u2014 the embargo test registration kcysa still awaits its own admin approval, untouched.",
+ "build_note": "2026-10-12 build (DN-012 pilot OSF workstream): claims moved only on shipped-test and live-provider evidence; CLM-010-05 and CLM-010-07 are partially_supported with the residue stated in their evidence \u2014 both wait on OSF admin approval through the provider's email-link channel, which the token API cannot perform (409/403 observed). Lifecycle stage checked throughout (author's own tests and live runs; DN-010 convention). FINALIZE (T-P4b, 2026-10-12, bundle v0.3.0): the demo registration's approval completed via the email-link channel; CLM-010-05 moved to supported on the issued live receipt + passed public verification (its build-exit residue is retained as superseded evidence). CLM-010-07 remains partially_supported \u2014 the embargo test registration kcysa still awaits its own admin approval, untouched. CLOSE-OUT (kcysa embargo approval, 2026-10-12, bundle v0.4.0): the embargo test registration kcysa's admin approval completed via OSF's email-link channel (owner-authorized; coordinator's guarded browser task, ~14:27 EDT); the authenticated re-fetch shows embargoed=true with the embargo end date as set, so CLM-010-07 moves to supported and its build-exit residue is retained as superseded evidence \u2014 the F-010-7 showing. Spec 010 closes with all 8 claims supported.",
  "claims": [
   {
    "boundary": [
@@ -271,9 +271,21 @@
      "source_quality": "primary"
     },
     {
-     "direction": "contradicts",
+     "direction": "supports",
      "kind": "observed",
-     "ref": "RESIDUE: the record's embargoed attribute reads false with pending_embargo_approval=true \u2014 the embargo terms are accepted and recorded by the provider, but the embargo takes effect only on admin approval through OSF's email-link channel, outside the token API.",
+     "ref": "SUPERSEDED residue (build exit): the record's embargoed attribute reads false with pending_embargo_approval=true \u2014 the embargo terms are accepted and recorded by the provider, but the embargo takes effect only on admin approval through OSF's email-link channel, outside the token API. Resolved 2026-10-12 by the approval + close-out verification recorded below; the residue no longer holds.",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Live (close-out, 2026-10-12): admin approval of kcysa completed via OSF's email-link channel (the coordinator's guarded browser task, owner-authorized decision, ~14:27 EDT); the OSF page then read \"Embargoed registration \u2014 This registration is embargoed. It will remain private until Mon Oct 11 2027\" (EDT display of the 2027-10-12T00:00:00Z embargo end). The \"End embargo early\" button was not clicked; registrations 84dk7 and project dvrew untouched.",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Live (close-out, 2026-10-12): authenticated re-fetch of kcysa via the OSF API shows embargoed=true, embargo_end_date 2027-10-12T00:00:00Z as set, public=false, pending_embargo_approval=false, reviews_state \"embargo\", revision_state \"approved\"; an unauthenticated fetch returns HTTP 401 \u2014 the registration is not publicly fetchable while the embargo runs (records/embargo-test-verification.json). This is the showing F-010-7 requires.",
      "source_quality": "primary"
     }
    ],
@@ -285,10 +297,10 @@
    "lifecycle_stage": "checked",
    "severity": "medium",
    "source_ref": "specs/010-osf-registration/spec.md",
-   "stage_basis": "PARTIAL at build exit: the embargo path is demonstrated to provider acceptance of the embargo terms (fetched record, non-public, end date as set); embargoed=true awaits admin approval via OSF's channel (see residue evidence).",
-   "status": "partially_supported",
+   "stage_basis": "Completed at close-out (2026-10-12): the embargo path was demonstrated to provider acceptance of the embargo terms at build (fetched record, non-public, end date as set); admin approval then completed through OSF's email-link channel (the token API cannot perform it), and the authenticated re-fetch shows embargoed=true with the embargo end date as set and the record not public \u2014 the exact showing the claim's text and F-010-7 demand before embargo support is claimed. Checking (the author's own runs, read back from the provider's record).",
+   "status": "supported",
    "text": "The embargo path is demonstrated, not asserted: a test registration created with an embargo end date is fetched back showing the embargoed state (not public, the embargo end date as set) before embargo support is claimed anywhere.",
-   "uncertainty": "medium"
+   "uncertainty": "low"
   },
   {
    "boundary": [
@@ -330,5 +342,5 @@
  ],
  "date": "2026-10-12",
  "spec": "specs/010-osf-registration/spec.md",
- "version": "0.3.0"
+ "version": "0.4.0"
 }

@@ -55,3 +55,16 @@ Article XIV gate and appears nowhere in this spec.
       10.17605/OSF.IO/84DK7. Full narrative:
       `records/demo-deposit-observation.md` + the T-P4b section of
       `assessment-2026-10-12.md`.
+- [x] T-P4c Complete the embargo demonstration: registration
+      `kcysa`'s admin approval + close-out verification.
+      **Status: complete, 2026-10-12.** Outcome: on the owner's
+      decision, approval completed via OSF's email-link channel
+      (coordinator's guarded browser task, ~14:27 EDT; the page
+      read "Embargoed registration … will remain private until
+      Mon Oct 11 2027"; "End embargo early" NOT clicked);
+      authenticated re-fetch verifies `embargoed: true`,
+      embargo end date 2027-10-12T00:00:00Z as set, not public
+      (`records/embargo-test-verification.json`). CLM-010-07
+      partially_supported → supported (bundle v0.4.0); Spec 010
+      closes 8/8 supported. Full narrative: the kcysa close-out
+      section of `assessment-2026-10-12.md`.

@@ -3,9 +3,9 @@
   "methodology_version": "1.0",
   "project": "tekmerion",
   "phase": "after_implement",
-  "outcome": "clarify",
-  "summary": "Assessed 8 claim(s); found 16 failure mode(s); 1 claim(s) below the 0.70 confidence threshold.",
-  "created_at": "2026-10-12T15:46:58.533000Z",
+  "outcome": "iterate",
+  "summary": "Assessed 8 claim(s); found 15 failure mode(s); 0 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T18:30:35.045205Z",
   "claims": [
     {
       "id": "CLM-010-01",
@@ -545,7 +545,7 @@
       "id": "CLM-010-07",
       "text": "The embargo path is demonstrated, not asserted: a test registration created with an embargo end date is fetched back showing the embargoed state (not public, the embargo end date as set) before embargo support is claimed anywhere.",
       "kind": "requirement",
-      "status": "partially_supported",
+      "status": "supported",
       "boundary": [
         "Scope: DESIGN \u00a74.2.3's embargo demonstration requirement; the demonstration registration itself is public/immediate (plan.md ambiguity 2)"
       ],
@@ -586,9 +586,31 @@
           "content_hash": null
         },
         {
-          "ref": "RESIDUE: the record's embargoed attribute reads false with pending_embargo_approval=true \u2014 the embargo terms are accepted and recorded by the provider, but the embargo takes effect only on admin approval through OSF's email-link channel, outside the token API.",
+          "ref": "SUPERSEDED residue (build exit): the record's embargoed attribute reads false with pending_embargo_approval=true \u2014 the embargo terms are accepted and recorded by the provider, but the embargo takes effect only on admin approval through OSF's email-link channel, outside the token API. Resolved 2026-10-12 by the approval + close-out verification recorded below; the residue no longer holds.",
           "kind": "observed",
-          "direction": "contradicts",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Live (close-out, 2026-10-12): admin approval of kcysa completed via OSF's email-link channel (the coordinator's guarded browser task, owner-authorized decision, ~14:27 EDT); the OSF page then read \"Embargoed registration \u2014 This registration is embargoed. It will remain private until Mon Oct 11 2027\" (EDT display of the 2027-10-12T00:00:00Z embargo end). The \"End embargo early\" button was not clicked; registrations 84dk7 and project dvrew untouched.",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Live (close-out, 2026-10-12): authenticated re-fetch of kcysa via the OSF API shows embargoed=true, embargo_end_date 2027-10-12T00:00:00Z as set, public=false, pending_embargo_approval=false, reviews_state \"embargo\", revision_state \"approved\"; an unauthenticated fetch returns HTTP 401 \u2014 the registration is not publicly fetchable while the embargo runs (records/embargo-test-verification.json). This is the showing F-010-7 requires.",
+          "kind": "observed",
+          "direction": "supports",
           "source_quality": "primary",
           "description": "",
           "source_id": "",
@@ -602,12 +624,12 @@
       "falsification_tests": [
         "F-010-7: embargo support claimed in any record without a fetched-back test registration record showing embargoed = true and the embargo end date as set."
       ],
-      "uncertainty": "medium",
+      "uncertainty": "low",
       "severity": "medium",
       "source_ref": "specs/010-osf-registration/spec.md",
       "domain": "",
-      "confidence": 0.25,
-      "confidence_band": "low",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-010-07-IRREDUCIBILITY-CHALLENGE",
@@ -617,16 +639,6 @@
           "severity": "medium",
           "category": "coverage_gap",
           "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
-          "resolved": false
-        },
-        {
-          "id": "AEE-CLM-010-07-COUNTEREVIDENCE-CHALLENG",
-          "claim_id": "CLM-010-07",
-          "challenge": "Counterevidence challenge",
-          "breakpoint": "Recorded evidence contradicts the claim",
-          "severity": "high",
-          "category": "contradiction",
-          "recovery_hint": "Resolve, narrow, or supersede the claim without deleting counterevidence.",
           "resolved": false
         }
       ],
@@ -790,19 +802,17 @@
     },
     "CLM-010-07": {
       "claim_id": "CLM-010-07",
-      "direct_score": 0.25,
-      "propagated_score": 0.25,
-      "band": "low",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
         "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
-        "contradiction_penalty": 0.75
+        "contradiction_penalty": 0
       },
-      "notes": [
-        "Contradiction penalty 0.750"
-      ]
+      "notes": []
     },
     "CLM-010-08": {
       "claim_id": "CLM-010-08",
@@ -820,14 +830,6 @@
     }
   },
   "recoveries": [
-    {
-      "failure_id": "AEE-CLM-010-07-COUNTEREVIDENCE-CHALLENG",
-      "claim_id": "CLM-010-07",
-      "strategy": "resolve_contradiction",
-      "action": "Resolve, narrow, or supersede the claim without deleting counterevidence.",
-      "priority": 2,
-      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
-    },
     {
       "failure_id": "AEE-CLM-010-01-IRREDUCIBILITY-CHALLENGE",
       "claim_id": "CLM-010-01",
