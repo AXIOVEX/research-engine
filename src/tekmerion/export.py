@@ -660,11 +660,28 @@ def verify_bundle(bundle_dir: str) -> BundleVerification:
     def count_events(kind: str) -> int:
         return sum(1 for e in events if e["type"] == kind)
 
+    def projection_matches(entries: Any, kind: str, *, envelope: bool) -> bool:
+        """A projection file's entries must equal the ledger's own
+        events of that kind — payload for payload, not just in count.
+        (Phase 7 K2 finding: a count-only check let a flipped verdict
+        string in verdicts.json pass verification on a rehashed
+        bundle; the ledger copy inside the bundle is the ground truth
+        the projection is checked against.)"""
+        if not isinstance(entries, list):
+            return False
+        expected = [
+            ({"seq": e["seq"], "actor": e["actor"], **e["payload"]}
+             if envelope else dict(e["payload"]))
+            for e in events if e["type"] == kind
+        ]
+        canon = lambda lst: sorted(json.dumps(x, sort_keys=True) for x in lst)
+        return canon(entries) == canon(expected)
+
     queries = load_json("queries.json")
-    if queries is not None and len(queries.get("queries", [])) != count_events("connector.query"):
+    if queries is not None and not projection_matches(queries.get("queries"), "connector.query", envelope=False):
         failures.append("queries.json does not match the ledger's connector.query events")
     verdicts = load_json("verdicts.json")
-    if verdicts is not None and len(verdicts.get("verdicts", [])) != count_events("verdict.issued"):
+    if verdicts is not None and not projection_matches(verdicts.get("verdicts"), "verdict.issued", envelope=True):
         failures.append("verdicts.json does not match the ledger's verdict.issued events")
 
     # -- run-outcome projection (NC-6): cross-check what the bundle alone

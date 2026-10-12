@@ -38,15 +38,15 @@ for _line in Path.home().joinpath(
         _k, _v = _line.split("=", 1)
         os.environ.setdefault(_k.strip(), _v.strip().strip('"').strip("'"))
 
-from tekmerion.claims import Claim, ClaimRegister, Control, EvidenceGroup  # noqa: E402
-from tekmerion.connectors import CrossrefConnector, CreditBudget, OpenAlexConnector  # noqa: E402
+from tekmerion.claims import Claim, ClaimRegister  # noqa: E402
+from tekmerion.connectors import CrossrefConnector, CreditBudget, OpenAlexConnector, run_query  # noqa: E402
 from tekmerion.deposit import ZenodoTransport, deposit_bundle, record_anchor  # noqa: E402
 from tekmerion.export import export_bundle, record_export, verify_anchor, verify_bundle  # noqa: E402
 from tekmerion.freeze import freeze  # noqa: E402
 from tekmerion.store import StudyStore  # noqa: E402
-from tekmerion.verdicts import evaluate_run, run_controls  # noqa: E402
+from tekmerion.verdicts import Control, evaluate_run, run_controls  # noqa: E402
 from tekmerion.verification import (  # noqa: E402
-    Citation, decide, pending_second_reviews, run_query, to_evidence_item,
+    Citation, decide, pending_second_reviews, to_evidence_item,
     verify_citations)
 
 STUDY = HERE / "study"
@@ -87,16 +87,6 @@ CLAIMS = [
           "The Framingham records do not exist, or do not describe "
           "predictive risk-factor models",
           margin=0.1, sufficiency_floor=2),
-    Claim("CLM-E-CTL-POS",
-          "control: CBT-I improves sleep efficiency in chronic insomnia "
-          "(known-answer: Trauer 2015's conclusion)",
-          "Trauer 2015's synthesis finds no improvement in sleep "
-          "efficiency or the other diary sleep measures", margin=0.1),
-    Claim("CLM-E-CTL-NEG",
-          "control: glucosamine reduces joint pain versus placebo "
-          "(known-answer: Wandel 2010 found it does not)",
-          "Wandel 2010's network meta-analysis conclusion is the control's "
-          "falsifier observation", margin=0.1),
 ]
 
 CITATIONS = [
@@ -192,23 +182,58 @@ DECISIONS = {
 }
 
 
+def _group(gid, support, contradiction, *, falsifier_observation=False,
+           items=1):
+    return {"origin_group": gid, "support_mass": support,
+            "contradiction_mass": contradiction, "could_falsify": True,
+            "falsifier_observation": falsifier_observation,
+            "verified": True, "items": items, "metadata_only": False}
+
+
 def controls() -> list[Control]:
     return [
-        Control("positive", claim_id="CLM-E-CTL-POS", expected="supported",
-                groups=[EvidenceGroup("CTL-P1", 0.9, 0.0, True),
-                        EvidenceGroup("CTL-P2", 0.9, 0.0, True)],
-                rationale_ref="corpus.md controls: known-answer control in "
-                              "the evaluation's lead domain (sleep "
-                              "interventions), shaped like Q1's evidence"),
-        Control("negative", claim_id="CLM-E-CTL-NEG", expected="contradicted",
-                groups=[EvidenceGroup("CTL-N1", 0.0, 0.9, True,
-                                      falsifier_observation=True)],
-                rationale_ref="corpus.md controls: mirrors CLM-E-004's shape "
-                              "— a popular remedy claim a decisive synthesis "
-                              "refutes (Wandel 2010)"),
-        Control("swap", rationale_ref="RT-1 standard: provenance forgery on "
-                                      "a multi-actor ledger (Phase 7 fixed "
-                                      "event selection)"),
+        Control(
+            failure_mode="retrieval/stance broken: known-true claim not "
+                         "supported",
+            kind="positive",
+            claim=Claim("CLM-E-CTL-POS",
+                        "control: CBT-I improves sleep efficiency in chronic "
+                        "insomnia (known-answer: Trauer 2015's conclusion)",
+                        "Trauer 2015's synthesis finds no improvement in "
+                        "sleep efficiency or the other diary sleep measures",
+                        margin=0.1, sufficiency_floor=1),
+            groups=[_group("CTL-P1", 0.9, 0.0), _group("CTL-P2", 0.9, 0.0)],
+            expected="supported",
+            representative_rationale="known-answer control in the "
+                "evaluation's own lead domain (sleep interventions), with "
+                "the evidence shape Q1's claim was expected to have — if "
+                "the engine cannot affirm this, Q1's verdict means nothing "
+                "(corpus.md)"),
+        Control(
+            failure_mode="verification decorative: a refuted claim "
+                         "affirmed, or a falsifier observation ignored",
+            kind="negative",
+            claim=Claim("CLM-E-CTL-NEG",
+                        "control: glucosamine reduces joint pain versus "
+                        "placebo (known-answer: Wandel 2010 found it does "
+                        "not)",
+                        "Wandel 2010's network meta-analysis conclusion is "
+                        "the control's falsifier observation",
+                        margin=0.1, sufficiency_floor=1),
+            groups=[_group("CTL-N1", 0.0, 0.9, falsifier_observation=True)],
+            expected="contradicted",
+            representative_rationale="mirrors CLM-E-004's exact shape — a "
+                "popular remedy claim a decisive synthesis refutes; if the "
+                "engine cannot contradict this, Q4's CONTRADICTED is "
+                "suspect (corpus.md)"),
+        Control(
+            failure_mode="provenance forgery undetected: an actor swap on "
+                         "the signed ledger verifies as intact",
+            kind="swap",
+            representative_rationale="RT-1 standard: provenance forgery "
+                "is this study's realistic tamper — a multi-actor ledger "
+                "whose signatures bind actors to events; Phase 7 fixed "
+                "event selection (first distinct-actor pair)"),
     ]
 
 
@@ -225,8 +250,8 @@ def main() -> int:
     store = StudyStore.create(str(LEDGER))
     reg = ClaimRegister()
     for claim in CLAIMS:
-        reg.add_claim(claim)
-        store.register_claim(claim.claim_id, claim.registration_payload(),
+        reg.register(claim)
+        store.register_claim(claim.claim_id, claim.as_dict(),
                              actor="researcher")
     note("claims_registered", [c.claim_id for c in CLAIMS])
 
@@ -255,11 +280,24 @@ def main() -> int:
         item = [e for e in store.events()
                 if e["type"] == "adjudication.enqueued"
                 and e["payload"]["queue_id"] == qid][0]
-        cit_id = item["payload"]["citation_id"]
-        decision, rationale = DECISIONS[cit_id]
+        payload = item["payload"]
+        if payload.get("kind") == "grouping":
+            # The suspect rule pairs the fabricated citation with its
+            # real namesakes (it does not filter unresolved citations).
+            # Honest decision: an identifier that resolves to no work
+            # cannot share an origin with the resolved Trauer record.
+            key = "+".join(payload["citation_ids"])
+            decision, rationale = (
+                "separate_origin",
+                "CIT-E-103 identifies no work at any source of record "
+                "(fabricated DOI, resolution failed); it cannot share "
+                "an origin with the resolved Trauer record.")
+        else:
+            key = payload["citation_id"]
+            decision, rationale = DECISIONS[key]
         decide(store, qid, decision, adjudicator="adjudicator",
                rationale=rationale)
-        decided[cit_id] = decision
+        decided[key] = decision
     note("decisions", decided)
 
     sampled = pending_second_reviews(store, fraction=0.10, seed=7)
@@ -314,11 +352,9 @@ def main() -> int:
               "No verdicts issued, no deposit.")
         return 1
     for verdict in result.claim_verdicts:
-        if verdict.claim_id.startswith("CLM-E-00"):
-            store.issue_verdict(verdict.claim_id, verdict.as_dict(),
-                                actor="verdict-service")
-    note("verdicts_issued", [v.claim_id for v in result.claim_verdicts
-                              if v.claim_id.startswith("CLM-E-00")])
+        store.issue_verdict(verdict.claim_id, verdict.as_dict(),
+                            actor="verdict-service")
+    note("verdicts_issued", [v.claim_id for v in result.claim_verdicts])
 
     retrieved = {r.citation_id: r.retrieved for r in report.results
                  if r.retrieved}

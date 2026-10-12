@@ -313,3 +313,36 @@ def test_verdicts_projection_outcome_tamper_is_detected(tmp_path):
     verification = verify_bundle(str(forged))
     assert not verification.ok
     assert any("run_outcome" in f for f in verification.failures)
+
+
+def test_verdict_flip_in_rehashed_bundle_is_detected(tmp_path):
+    """K2 finding (Phase 7 evaluation): the verdicts projection
+    cross-check once compared only the COUNT of entries against the
+    ledger — flipping a verdict string in verdicts.json on a
+    competently rehashed bundle passed verification. Entries must
+    equal the ledger's issued payloads exactly."""
+    _s, _p, _r, _c, out, _m = _bundle_study(tmp_path, issue_verdicts=True)
+    forged = tmp_path / "bundle-flipped"
+    shutil.copytree(out, forged)
+    doc = _verdicts_doc(forged)
+    assert doc["verdicts"], "fixture must carry an issued verdict"
+    doc["verdicts"][0]["verdict"] = "contradicted"
+    (forged / "verdicts.json").write_text(
+        json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    import hashlib
+    manifest = json.loads((forged / "manifest.json").read_text(encoding="utf-8"))
+    for entry in manifest["files"]:
+        if entry["path"] == "verdicts.json":
+            data = (forged / "verdicts.json").read_bytes()
+            entry["sha256"] = hashlib.sha256(data).hexdigest()
+            entry["bytes"] = len(data)
+    core = {k: v for k, v in manifest.items() if k != "bundle_hash"}
+    manifest["bundle_hash"] = hashlib.sha256(json.dumps(
+        core, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    ).encode("utf-8")).hexdigest()
+    (forged / "manifest.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    verification = verify_bundle(str(forged))
+    assert not verification.ok
+    assert any("verdicts.json does not match" in f
+               for f in verification.failures)
