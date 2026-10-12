@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "extensions": {
+    "aee": {
+      "version": "1.2.0",
+      "source": "local",
+      "manifest_hash": "sha256:b0fccb5b583ad013a77ff089032bc7f7b84e5986ab84b46dac5d429701bdf4a8",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {},
+      "registered_skills": [
+        "speckit-aee-assess",
+        "speckit-aee-challenge",
+        "speckit-aee-trace",
+        "speckit-aee-verify",
+        "speckit-aee-gate",
+        "speckit-aee-review",
+        "speckit-aee-gaps",
+        "speckit-aee-route-evidence",
+        "speckit-aee-report-savings"
+      ],
+      "installed_at": "2026-10-12T00:27:10.048309+00:00"
+    }
+  }
+}
