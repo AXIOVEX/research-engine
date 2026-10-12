@@ -4,8 +4,8 @@
   "project": "tekmerion",
   "phase": "after_implement",
   "outcome": "iterate",
-  "summary": "Assessed 12 claim(s); found 29 failure mode(s); 1 claim(s) below the 0.70 confidence threshold.",
-  "created_at": "2026-10-12T14:14:35.896620Z",
+  "summary": "Assessed 12 claim(s); found 29 failure mode(s); 0 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T15:24:10.508135Z",
   "claims": [
     {
       "id": "CLM-009-01",
@@ -864,16 +864,38 @@
       "id": "CLM-009-09",
       "text": "The agent skill (skill/SKILL.md) is sufficient operating instructions for the flow it teaches: an agent with the installed server and only the skill can complete the documented quickstart study end-to-end, following its playbooks, and its troubleshooting section resolves the refusal shapes the flow can produce (falsifier refusal, role denial, INVALID run, deposit gate).",
       "kind": "prediction",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
-        "Scope: skill/SKILL.md + docs/install.md quickstart. The exercising run is the coordinator's post-acceptance skill-driven run from the main environment; until it happens this claim stays a prediction."
+        "Scope: skill/SKILL.md + docs/install.md quickstart. The exercising runs are the coordinator's skill-driven runs from the main environment (2026-10-12, runs 1-3, transcripts in specs/009-mcp-server/exercise/). The deciding run exercised Playbook A end-to-end plus the documented refusal shapes; Playbooks B/C were exercised in the builders' clean-room acceptance, not in the coordinator's runs. One operator judgment in run 3 diverged from the skill's finer guidance (a title-transliteration quarantine excluded where the skill offers variant); the skill documents both paths and the study's outcome was unaffected (metadata-only evidence carries zero verdict mass either way)."
       ],
       "depends_on": [],
       "conflicts_with": [],
       "evidence": [
         {
-          "ref": "specs/009-mcp-server/spec.md \u00a71, \u00a77 (skill is a deliverable; its sufficiency is tested by a run that uses only it)",
+          "ref": "specs/009-mcp-server/spec.md sections 1, 7 (skill is a deliverable; its sufficiency is tested by a run that uses only it)",
           "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/009-mcp-server/exercise/transcript3.jsonl (coordinator run 3, deciding run: full Playbook A completed on the amended skill; every refusal in its documented shape, incl. the Article II falsifier refusal verbatim on the wire; run VALID, verdicts issued and read back; bundle exported and standalone-verified)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md (builders' clean-room acceptance 21/21, re-run 21/21 after fixes; addenda record the F1/F4 findings and the G1/G2 skill amendments the coordinator's runs forced)",
+          "kind": "observed",
           "direction": "supports",
           "source_quality": "primary",
           "description": "",
@@ -892,8 +914,8 @@
       "severity": "medium",
       "source_ref": "specs/009-mcp-server/spec.md",
       "domain": "",
-      "confidence": 0.480625,
-      "confidence_band": "medium",
+      "confidence": 0.998952,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-009-09-IRREDUCIBILITY-CHALLENGE",
@@ -1265,20 +1287,17 @@
     },
     "CLM-009-09": {
       "claim_id": "CLM-009-09",
-      "direct_score": 0.480625,
-      "propagated_score": 0.480625,
-      "band": "medium",
+      "direct_score": 0.998952,
+      "propagated_score": 0.998952,
+      "band": "high",
       "components": {
-        "evidence": 0.2375,
-        "independence": 0.5,
+        "evidence": 0.998094,
+        "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence",
-        "Fewer than two independent supporting sources"
-      ]
+      "notes": []
     },
     "CLM-009-10": {
       "claim_id": "CLM-009-10",

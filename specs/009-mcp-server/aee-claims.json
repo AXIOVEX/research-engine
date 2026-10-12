@@ -368,13 +368,25 @@
     },
     {
       "boundary": [
-        "Scope: skill/SKILL.md + docs/install.md quickstart. The exercising run is the coordinator's post-acceptance skill-driven run from the main environment; until it happens this claim stays a prediction."
+        "Scope: skill/SKILL.md + docs/install.md quickstart. The exercising runs are the coordinator's skill-driven runs from the main environment (2026-10-12, runs 1-3, transcripts in specs/009-mcp-server/exercise/). The deciding run exercised Playbook A end-to-end plus the documented refusal shapes; Playbooks B/C were exercised in the builders' clean-room acceptance, not in the coordinator's runs. One operator judgment in run 3 diverged from the skill's finer guidance (a title-transliteration quarantine excluded where the skill offers variant); the skill documents both paths and the study's outcome was unaffected (metadata-only evidence carries zero verdict mass either way)."
       ],
       "evidence": [
         {
           "direction": "supports",
           "kind": "asserted",
-          "ref": "specs/009-mcp-server/spec.md \u00a71, \u00a77 (skill is a deliverable; its sufficiency is tested by a run that uses only it)",
+          "ref": "specs/009-mcp-server/spec.md sections 1, 7 (skill is a deliverable; its sufficiency is tested by a run that uses only it)",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "specs/009-mcp-server/exercise/transcript3.jsonl (coordinator run 3, deciding run: full Playbook A completed on the amended skill; every refusal in its documented shape, incl. the Article II falsifier refusal verbatim on the wire; run VALID, verdicts issued and read back; bundle exported and standalone-verified)",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md (builders' clean-room acceptance 21/21, re-run 21/21 after fixes; addenda record the F1/F4 findings and the G1/G2 skill amendments the coordinator's runs forced)",
           "source_quality": "primary"
         }
       ],
@@ -385,10 +397,10 @@
       "kind": "prediction",
       "severity": "medium",
       "source_ref": "specs/009-mcp-server/spec.md",
-      "status": "draft",
+      "status": "supported",
       "text": "The agent skill (skill/SKILL.md) is sufficient operating instructions for the flow it teaches: an agent with the installed server and only the skill can complete the documented quickstart study end-to-end, following its playbooks, and its troubleshooting section resolves the refusal shapes the flow can produce (falsifier refusal, role denial, INVALID run, deposit gate).",
       "uncertainty": "medium",
-      "lifecycle_stage": "created"
+      "lifecycle_stage": "checked"
     },
     {
       "boundary": [
@@ -507,5 +519,5 @@
   ],
   "date": "2026-10-12",
   "spec": "specs/009-mcp-server/spec.md",
-  "version": "0.2.0"
+  "version": "0.3.0"
 }
