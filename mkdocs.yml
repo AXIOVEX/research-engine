@@ -1,0 +1,55 @@
+site_name: Tekmerion
+site_description: "Tekmerion — Axiovex's defensible-research engine: every claim carries its falsifier, verdicts are pre-registered, evidence is provenance-tracked and hash-verified, records are append-only."
+site_url: https://tekmerion.readthedocs.io/en/latest/
+repo_url: https://github.com/AXIOVEX/tekmerion
+repo_name: AXIOVEX/tekmerion
+copyright: "All rights reserved. © 2026 Axiovex Systems, LLC."
+
+# The site sources live in documentation/ — the repository's docs/ tree is
+# the project's internal record library (architecture, audits, pilot
+# records, wireframes) and is deliberately not the published site.
+docs_dir: documentation
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Guide:
+      - Installation: guide/installation.md
+      - Quickstart: guide/quickstart.md
+      - Domain adapters: guide/adapters.md
+      - Enterprise platform: guide/enterprise.md
+  - Concepts:
+      - Claims & falsifiers: concepts/claims-and-falsifiers.md
+      - Verdicts: concepts/verdicts.md
+      - Stages & lanes: concepts/stages-and-lanes.md
+      - Records, bundles & anchors: concepts/records-and-bundles.md
+  - Evidence base:
+      - Overview: evidence/index.md
+      - "Worked study: 2026 AI-mathematics claims": evidence/math-study.md
+      - "Phase 7 evaluation": evidence/phase7-evaluation.md
+      - "The Phase 5 demonstration (INVALID)": evidence/demo-study.md
+  - Reference:
+      - MCP tools: reference/mcp-tools.md
