@@ -45,18 +45,55 @@ outcomes flow into the pipeline's existing vocabulary (resolution ∈
 resolved / not_found / error; agreement; content ∈ supports / contradicts /
 contextual / metadata_only) with `source="core"` on every item it produces.
 
-Field mapping (v3 Work → RetrievedItem): `doi` → `source_id` (the DOI is the
-identity; a record without a DOI carries its CORE id and cannot enrich or
-fold by DOI); `title`; `authors[].name`; `yearPublished`; venue from
-`journals[0].title` else `publisher`; content from `abstract`, falling back
-to `fullText` when no abstract is present (the v3 keyless placeholder string
-"Not available for public API users." is treated as absent content, because
-it is).
+Field mapping (v3 → RetrievedItem), **corrected by the 2026-10-12 live probe**
+(plan step 2; the probe's evidence is in the dated assessment record):
+
+- **There is no `/v3/works/doi:{doi}` route** (it answers 404 "No route
+  found" for real and fabricated DOIs alike). Resolution by DOI is a
+  search: `q=doi:"…"` on `/v3/search/works/`.
+- **The Work object carries no licence and (usually) no full text.** It is
+  the discovery vehicle: `doi` → `source_id` (the DOI is the identity; a
+  record without a DOI carries its CORE id and cannot enrich or fold by
+  DOI); `title`; `authors[].name` — served as "Surname, Given" and
+  **normalized to natural order at the connector**, because stage 2
+  matches on surnames and would misread the inverted form; `yearPublished`
+  (int on works); venue from `journals[0].title` **only** — a deposit's
+  publisher is not a venue, and claiming it as one manufactures a
+  stage-2 venue disagreement against exactly the records CORE exists
+  to enrich (observed live 2026-10-12: "Pergamon Press" vs the cited
+  Journal of Psychiatric Research); absent journal → venue None, which
+  stage 2 does not judge; a work-level `abstract` is present for some
+  works.
+- **The Output object (one per repository deposit, listed on the work as
+  `/v3/outputs/{id}` URLs) is the licence + content unit**: it carries
+  `license` (a licence URL string), its own `abstract`, and `fullText`
+  (the v3 keyless placeholder string "Not available for public API
+  users." is treated as absent content, because it is). `yearPublished`
+  on outputs is a string and is parsed as such.
+- So `resolve(doi)` = find the work by DOI search, then consult its
+  outputs **in listed order, at most 3 fetches**, and build the item from
+  the first output that asserts a licence *and* carries content
+  (abstract preferred, full text otherwise). If no output qualifies, the
+  item is built from the work with content dropped (see licence
+  discipline). `search(query)` builds items from works only — no output
+  fetches — so search items are metadata records unless a work itself
+  asserts a licence; DOI resolution is where licensed content enters,
+  which is precisely where the pipeline needs it (the enrichment path
+  resolves by DOI).
+- **An asserted licence unlocks content only if it is a recognizable
+  licence instrument** — a licence or rights-statement URL, or a known
+  licence identifier. The deposit licence field also carries
+  restriction markers (a Schuch deposit asserted `intranet`, observed
+  live 2026-10-12): a marker is not a licence, and unrecognized values
+  fail closed — content dropped, the asserted basis still recorded
+  verbatim so the degradation is visible.
 
 ### Licence discipline (per-record, mandatory)
 
-`license_basis` is captured per record from the work's asserted licence
-(`license` field as v3 serves it); when the record asserts none, the basis is
+`license_basis` is captured per record from the asserted licence of the
+record the item is built from (the output's `license` field; a work that
+itself asserted one would be honored the same way); when no consulted
+record asserts a licence, the basis is
 recorded as `core-aggregated (no per-work licence asserted)` and **the
 content is dropped at the connector** — abstract and full text alike —
 exactly as Crossref drops unlicensed abstracts (Crossref abstracts are not
@@ -69,12 +106,17 @@ existing `_nc_flag` rule (RT2-1, rights per deployment shape).
 ### Failure honesty
 
 CORE failure modes map onto the existing outcome shapes *distinctly*:
-- HTTP 404 on the DOI route → `resolve` returns `None` (no record: the
-  not_found shape, same as the other connectors).
+- A DOI with no matching work in the search results → `resolve` returns
+  `None` (no record: the not_found shape, same as the other connectors).
+  An individual output fetch answering 404 is skipped over, never fatal.
 - HTTP 401/403 (auth), 429 (rate limit), 5xx, and transport failures →
   the connector raises `CoreApiError`. In the pipeline's resolution loop a
   raised connector is an explicit `error` outcome when no other route
   resolved — an outage never reads as "the work does not exist".
+  One refinement, from the source's shape: a failure while consulting a
+  *found* work's outputs degrades that resolve to the work's metadata
+  record (the lookup itself succeeded); only the search step's failure
+  raises.
 - An empty search result is an empty list (the source answered; nothing
   matched) — never an exception, never a fabricated record.
 

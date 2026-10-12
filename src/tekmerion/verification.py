@@ -213,26 +213,69 @@ def check_agreement(citation: Citation, item: RetrievedItem) -> tuple[str, list[
 
 # ------------------------------------------------------------------ stage 1
 
+def _enrich(citation: Citation, primary: RetrievedItem,
+            candidates: list) -> tuple[RetrievedItem, str]:
+    """Content enrichment (Spec 012): the primary record resolved but
+    carries no licence-permitted content — the RT-5 metadata-only
+    case. Ask the candidate connectors, in order, for the same DOI.
+    A candidate replaces the primary only when it is the same work
+    (resolved by that DOI), carries licence-permitted content, and
+    stage 2 judges it in agreement with the citation — an enrichment
+    source never manufactures a disagreement the primary record did
+    not produce. Failures never un-resolve a resolved citation: the
+    primary stands and the failure is noted."""
+    doi = citation.doi or _norm_doi(primary.source_id)
+    if not doi or not doi.startswith("10."):
+        return primary, ""
+    notes: list[str] = []
+    for conn in candidates:
+        name = getattr(conn, "name", "connector")
+        try:
+            cand = conn.resolve(doi)
+        except Exception as exc:
+            notes.append(f"enrichment via {name} failed: {exc}")
+            continue
+        if cand is None or not cand.abstract:
+            continue
+        if check_agreement(citation, cand)[0] != AGREE:
+            notes.append(f"enrichment via {name} passed over: its record "
+                         "disagrees with the citation")
+            continue
+        return cand, (f"resolved via {primary.source} without "
+                      f"licence-permitted content; content via {cand.source} "
+                      f"(same DOI)")
+    return primary, "; ".join(notes)
+
+
 def _resolve(citation: Citation, connectors: list) -> tuple[Optional[RetrievedItem], str, str]:
     """Resolve against a source of record. Returns (item, outcome,
     detail); an exception from every attempted route is an explicit
     `error` outcome, never a silent skip."""
     last_error = ""
     if citation.doi:
-        for conn in connectors:
+        primary: Optional[RetrievedItem] = None
+        primary_at = -1
+        for idx, conn in enumerate(connectors):
             try:
                 item = conn.resolve(citation.doi)
             except Exception as exc:  # transport/parse failure = explicit outcome
                 last_error = f"{getattr(conn, 'name', 'connector')}: {exc}"
                 continue
             if item is not None:
-                return item, RESOLVED, ""
-        return None, (ERROR if last_error else NOT_FOUND), last_error
+                primary, primary_at = item, idx
+                break
+        if primary is None:
+            return None, (ERROR if last_error else NOT_FOUND), last_error
+        if primary.abstract:
+            return primary, RESOLVED, ""
+        enriched, note = _enrich(citation, primary, connectors[primary_at + 1:])
+        return enriched, RESOLVED, note
     # No DOI: source-native record matched on title + authors + venue +
     # year (WS5 §1.1) — the first agreeing candidate resolves; if the
     # source answers but nothing agrees, the best candidate is carried
     # forward and stage 2 renders the disagreement explicitly.
     best: Optional[RetrievedItem] = None
+    best_from: Any = None
     for conn in connectors:
         try:
             candidates = conn.search(citation.title)
@@ -241,10 +284,20 @@ def _resolve(citation: Citation, connectors: list) -> tuple[Optional[RetrievedIt
             continue
         for cand in candidates:
             if best is None:
-                best = cand
+                best, best_from = cand, conn
             if check_agreement(citation, cand)[0] == AGREE:
-                return cand, RESOLVED, ""
+                if cand.abstract:
+                    return cand, RESOLVED, ""
+                enriched, note = _enrich(citation, cand,
+                                         [c for c in connectors if c is not conn]
+                                         + [conn])
+                return enriched, RESOLVED, note
     if best is not None:
+        if not best.abstract:
+            enriched, note = _enrich(citation, best,
+                                     [c for c in connectors if c is not best_from]
+                                     + [best_from])
+            return enriched, RESOLVED, note
         return best, RESOLVED, ""
     return None, (ERROR if last_error else NOT_FOUND), last_error
 
