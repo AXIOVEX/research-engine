@@ -1,5 +1,6 @@
 # Spec 006 — checkCIF Adapter (P2: automated validation suite) — tasks
 
 - [x] T1 Spec + claims bundle v0.1.0 + assessor run at after_specify.
-- [ ] T2 Build (GATED: owner shortlist approval).
-- [ ] T3 Seeded-defect tests (each claim's falsifier exercised by a fixture that must fail the naive implementation).
+- [x] T2 Build (GATED: owner shortlist approval — PASSED 2026-10-12). Built 2026-10-12: `src/tekmerion/adapters/core.py` (shared seam) + `src/tekmerion/adapters/checkcif.py` (parser, registered alert mapping, PLATON runner seam, recorded-output ingestion).
+- [x] T3 Seeded-defect tests (each claim's falsifier exercised by a fixture that must fail the naive implementation): tests/test_adapters_checkcif.py — 12 tests, incl. recorded-output-without-artifact refused as evidence (F-006-1), version-stripped output refused (F-006-1), scope-claim-less emission refused at the seam, unavailable checker ledgered as `not_runnable_here` with no evidence.
+- [ ] T4 (OPEN, operator) Live-PLATON verification: run the adapter against a real PLATON binary installed under PLATON's license terms (author-distributed, not OSI) and record one `run_by_us` run in a study ledger. The invocation seam is implemented and exercised with a test-double binary emitting recorded real .chk output; no PLATON binary exists in the build environment and none was downloaded (license terms are the operator's gate, per spec §Function).

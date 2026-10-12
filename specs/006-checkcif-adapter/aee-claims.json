@@ -1,18 +1,18 @@
 {
  "spec": "specs/006-checkcif-adapter/spec.md",
- "version": "0.1.0",
+ "version": "0.2.0",
  "date": "2026-10-12",
  "claims": [
   {
    "id": "CLM-006-01",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "low",
    "source_ref": "specs/006-checkcif-adapter/spec.md",
    "text": "The adapter's evidence item records the CIF SHA-256, the checker (checkCIF service vs local PLATON), and the PLATON/check.def version for every run; an alert record without all three is not evidence.",
    "boundary": [
-    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
    ],
    "falsification_tests": [
     "F-006-1: an adapter evidence item missing the artifact hash, checker identity, or check.def version."
@@ -23,19 +23,33 @@
      "kind": "asserted",
      "ref": "specs/006-checkcif-adapter/spec.md",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "src/tekmerion/adapters/checkcif.py (run_checkcif: evidence withheld unless artifact hash + PLATON/check.def version pair are recorded) + src/tekmerion/adapters/core.py (emit_adapter_evidence refusals)",
+     "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_adapters_checkcif.py::test_recorded_output_without_artifact_is_context_not_evidence, ::test_output_without_versions_is_not_evidence, ::test_recorded_run_matched_pair_contextual_evidence_and_replay (ledger replay carries CIF SHA-256, checker identity, check.def version, raw-output hash)",
+     "source_quality": "test"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the adapter test suite (seeded negatives through production paths; recorded real checker outputs as fixtures); evidence is the author's own tests \u2014 checking, not settlement (DN-010 audit convention)."
   },
   {
    "id": "CLM-006-02",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "low",
    "source_ref": "specs/006-checkcif-adapter/spec.md",
-   "text": "BLIND SPOT (scope claim): a clean checkCIF result (no A/B alerts) establishes only that the CIF is internally consistent under the check.def suite. It does NOT establish that the structure is chemically correct, that the claimed chemistry is the chemistry in the crystal, or that the dataset is genuine — IUCr states in every report that the absence of alerts does not guarantee there are no aspects needing attention, and internally consistent fabricated datasets are known to pass.",
+   "text": "BLIND SPOT (scope claim): a clean checkCIF result (no A/B alerts) establishes only that the CIF is internally consistent under the check.def suite. It does NOT establish that the structure is chemically correct, that the claimed chemistry is the chemistry in the crystal, or that the dataset is genuine \u2014 IUCr states in every report that the absence of alerts does not guarantee there are no aspects needing attention, and internally consistent fabricated datasets are known to pass.",
    "boundary": [
-    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
    ],
    "falsification_tests": [
     "F-006-2: any study presentation of a clean checkCIF result as establishing structure correctness, chemical identity, or dataset genuineness."
@@ -46,19 +60,33 @@
      "kind": "asserted",
      "ref": "specs/006-checkcif-adapter/spec.md",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "src/tekmerion/adapters/core.py (every adapter run record carries scope_claim_id; emit_adapter_evidence refuses scope-claim-less evidence) + src/tekmerion/adapters/checkcif.py module docstring (blind spot stated with the mapping)",
+     "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_adapters_checkcif.py::test_scope_claim_attachment_is_mechanically_enforced, ::test_alert_mapping_registered_rows (a clean run builds contextual evidence with zero support mass \u2014 a pass is never recorded as support)",
+     "source_quality": "test"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the adapter test suite (seeded negatives through production paths; recorded real checker outputs as fixtures); evidence is the author's own tests \u2014 checking, not settlement (DN-010 audit convention)."
   },
   {
    "id": "CLM-006-03",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "low",
    "source_ref": "specs/006-checkcif-adapter/spec.md",
    "text": "Alert mapping is monotone and disclosed: A alerts attach contradiction mass to the supported claim's structure sub-claim; B alerts attach partial contradiction; C/G attach context only. The mapping table is part of this spec's record and may not be tuned per-study.",
    "boundary": [
-    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
    ],
    "falsification_tests": [
     "F-006-3: a study whose alert-to-mass mapping differs from the registered table, or an A alert recorded as context only."
@@ -69,19 +97,33 @@
      "kind": "asserted",
      "ref": "specs/006-checkcif-adapter/spec.md",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "src/tekmerion/adapters/checkcif.py::map_alert_counts (the registered mapping table as a pure function of parsed counts; no per-study parameter exists)",
+     "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_adapters_checkcif.py::test_alert_mapping_registered_rows, ::test_a_alerts_build_contradiction_evidence (A: full contradiction + falsifier observation; B: 0.50 partial; C/G: context only \u2014 exercised on the recorded IUCr sucrose report's parsed alerts)",
+     "source_quality": "test"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the adapter test suite (seeded negatives through production paths; recorded real checker outputs as fixtures); evidence is the author's own tests \u2014 checking, not settlement (DN-010 audit convention)."
   },
   {
    "id": "CLM-006-04",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "low",
    "source_ref": "specs/006-checkcif-adapter/spec.md",
    "text": "The adapter supplies lane-1 evidence only: it issues no verdicts, and a checkCIF pass can never be the sole evidence for a supported verdict on a structure claim.",
    "boundary": [
-    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
    ],
    "falsification_tests": [
     "F-006-4: a verdict of supported whose only evidence group is a checkCIF adapter item."
@@ -92,8 +134,23 @@
      "kind": "asserted",
      "ref": "specs/006-checkcif-adapter/spec.md",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "src/tekmerion/adapters/ (the adapter package exposes evidence emission only; no verdict type, verdict function, or register mutation beyond add_evidence exists in it)",
+     "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_adapters_checkcif.py (every run path terminates in an evidence item or a ledgered no-evidence run; no test or code path issues a verdict)",
+     "source_quality": "test"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the adapter test suite (seeded negatives through production paths; recorded real checker outputs as fixtures); evidence is the author's own tests \u2014 checking, not settlement (DN-010 audit convention)."
   }
- ]
+ ],
+ "build_note": "2026-10-12 build (owner shortlist gate passed): claims moved only on shipped-test evidence; lifecycle stages per the DN-010 audit convention (the author's own seeded-defect tests are checking, not settlement)."
 }

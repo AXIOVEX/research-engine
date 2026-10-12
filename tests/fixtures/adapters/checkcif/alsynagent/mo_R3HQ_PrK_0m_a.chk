@@ -1,0 +1,132 @@
+#===============================================================================
+# PLATON/CHECK-( 90622) versus check.def version 220517, Entry: mo_r3hq_prk_0m_a
+# Data: mo_R3HQ_PrK_0m_a.cif - Type: CIF         Bond Precision   C-C = 0.0167 A
+# Refl: mo_R3HQ_PrK_0m_a.fcf - Type: LIST4                          Temp = 300 K
+# Audit:OLEX2 1.5 (COMPILED 2024.02.16 SVN.R378C4104 FOR OLEXSYS, GUI SVN.R6928)
+# Refin:SHELXL 2019/3 (SHELDRICK, 2015)
+# X-ray MoKa              R(int) = 0.059,  wR2/R(int) =  1.8,  Nref/Npar =   7.4
+# Cell    9.967(4)   20.023(8)   12.654(6)           90   111.958(9)          90
+# Wavelength 0.71073  Volume Reported      2342.3(18) Calculated      2342.2(17)
+# SpaceGroup from Symmetry P 21         Hall: P 2yb                   monoclinic
+#                 Reported P 1 21 1           P 2yb                   monoclinic
+# MoietyFormula K N8 O23 Pr, 4(C7 H14 N O), O
+#      Reported K N8 O24 Pr, 4(C7 H14 N O)
+#    SumFormula C28 H56 K N12 O28 Pr
+#      Reported C28 H56 K N12 O28 Pr
+# Mr        =   1188.86[Calc],   1188.85[Rep]       Volume/NonHatoms = 17 Ang**3
+# Dx,gcm-3  =     1.686[Calc],     1.686[Rep]
+# Z         =         2[Calc],         2[Rep]
+# Mu (mm-1) =     1.234[Calc],     1.234[Rep]  Xtal Size =  0.100x0.100x0.110 mm
+# F000      =    1220.0[Calc],    1220.0[Rep]  or F000' =   1220.66[Calc]
+# Reported   T Limits: Tmin=0.612              Tmax=0.746  AbsCorr = NONE
+# Calculated T Limits: Tmin=0.873 Tmin'=0.873  Tmax=0.884
+# Measured   HKL: Reported  25515, Embedded  33076, <Mult>  5.2
+# Reported   Hmax= 12, Kmax= 25, Lmax= 15, Nref=   9554        , Th(max)= 26.370
+# Obs in FCF Hmax= 12, Kmax= 24, Lmax= 15, Nref=   9554[  4931], Th(max)= 26.370
+# Calculated Hmax= 12, Kmax= 25, Lmax= 15, Nref=   9576[  4932], Ratio=1.94/1.00
+# Reported   Rho(min) = -0.45, Rho(max) =  1.14 e/Ang**3 (From CIF)
+# Calculated Rho(min) = -0.42, Rho(max) =  1.26 e/Ang**3 (From CIF+FCF data)
+# w=1/[\s^2^(Fo^2^)+(0.0448P)^2^+0.4542P], P=(Fo^2^+2Fc^2^)/3
+# R= 0.0439(  8452), wR2= 0.1079(  9554), S = 1.054      (From CIF+FCF data)
+# R= 0.0439(  8452), wR2= 0.1078(  9554), S = 1.053      (From FCF data only)
+# R= 0.0439(  8452), wR2= 0.1078(  9554), S = 1.053, Npar=  668, Flack 0.009(11)
+# Number Bijvoet Pairs = 4623 (100%),      3600 Selected for:  Parsons 0.020(11)
+# P2(tr) 1.000, P3(tr) 1.000, P3(tw) 0.000, Student-T Nu =  28,  Hooft 0.018(10)
+#===============================================================================
+# For Documentation:http://www.platonsoft.nl/CIF-VALIDATION.pdf
+#===============================================================================
+#                                                                              *
+#===============================================================================
+#>>> The Following Improvement and Query ALERTS were generated - (Acta-Mode) <<<
+#===============================================================================
+     Format: alert-number_ALERT_alert-type_alert-level text
+
+042_ALERT_1_C Calc. and Reported MoietyFormula Strings  Differ     Please Check
+090_ALERT_3_C Poor Data / Parameter Ratio (Zmax > 18) ........       7.38 Note
+094_ALERT_2_C Ratio of Maximum / Minimum Residual Density ....       2.52 Report
+234_ALERT_4_C Large Hirshfeld Difference O8       --N10      .       0.16 Ang.
+241_ALERT_2_C High   'MainMol' Ueq as Compared to Neighbors of        O18 Check
+241_ALERT_2_C High   'MainMol' Ueq as Compared to Neighbors of        O28 Check
+242_ALERT_2_C Low    'MainMol' Ueq as Compared to Neighbors of        Pr1 Check
+242_ALERT_2_C Low    'MainMol' Ueq as Compared to Neighbors of         K1 Check
+242_ALERT_2_C Low    'MainMol' Ueq as Compared to Neighbors of         N8 Check
+244_ALERT_4_C Low    'Solvent' Ueq as Compared to Neighbors of         N3 Check
+244_ALERT_4_C Low    'Solvent' Ueq as Compared to Neighbors of        C14 Check
+342_ALERT_3_C Low Bond Precision on  C-C Bonds ...............    0.01671 Ang.
+415_ALERT_2_C Short Inter D-H..H-X       H1A      ..H29      .       2.11 Ang.
+                                                    x,y,1+z  =      1_556 Check
+417_ALERT_2_C Short Inter D-H..H-D       H15      ..H29      .       2.11 Ang.
+                                                  1+x,y,1+z  =      1_656 Check
+973_ALERT_2_C Check Calcd Positive Resid. Density on       Pr1       1.26 eA-3
+#===============================================================================
+002_ALERT_2_G Number of Distance or Angle Restraints on AtSite         18 Note
+003_ALERT_2_G Number of Uiso or Uij Restrained non-H Atoms ...         74 Report
+004_ALERT_5_G Polymeric Structure Found with Maximum Dimension          2 Info
+007_ALERT_5_G Number of Unrefined Donor-H Atoms ..............          8 Report
+115_ALERT_5_G ADDSYM Detects Noncrystallographic Inversion ...        93% Check
+168_ALERT_4_G The CIF-Embedded .res File Contains EXYZ Records          4 Report
+171_ALERT_4_G The CIF-Embedded .res File Contains EADP Records          4 Report
+172_ALERT_4_G The CIF-Embedded .res File Contains DFIX Records          2 Report
+173_ALERT_4_G The CIF-Embedded .res File Contains DANG Records          1 Report
+178_ALERT_4_G The CIF-Embedded .res File Contains SIMU Records          5 Report
+232_ALERT_2_G Hirshfeld Test Diff (M-X)  Pr1      --O32      .        7.3 s.u.
+300_ALERT_4_G Atom Site Occupancy of O2         Constrained at        0.5 Check
+300_ALERT_4_G Atom Site Occupancy of O3         Constrained at        0.5 Check
+300_ALERT_4_G Atom Site Occupancy of O5         Constrained at        0.5 Check
+300_ALERT_4_G Atom Site Occupancy of O13        Constrained at        0.5 Check
+300_ALERT_4_G Atom Site Occupancy of O19        Constrained at        0.5 Check
+300_ALERT_4_G Atom Site Occupancy of O25        Constrained at        0.5 Check
+300_ALERT_4_G Atom Site Occupancy of O27        Constrained at        0.5 Check
+300_ALERT_4_G Atom Site Occupancy of O33        Constrained at        0.5 Check
+300_ALERT_4_G Atom Site Occupancy of N2         Constrained at        0.5 Check
+300_ALERT_4_G Atom Site Occupancy of N7         Constrained at        0.5 Check
+300_ALERT_4_G Atom Site Occupancy of N9         Constrained at        0.5 Check
+300_ALERT_4_G Atom Site Occupancy of N14        Constrained at        0.5 Check
+301_ALERT_3_G Main Residue  Disorder ..............(Resd  1  )        21% Note
+302_ALERT_4_G Anion/Solvent/Minor-Residue Disorder (Resd  6  )       100% Note
+302_ALERT_4_G Anion/Solvent/Minor-Residue Disorder (Resd  7  )       100% Note
+311_ALERT_2_G Isolated Disordered Oxygen Atom (No H's ?) .....         O9 Check
+311_ALERT_2_G Isolated Disordered Oxygen Atom (No H's ?) .....        O21 Check
+432_ALERT_2_G Short Inter X...Y Contact  O3       ..C16      .       2.52 Ang.
+                                                      x,y,z  =      1_555 Check
+432_ALERT_2_G Short Inter X...Y Contact  O19      ..C18      .       2.53 Ang.
+                                                      x,y,z  =      1_555 Check
+432_ALERT_2_G Short Inter X...Y Contact  O19      ..C16      .       2.90 Ang.
+                                                      x,y,z  =      1_555 Check
+432_ALERT_2_G Short Inter X...Y Contact  O21      ..C25      .       2.46 Ang.
+                                                      x,y,z  =      1_555 Check
+432_ALERT_2_G Short Inter X...Y Contact  O21      ..C23      .       2.59 Ang.
+                                                      x,y,z  =      1_555 Check
+432_ALERT_2_G Short Inter X...Y Contact  O21      ..C24      .       2.86 Ang.
+                                                   -1+x,y,z  =      1_455 Check
+432_ALERT_2_G Short Inter X...Y Contact  O23      ..C25      .       2.44 Ang.
+                                                      x,y,z  =      1_555 Check
+432_ALERT_2_G Short Inter X...Y Contact  O23      ..C13      .       2.44 Ang.
+                                                      x,y,z  =      1_555 Check
+794_ALERT_5_G Tentative Bond Valency for Pr1       (III)     .       3.91 Info
+860_ALERT_3_G Number of Least-Squares Restraints .............        482 Note
+883_ALERT_1_G No Info/Value for _atom_sites_solution_primary .     Please Do !
+910_ALERT_3_G Missing # of FCF Reflection(s) Below Theta(Min).          1 Note
+933_ALERT_2_G Number of HKL-OMIT Records in Embedded .res File          3 Note
+954_ALERT_1_G Reported (CIF) and Actual (FCF) Kmax Differ by .          1 Units
+978_ALERT_2_G Number C-C Bonds with Positive Residual Density.          0 Info
+#===============================================================================
+
+               ALERT_Level and ALERT_Type Summary
+               ==================================
+ 15 ALERT_Level_C = Check. Ensure it is Not caused by an Omission or Oversight
+ 43 ALERT_Level_G = General Info/Check that it is not Something Unexpected
+
+  3 ALERT_Type_1 CIF Construction/Syntax Error, Inconsistent or Missing Data.
+ 24 ALERT_Type_2 Indicator that the Structure Model may be Wrong or Deficient.
+  5 ALERT_Type_3 Indicator that the Structure Quality may be Low.
+ 22 ALERT_Type_4 Improvement, Methodology, Query or Suggestion.
+  4 ALERT_Type_5 Informative Message, Check.
+#===============================================================================
+
+   1 Missing  Experimental  Info Issue(s) (Out of  64 Tests) -   98 % Satisfied
+   0 Experimental  Data  Related Issue(s) (Out of  35 Tests) -  100 % Satisfied
+  36 Structural  Model   Related Issue(s) (Out of 136 Tests) -   74 % Satisfied
+  20 Unresolved or to be Checked Issue(s) (Out of 274 Tests) -   93 % Satisfied
+
+#                                                                              *
