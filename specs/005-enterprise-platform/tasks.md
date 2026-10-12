@@ -29,11 +29,11 @@
 
 ## Phase E2 — SAML 2.0
 
-- [ ] T513 SAML SP: Web Browser SSO profile, SP- and IdP-initiated; per-tenant metadata import + validation.
-- [ ] T514 Assertion validation: signatures required; wrong-IdP and unsigned assertions rejected (F-005-02 seeded defects).
-- [ ] T515 Attribute mapping incl. `eduPersonPrincipalName` / `eduPersonScopedAffiliation`; mapping into the §2 identity model.
-- [ ] T516 Shibboleth-class test IdP harness in CI (test tenant only; no external federation dependency).
-- [ ] T517 Step-up parity for SAML sessions (verdict/admin actions); phase exit re-assessment + Spec 002 battery.
+- [x] T513 SAML SP: Web Browser SSO profile, SP- and IdP-initiated; per-tenant metadata import + validation.
+- [x] T514 Assertion validation: signatures required; wrong-IdP and unsigned assertions rejected (F-005-02 seeded defects).
+- [x] T515 Attribute mapping incl. `eduPersonPrincipalName` / `eduPersonScopedAffiliation`; mapping into the §2 identity model.
+- [x] T516 Shibboleth-class test IdP harness in CI (test tenant only; no external federation dependency).
+- [x] T517 Step-up parity for SAML sessions (verdict/admin actions); phase exit re-assessment + Spec 002 battery.
 
 ## Phase E3 — Provisioning & lifecycle (SCIM)
 

@@ -117,3 +117,34 @@ evidence is an in-process mock IdP enforcing real PKCE/RS256 — no external
 IdP has been exercised), delegated-custody behavior under a real KMS/HSM
 (E2+ integration, interface only here), and platform-ledger behavior at
 institutional event volumes.
+
+**E2 — SAML 2.0 SP: EXITED 2026-10-12** (branch `enterprise/e2-saml`,
+commit `bb5a985`; PR #4 opened for CI, run 38257747324 success; merging
+is the coordinator's). Delivered: per-tenant SAML IdP configuration from
+imported metadata (platform provisioning + tenant-admin self-service;
+certificates by reference, fingerprints ledgered) (T513); the
+signed-assertion-only validation battery — issuer/audience/recipient/
+conditions/InResponseTo/replay, every refusal an `auth.login_failed`
+event before the raise (T514); attribute mapping incl.
+`eduPersonPrincipalName` (subject under `subject_source=eppn`) and
+`eduPersonScopedAffiliation` into the §2 identity model (T515); the
+Shibboleth-class test IdP harness in CI (T516); step-up parity — SAML
+sessions reach the same §2 step-up state via ForceAuthn + REFEDS MFA
+context, and no-MFA SAML sessions are refused at the append gate
+exactly as OIDC ones (T517). Tests: 210 passed locally and in CI (173
+prior + 37 new), Spec 002 battery unchanged. Claims at exit (bundle
+v0.4.0, re-assessed `after_implement`, outcome `gather_evidence` — 13
+claims remain below threshold, all unbuilt E3–E6 scope): CLM-005-02 →
+**supported** (1.00); CLM-005-14 stays partially_supported with SAML
+events added to its evidence (residue: E3 SCIM outcomes, E4
+break-glass); CLM-005-27 stays supported with SAML MFA-parity
+evidence. The responsibility matrix was reviewed — no classification
+changes (IA rows are protocol-neutral; E2 makes their SAML half true);
+the crypto inventory gains row 12 (XML-DSig verification, not
+FIPS-validated — §3.13.11 gap unchanged under the owner's recorded
+FIPS timing decision). What remains not understood at this exit: real
+Shibboleth/Entra SAML interoperability (fixtures only — the harness's
+signatures are real, its message shapes are ours), the in-repo
+exclusive canonicalizer against production namespace-heavy
+assertions, and SP request-signing / encrypted-assertion support
+(both refused-or-absent by recorded v1 scope, not by oversight).

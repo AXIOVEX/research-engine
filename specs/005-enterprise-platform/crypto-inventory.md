@@ -21,6 +21,7 @@ its status on evidence.
 | 9 | Key fingerprints | Platform service layer | SHA-256 | Python `hashlib` | **No** |
 | 10 | Session tokens, enrollment nonces, API secrets (generation) | Platform service layer | CSPRNG output | Python `secrets` (OS entropy) | Not a module-validation question; listed for completeness |
 | 11 | TLS to IdP endpoints | Platform runtime | TLS 1.2+ | Python `urllib`/OpenSSL as deployed | Deployment-dependent; **no claim** |
+| 12 | SAML assertion/response signature verification (E2) | Platform service layer (`platform/saml.py`, `platform/xmlc14n.py`, `platform/x509.py`) | XML-DSig: RSA PKCS#1 v1.5 + SHA-256 (verify-only), SHA-256 reference digests, exclusive C14N | Pure-Python in this repo — the RS256 verifier is #6's; the canonicalizer and X.509 key extraction are new in E2, prototype-grade | **No** |
 
 ## Reading this table
 

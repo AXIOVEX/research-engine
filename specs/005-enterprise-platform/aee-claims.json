@@ -1,6 +1,6 @@
 {
   "spec": "specs/005-enterprise-platform/spec.md",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "date": "2026-10-12",
   "claims": [
     {
@@ -54,7 +54,7 @@
     {
       "id": "CLM-005-02",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "severity": "high",
       "uncertainty": "medium",
       "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -78,6 +78,24 @@
           "kind": "asserted",
           "ref": "WS6 §1 role matrix (docs/architecture/06-product-shape.md)",
           "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_e2_saml.py (37 tests): SP- and IdP-initiated logins vs the in-repo Shibboleth-class mock IdP (tests/e2_world.py, real XML-DSig over in-repo exclusive C14N); the F-005-02 refusal battery — unsigned assertion, response-signature-cannot-rescue-unsigned, wrong signing key, KeyInfo naming an unconfigured cert, tampered content (digest mismatch), expired / not-yet-valid, wrong audience, wrong recipient, wrong issuer, InResponseTo mismatch, replayed assertion, non-success status, encrypted assertion refused by name, DOCTYPE refused — each refused AND recorded as an auth.login_failed event in the tenant ledger before the raise",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_e2_saml.py: per-tenant metadata import + validation (expired validUntil, expired certs, missing signing cert refused at configuration; cert material by reference — fingerprints in the idp.configured event, no cert bytes in any ledger); attribute mapping incl. eduPersonPrincipalName (OID form) as subject under subject_source=eppn and eduPersonScopedAffiliation to affiliation; cross-tenant seeded case (tenant B's validly-signed assertion refused at tenant A's ACS; B's flow state refused at A's ACS)",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "CI run 38257747324 (PR #4, enterprise/e2-saml) success; full suite 210 passed locally (173 prior + 37 new), Spec 002 battery unchanged",
+          "source_quality": "test"
         }
       ]
     },
@@ -517,6 +535,12 @@
           "kind": "observed",
           "ref": "SCIM sync outcomes (E3) and break-glass use (CLM-005-10) are not yet emittable events — partially_supported until E4 completion per this claim's boundary",
           "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "E2 (tests/test_e2_saml.py): SAML IdP configuration events (idp.configured/idp.updated, protocol=saml, cert fingerprints) and every SAML authentication success/failure incl. the full refusal battery are recorded in the tenant platform ledger; chains verify after the battery (test_refusal_battery_leaves_chains_verifiable)",
+          "source_quality": "test"
         }
       ]
     },
@@ -966,6 +990,12 @@
           "direction": "supports",
           "kind": "observed",
           "ref": "CI run 38253126192 (PR #2, enterprise/e1-identity) success; full suite 122 passed locally",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "E2 (tests/test_e2_saml.py): SAML MFA parity — a session whose AuthnContext evidences no MFA (PasswordProtectedTransport) is refused at the append gate; SAML step-up requires an MFA-evidencing fresh assertion (REFEDS MFA context requested with ForceAuthn) and a no-MFA step-up assertion is refused",
           "source_quality": "test"
         }
       ]
