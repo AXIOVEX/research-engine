@@ -2,6 +2,10 @@
 
 **DRAFT — for owner review — not yet adopted.** The contract-term half of this
 statement is carried in `DPA-TEMPLATE-DRAFT.md` §12.
+**Adoption (2026-10-12):** adopted as an Axiovex working document by owner
+ratification, 2026-10-12. **Counsel review is required before execution with any
+partner.** The header above stands as this document's drafting provenance;
+adoption changes nothing substantive in the text.
 **Date:** 2026-10-12 · **Closes:** HECVAT register item 14 (with the DPA term) ·
 **Sources:** DN-010 (Tao realignment doctrine), `specs/005-enterprise-platform/spec.md`
 (§8: no secondary use), `specs/009-mcp-server/spec.md`, `docs/install.md`,

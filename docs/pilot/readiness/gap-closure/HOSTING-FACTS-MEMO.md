@@ -110,3 +110,14 @@ while any invented answer would be a breach we wrote ourselves.
 
 *Memo prepared from repo records only, 2026-10-12. No decision is recorded by this
 document; it exists to make the decision statable in one sitting.*
+
+**Decision recorded (2026-10-12):** the owner has answered §5's question,
+ratifying the coordinator's recommendation: the pilot operates as **(C)
+partner-workstation installs under the Spec 009 shape**. The Axiovex-hosted
+option (A) is **deferred until a partner requirement names it**; no cloud provider
+or region is named, because none was decided. Register items 3, 5, 8, 9 (and the
+hosted halves of 6 and 7) therefore remain exactly as §5's closing paragraph
+states them — not yet answerable for any future hosted offering. This memo is
+adopted as an Axiovex working document with the rest of the gap-closure folder
+(2026-10-12; counsel review required before execution with any partner). The
+footer above stands as written on the day the memo was prepared.

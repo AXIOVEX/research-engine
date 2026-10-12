@@ -7,6 +7,14 @@ owner's separate per-target approval before any communication with it. No instit
 here has been contacted, and nothing here is a claim about any institution's willingness to
 participate.
 
+**Approval (2026-10-12):** the owner has approved this shortlist **as ranked** (Duke,
+Pitt HSLS, York CRD first) — ratified 2026-10-12. The limits in the status block above
+stand unchanged and are restated here so the approval cannot be misread: **approval of
+this list authorizes no outreach.** Each named target still requires the owner's
+separate per-target approval before any communication with it (DESIGN §7 step 5), and
+the owner's no-contact directive of 2026-10-12 stands until he lifts it by name. No
+institution named here has been contacted.
+
 ---
 
 ## 1. Method note

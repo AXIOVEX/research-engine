@@ -195,6 +195,17 @@ researcher / reviewer / adjudicator / integrity). The institution-local and hybr
 remain available as later moves on the same architecture; the pilot does not promise them on
 a date.
 
+**Decision note (2026-10-12):** the owner has decided the **pilot** deployment shape
+(ratifying the coordinator's recommendation, 2026-10-12): the pilot operates as
+**partner-workstation installs under the Spec 009 shape** — the partner installs and runs
+Tekmerion on its own workstations; no Axiovex-operated hosted deployment exists for the
+pilot. The DN-003 hosted shape above is **deferred, not abandoned**: an Axiovex-hosted
+offering is decided only when a partner requirement names it, and the §5.2 onboarding steps
+written for the hosted shape apply at that point. Until then, the hosted-shape register
+items (HECVAT §9 items 3, 5, 8, 9 and the hosted residues of 6 and 7) remain
+**not yet answerable** — the workstation pilot creates no hosting facts. This note is
+appended; the DN-003 text above stands as originally written.
+
 ### 5.2 Onboarding steps
 
 1. **Fit confirmation** against §2.2 — including the F5 append-only conversation and F3 IdP

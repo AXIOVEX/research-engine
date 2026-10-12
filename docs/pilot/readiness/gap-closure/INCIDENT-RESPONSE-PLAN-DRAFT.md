@@ -2,6 +2,13 @@
 
 **DRAFT — for owner review — not yet adopted.** Timelines in brackets are
 commitments-to-be-confirmed, not commitments.
+**Adoption (2026-10-12):** adopted as an Axiovex working document by owner
+ratification, 2026-10-12. **Counsel review is required before execution with any
+partner.** The header above stands as this document's drafting provenance;
+adoption changes nothing substantive in the text. Cross-reference: the
+gap-closure README board (item 10) records that T554 signed incident-response
+egress was built at Spec 005 E4, superseding this plan's detection premise on
+that one point; the plan's text takes that update at counsel review, not here.
 **Date:** 2026-10-12 · **Closes:** HECVAT register item 10 (plan + notification
 timelines in draft form) · **Sources:** `docs/pilot/DESIGN.md` (§5.3 support model),
 `specs/005-enterprise-platform/spec.md` (§8 audit ledger, §13.4 AU event classes,

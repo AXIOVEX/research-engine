@@ -2,7 +2,11 @@
 
 **DRAFT TEMPLATE — for owner/counsel review — not yet adopted, not offered to any
 institution, and not legal advice.** Prepared by a non-lawyer from the program's own
-records, 2026-10-12. **Closes:** HECVAT register item 13 (with
+records, 2026-10-12.
+**Adoption (2026-10-12):** adopted as an Axiovex working document by owner
+ratification, 2026-10-12. **Counsel review is required before execution with any
+partner.** The header above stands as this document's drafting provenance;
+adoption changes nothing substantive in the text. **Closes:** HECVAT register item 13 (with
 `PRIVACY-NOTICE-DRAFT.md`); carries the no-training contract term for register
 item 14 (§12). **Sources:** `docs/pilot/DESIGN.md` (§2.3, §5.4, §5.5),
 `specs/005-enterprise-platform/spec.md` (§§3–4, §8), DN-005, Axiomere DESIGN §6.

@@ -1,6 +1,12 @@
 # Business Continuity & Disaster Recovery — Tekmerion (DRAFT)
 
 **DRAFT — for owner review — not yet adopted.**
+**Adoption (2026-10-12):** adopted as an Axiovex working document by owner
+ratification, 2026-10-12. **Counsel review is required before execution with any
+partner.** The header above stands as this document's drafting provenance;
+adoption changes nothing substantive in the text. The hosted residues named
+below remain gated on a future hosted decision (the pilot proceeds on
+workstation installs — DESIGN §5.1 decision note, 2026-10-12).
 **Date:** 2026-10-12 · **Closes:** HECVAT register item 6 for the deployment
 reality that exists today; item 5 (backup schedule / restore tests) and the
 hosted-exercise half of item 6 remain gated on the hosting decision — see §5 and
