@@ -5,7 +5,7 @@
 ## Gates
 
 - [x] G1 Owner go-ahead on Spec 002 — given 2026-10-11.
-- [!] G3 OD-5 thresholds (K3 audit-time budget, K5 cost ceiling) recorded before the evaluation freeze.
+- [x] G3 OD-5 thresholds RECORDED 2026-10-12 by amendment, before the evaluation freeze (owner block ratification of the coordinator's recommendations, Glossa-Lab chat): **K3 = 2 hours per evidence-question bundle; K5 = $25 marginal cost per question.**
 - [!] G4 Any spend — none planned; free API keys on owner accounts only.
 
 ## Phase 0 — Setup
