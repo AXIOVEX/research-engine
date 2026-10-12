@@ -43,6 +43,12 @@
      "kind": "asserted",
      "ref": "docs/architecture/02-claim-evidence-model.md",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Phase 7 frozen evaluation (2026-10-12): kill criterion K4 executed — the seeded duplicate pair (CIT-E-101/102) and shared-dataset pair (CIT-E-501/502) each folded to ONE origin group (8 evidence items in 6 origin groups), and the fold was load-bearing in a verdict: CLM-E-005's sufficiency floor was unmet by its single folded group (inconclusive-by-floor), where failed folding would have cleared it to supported — the inflation F-001-D2 names — specs/002-mvp-implementation/evaluation/EVALUATION-REPORT.md §2.4",
+     "source_quality": "artifact"
     }
    ],
    "falsification_tests": [
@@ -56,7 +62,7 @@
    "text": "Counting evidence by origin group prevents derivative sources from inflating support for a claim.",
    "uncertainty": "high",
    "lifecycle_stage": "checked",
-   "stage_basis": "Scoring/verdict machinery built and tested under Spec 002 with seeded defects; checked."
+   "stage_basis": "Scoring/verdict machinery built and tested under Spec 002 with seeded defects; checked. Phase 7 also executed the falsifier's test class as kill criterion K4 on a frozen corpus: seeded derivative pairs folded to single origin groups, and the fold decided a verdict (CLM-E-005, inconclusive-by-floor). Checked, on executed evidence."
   },
   {
    "boundary": [
@@ -95,6 +101,12 @@
      "kind": "asserted",
      "ref": "docs/architecture/04-records-export.md",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Phase 7 frozen evaluation (2026-10-12): kill criterion K2 executed from the bundle alone — honest replay reproduced all five verdicts exactly (verdict, interval, point estimate); tamper case B (ledger actor edit) detected as hash-mismatch; tamper case A (verdict string flipped, manifest rehashed) was NOT detected by the verifier's count-only projection check on first pass, was fixed in-phase (payload-for-payload cross-check; regression test test_verdict_flip_in_rehashed_bundle_is_detected), and is detected on re-verification; all pre-existing frozen bundles still verify under the strengthened verifier — specs/002-mvp-implementation/evaluation/EVALUATION-REPORT.md §2.2",
+     "source_quality": "artifact"
     }
    ],
    "falsification_tests": [
@@ -108,7 +120,7 @@
    "text": "An append-only hash-chained event store makes silent rewriting of a research record detectable on replay.",
    "uncertainty": "high",
    "lifecycle_stage": "checked",
-   "stage_basis": "Evidence/provenance machinery (hash-verified retrieval records, RT-5 caps) built and tested under Spec 002; checked."
+   "stage_basis": "Evidence/provenance machinery (hash-verified retrieval records, RT-5 caps) built and tested under Spec 002; checked. Phase 7 executed kill criterion K2 from the bundle alone: honest replay exact; a rehashed verdict-flip initially escaped the count-only projection check — a real partial firing of F-001-D4 — fixed in-phase (payload-for-payload cross-check + regression test) and detected on re-verification; ledger-edit tamper detected throughout."
   },
   {
    "boundary": [
@@ -127,6 +139,18 @@
      "kind": "asserted",
      "ref": "docs/architecture/01-source-layer.md",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Phase 7 frozen evaluation (2026-10-12): kill criterion K1 — this claim's own falsifier test F-001-D5 — executed on the frozen corpus and passed under the accounting standard of EVALUATION-REPORT.md §2.1: 10/10 citations accounted with exactly one citation.checked each (9 resolved, 1 not_found, 0 error); the seeded fabricated DOI (CIT-E-103, 10.7326/M14-9999) was caught, quarantined, and excluded with zero evidence contribution; the seeded corrupted citation (CIT-E-202) was caught at stage 2 (authors, year) and excluded as cited; no fabricated or unsupported citation stands in the evidence basis — specs/002-mvp-implementation/evaluation/EVALUATION-REPORT.md §2.1",
+     "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Evaluation audit bundle, Zenodo DOI 10.5281/zenodo.23319126 (freeze root a4c798715c05ae151849ddf0e7c4a3dcb7b119620757b088686bd18d24e6c049); run VALID, bundle states its outcome in verdicts.json and verifies standalone; anchor verified against the public record",
+     "source_quality": "artifact"
     }
    ],
    "falsification_tests": [
@@ -138,9 +162,9 @@
    "source_ref": "specs/001-research-engine/spec.md",
    "status": "draft",
    "text": "Resolving every citation against its source of record before use reduces fabricated-reference incidence to zero in exported artifacts.",
-   "uncertainty": "high",
-   "lifecycle_stage": "created",
-   "stage_basis": "Design claim only; no implementation or test evidence yet. Created."
+   "uncertainty": "medium",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Citation-verification machinery built under Spec 002; its named test — kill criterion K1, which is F-001-D5 verbatim — was executed on the frozen Phase 7 evaluation corpus and passed (10/10 citations accounted; the seeded fabrication was caught, quarantined, and excluded with zero evidence contribution; zero fabricated citations in the exported artifacts). Checked on that corpus; behaviour on corpora orders of magnitude larger, and on fabrications subtler than a nonexistent DOI, remains unmeasured (EVALUATION-REPORT.md §2.1)."
   },
   {
    "boundary": [
@@ -153,6 +177,12 @@
      "kind": "asserted",
      "ref": "docs/architecture/03-verdict-engine.md",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Phase 7 frozen evaluation (2026-10-12): the K3 protocol F-001-D6 names now exists (pre-registered thresholds, G3/OD-5: 2h per question) and was executed — a fresh-context auditor given only the exported bundle retraced all 5 claims (statement + falsifier, verdict + interval + reason, evidence items + origin groups + sufficiency floor, citation outcomes, exclusions) in ~18 minutes against the 10-hour budget; standalone verifier ok; K3 pass. The audit exercised the per-claim register arm only; no blended-score arm was fielded — specs/002-mvp-implementation/evaluation/EVALUATION-REPORT.md §2.3",
+     "source_quality": "artifact"
     }
    ],
    "falsification_tests": [
@@ -165,8 +195,8 @@
    "status": "draft",
    "text": "A per-claim verdict taxonomy (INVALID/INCONCLUSIVE/CONTRADICTED/SUPPORTED) preserves information that a single blended study score destroys — specifically, which claims failed and why.",
    "uncertainty": "high",
-   "lifecycle_stage": "created",
-   "stage_basis": "Design claim only, and its falsifier F-001-D6 is comparative against a K3 protocol that does not exist — inoperable today (audit NC). Created."
+   "lifecycle_stage": "checked",
+   "stage_basis": "The K3 protocol F-001-D6 names now exists and was executed in Phase 7 (EVALUATION-REPORT.md §2.3): a fresh-context auditor retraced all five verdicts from the bundle alone in ~18 min against the pre-registered 2h-per-question budget — the per-claim register was the audit's instrument and carried it, including surfacing per-claim defects a blended score cannot express (a falsifier-flag contradiction on CLM-E-004; a wrong author given name in CIT-E-401). Audit item NC-5 (falsifier inoperable) is discharged. Checked — NOT settled: F-001-D6's comparative test (blended score vs per-claim register, decision quality and speed) has never been run; no blended arm was fielded. The falsifier remains live and is now operable; a two-arm K3 study is the named path to settling this claim."
   },
   {
    "boundary": [
@@ -203,6 +233,6 @@
  ],
  "date": "2026-10-12",
  "spec": "001-research-engine",
- "version": "0.3.0",
- "audit_note": "2026-10-12 Tao realignment audit (DN-010 standard): lifecycle_stage + stage_basis added to every claim by reclassification only; no claim text, falsifier, or evidence was rewritten. Git history is the append-only trail for AEE bundles."
+ "version": "0.4.0",
+ "audit_note": "2026-10-12 Tao realignment audit (DN-010 standard): lifecycle_stage + stage_basis added to every claim by reclassification only; no claim text, falsifier, or evidence was rewritten. Git history is the append-only trail for AEE bundles. v0.4.0 (2026-10-12): Spec 001 re-assessment against the executed Phase 7 evaluation — the named follow-up of EVALUATION-REPORT.md §8, discharging audit item NC-5. CLM-001-05 and CLM-001-06 reclassified created → checked on executed K1/K3 evidence; observed evidence refs added to CLM-001-02 (K4), CLM-001-04 (K2), CLM-001-05 (K1), CLM-001-06 (K3); CLM-001-05 uncertainty high → medium (mirroring its implementation-level twin CLM-002-10). No claim text or falsifier rewritten; statuses of CLM-001-01…06 remain draft by this bundle's convention — the lifecycle stage carries the state. Record: specs/001-research-engine/assessment-2026-10-12.md; machine assessment: aee-assessment-after-implement.json."
 }
