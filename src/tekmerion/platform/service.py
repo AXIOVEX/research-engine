@@ -29,11 +29,21 @@ from typing import Callable, Optional
 
 from . import authz, ed25519
 from .authz import AuthorizationService
+from .baseline import ENDPOINT_CLASSES, RateLimiter, tls_posture
+from .breakglass import (
+    AUTHORIZER_PLANES, AUTHORIZER_PLATFORM, AUTHORIZER_TENANT,
+    MAX_DURATION_SECONDS as BREAKGLASS_MAX_DURATION_SECONDS,
+    STATE_ACTIVE, STATE_CLOSED, STATE_DENIED, STATE_EXPIRED, STATE_PENDING,
+    BreakGlassPolicy, BreakGlassSession,
+)
 from .directory import (
     ApiKeyRecord, Directory, IdPConfig, Identity, InMemorySecrets,
     SamlIdPConfig, Session, Tenant, hash_api_secret,
 )
-from .errors import AuthenticationError, AuthorizationDenied, ConfigurationError, GateDenied
+from .errors import (
+    AuthenticationError, AuthorizationDenied, ConfigurationError, GateDenied,
+    RateLimited,
+)
 from .keys import (
     STATUS_CLOSED, STATUS_REVOKED, DelegatedSigner, KeyRecord, KeyRegistry,
     fingerprint,
@@ -41,12 +51,19 @@ from .keys import (
 from .ledger import (
     APIKEY_ISSUED, APIKEY_REVOKED, AUTH_APIKEY_FAILED, AUTH_LOGIN_FAILED,
     AUTH_LOGIN_SUCCEEDED, AUTH_LOGOUT, AUTH_STEPUP, AUTHZ_DENIED,
-    DIRECTORY_PII_ERASED, GROUP_MAPPING_APPROVED, GROUP_MAPPING_REVOKED,
-    GROUP_MEMBERSHIP_GRANTED, GROUP_MEMBERSHIP_REVOKED, IDENTITY_CREATED,
-    IDENTITY_DEACTIVATED, IDENTITY_REACTIVATED, IDENTITY_UPDATED,
-    IDP_CONFIGURED, IDP_UPDATED, PLATFORM_BOOTSTRAPPED, ROLE_GRANTED,
-    ROLE_REVOKED, SCIM_SYNC_FAILED, SCIM_SYNC_SUCCEEDED, SCIM_TOKEN_ISSUED,
-    SCIM_TOKEN_REVOKED, SESSION_REVOKED, TENANT_CREATED, TENANT_UPDATED,
+    BREAKGLASS_ACTION, BREAKGLASS_ACTION_REFUSED, BREAKGLASS_AUTHORIZATION_DENIED,
+    BREAKGLASS_AUTHORIZED, BREAKGLASS_INVOCATION_REFUSED, BREAKGLASS_INVOKED,
+    BREAKGLASS_POLICY_DECLARED, BREAKGLASS_POLICY_REVOKED,
+    BREAKGLASS_REVIEW_COMPLETED, BREAKGLASS_REVIEW_CREATED,
+    BREAKGLASS_SESSION_CLOSED, DIRECTORY_PII_ERASED, GROUP_MAPPING_APPROVED,
+    GROUP_MAPPING_REVOKED, GROUP_MEMBERSHIP_GRANTED, GROUP_MEMBERSHIP_REVOKED,
+    IDENTITY_CREATED, IDENTITY_DEACTIVATED, IDENTITY_REACTIVATED,
+    IDENTITY_UPDATED, IDP_CONFIGURED, IDP_UPDATED, PLATFORM_BOOTSTRAPPED,
+    RATE_LIMIT_EXCEEDED, ROLE_GRANTED, ROLE_REVOKED, SCIM_SYNC_FAILED,
+    SCIM_SYNC_SUCCEEDED, SCIM_TOKEN_ISSUED, SCIM_TOKEN_REVOKED,
+    SECURITY_EVENT_EMITTED, SESSION_REVOKED, TENANT_CREATED, TENANT_UPDATED,
+    WEBHOOK_DELIVERY_FAILED, WEBHOOK_DELIVERY_SUCCEEDED,
+    WEBHOOK_SUBSCRIPTION_CREATED, WEBHOOK_SUBSCRIPTION_REVOKED,
     PlatformLedger,
 )
 from .oidc import OIDCClient, pkce_pair
@@ -60,6 +77,12 @@ from .scim import (
     ScimGroup, ScimNotFoundError, ScimUniquenessError, display_name_of,
     group_resource, list_response, matches_filter, new_prefixed_id,
     new_scim_id, paginate, parse_filter, primary_email, user_resource,
+)
+from .webhooks import (
+    BACKOFF_SECONDS, EVENT_TEST, MAX_ATTEMPTS, SIGNING_ED25519,
+    SIGNING_HMAC_SHA256, SIGNING_MODES, SEC_AUDIT_VERIFICATION_FAILURE,
+    SEC_AUTH_FAILURE_BURST, SEC_BREAK_GLASS_USE, SEC_REVOCATION_STORM,
+    Delivery, SecurityMonitor, WebhookSubscription, build_delivery,
 )
 from .x509 import parse_certificate
 
@@ -109,6 +132,12 @@ class PlatformService:
         self.oidc = oidc_client or OIDCClient(now=now)
         self.delegated_signer = DelegatedSigner()
         self.scim = ScimDirectory()
+        # E4 state: the rate limiter, the T554 security-event
+        # detectors, and the egress delivery queue. Working state —
+        # every trip, emission, and delivery outcome is ledgered.
+        self.rate_limiter = RateLimiter()
+        self.security_monitor = SecurityMonitor()
+        self._deliveries: dict[str, Delivery] = {}
         deployment_path = self.root / "deployment.axmr"
         if deployment_path.exists():
             self.deployment_ledger = PlatformLedger.open(str(deployment_path), scope="deployment")
@@ -208,6 +237,96 @@ class PlatformService:
             )
             raise AuthorizationDenied(decision.reason)
         return session, identity
+
+    # -- E4 plumbing: rate limits (T530) + security events (T554) -------------
+
+    def _rate_guard(self, tenant_id: str, endpoint_class: str) -> None:
+        """Per-tenant rate limit for one endpoint class (§6/§9). A
+        trip is recorded in the tenant's ledger before the 429 is
+        raised — exhaustion is a recorded stop, never a surprise.
+        The platform tenant's trips land in the deployment ledger."""
+        assert endpoint_class in ENDPOINT_CLASSES, endpoint_class
+        policy = (self.directory.tenant(tenant_id).policy
+                  if tenant_id in self.directory.tenants else None)
+        limit = policy.rate_limit_per_minute if policy else 600
+        try:
+            self.rate_limiter.check(tenant_id, endpoint_class,
+                                    limit_per_minute=limit, now=self._now())
+        except RateLimited as exc:
+            if tenant_id in self.directory.tenants:
+                self._auth_ledger(tenant_id).record(
+                    RATE_LIMIT_EXCEEDED, actor_id="system",
+                    target=f"endpoint:{endpoint_class}", outcome="limited",
+                    endpoint_class=endpoint_class, limit_per_minute=limit,
+                    retry_after_seconds=int(exc.retry_after_seconds) + 1,
+                    at=self._now())
+            raise
+
+    def _egress(self, tenant_id: str, event_type: str, data: dict) -> list[str]:
+        """Queue signed deliveries for every subscription of the
+        tenant matching this event type. Delivery itself (and its
+        ledger records) happens in deliver_webhooks — egress is
+        queued, never fired inline into a transport from inside an
+        unrelated operation."""
+        created: list[str] = []
+        for sub in self.directory.webhook_subscriptions.values():
+            if sub.tenant_id != tenant_id or not sub.matches(event_type):
+                continue
+            hmac_secret = ed_seed = None
+            if sub.signing == SIGNING_HMAC_SHA256:
+                hmac_secret = self.secrets.get(sub.secret_ref).encode("utf-8")
+            else:
+                ed_seed = bytes.fromhex(self.secrets.get(sub.signing_key_ref))
+            delivery = build_delivery(
+                sub, event_type=event_type, data=data, now=self._now(),
+                hmac_secret=hmac_secret, ed25519_seed=ed_seed)
+            self._deliveries[delivery.delivery_id] = delivery
+            created.append(delivery.delivery_id)
+        return created
+
+    def _emit_security_event(self, tenant_id: str, event_type: str,
+                             data: dict) -> None:
+        """A T554 security event: the emission is itself a platform
+        audit record (in the tenant's ledger; the deployment ledger
+        for platform-plane context), then the event egresses signed
+        over the webhook channel."""
+        self._auth_ledger(tenant_id).record(
+            SECURITY_EVENT_EMITTED, actor_id="system",
+            target=f"security:{event_type}", outcome="emitted",
+            event_class=event_type, at=self._now())
+        self._egress(tenant_id, event_type, data)
+
+    def _note_auth_failure(self, tenant_id: str) -> None:
+        """Feed the T554 burst detector after an authentication
+        failure has been recorded for this tenant."""
+        if tenant_id not in self.directory.tenants:
+            return
+        policy = self.directory.tenant(tenant_id).policy
+        if self.security_monitor.observe_auth_failure(
+                tenant_id, now=self._now(),
+                threshold=policy.auth_failure_burst_threshold,
+                window=policy.security_window_seconds):
+            self._emit_security_event(tenant_id, SEC_AUTH_FAILURE_BURST, {
+                "tenant_id": tenant_id,
+                "threshold": policy.auth_failure_burst_threshold,
+                "window_seconds": int(policy.security_window_seconds),
+            })
+
+    def _note_revocations(self, tenant_id: str, count: int) -> None:
+        """Feed the T554 revocation-storm detector after revocations
+        have been recorded for this tenant."""
+        if count <= 0 or tenant_id not in self.directory.tenants:
+            return
+        policy = self.directory.tenant(tenant_id).policy
+        if self.security_monitor.observe_revocations(
+                tenant_id, now=self._now(), count=count,
+                threshold=policy.revocation_storm_threshold,
+                window=policy.security_window_seconds):
+            self._emit_security_event(tenant_id, SEC_REVOCATION_STORM, {
+                "tenant_id": tenant_id,
+                "threshold": policy.revocation_storm_threshold,
+                "window_seconds": int(policy.security_window_seconds),
+            })
 
     # -- bootstrap / tenants -----------------------------------------------------
 
@@ -415,6 +534,7 @@ class PlatformService:
 
     def begin_login(self, tenant_id: str, issuer: str) -> str:
         config = self.directory.idp(tenant_id, issuer)
+        self._rate_guard(tenant_id, "auth.login")
         state = _secrets.token_urlsafe(24)
         nonce = _secrets.token_urlsafe(24)
         verifier, challenge = pkce_pair()
@@ -433,6 +553,7 @@ class PlatformService:
                 or pending.get("protocol", "oidc") != "oidc"):
             raise AuthenticationError("login state unknown or expired")
         tenant_id, issuer = pending["tenant_id"], pending["issuer"]
+        self._rate_guard(tenant_id, "auth.login")
         config = self.directory.idp(tenant_id, issuer)
         ledger = self._auth_ledger(tenant_id)
 
@@ -440,6 +561,7 @@ class PlatformService:
             ledger.record(AUTH_LOGIN_FAILED, actor_id="unknown",
                           target=f"tenant:{tenant_id}", outcome="failed",
                           reason=reason, issuer=issuer, at=self._now())
+            self._note_auth_failure(tenant_id)
             return AuthenticationError("authentication failed")
 
         try:
@@ -514,6 +636,7 @@ class PlatformService:
 
     def begin_saml_login(self, tenant_id: str, idp_entity_id: str) -> str:
         config = self.directory.saml_idp(tenant_id, idp_entity_id)
+        self._rate_guard(tenant_id, "auth.saml")
         return self._saml_redirect(config, purpose="login")
 
     def begin_saml_step_up(self, session_token: str) -> str:
@@ -571,6 +694,7 @@ class PlatformService:
         """The tenant's ACS, as a service method. SP-initiated when a
         RelayState is carried; IdP-initiated (unsolicited) when not —
         and only where the tenant's configuration allows it."""
+        self._rate_guard(tenant_id, "auth.saml")
         ledger = self._auth_ledger(tenant_id)
 
         def fail(reason: str) -> AuthenticationError:
@@ -578,6 +702,7 @@ class PlatformService:
                           target=f"tenant:{tenant_id}", outcome="failed",
                           reason=f"saml: {reason}", issuer=idp_entity_id,
                           protocol="saml", at=self._now())
+            self._note_auth_failure(tenant_id)
             return AuthenticationError("authentication failed")
 
         try:
@@ -627,6 +752,7 @@ class PlatformService:
                           target=f"tenant:{tenant_id}", outcome="failed",
                           reason=f"saml step-up: {reason}", issuer=idp_entity_id,
                           protocol="saml", at=self._now())
+            self._note_auth_failure(tenant_id)
             return AuthenticationError("step-up failed")
 
         try:
@@ -722,9 +848,10 @@ class PlatformService:
                           subject_actor_id=identity.actor_id,
                           sessions_revoked=n, reason="deactivation", via=via,
                           at=self._now())
-        self.registry(tenant_id).close_for_identity(
+        closed = self.registry(tenant_id).close_for_identity(
             identity_id=identity.identity_id, recorded_by_actor_id=actor_id,
             reason="deactivation")
+        self._note_revocations(tenant_id, closed)
 
     def _reactivate_identity_core(self, identity: Identity, *, actor_id: str,
                                   via: str) -> None:
@@ -853,6 +980,7 @@ class PlatformService:
             self._require(session_token, authz.TENANT_KEY_MANAGE, tenant_id=identity.tenant_id)
         registry.revoke(fp=key_fingerprint, recorded_by_actor_id=identity.actor_id,
                         reason=reason)
+        self._note_revocations(identity.tenant_id, 1)
 
     # -- API keys -----------------------------------------------------------------------------
 
@@ -890,6 +1018,7 @@ class PlatformService:
         self._tenant_ledger(tenant_id).record(
             APIKEY_REVOKED, actor_id=admin.actor_id, target=f"apikey:{key_id}",
             key_id=key_id, at=self._now())
+        self._note_revocations(tenant_id, 1)
 
     # -- provisioning & lifecycle (E3: T518–T524) --------------------------------
     #
@@ -930,6 +1059,7 @@ class PlatformService:
             SCIM_TOKEN_REVOKED, actor_id=admin.actor_id,
             target=f"scim-token:{credential_id}",
             credential_id=credential_id, at=self._now())
+        self._note_revocations(tenant_id, 1)
 
     # -- SCIM plumbing -----------------------------------------------------------
 
@@ -953,6 +1083,7 @@ class PlatformService:
             self._record_scim_failure(tenant_id, actor_id=actor, op=op,
                                       target=target, reason="unknown tenant")
             raise ScimNotFoundError(f"unknown tenant: {tenant_id}")
+        self._rate_guard(tenant_id, "scim")
         found = self.scim.find_credential(credential_id)
         if found is None or not _secrets.compare_digest(
                 found[1].secret_hash, hash_api_secret(secret)):
@@ -1762,9 +1893,11 @@ class PlatformService:
         if identity.active:
             raise ConfigurationError(
                 "key sweep applies to deprovisioned identities")
-        return self.registry(identity.tenant_id).close_for_identity(
+        closed = self.registry(identity.tenant_id).close_for_identity(
             identity_id=identity_id, recorded_by_actor_id=admin.actor_id,
             reason="deprovision-sweep")
+        self._note_revocations(identity.tenant_id, closed)
+        return closed
 
     def erase_directory_pii(self, session_token: str, *,
                             identity_id: str) -> bool:
@@ -1807,6 +1940,7 @@ class PlatformService:
         unrevoked key bound to the session identity, with the role,
         tenant binding, MFA, and step-up rules of §§2/5/13.5. Every
         refusal is recorded before it is raised."""
+        self._rate_guard(tenant_id, "append.session")
         try:
             session, identity = self._resolve_session(session_token)
         except AuthenticationError as exc:
@@ -1854,19 +1988,23 @@ class PlatformService:
         """Service-account appends (CLM-005-18): the key authenticates;
         scope, expiry, revocation, and the principal's state decide.
         Actions are attributed to the principal in the record."""
+        self._rate_guard(tenant_id, "append.api")
         ledger = self._tenant_ledger(tenant_id)
         record = self.directory.find_api_key(key_id, secret)
         if record is None or record.tenant_id != tenant_id:
             ledger.record(AUTH_APIKEY_FAILED, actor_id="unknown", target=f"apikey:{key_id}",
                           outcome="failed", reason="unknown key or bad secret", at=self._now())
+            self._note_auth_failure(tenant_id)
             raise GateDenied("API key authentication failed")
         if record.revoked:
             ledger.record(AUTH_APIKEY_FAILED, actor_id="unknown", target=f"apikey:{key_id}",
                           outcome="failed", reason="key revoked", at=self._now())
+            self._note_auth_failure(tenant_id)
             raise GateDenied("API key is revoked")
         if record.expires_at <= self._now():
             ledger.record(AUTH_APIKEY_FAILED, actor_id="unknown", target=f"apikey:{key_id}",
                           outcome="failed", reason="key expired", at=self._now())
+            self._note_auth_failure(tenant_id)
             raise GateDenied("API key is expired")
         principal = self.directory.identity(record.principal_identity_id)
         if not principal.active:
@@ -1880,3 +2018,710 @@ class PlatformService:
             identity=principal, role_basis=record.role_class,
             key_fingerprint=None, custody="api_key",
             session_id=None, api_key_id=key_id)
+
+    # -- break-glass (E4: T529) ----------------------------------------------------
+    #
+    # The mechanism of §5, per breakglass.py's rules. Declaration is a
+    # tenant-admin act (tenant.policy_manage); invocation mints a
+    # PENDING session; a second authorizer — never the invoker —
+    # activates it; actions run only inside the declared scopes and
+    # the time box; every step is a marked event in BOTH the tenant's
+    # ledger and the deployment ledger (the platform security log).
+
+    #: The scopes a declaration may name: tenant-admin actions for
+    #: which a break-glass operation exists. Declaring a scope the
+    #: mechanism cannot exercise is refused at declaration — the
+    #: declaration never promises what the mechanism cannot do.
+    BREAKGLASS_SCOPES = frozenset({
+        authz.TENANT_AUDIT_EXPORT, authz.TENANT_MEMBER_MANAGE,
+        authz.TENANT_KEY_MANAGE,
+    })
+
+    def _bg_record(self, tenant_id: str, event_type: str, *, actor_id: str,
+                   bg: Optional[BreakGlassSession] = None,
+                   outcome: str = "ok", **fields) -> None:
+        """A break-glass event is recorded in the tenant's own ledger
+        AND the deployment security log, marked as break-glass."""
+        marked = {"break_glass": True, "tenant_id": tenant_id, **fields}
+        if bg is not None:
+            marked["bg_session_id"] = bg.bg_session_id
+        # A caller may name the acted-on target (the break-glass
+        # action event does); it is the record's target, not a field.
+        target = marked.pop("target", None) or (
+            f"breakglass:{bg.bg_session_id}" if bg is not None
+            else f"tenant:{tenant_id}")
+        self._tenant_ledger(tenant_id).record(
+            event_type, actor_id=actor_id, target=target, outcome=outcome,
+            at=self._now(), **marked)
+        self.deployment_ledger.record(
+            event_type, actor_id=actor_id, target=target, outcome=outcome,
+            at=self._now(), **marked)
+
+    def declare_break_glass_policy(self, session_token: str, *, tenant_id: str,
+                                   invoker_roles: list, second_authorizer_plane: str,
+                                   max_duration_seconds: float,
+                                   scopes: list) -> BreakGlassPolicy:
+        """Declare (or re-declare) a tenant's break-glass policy.
+        Until this act exists, break-glass cannot be invoked for the
+        tenant — by construction (the wireframe's undeclared state)."""
+        _, admin = self._require(session_token, authz.TENANT_POLICY_MANAGE,
+                                 tenant_id=tenant_id)
+        if second_authorizer_plane not in AUTHORIZER_PLANES:
+            raise ConfigurationError(
+                f"second authorizer must be one of {AUTHORIZER_PLANES}")
+        if not (0 < max_duration_seconds <= BREAKGLASS_MAX_DURATION_SECONDS):
+            raise ConfigurationError(
+                f"break-glass time box must be within (0, {BREAKGLASS_MAX_DURATION_SECONDS}] "
+                "seconds — the 4h ceiling is not configurable up")
+        bad_scopes = set(scopes) - self.BREAKGLASS_SCOPES
+        if bad_scopes or not scopes:
+            raise ConfigurationError(
+                f"break-glass scopes must be a non-empty subset of "
+                f"{sorted(self.BREAKGLASS_SCOPES)}; refused: {sorted(bad_scopes)}")
+        bad_roles = set(invoker_roles) - authz.ALL_GRANTABLE_ROLES
+        if bad_roles or not invoker_roles:
+            raise ConfigurationError(
+                f"invoker roles must be grantable roles; refused: {sorted(bad_roles)}")
+        policy = BreakGlassPolicy(
+            tenant_id=tenant_id, invoker_roles=tuple(invoker_roles),
+            second_authorizer_plane=second_authorizer_plane,
+            max_duration_seconds=float(max_duration_seconds),
+            scopes=tuple(scopes), declared_by_actor_id=admin.actor_id,
+            declared_at=self._now())
+        self.directory.break_glass_policies[tenant_id] = policy
+        self._tenant_ledger(tenant_id).record(
+            BREAKGLASS_POLICY_DECLARED, actor_id=admin.actor_id,
+            target=f"tenant:{tenant_id}", tenant_id=tenant_id,
+            invoker_roles=list(policy.invoker_roles),
+            second_authorizer_plane=second_authorizer_plane,
+            max_duration_seconds=int(max_duration_seconds),
+            scopes=list(policy.scopes), at=self._now())
+        return policy
+
+    def revoke_break_glass_policy(self, session_token: str, *,
+                                  tenant_id: str) -> None:
+        """Withdraw a tenant's declaration. Pending sessions are
+        denied and active sessions closed on the spot — revocation
+        never leaves a live session behind."""
+        _, admin = self._require(session_token, authz.TENANT_POLICY_MANAGE,
+                                 tenant_id=tenant_id)
+        policy = self.directory.break_glass_policies.get(tenant_id)
+        if policy is None or not policy.active:
+            raise ConfigurationError(f"no active break-glass policy for {tenant_id}")
+        policy.active = False
+        self._tenant_ledger(tenant_id).record(
+            BREAKGLASS_POLICY_REVOKED, actor_id=admin.actor_id,
+            target=f"tenant:{tenant_id}", tenant_id=tenant_id, at=self._now())
+        for bg in list(self.directory.break_glass_sessions.values()):
+            if bg.tenant_id != tenant_id:
+                continue
+            self._touch_bg_session(bg)
+            if bg.state == STATE_PENDING:
+                bg.state = STATE_DENIED
+                self._bg_record(tenant_id, BREAKGLASS_AUTHORIZATION_DENIED,
+                                actor_id=admin.actor_id, bg=bg, outcome="denied",
+                                reason="policy revoked")
+            elif bg.state == STATE_ACTIVE:
+                self._close_bg_session(bg, state=STATE_CLOSED,
+                                       reason="policy revoked",
+                                       actor_id=admin.actor_id)
+
+    def invoke_break_glass(self, session_token: str, *, tenant_id: str,
+                           reason: str, duration_seconds: float) -> BreakGlassSession:
+        """Mint a PENDING break-glass session. Refusals — no policy,
+        wrong invoker role, oversized box — are recorded before the
+        raise, in the tenant's ledger and the deployment log."""
+        self._rate_guard(tenant_id, "breakglass")
+        _, invoker = self._resolve_session(session_token)
+
+        def refuse(message: str) -> GateDenied:
+            fields = {"reason": message, "break_glass": True, "tenant_id": tenant_id}
+            ledger = (self._tenant_ledger(tenant_id)
+                      if tenant_id in self.directory.tenants
+                      else self.deployment_ledger)
+            ledger.record(BREAKGLASS_INVOCATION_REFUSED, actor_id=invoker.actor_id,
+                          target=f"tenant:{tenant_id}", outcome="denied",
+                          at=self._now(), **fields)
+            if tenant_id in self.directory.tenants:
+                self.deployment_ledger.record(
+                    BREAKGLASS_INVOCATION_REFUSED, actor_id=invoker.actor_id,
+                    target=f"tenant:{tenant_id}", outcome="denied",
+                    at=self._now(), **fields)
+            return GateDenied(message)
+
+        policy = self.directory.break_glass_policies.get(tenant_id)
+        if policy is None or not policy.active:
+            raise refuse(
+                f"break-glass cannot be invoked for tenant {tenant_id}: "
+                "no policy declared")
+        held = self.all_roles_of(invoker)
+        if not (held & set(policy.invoker_roles)):
+            raise refuse(
+                f"invoker holds none of the declared invoker roles "
+                f"{sorted(policy.invoker_roles)}")
+        if not (0 < duration_seconds <= policy.max_duration_seconds):
+            raise refuse(
+                f"requested time box {duration_seconds}s is outside the "
+                f"declared maximum {policy.max_duration_seconds}s")
+        bg = BreakGlassSession(
+            bg_session_id="bg_" + _secrets.token_hex(8), tenant_id=tenant_id,
+            invoker_identity_id=invoker.identity_id,
+            invoker_actor_id=invoker.actor_id, reason=reason,
+            requested_duration_seconds=float(duration_seconds),
+            invoked_at=self._now())
+        self.directory.break_glass_sessions[bg.bg_session_id] = bg
+        self._bg_record(tenant_id, BREAKGLASS_INVOKED, actor_id=invoker.actor_id,
+                        bg=bg, reason=reason,
+                        requested_duration_seconds=int(duration_seconds))
+        return bg
+
+    def _bg_authorizer_check(self, session_token: str,
+                             bg: BreakGlassSession) -> Identity:
+        """Eligibility for authorizing/denying/closing: the caller
+        holds the DECLARED authorizer plane's role and is not the
+        invoker. Failures are recorded before the raise."""
+        _, authorizer = self._resolve_session(session_token)
+        policy = self.directory.break_glass_policies.get(bg.tenant_id)
+
+        def deny(message: str) -> GateDenied:
+            self._bg_record(bg.tenant_id, BREAKGLASS_AUTHORIZATION_DENIED,
+                            actor_id=authorizer.actor_id, bg=bg,
+                            outcome="denied", reason=message)
+            return GateDenied(message)
+
+        if policy is None or not policy.active:
+            raise deny("the tenant's break-glass policy is no longer active")
+        if authorizer.identity_id == bg.invoker_identity_id:
+            raise deny("the invoker cannot authorize their own break-glass "
+                       "session — a second authorizer is required")
+        if policy.second_authorizer_plane == AUTHORIZER_PLATFORM:
+            eligible = authz.PLATFORM_ADMIN in self.roles_of(
+                authorizer.identity_id, None)
+        else:
+            eligible = authz.TENANT_ADMIN in self.roles_of(
+                authorizer.identity_id, bg.tenant_id)
+        if not eligible:
+            raise deny(
+                f"second authorizer must hold the declared plane's role "
+                f"({policy.second_authorizer_plane})")
+        return authorizer
+
+    def authorize_break_glass(self, session_token: str, *,
+                              bg_session_id: str) -> BreakGlassSession:
+        """The second authorization: activates the session and starts
+        its time box. This act is the 'use' T554 egresses."""
+        bg = self.directory.break_glass_sessions.get(bg_session_id)
+        if bg is None:
+            raise ConfigurationError(f"unknown break-glass session: {bg_session_id}")
+        authorizer = self._bg_authorizer_check(session_token, bg)
+        if bg.state != STATE_PENDING:
+            self._bg_record(bg.tenant_id, BREAKGLASS_AUTHORIZATION_DENIED,
+                            actor_id=authorizer.actor_id, bg=bg,
+                            outcome="denied",
+                            reason=f"session is {bg.state}, not pending")
+            raise GateDenied(f"break-glass session is {bg.state}, not pending")
+        policy = self.directory.break_glass_policies[bg.tenant_id]
+        now = self._now()
+        bg.state = STATE_ACTIVE
+        bg.authorized_by_actor_id = authorizer.actor_id
+        bg.authorized_by_identity_id = authorizer.identity_id
+        bg.authorized_at = now
+        bg.expires_at = now + min(bg.requested_duration_seconds,
+                                  policy.max_duration_seconds)
+        self._bg_record(bg.tenant_id, BREAKGLASS_AUTHORIZED,
+                        actor_id=authorizer.actor_id, bg=bg,
+                        invoker_actor_id=bg.invoker_actor_id,
+                        expires_at=int(bg.expires_at))
+        self._emit_security_event(bg.tenant_id, SEC_BREAK_GLASS_USE, {
+            "tenant_id": bg.tenant_id, "bg_session_id": bg.bg_session_id,
+            "invoker_actor_id": bg.invoker_actor_id,
+            "authorized_by_actor_id": authorizer.actor_id,
+            "expires_at": int(bg.expires_at),
+        })
+        return bg
+
+    def deny_break_glass(self, session_token: str, *, bg_session_id: str,
+                         note: str = "") -> BreakGlassSession:
+        bg = self.directory.break_glass_sessions.get(bg_session_id)
+        if bg is None:
+            raise ConfigurationError(f"unknown break-glass session: {bg_session_id}")
+        authorizer = self._bg_authorizer_check(session_token, bg)
+        if bg.state != STATE_PENDING:
+            raise GateDenied(f"break-glass session is {bg.state}, not pending")
+        bg.state = STATE_DENIED
+        self._bg_record(bg.tenant_id, BREAKGLASS_AUTHORIZATION_DENIED,
+                        actor_id=authorizer.actor_id, bg=bg, outcome="denied",
+                        reason=note or "second authorizer refused")
+        return bg
+
+    def _touch_bg_session(self, bg: BreakGlassSession) -> None:
+        """Expiry is lazy and total: the first touch after the box
+        runs out closes the session (with its review item) before
+        anything else can use it."""
+        if (bg.state == STATE_ACTIVE and bg.expires_at is not None
+                and self._now() >= bg.expires_at):
+            self._close_bg_session(bg, state=STATE_EXPIRED,
+                                   reason="time box exhausted",
+                                   actor_id=bg.invoker_actor_id)
+
+    def _close_bg_session(self, bg: BreakGlassSession, *, state: str,
+                          reason: str, actor_id: str) -> None:
+        bg.state = state
+        bg.closed_at = self._now()
+        bg.close_reason = reason
+        self._bg_record(bg.tenant_id, BREAKGLASS_SESSION_CLOSED,
+                        actor_id=actor_id, bg=bg, close_reason=reason,
+                        actions_taken=bg.actions_taken)
+        # The post-use review item is created automatically (§5) —
+        # an appended record naming the session and its action count;
+        # its disposition is a tenant admin's recorded act.
+        bg.review_item_id = "bgr_" + _secrets.token_hex(6)
+        self._bg_record(bg.tenant_id, BREAKGLASS_REVIEW_CREATED,
+                        actor_id=actor_id, bg=bg,
+                        review_item_id=bg.review_item_id,
+                        actions_taken=bg.actions_taken)
+
+    def close_break_glass(self, session_token: str, *,
+                          bg_session_id: str) -> BreakGlassSession:
+        """End an active session early: the invoker, or an eligible
+        second authorizer. No silent extension exists anywhere in
+        this mechanism — a longer need is a new session."""
+        bg = self.directory.break_glass_sessions.get(bg_session_id)
+        if bg is None:
+            raise ConfigurationError(f"unknown break-glass session: {bg_session_id}")
+        self._touch_bg_session(bg)
+        _, caller = self._resolve_session(session_token)
+        if caller.identity_id == bg.invoker_identity_id:
+            actor_id = caller.actor_id
+        else:
+            self._bg_authorizer_check(session_token, bg)
+            actor_id = caller.actor_id
+        if bg.state != STATE_ACTIVE:
+            raise GateDenied(f"break-glass session is {bg.state}, not active")
+        self._close_bg_session(bg, state=STATE_CLOSED,
+                               reason="closed by invoker or authorizer",
+                               actor_id=actor_id)
+        return bg
+
+    def break_glass_act(self, bg_session_id: str, *, action: str, **kwargs):
+        """Exercise one declared-scope action under an active
+        break-glass session. The tenant comes from the session —
+        never from a parameter (T526 discipline) — and every act,
+        granted or refused, is a marked event in both ledgers."""
+        bg = self.directory.break_glass_sessions.get(bg_session_id)
+        if bg is None:
+            self.deployment_ledger.record(
+                BREAKGLASS_ACTION_REFUSED, actor_id="unknown",
+                target=f"breakglass:{bg_session_id}", outcome="denied",
+                break_glass=True, reason="unknown break-glass session",
+                at=self._now())
+            raise GateDenied(f"unknown break-glass session: {bg_session_id}")
+        self._rate_guard(bg.tenant_id, "breakglass")
+        self._touch_bg_session(bg)
+
+        def refuse(message: str) -> GateDenied:
+            self._bg_record(bg.tenant_id, BREAKGLASS_ACTION_REFUSED,
+                            actor_id=bg.invoker_actor_id, bg=bg,
+                            outcome="denied", action=action, reason=message)
+            return GateDenied(message)
+
+        if bg.state != STATE_ACTIVE:
+            raise refuse(f"break-glass session is {bg.state}, not active")
+        policy = self.directory.break_glass_policies.get(bg.tenant_id)
+        if policy is None or not policy.active:
+            raise refuse("the tenant's break-glass policy is no longer active")
+        if action not in policy.scopes:
+            raise refuse(
+                f"action {action} is outside the declared break-glass "
+                f"scopes {sorted(policy.scopes)}")
+        result = None
+        if action == authz.TENANT_AUDIT_EXPORT:
+            result = self._tenant_ledger(bg.tenant_id).events()
+            target = f"tenant:{bg.tenant_id}"
+        elif action == authz.TENANT_MEMBER_MANAGE:
+            identity = self.directory.identity(kwargs["identity_id"])
+            if identity.tenant_id != bg.tenant_id:
+                raise refuse("target identity belongs to another tenant")
+            self._deactivate_identity_core(
+                identity, actor_id=bg.invoker_actor_id,
+                reason=kwargs.get("reason", "break-glass"), via="break-glass")
+            target = f"identity:{identity.identity_id}"
+        elif action == authz.TENANT_KEY_MANAGE:
+            fp = kwargs["key_fingerprint"]
+            registry = self.registry(bg.tenant_id)
+            if registry.get(fp) is None:
+                raise refuse(f"unknown key for this tenant: {fp}")
+            registry.revoke(fp=fp, recorded_by_actor_id=bg.invoker_actor_id,
+                            reason=kwargs.get("reason", "break-glass"))
+            self._note_revocations(bg.tenant_id, 1)
+            target = f"key:{fp}"
+        else:  # pragma: no cover — declaration validation keeps scopes implementable
+            raise refuse(f"no break-glass operation implements {action}")
+        bg.actions_taken += 1
+        self._bg_record(bg.tenant_id, BREAKGLASS_ACTION,
+                        actor_id=bg.invoker_actor_id, bg=bg,
+                        action=action, target=target)
+        return result
+
+    def break_glass_state(self, tenant_id: str) -> dict:
+        """The tenant's break-glass posture: current policy (or the
+        honest undeclared state) + its sessions. This is the data the
+        console's break-glass screen (E5) renders."""
+        for bg in self.directory.break_glass_sessions.values():
+            if bg.tenant_id == tenant_id:
+                self._touch_bg_session(bg)
+        policy = self.directory.break_glass_policies.get(tenant_id)
+        return {
+            "tenant_id": tenant_id,
+            "policy": policy if (policy is not None and policy.active) else None,
+            "sessions": [bg for bg in self.directory.break_glass_sessions.values()
+                         if bg.tenant_id == tenant_id],
+        }
+
+    def record_break_glass_review(self, session_token: str, *, tenant_id: str,
+                                  bg_session_id: str, disposition: str,
+                                  note: str = "") -> None:
+        """The post-use review's disposition: a tenant admin records
+        it against the automatically created review item. The item is
+        completable exactly once."""
+        _, admin = self._require(session_token, authz.TENANT_AUDIT_EXPORT,
+                                 tenant_id=tenant_id)
+        bg = self.directory.break_glass_sessions.get(bg_session_id)
+        if bg is None or bg.tenant_id != tenant_id or bg.review_item_id is None:
+            raise ConfigurationError(
+                f"no break-glass review item for session {bg_session_id}")
+        if bg.review_completed:
+            raise ConfigurationError("break-glass review already completed")
+        bg.review_completed = True
+        self._bg_record(tenant_id, BREAKGLASS_REVIEW_COMPLETED,
+                        actor_id=admin.actor_id, bg=bg,
+                        review_item_id=bg.review_item_id,
+                        disposition=disposition, note=note)
+
+    # -- webhook egress (E4: T531) ------------------------------------------------
+    #
+    # Subscription administration is a policy act: tenant admins
+    # manage their tenant's egress under tenant.policy_manage;
+    # platform-plane subscriptions (keyed to the platform tenant) are
+    # platform.config_manage. Secrets are shown exactly once (HMAC)
+    # or published as a public key (Ed25519); ledgers carry
+    # fingerprints only (T502 discipline).
+
+    def _webhook_door(self, session_token: str, tenant_id: str) -> Identity:
+        if tenant_id == PLATFORM_TENANT_ID:
+            _, admin = self._require(session_token, authz.PLATFORM_CONFIG_MANAGE,
+                                     tenant_id=None)
+            return admin
+        _, admin = self._require(session_token, authz.TENANT_POLICY_MANAGE,
+                                 tenant_id=tenant_id)
+        return admin
+
+    def _webhook_scope_ledger(self, tenant_id: str) -> PlatformLedger:
+        return (self.deployment_ledger if tenant_id == PLATFORM_TENANT_ID
+                else self._tenant_ledger(tenant_id))
+
+    def register_webhook(self, session_token: str, *, tenant_id: str, url: str,
+                         signing: str, event_classes: list) -> tuple[WebhookSubscription, Optional[str]]:
+        """Register an egress endpoint. Returns (subscription,
+        shown_once_secret) — the secret only in HMAC mode, only here."""
+        admin = self._webhook_door(session_token, tenant_id)
+        if signing not in SIGNING_MODES:
+            raise ConfigurationError(f"unknown webhook signing mode: {signing}")
+        posture, _ = tls_posture(url)
+        if posture != "serve":
+            raise ConfigurationError(
+                "webhook URL must be https — signed payloads do not egress "
+                "over plain HTTP (§9)")
+        if not event_classes:
+            raise ConfigurationError("a webhook subscription names at least one event class")
+        sub_id = "wh_" + _secrets.token_hex(6)
+        shown_once: Optional[str] = None
+        fields: dict = {}
+        if signing == SIGNING_HMAC_SHA256:
+            secret = _secrets.token_urlsafe(32)
+            ref = f"webhook-secret:{tenant_id}:{sub_id}"
+            self.secrets.put(ref, secret)
+            sub = WebhookSubscription(
+                subscription_id=sub_id, tenant_id=tenant_id, url=url,
+                signing=signing, event_classes=tuple(event_classes),
+                secret_ref=ref, secret_fingerprint=hash_api_secret(secret),
+                created_by_actor_id=admin.actor_id)
+            fields["secret_fingerprint"] = sub.secret_fingerprint
+            shown_once = secret
+        else:
+            seed = _secrets.token_bytes(32)
+            ref = f"webhook-key:{tenant_id}:{sub_id}"
+            self.secrets.put(ref, seed.hex())
+            public_hex = ed25519.publickey_from_seed(seed).hex()
+            sub = WebhookSubscription(
+                subscription_id=sub_id, tenant_id=tenant_id, url=url,
+                signing=signing, event_classes=tuple(event_classes),
+                signing_key_ref=ref, signing_public_key_hex=public_hex,
+                created_by_actor_id=admin.actor_id)
+            fields["signing_public_key"] = public_hex
+        self.directory.webhook_subscriptions[sub_id] = sub
+        self._webhook_scope_ledger(tenant_id).record(
+            WEBHOOK_SUBSCRIPTION_CREATED, actor_id=admin.actor_id,
+            target=f"webhook:{sub_id}", subscription_id=sub_id, url=url,
+            signing=signing, event_classes=list(event_classes),
+            at=self._now(), **fields)
+        return sub, shown_once
+
+    def revoke_webhook(self, session_token: str, *, tenant_id: str,
+                       subscription_id: str) -> None:
+        admin = self._webhook_door(session_token, tenant_id)
+        sub = self.directory.webhook_subscriptions.get(subscription_id)
+        if sub is None or sub.tenant_id != tenant_id:
+            raise ConfigurationError(
+                f"unknown webhook subscription for tenant: {subscription_id}")
+        sub.active = False
+        self._webhook_scope_ledger(tenant_id).record(
+            WEBHOOK_SUBSCRIPTION_REVOKED, actor_id=admin.actor_id,
+            target=f"webhook:{subscription_id}", subscription_id=subscription_id,
+            at=self._now())
+
+    def send_webhook_test(self, session_token: str, *, tenant_id: str,
+                          subscription_id: str) -> list[str]:
+        """The operational probe: queue a signed test delivery to one
+        subscription. Returns the queued delivery ids."""
+        admin = self._webhook_door(session_token, tenant_id)
+        sub = self.directory.webhook_subscriptions.get(subscription_id)
+        if sub is None or sub.tenant_id != tenant_id or not sub.active:
+            raise ConfigurationError(
+                f"unknown or inactive webhook subscription: {subscription_id}")
+        before = set(self._deliveries)
+        self._egress(tenant_id, EVENT_TEST, {
+            "probe": True, "subscription_id": subscription_id,
+            "by_actor_id": admin.actor_id,
+        })
+        return [d for d in self._deliveries if d not in before
+                and self._deliveries[d].subscription_id == subscription_id]
+
+    def pending_deliveries(self) -> list[Delivery]:
+        return [d for d in self._deliveries.values() if d.state == "pending"]
+
+    def deliver_webhooks(self, transport) -> list[Delivery]:
+        """Attempt every due delivery once. `transport(url, body,
+        headers) -> int` is injected (no sockets here — the HTTP
+        adapter supplies the real one). Every attempt's outcome is a
+        platform audit event in the subscription tenant's scope."""
+        attempted: list[Delivery] = []
+        now = self._now()
+        for delivery in list(self._deliveries.values()):
+            if delivery.state != "pending" or delivery.next_attempt_at > now:
+                continue
+            delivery.attempts += 1
+            status: Optional[int] = None
+            error = ""
+            try:
+                status = transport(self._subscription_url(delivery),
+                                   delivery.body, delivery.headers)
+            except Exception as exc:  # transport failure is data, not a crash
+                error = f"{type(exc).__name__}: {exc}"
+            ledger = self._webhook_scope_ledger(delivery.tenant_id)
+            if status is not None and 200 <= status < 300:
+                delivery.state = "delivered"
+                delivery.last_status = status
+                ledger.record(WEBHOOK_DELIVERY_SUCCEEDED,
+                              actor_id="system",
+                              target=f"webhook:{delivery.subscription_id}",
+                              outcome="ok", delivery_id=delivery.delivery_id,
+                              delivery_event_type=delivery.event_type,
+                              attempt=delivery.attempts, status=status,
+                              at=self._now())
+            else:
+                delivery.last_status = status
+                delivery.last_error = error
+                exhausted = delivery.attempts >= MAX_ATTEMPTS
+                if exhausted:
+                    delivery.state = "failed"
+                else:
+                    delivery.next_attempt_at = (
+                        self._now() + BACKOFF_SECONDS[delivery.attempts - 1])
+                ledger.record(WEBHOOK_DELIVERY_FAILED,
+                              actor_id="system",
+                              target=f"webhook:{delivery.subscription_id}",
+                              outcome="failed", delivery_id=delivery.delivery_id,
+                              delivery_event_type=delivery.event_type,
+                              attempt=delivery.attempts, status=status,
+                              error=error, exhausted=exhausted,
+                              at=self._now())
+            attempted.append(delivery)
+        return attempted
+
+    def _subscription_url(self, delivery: Delivery) -> str:
+        sub = self.directory.webhook_subscriptions.get(delivery.subscription_id)
+        return sub.url if sub is not None else ""
+
+    # -- audit reads, verification, reconciliation (E4: T526/T532) ----------------
+    #
+    # The review half of CLM-005-26 + the join of CLM-005-22. Reads
+    # are plane-checked like every other surface: a tenant's audit
+    # record is readable by that tenant's audit-export role (and its
+    # verification walkable by the platform plane) — never by another
+    # tenant, never by a study role.
+
+    def _require_audit_access(self, session_token: str, tenant_id: str) -> Identity:
+        try:
+            _, admin = self._require(session_token, authz.TENANT_AUDIT_EXPORT,
+                                     tenant_id=tenant_id)
+            return admin
+        except AuthorizationDenied:
+            _, admin = self._require(session_token, authz.PLATFORM_CONFIG_MANAGE,
+                                     tenant_id=None)
+            return admin
+
+    def read_tenant_audit(self, session_token: str, *, tenant_id: str,
+                          event_type: Optional[str] = None) -> list:
+        """The tenant's complete platform audit record — its own
+        ledger, nothing of any other tenant's (the §8 split)."""
+        self._require_audit_access(session_token, tenant_id)
+        events = self._tenant_ledger(tenant_id).events()
+        if event_type is not None:
+            events = [e for e in events if e["type"] == event_type]
+        return events
+
+    def read_deployment_audit(self, session_token: str, *,
+                              event_type: Optional[str] = None) -> list:
+        _, admin = self._require(session_token, authz.PLATFORM_CONFIG_MANAGE,
+                                 tenant_id=None)
+        events = self.deployment_ledger.events()
+        if event_type is not None:
+            events = [e for e in events if e["type"] == event_type]
+        return events
+
+    @staticmethod
+    def _verification_dict(verification) -> dict:
+        return {
+            "ok": bool(getattr(verification, "ok", False)),
+            "events": getattr(verification, "events", None),
+            "break_seq": getattr(verification, "break_seq", None),
+            "reason": getattr(verification, "reason", None),
+        }
+
+    def _verify_honestly(self, ledger: PlatformLedger) -> dict:
+        """A chain result, or — for a ledger too damaged to read — an
+        honest failure dict. Verification never raises on damage:
+        damage IS the finding."""
+        try:
+            return self._verification_dict(ledger.verify())
+        except Exception as exc:  # noqa: BLE001 — reported, not hidden
+            return {"ok": False, "events": None, "break_seq": None,
+                    "reason": f"ledger unreadable: {type(exc).__name__}: {exc}"}
+
+    def verify_tenant_audit(self, session_token: str, *,
+                            tenant_id: str) -> dict:
+        """Chain-verify a tenant's platform ledger. The result is
+        returned honestly either way (a broken chain is a finding,
+        not an exception) — and a failure is a T554 security event."""
+        self._require_audit_access(session_token, tenant_id)
+        result = self._verify_honestly(self._tenant_ledger(tenant_id))
+        if not result["ok"]:
+            data = {
+                "scope": "tenant", "tenant_id": tenant_id,
+                "break_seq": result["break_seq"], "reason": result["reason"],
+            }
+            try:
+                self._emit_security_event(
+                    tenant_id, SEC_AUDIT_VERIFICATION_FAILURE, data)
+            except Exception:  # noqa: BLE001 — the tenant ledger itself is damaged
+                # The finding still lands — in the deployment log,
+                # which is intact and is the platform security record.
+                self.deployment_ledger.record(
+                    SECURITY_EVENT_EMITTED, actor_id="system",
+                    target="security:audit_verification_failure",
+                    outcome="emitted",
+                    event_class=SEC_AUDIT_VERIFICATION_FAILURE,
+                    at=self._now())
+                self._egress(tenant_id, SEC_AUDIT_VERIFICATION_FAILURE, data)
+        return result
+
+    def verify_deployment_audit(self, session_token: str) -> dict:
+        _, admin = self._require(session_token, authz.PLATFORM_CONFIG_MANAGE,
+                                 tenant_id=None)
+        result = self._verify_honestly(self.deployment_ledger)
+        if not result["ok"]:
+            self._emit_security_event(PLATFORM_TENANT_ID,
+                                      SEC_AUDIT_VERIFICATION_FAILURE, {
+                                          "scope": "deployment",
+                                          "break_seq": result["break_seq"],
+                                          "reason": result["reason"],
+                                      })
+        return result
+
+    def reconcile_actor(self, session_token: str, *, tenant_id: str,
+                        actor_id: str, study_events: list) -> dict:
+        """The CLM-005-22 walk: join one actor's platform-plane events
+        to their study-ledger appends on the identity↔key binding.
+
+        A study append pairs only if its attribution names this actor
+        AND its signing key is (or was) enrolled to this identity —
+        historical keys pair; another identity's key NEVER pairs, and
+        an append claiming this actor under a foreign key is reported
+        as a key mismatch, not silently dropped. Appends with no
+        attribution pair on the ledger envelope actor (checkpoint
+        class). `study_events` are the study ledger's event dicts,
+        supplied by the caller — the platform↔study seam is data,
+        exactly as the export pattern carries it (E6 anchors it)."""
+        self._require_audit_access(session_token, tenant_id)
+        identity = None
+        for ident in self.directory.identities.values():
+            if ident.actor_id == actor_id and ident.tenant_id == tenant_id:
+                identity = ident
+                break
+        registry = self.registry(tenant_id)
+        bindings = []
+        own_fps: dict[str, str] = {}     # fingerprint -> owning identity_id
+        if identity is not None:
+            for rec in registry.keys_for_identity(identity.identity_id):
+                bindings.append({
+                    "key_fingerprint": rec.fingerprint, "status": rec.status,
+                    "custody": rec.custody,
+                })
+                own_fps[rec.fingerprint] = identity.identity_id
+        platform_events = []
+        for ev in self._tenant_ledger(tenant_id).events():
+            p = ev["payload"]
+            if p.get("actor_id") == actor_id or p.get("subject_actor_id") == actor_id:
+                platform_events.append(ev)
+        paired, mismatches, unpaired = [], [], []
+        for ev in study_events:
+            payload = ev.get("payload") or {}
+            attribution = payload.get("attribution")
+            if not isinstance(attribution, dict):
+                content = payload.get("content")
+                if isinstance(content, dict):
+                    attribution = content.get("attribution")
+            attribution = attribution if isinstance(attribution, dict) else {}
+            ev_actor = attribution.get("actor_id") or ev.get("actor")
+            fp = attribution.get("key_fingerprint")
+            if ev_actor != actor_id:
+                unpaired.append({"event": ev, "why": "another actor"})
+                continue
+            if fp is not None and identity is not None and fp not in own_fps:
+                holder = registry.get(fp)
+                if holder is not None:
+                    mismatches.append({
+                        "event": ev,
+                        "why": "key enrolled to a different identity",
+                        "key_fingerprint": fp,
+                    })
+                    continue
+                unpaired.append({"event": ev, "why": "key not enrolled in this tenant"})
+                continue
+            if fp is not None and identity is None:
+                unpaired.append({"event": ev, "why": "actor has no identity in this tenant"})
+                continue
+            paired.append(ev)
+        return {
+            "tenant_id": tenant_id,
+            "actor_id": actor_id,
+            "identity": ({"identity_id": identity.identity_id,
+                          "tenant_id": identity.tenant_id}
+                         if identity is not None else None),
+            "bindings": bindings,
+            "platform_events": platform_events,
+            "paired_appends": paired,
+            "key_mismatches": mismatches,
+            "unpaired_appends": unpaired,
+        }

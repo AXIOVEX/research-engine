@@ -4,8 +4,8 @@
   "project": "tekmerion",
   "phase": "after_implement",
   "outcome": "gather_evidence",
-  "summary": "Assessed 31 claim(s); found 136 failure mode(s); 10 claim(s) below the 0.70 confidence threshold.",
-  "created_at": "2026-10-12T16:15:16.390298Z",
+  "summary": "Assessed 31 claim(s); found 136 failure mode(s); 4 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T16:59:58.708650Z",
   "claims": [
     {
       "id": "CLM-005-01",
@@ -1100,7 +1100,7 @@
       "id": "CLM-005-09",
       "text": "Platform-admin, tenant-admin, and study roles are disjoint planes: no plane's authority implies another's \u2014 a platform admin cannot sign study verdicts, and a tenant admin can reach nothing outside their tenant.",
       "kind": "requirement",
-      "status": "partially_supported",
+      "status": "supported",
       "boundary": [
         "Scope: authorization model across hosted and self-hosted shapes (E1 model, E4 test battery)",
         "Excludes break-glass, which is a separate named mechanism (CLM-005-10), not a plane"
@@ -1146,6 +1146,17 @@
           "kind": "observed",
           "direction": "supports",
           "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "E4 discharges the battery this claim's evidence awaited: tests/test_e4_tenancy.py::test_cross_plane_battery runs F-005-09 in both directions \u2014 the platform admin is refused at the study gate and at tenant-admin powers (configure_idp/deactivate refused, denials ledgered), the tenant admin is refused platform powers (create_tenant/update_tenant/platform grant) and cannot sign verdicts on tenant-admin power alone; test_admin_surfaces_are_tenant_scoped runs the same battery across the administrative surface against a second tenant",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
           "description": "",
           "source_id": "",
           "independent_of": [],
@@ -1222,7 +1233,7 @@
       "id": "CLM-005-10",
       "text": "Break-glass access exists only as a named mechanism: pre-declared per tenant, dual-authorized, time-boxed, alarmed on use, and every use appended to the platform audit record; there is no standing or silent backdoor credential.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: emergency access to tenant data/administration in the hosted shape (E4); in the self-hosted shape the institution's own operators hold infrastructure access outside this mechanism, stated honestly",
         "Excludes DN-005's erasure certificate \u2014 a legal-compulsion protocol, not an access path"
@@ -1251,6 +1262,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e4_breakglass.py: the declared mechanism end-to-end \u2014 invocation with no declaration is refused and ledgered in BOTH ledgers (the wireframe's undeclared state is the default); declaration validation refuses a >4h box, undeclarable scopes (study powers can never be declared), unknown authorizer planes; the invoker cannot self-authorize; a wrong-plane authorizer is refused; a pending session confers nothing",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_e4_breakglass.py::test_f005_10_no_use_without_audit_trail + test_expiry_closes_session_and_creates_review + test_policy_revocation_closes_live_sessions: every action is a marked event (break_glass=true, bg_session_id) in the tenant ledger AND the deployment security log; expiry closes the session and auto-creates the post-use review item; policy revocation closes live sessions; there is no extension path \u2014 an expired session cannot be re-authorized",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -1262,8 +1295,8 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-10-IRREDUCIBILITY-CHALLENGE",
@@ -1332,7 +1365,7 @@
       "id": "CLM-005-11",
       "text": "Tenant isolation holds by construction: every study, identity binding, and platform record carries a tenant scope enforced at the data-access layer, and the E4 isolation battery's canonical test \u2014 tenant A's credential presented against tenant B's study at every endpoint class \u2014 returns no tenant-B data.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: hosted multi-tenant shape (E4); the self-hosted shape is single-tenant by deployment",
         "Excludes information disclosure via shared *public* artifacts (anchored bundles a tenant chose to deposit publicly)"
@@ -1361,6 +1394,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e4_tenancy.py isolation battery (F-005-11) across every surface built in E1\u2013E3: OIDC session replay into another tenant's study (refused at the session binding), cross-tenant key presentation (uniform unknown-key refusal, no bytes of the other tenant), SCIM credential presented cross-tenant (authentication failure ledgered in the ADDRESSED tenant, nothing provisioned), API-key cross-tenant reuse (auth failure in the addressed tenant's ledger), SAML assertion at the wrong tenant's ACS + SAML-born session replayed cross-tenant, audit reads cross-tenant \u2014 every attempt refused with zero of the other tenant's data returned, target state unmoved, both chains verifying afterwards",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_e4_tenancy.py::test_tenant_chains_are_independent: per-tenant ledger files are separate, verify independently, and carry neither tenant's subject actors in the other's chain",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -1368,12 +1423,12 @@
       "falsification_tests": [
         "F-005-11: any response in the isolation battery containing another tenant's study data, metadata, or existence signal beyond a uniform not-found."
       ],
-      "uncertainty": "high",
+      "uncertainty": "medium",
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-11-IRREDUCIBILITY-CHALLENGE",
@@ -1633,7 +1688,7 @@
       "id": "CLM-005-14",
       "text": "Every platform-plane administrative action \u2014 IdP configuration change, role grant or revocation, key enrollment/rotation/revocation, SCIM sync outcome, break-glass use \u2014 is recorded as an append-only, signed, hash-chained event in the platform audit ledger.",
       "kind": "requirement",
-      "status": "partially_supported",
+      "status": "supported",
       "boundary": [
         "Scope: platform audit ledger, distinct from study ledgers (E1 core, complete by E4)",
         "Excludes study-internal events, which live in study ledgers under Spec 002"
@@ -1687,6 +1742,28 @@
         },
         {
           "ref": "E2 (tests/test_e2_saml.py): SAML IdP configuration events (idp.configured/idp.updated, protocol=saml, cert fingerprints) and every SAML authentication success/failure incl. the full refusal battery are recorded in the tenant platform ledger; chains verify after the battery (test_refusal_battery_leaves_chains_verifiable)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "E4 completes the enumeration: the break-glass vocabulary (policy declared/revoked, invoked, invocation refused, authorized, authorization denied, action, action refused, session closed, review created/completed), webhook subscription created/revoked, security.event_emitted, and ratelimit.exceeded are all emittable platform-ledger events, exercised by tests/test_e4_breakglass.py, tests/test_e4_webhooks.py, and the E1 AU completeness sweep \u2014 extended a third time (the E3 pattern) to exercise the E4 vocabulary, passing with both ledgers verifying after the whole battery",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_e4_breakglass.py::test_f005_10_no_use_without_audit_trail: a full break-glass session's every state change and action has its events in BOTH the tenant ledger and the deployment ledger; an unknown session id's attempted action is refused and the refusal is on record \u2014 the E3 residue (break-glass use not yet an emittable event) is discharged",
           "kind": "observed",
           "direction": "supports",
           "source_quality": "test",
@@ -1796,7 +1873,7 @@
       "id": "CLM-005-22",
       "text": "An actor's platform-plane audit events and study-ledger appends are joinable on the identity\u2194key binding, so an auditor can walk from an administrative action to everything that identity signed, and back.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: the reconciliation path between the platform audit ledger and study ledgers (E4)",
         "Excludes actors whose binding was established before this spec in single-tenant prototype use (actor strings in Phase 1\u20135 ledgers), which join by recorded assertion, not by binding"
@@ -1825,6 +1902,17 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e4_tenancy.py::test_reconciliation_walk (F-005-22): a researcher's claim appends and an adjudicator's verdict appends join to their platform-plane events (login, key enrollment) on the identity\u2194key binding; historical keys pair; an append claiming the actor under ANOTHER identity's key is reported as a key mismatch, never paired and never dropped; a cross-tenant walk for the same actor finds no identity and pairs nothing; the walk itself is an audit-plane act (study roles are refused)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -1836,8 +1924,8 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-22-IRREDUCIBILITY-CHALLENGE",
@@ -2279,7 +2367,7 @@
       "id": "CLM-005-19",
       "text": "The session and transport baseline holds, in enumerable terms: HTTP requests are refused or redirected to TLS; session cookies carry Secure, HttpOnly, and SameSite attributes; sessions die at a configured idle lifetime and a configured absolute lifetime; per-tenant rate limits answer excess requests with 429; responses carry HSTS, a Content-Security-Policy, X-Content-Type-Options, Referrer-Policy, and frame-ancestors restrictions.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: hosted shape in full; self-hosted inherits the same defaults behind the institution's TLS termination (E4)",
         "Excludes penetration-test attestation, which is an E6 evidence item, not a design claim"
@@ -2308,6 +2396,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e4_tenancy.py::test_transport_baseline_contract: the \u00a79 baseline as asserted data \u2014 HSTS, CSP with frame-ancestors 'none', X-Content-Type-Options, Referrer-Policy present by name; the session cookie carries Secure, HttpOnly, SameSite=Lax; TLS posture serves https, redirects http to https, refuses other schemes; shipped TenantPolicy defaults equal the spec's numbers (idle 1800s, absolute 43200s)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_e4_tenancy.py::test_session_lifetime_battery + test_rate_limit_battery (F-005-19): sessions die at the idle lifetime despite a valid token and at the absolute lifetime despite continuous activity (real enforcement via the session resolver); per-tenant, per-endpoint-class rate limits answer excess with 429 + retry hint, recorded as ratelimit.exceeded in the tenant's ledger, independent across classes and tenants, recovering with the window",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -2319,8 +2429,8 @@
       "severity": "medium",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.674984,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-19-PRECISION-CHALLENGE",
@@ -2369,7 +2479,7 @@
       "id": "CLM-005-21",
       "text": "Webhook and event-egress payloads are signed (HMAC-SHA256 with the tenant's egress secret, or Ed25519), and the reference receiver rejects unsigned, badly signed, and replayed (outside the stated timestamp window) deliveries.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: platform event egress to tenant-registered endpoints (E4)",
         "Excludes inbound webhooks from IdPs, which follow the IdP's own protocol security (SAML/OIDC)"
@@ -2398,6 +2508,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e4_webhooks.py::test_hmac_delivery_roundtrip_and_receiver_rejections + test_ed25519_delivery_roundtrip (F-005-21): genuine deliveries verify end-to-end under BOTH signing modes; the reference receiver rejects by name \u2014 missing signature header, bad HMAC, bad Ed25519 signature, timestamp outside the 300s replay window, replayed delivery id (the receiver's replay register is consulted before signature verification)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_e4_webhooks.py::test_delivery_retries_backoff_and_exhaustion: transport failures retry on the (1s, 5s, 25s) backoff to MAX_ATTEMPTS=4 and exhaust honestly; every attempt is a webhook.delivery_succeeded/failed platform audit event; a delivery is signed once at creation \u2014 retries re-send the same signed body and cannot re-date it",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -2409,8 +2541,8 @@
       "severity": "medium",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-21-IRREDUCIBILITY-CHALLENGE",
@@ -2812,7 +2944,7 @@
       "id": "CLM-005-26",
       "text": "The platform audit ledger emits the SP 800-171 \u00a73.3.1/\u00a73.3.2 event classes from E1: account creation and modification, authentication successes and failures, authorization decisions on mutations including denials, administrative actions, the complete key lifecycle, session lifecycle, and API-key lifecycle \u2014 each event carrying actor identity, event type, timestamp, target, and outcome.",
       "kind": "requirement",
-      "status": "partially_supported",
+      "status": "supported",
       "boundary": [
         "Scope: platform plane (deployment + per-tenant audit ledgers); study-plane events remain Spec 002's vocabulary",
         "E1 delivers the emission; E4 completes review/retention semantics \u2014 this claim is discharged in halves and must be scored as such"
@@ -2858,6 +2990,28 @@
           "kind": "observed",
           "direction": "supports",
           "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "E4 delivers the review half this claim's boundary names: plane-checked audit read surfaces (read_tenant_audit \u2014 the tenant's own audit-export role or the platform plane; a study role is refused, CMMC 3.3.9), chain-verification surfaces that report a break honestly instead of raising (test_security_event_audit_verification_failure: a one-letter tamper in a role.granted event is detected as hash-mismatch by the platform plane's verification), and the reconciliation join of CLM-005-22 (the 3.3.5 correlation act)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Retention semantics: the audit record's retention is its construction \u2014 append-only, hash-chained Axiomere ledgers with no mutation or deletion path anywhere in the stack (the tamper battery shows alteration is detectable, and Axiomere refuses to reopen a broken chain); export formats and anchored audit export are CLM-005-15/E6, outside this claim's text. The E1 AU sweep, extended at E4, exercises the full vocabulary incl. the E4 event types",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
           "description": "",
           "source_id": "",
           "independent_of": [],
@@ -3167,7 +3321,7 @@
       "id": "CLM-005-30",
       "text": "Incident-response support is mechanized: security-significant platform events (authentication-failure bursts, break-glass use, revocation storms, audit-verification failures) are first-class signed egress events over the webhook channel, and unimplemented 800-171 requirements live in an append-only POA&M register (items, milestones, status as events) seeded with the \u00a73.13.11 FIPS gap.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "partially_supported",
       "boundary": [
         "Scope: IR family support only \u2014 the incident-response capability and its testing remain the organization's (matrix 3.6)",
         "Webhook channel is E4 (CLM-005-21); the IR event classes and the POA&M register are E6 (T553/T554) \u2014 the claim joins both and is discharged across them"
@@ -3196,6 +3350,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "E4 delivers the IR-hooks half (T554; tasks.md's E4 block carries T554 \u2014 the classes landed one phase earlier than this claim's boundary text contemplated): all four named classes are first-class signed egress events \u2014 security.authentication_failure_burst and security.revocation_storm (sliding-window detectors firing once per window, fed by real login/API-key failures and real revocations incl. deactivation key closures), security.break_glass_use (emitted at break-glass authorization), security.audit_verification_failure (emitted on a failed chain verification) \u2014 each emission itself a security.event_emitted platform audit record, egressed signed over the CLM-005-21 channel (tests/test_e4_webhooks.py)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Residue, named: the POA&M register half (T553) is E6 and does not exist yet \u2014 items/milestones/status-as-events are unbuilt; this claim joins both halves and stays partially_supported until E6, per its own boundary",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -3207,8 +3383,8 @@
       "severity": "medium",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-30-PRECISION-CHALLENGE",
@@ -3433,35 +3609,31 @@
     },
     "CLM-005-10": {
       "claim_id": "CLM-005-10",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-11": {
       "claim_id": "CLM-005-11",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-12": {
       "claim_id": "CLM-005-12",
@@ -3509,19 +3681,17 @@
     },
     "CLM-005-22": {
       "claim_id": "CLM-005-22",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-15": {
       "claim_id": "CLM-005-15",
@@ -3583,35 +3753,31 @@
     },
     "CLM-005-19": {
       "claim_id": "CLM-005-19",
-      "direct_score": 0.674984,
-      "propagated_score": 0.674984,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.409062,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-21": {
       "claim_id": "CLM-005-21",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-20": {
       "claim_id": "CLM-005-20",
@@ -3731,19 +3897,17 @@
     },
     "CLM-005-30": {
       "claim_id": "CLM-005-30",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-31": {
       "claim_id": "CLM-005-31",

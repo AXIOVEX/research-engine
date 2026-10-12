@@ -72,6 +72,34 @@ APIKEY_ISSUED = "apikey.issued"
 APIKEY_REVOKED = "apikey.revoked"
 SESSION_REVOKED = "session.revoked"
 
+# -- E4 vocabulary (T526–T533, T554): tenancy hardening ------------------
+# Break-glass (T529): the mechanism's whole lifecycle. Every event of
+# a break-glass session is *marked* — payloads carry break_glass=True
+# plus the session id — and the tenant-scope events land in BOTH the
+# tenant's ledger (the tenant's own record of what touched it) and
+# the deployment ledger (the platform security log).
+BREAKGLASS_POLICY_DECLARED = "breakglass.policy_declared"
+BREAKGLASS_POLICY_REVOKED = "breakglass.policy_revoked"
+BREAKGLASS_INVOKED = "breakglass.invoked"
+BREAKGLASS_INVOCATION_REFUSED = "breakglass.invocation_refused"
+BREAKGLASS_AUTHORIZED = "breakglass.authorized"
+BREAKGLASS_AUTHORIZATION_DENIED = "breakglass.authorization_denied"
+BREAKGLASS_ACTION = "breakglass.action"
+BREAKGLASS_ACTION_REFUSED = "breakglass.action_refused"
+BREAKGLASS_SESSION_CLOSED = "breakglass.session_closed"
+BREAKGLASS_REVIEW_CREATED = "breakglass.review_created"
+BREAKGLASS_REVIEW_COMPLETED = "breakglass.review_completed"
+# Webhook egress (T531): subscription management + delivery outcomes.
+WEBHOOK_SUBSCRIPTION_CREATED = "webhook.subscription_created"
+WEBHOOK_SUBSCRIPTION_REVOKED = "webhook.subscription_revoked"
+WEBHOOK_DELIVERY_SUCCEEDED = "webhook.delivery_succeeded"
+WEBHOOK_DELIVERY_FAILED = "webhook.delivery_failed"
+# Security-event emission (T554): a detector fired and the event was
+# egressed over the webhook channel; the emission itself is a record.
+SECURITY_EVENT_EMITTED = "security.event_emitted"
+# Rate limiting (T530): a per-tenant limit tripped; §6's recorded stop.
+RATE_LIMIT_EXCEEDED = "ratelimit.exceeded"
+
 #: The §3.3.1/§3.3.2 event classes the CMMC amendment (T550) requires
 #: the ledger to be able to evidence. The T550 sweep test asserts each
 #: class is exercised by the E1 surface.
@@ -91,6 +119,14 @@ AU_EVENT_CLASSES = {
         SCIM_SYNC_SUCCEEDED, SCIM_SYNC_FAILED, SCIM_TOKEN_ISSUED,
         SCIM_TOKEN_REVOKED, GROUP_MAPPING_APPROVED, GROUP_MAPPING_REVOKED,
         GROUP_MEMBERSHIP_GRANTED, GROUP_MEMBERSHIP_REVOKED,
+        BREAKGLASS_POLICY_DECLARED, BREAKGLASS_POLICY_REVOKED,
+        BREAKGLASS_INVOKED, BREAKGLASS_INVOCATION_REFUSED,
+        BREAKGLASS_AUTHORIZED, BREAKGLASS_AUTHORIZATION_DENIED,
+        BREAKGLASS_ACTION, BREAKGLASS_ACTION_REFUSED,
+        BREAKGLASS_SESSION_CLOSED, BREAKGLASS_REVIEW_CREATED,
+        BREAKGLASS_REVIEW_COMPLETED,
+        WEBHOOK_SUBSCRIPTION_CREATED, WEBHOOK_SUBSCRIPTION_REVOKED,
+        SECURITY_EVENT_EMITTED, RATE_LIMIT_EXCEEDED,
     },
     "key_lifecycle": {KEY_ENROLLED, KEY_ROTATED, KEY_REVOKED, KEY_CLOSED},
     "session_lifecycle": {AUTH_LOGIN_SUCCEEDED, AUTH_LOGOUT, AUTH_STEPUP, SESSION_REVOKED},
