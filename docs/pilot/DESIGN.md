@@ -272,8 +272,8 @@ tallies standing in for understanding).
 *Correction (2026-10-12): SAML (E2) and SCIM (E3) have landed and are claim-supported, so
 their availability no longer belongs in the not-claimed list above — the Spec 005 row carries
 them. Admin-console availability remains not claimed (E5 unbuilt; owner wireframe gate).
-SOC 2 certification, CMMC compliance, SLA figures, customer references, and verdict tallies
-remain not claimed, as written.*
+SOC 2 certification and CMMC compliance are not claimed, as written; neither are
+SLA figures, customer references, or verdict tallies.*
 
 ## 7. Sequencing and gates
 
