@@ -11,6 +11,10 @@ Contract rules carried from the architecture, not reinvented here:
   filter calls are ~10x cheaper than search calls, so this connector
   prefers filters, and every call reserves against a budget first —
   exhaustion is a stop, never a surprise (RT2-2 discipline).
+- CORE (Spec 012) is the WS1 full-text content channel: discovery is
+  the Work, the licence + content unit is the Output (one per
+  repository deposit), and a record asserting no licence yields no
+  content — the same rule as Crossref's, applied per deposit.
 - Sources without a verified public API (tDAR, ADS) or with
   non-commercial framing (BASE) are NOT connectors here (WS1 registry).
 """
@@ -19,6 +23,7 @@ from __future__ import annotations
 
 import json
 import os
+import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
@@ -29,7 +34,7 @@ USER_AGENT = "Tekmerion/0.1 (Axiovex Systems; https://axiovexsystems.com)"
 
 @dataclass
 class RetrievedItem:
-    source: str            # "crossref" | "openalex"
+    source: str            # "crossref" | "openalex" | "core"
     source_id: str         # DOI (crossref) or OpenAlex work id
     title: str
     authors: list[str] = field(default_factory=list)
@@ -239,6 +244,257 @@ class OpenAlexConnector:
             year=w.get("publication_year"),
             venue=(((w.get("primary_location") or {}).get("source") or {}).get("display_name")),
             abstract=abstract,
+            license_basis=license_basis,
+            hosted_ok=not _nc_flag(license_basis),
+        )
+
+
+# ------------------------------------------------------------------ core
+
+class CoreApiError(RuntimeError):
+    """A CORE failure that is NOT 'no record': auth (401/403), rate
+    limit (429), server error (5xx), or a transport failure. Raised,
+    never swallowed into a None, so the pipeline records an `error`
+    outcome — an outage must not read as a nonexistent work
+    (Spec 012, CLM-012-04)."""
+
+
+def _core_author_name(name: Any) -> str:
+    """CORE serves author names inverted ("Schuch, Felipe Barreto").
+    Stage 2 matches on surnames, so names are normalized to natural
+    order at the connector — the same person, the readable form."""
+    text = str(name or "").strip()
+    if "," in text:
+        family, given = text.split(",", 1)
+        return f"{given.strip()} {family.strip()}".strip()
+    return text
+
+
+def _core_year(value: Any, fallback: Any = None) -> Optional[int]:
+    for raw in (value, fallback):
+        if raw is None:
+            continue
+        text = str(raw).strip()
+        digits = text[:4]
+        if digits.isdigit():
+            return int(digits)
+    return None
+
+
+def _core_venue(record: dict) -> Optional[str]:
+    """Venue means the journal/container title — the pipeline's
+    stage 2 compares it against the cited venue. CORE deposits often
+    carry only a publisher ("Pergamon Press" for the Journal of
+    Psychiatric Research); a publisher is not a venue, and claiming
+    it as one would manufacture a venue disagreement against the
+    very records CORE exists to enrich (observed live, 2026-10-12).
+    No journal on the record -> no venue, and stage 2 does not
+    judge an absent field."""
+    for j in record.get("journals") or []:
+        title = j.get("title") if isinstance(j, dict) else j
+        if title:
+            return str(title)
+    return None
+
+
+def _licence_permits_content(value: str) -> bool:
+    """Does this asserted licence value actually license content use?
+
+    CORE's deposit-level licence field is messy: alongside real
+    licence URLs it carries restriction markers — 'intranet' was
+    observed live on a Schuch deposit whose abstract it would have
+    unlocked (Spec 012 smoke, 2026-10-12). A marker is not a licence.
+    Content is usable only when the value is a recognizable licence
+    instrument: a licence URL, a rights-statement URL, or a known
+    licence identifier. Anything else — empty, a restriction marker,
+    or an unrecognized string — does NOT unlock content; the basis is
+    still recorded verbatim, so the degradation stays visible."""
+    text = (value or "").strip()
+    if not text:
+        return False
+    low = text.lower()
+    if low in ("intranet", "restricted", "closed", "embargoed",
+               "unknown", "none", "n/a", "all rights reserved"):
+        return False
+    if low.startswith(("http://", "https://")):
+        return ("licen" in low or "rightsstatements" in low
+                or "legalcode" in low or "publicdomain" in low)
+    return low in {
+        "cc0", "cc0-1.0", "pddl-1.0", "odc-by-1.0",
+        "cc-by", "cc-by-3.0", "cc-by-4.0", "cc-by-sa-4.0",
+        "cc-by-nc-4.0", "cc-by-nd-4.0", "cc-by-nc-sa-4.0",
+        "cc-by-nc-nd-4.0", "public domain", "mit", "apache-2.0",
+        "bsd-3-clause", "gpl-3.0",
+    }
+
+
+class CoreConnector:
+    """CORE API v3 — the WS1 full-text content channel (Spec 012).
+
+    Shape of the source, established by live probe (2026-10-12):
+    there is no /works/doi: route (resolution by DOI is a search,
+    `q=doi:"…"`); the Work carries metadata and sometimes an abstract
+    but no licence; each Output (one per repository deposit) carries
+    the licence, its own abstract, and the full text. So the item is
+    built from the first output — in the work's listed order, at most
+    MAX_OUTPUT_FETCHES — that asserts a licence permitting content
+    use and carries content;
+    if none qualifies, the item is the work's metadata with content
+    dropped and the basis saying so (CLM-012-03).
+
+    Auth is a Bearer key; v3 withholds full text from keyless
+    callers, so the connector refuses to construct without one,
+    exactly as OpenAlexConnector does. CORE publishes no per-call
+    dollar price (free registered key, token-metered tiers), so spend
+    is accounted in budget units and calls only (CLM-012-05)."""
+
+    name = "core"
+    BASE = "https://api.core.ac.uk/v3"
+    MAX_OUTPUT_FETCHES = 3
+    NO_LICENCE_BASIS = "core-aggregated (no per-work licence asserted)"
+    FULLTEXT_PLACEHOLDER = "Not available for public API users."
+
+    def __init__(self, http: Optional[HttpJson] = None, api_key: Optional[str] = None,
+                 budget: Optional[CreditBudget] = None) -> None:
+        self.http = http or HttpJson()
+        self.api_key = api_key or os.environ.get("CORE_API_KEY")
+        if not self.api_key:
+            raise ValueError(
+                "CORE requires a free registered API key (API v3 withholds "
+                "full text from keyless callers): set CORE_API_KEY "
+                "(owner account, core.ac.uk)"
+            )
+        self.budget = budget or CreditBudget(limit=1000)
+
+    # -- transport with status translation (CLM-012-04) --
+
+    def _call(self, url: str, kind: str) -> Optional[dict]:
+        """One budgeted call. Returns the parsed body, or None when
+        CORE answered 404 (no such route/record — the caller decides
+        what absence means). The budget settles whenever CORE answered
+        (any HTTP status — the call counts against the token tier);
+        auth/rate/server failures raise CoreApiError, and a transport
+        failure (no answer, nothing settles) raises it too."""
+        cost = self.budget.reserve(kind)
+        try:
+            data = self.http.get(
+                url, headers={"Authorization": f"Bearer {self.api_key}"})
+        except urllib.error.HTTPError as exc:
+            self.budget.settle(cost)
+            if exc.code == 404:
+                return None
+            raise CoreApiError(
+                f"core: HTTP {exc.code} from api.core.ac.uk") from exc
+        except Exception as exc:
+            raise CoreApiError(f"core: transport failure: {exc}") from exc
+        self.budget.settle(cost)
+        return data
+
+    # -- interface --
+
+    def search(self, query: str, *, limit: int = 10) -> list[RetrievedItem]:
+        q = urllib.parse.quote(query)
+        data = self._call(f"{self.BASE}/search/works/?q={q}&limit={limit}", "search")
+        if not data:
+            return []
+        return [self._work_item(w) for w in data.get("results", [])]
+
+    def resolve(self, doi: str) -> Optional[RetrievedItem]:
+        raw = doi.strip()
+        if "doi.org/" in raw:
+            raw = raw.split("doi.org/", 1)[-1]
+        if raw.lower().startswith("doi:"):
+            raw = raw[4:].strip()
+        q = urllib.parse.quote(f'doi:"{raw}"')
+        data = self._call(f"{self.BASE}/search/works/?q={q}&limit=5", "get")
+        if not data:
+            return None
+        work = None
+        for w in data.get("results", []):
+            if (w.get("doi") or "").strip().lower() == raw.lower():
+                work = w
+                break
+        if work is None:
+            return None
+        return self._resolve_work(work)
+
+    # -- record construction --
+
+    def _resolve_work(self, work: dict) -> RetrievedItem:
+        item = self._work_item(work)
+        if item.abstract:
+            return item
+        for url in (work.get("outputs") or [])[: self.MAX_OUTPUT_FETCHES]:
+            try:
+                out = self._call(url, "get")
+            except CoreApiError:
+                # A found work whose deposits cannot be consulted is a
+                # degraded resolve, not a failed one: the metadata
+                # record stands. (The search step's own failure raises
+                # in _call before we ever get here.)
+                break
+            if not out:
+                continue  # a 404 deposit is skipped, never fatal
+            candidate = self._output_item(out, work)
+            if candidate is not None:
+                return candidate
+        return item
+
+    @staticmethod
+    def _content(record: dict, license_basis: str) -> Optional[str]:
+        """The record's usable content: abstract preferred, full text
+        otherwise — and only when the record's asserted licence is a
+        recognizable licence instrument (see _licence_permits_content).
+        The keyless-placeholder string is not content."""
+        if not _licence_permits_content(license_basis):
+            return None
+        abstract = (record.get("abstract") or "").strip()
+        if abstract:
+            return abstract
+        full = (record.get("fullText") or "").strip()
+        if full and full != CoreConnector.FULLTEXT_PLACEHOLDER:
+            return full
+        return None
+
+    @staticmethod
+    def _work_item(w: dict) -> RetrievedItem:
+        license_basis = (w.get("license") or "").strip()
+        return RetrievedItem(
+            source="core",
+            source_id=w.get("doi") or str(w.get("id", "")),
+            title=w.get("title") or "",
+            authors=[a for a in
+                     (_core_author_name(a.get("name")) for a in w.get("authors", [])
+                      if isinstance(a, dict)) if a],
+            year=_core_year(w.get("yearPublished")),
+            venue=_core_venue(w),
+            abstract=CoreConnector._content(w, license_basis),
+            license_basis=license_basis or CoreConnector.NO_LICENCE_BASIS,
+            hosted_ok=not _nc_flag(license_basis),
+        )
+
+    @staticmethod
+    def _output_item(out: dict, work: dict) -> Optional[RetrievedItem]:
+        """An item built from one deposit, or None when the deposit
+        does not qualify (asserts no licence, or carries no content)."""
+        license_basis = (out.get("license") or "").strip()
+        content = CoreConnector._content(out, license_basis)
+        if not license_basis or content is None:
+            return None
+        authors = [a for a in
+                   (_core_author_name(a.get("name")) for a in out.get("authors", [])
+                    if isinstance(a, dict)) if a]
+        if not authors:
+            authors = CoreConnector._work_item(work).authors
+        return RetrievedItem(
+            source="core",
+            source_id=out.get("doi") or work.get("doi") or str(out.get("id", "")),
+            title=out.get("title") or work.get("title") or "",
+            authors=authors,
+            year=_core_year(out.get("yearPublished"), out.get("publishedDate"))
+                 or _core_year(work.get("yearPublished")),
+            venue=_core_venue(out) or _core_venue(work),
+            abstract=content,
             license_basis=license_basis,
             hosted_ok=not _nc_flag(license_basis),
         )

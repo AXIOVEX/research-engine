@@ -21,11 +21,12 @@ in §4, explicitly not subprocessors yet.
 | 3 | **OSF — Open Science Framework** (Center for Open Science) | Registration anchoring (registry snapshot of a deposited project) | Same bundle content class as Zenodo, as an OSF project + registration stating the bundle's anchor values; partner content under embargo/private terms by default (DESIGN §5.4) | Demonstrated live on an Axiovex study (registration 84dk7, DOI 10.17605/OSF.IO/84DK7; Spec 010 records) |
 | 4 | **Crossref** | Scholarly metadata API (citation resolution and search) | **Queries only:** DOIs and bibliographic search terms for published literature; the polite-pool contact `research@axiovexsystems.com` in the User-Agent/mailto. Responses are publisher-supplied metadata, stored under per-work licence basis (abstracts are *not* assumed CC0) | No partner personal data is sent. No account or key is required for the access used |
 | 5 | **OpenAlex** (OurResearch) | Scholarly graph API (works/concepts, origin tracing) | **Queries only:** search terms and work/DOI identifiers for published literature | No partner personal data is sent. Access uses a free API key on an Axiovex account; the key is a credential, never data shared |
+| 6 | **CORE** (core.ac.uk) | Full-text content channel (WS1; Spec 012): citation content enrichment — records metadata-only at Crossref/OpenAlex can become content-checkable from repository deposits | **Queries + deposited-content lookups:** DOIs and bibliographic search terms for published literature; per-deposit record lookups. Returned content is stored only where the record's per-deposit licence basis permits (Spec 012 licence discipline) | Added 2026-10-12 (Spec 012, owner directive of the same date). No partner personal data is sent. Access uses a free registered API key on an Axiovex account; the key is a credential, never data shared. CORE receives **no deposits** from Tekmerion — it is a read-only content source, not an anchor |
 
-**Personal data summary.** Of the five, only the registry deposits (2, 3) can carry
+**Personal data summary.** Of the six, only the registry deposits (2, 3) can carry
 partner-authored content at all, and they carry it only under §2's discipline.
 Directory identity data (names, emails, IdP subjects) is processed by **none** of
-the five — it lives in the platform directory of the operating deployment and the
+the six — it lives in the platform directory of the operating deployment and the
 partner's own IdP.
 
 ## 2. The discipline that bounds this list
@@ -67,6 +68,11 @@ each becomes an inventory entry — with §3 notice — only when a connector sh
 - **CORE** — designed full-text content channel (WS1); **no CORE connector exists
   in the shipped codebase** (`src/tekmerion/connectors.py` ships Crossref and
   OpenAlex only). Status: **TO CONFIRM** before any CORE-connected build.
+  **Update (2026-10-12): status changed by Spec 012 — the CORE connector has
+  been built under the owner's directive of 2026-10-12 ("Add CORE, this is
+  still needed") and CORE is entered as subprocessor #6 in §1; this §4 entry
+  is retained as the dated record of its designed-only period and lapses on
+  that spec's merge.**
 - **Semantic Scholar, BASE, Internet Archive Scholar, HathiTrust, DSAL** —
   designed source-layer channels; not shipped; BASE additionally carries a
   recorded non-commercial-access condition (RED-TEAM-02 RT2-1) that excludes it

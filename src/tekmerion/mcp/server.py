@@ -35,7 +35,7 @@ from ..adapters import codecheck as codecheck_mod
 from ..adapters import statconsistency as stat_mod
 from ..adapters.core import adapter_runs
 from ..claims import Claim, EvidenceItem
-from ..connectors import CrossrefConnector, OpenAlexConnector
+from ..connectors import CoreConnector, CrossrefConnector, OpenAlexConnector
 from ..ui import state as st
 from ..ui.server import PERMISSIONS
 
@@ -113,6 +113,11 @@ def _default_connectors() -> list:
     connectors = [CrossrefConnector()]
     if os.environ.get("OPENALEX_API_KEY"):
         connectors.append(OpenAlexConnector())
+    if os.environ.get("CORE_API_KEY"):
+        # Spec 012: CORE is the content channel — appended last, so
+        # primary resolution order (Crossref, OpenAlex, CORE) holds
+        # and a keyless deployment behaves exactly as before.
+        connectors.append(CoreConnector())
     return connectors
 
 
