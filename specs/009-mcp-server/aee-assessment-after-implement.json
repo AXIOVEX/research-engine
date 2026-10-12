@@ -1,0 +1,1564 @@
+{
+  "schema_version": "1.0",
+  "methodology_version": "1.0",
+  "project": "tekmerion",
+  "phase": "after_implement",
+  "outcome": "iterate",
+  "summary": "Assessed 12 claim(s); found 29 failure mode(s); 1 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T14:14:35.896620Z",
+  "claims": [
+    {
+      "id": "CLM-009-01",
+      "text": "Every MCP tool maps onto a production service operation, driven through the same workspace orchestration the shipped UI uses (tekmerion.ui.state actions and the service modules beneath them). The tool layer introduces no record semantics of its own: it emits no ledger event type, payload shape, or state transition that the production services do not already emit.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: Spec 009 (MCP server surface). The engine's semantics are Specs 001-008 and are not modified by this spec."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/009-mcp-server/spec.md \u00a71, \u00a74 (tool-by-tool service mapping table)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/ui/state.py (the shared orchestration: action_register_claim, action_attach_citation, action_freeze, action_run, action_export, action_deposit)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_full_flow_two_instances",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-009-1: a tool whose ledger effects cannot be reproduced by the corresponding production service call, or a tool-emitted event type/payload that no service emits."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "domain": "",
+      "confidence": 0.999187,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-009-01-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-009-01",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-009-01-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-009-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-009-01 may contradict CLM-009-02",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-009-01-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-009-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-009-01 may contradict CLM-009-05",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-009-02",
+      "text": "Engine refusals propagate verbatim: when a production service refuses (RegistrationError, FreezeError, ExportError, DepositError, AdapterEvidenceError, IngestionError), the MCP error result carries the exception's text unchanged, and the refused call appends nothing to any ledger.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: Spec 009 \u00a75. Surface-originated refusals (role, transport, unknown study) are the surface's own text, as in the UI."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/009-mcp-server/spec.md \u00a75 (error shapes)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/claims.py::ClaimRegister.register (falsifier validated before any append \u2014 the refusal CLM-009-02 must surface)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_falsifier_refusal_is_verbatim_and_appends_nothing",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_sdk_shell_carries_refusals_verbatim",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-009-2: an acceptance or test transcript in which an engine refusal is softened, paraphrased, or reported as success; or a ledger event appended by a refused call."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "domain": "",
+      "confidence": 0.999959,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-009-02-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-009-02",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-009-02-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-009-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-009-02 may contradict CLM-009-03",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-009-02-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-009-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-009-02 may contradict CLM-009-04",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-009-02-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-009-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-009-02 may contradict CLM-009-07",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-009-02-NEGATION-CONFLICT-CHALLE-4",
+          "claim_id": "CLM-009-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-009-02 may contradict CLM-009-11",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-009-03",
+      "text": "A server instance carries exactly one configured actor identity and one WS6 role (TEKMERION_ACTOR / TEKMERION_ROLE at launch; the entry point refuses to start with no actor named). No tool accepts an actor parameter. Appends record the configured actor; role denials apply the shipped UI's permission matrix (tekmerion.ui.server.PERMISSIONS), imported rather than re-typed, so the surfaces cannot drift.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: Spec 009 \u00a73. Multi-actor work is multiple configured instances, as with the UI's SSO-hook identity."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/009-mcp-server/spec.md \u00a73",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/ui/server.py::PERMISSIONS (the WS6 \u00a71 matrix the tool layer imports)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_tool_roles_are_the_ui_matrix_not_a_copy",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_role_denials",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_events_carry_the_configured_actor",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-009-3: a mutation succeeding under a role the WS6 matrix denies; an event whose actor differs from the instance configuration; the server starting with TEKMERION_ACTOR unset."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "domain": "",
+      "confidence": 0.999998,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-009-03-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-009-03",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-009-03-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-009-03",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-009-03 may contradict CLM-009-05",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-009-03-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-009-03",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-009-03 may contradict CLM-009-09",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-009-04",
+      "text": "The deposit tool exposes the engine's mechanical adjudicator-approval gate (WS5 \u00a73) and never bypasses it: approval is a per-call parameter that defaults to empty, no configuration supplies it, and a deposit attempted without a named approver is refused with the engine's DepositError text and appends no anchor event.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: Spec 009 \u00a74 (deposit_bundle). Transports are configuration, as in the UI workspace; approval never is."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/009-mcp-server/spec.md \u00a73, \u00a74",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/deposit.py::deposit_bundle (the mechanical gate: no named approver -> DepositError)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_deposit_gate_refuses_without_approver",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-009-4: a deposit succeeding with approved_by empty or absent, an anchor.recorded event caused by an unapproved deposit call, or any config/env path that supplies approval implicitly."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "domain": "",
+      "confidence": 0.999187,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-009-04-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-009-04",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-009-04-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-009-04",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-009-04 may contradict CLM-009-05",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-009-04-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-009-04",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-009-04 may contradict CLM-009-09",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-009-05",
+      "text": "The core tekmerion package remains dependency-free (Python standard library only). The MCP SDK is an optional extra (tekmerion[mcp], pinned mcp>=2,<3): importing tekmerion succeeds with the SDK absent, and only the tekmerion-mcp entry point requires it, failing with a message that names the extra.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: packaging (pyproject). The Axiomere native extension remains a separate wheel, as in CI."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/009-mcp-server/spec.md \u00a72",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "pyproject.toml (dependencies = [] at spec time; the extra is the only addition this spec makes)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_sdk_import_is_confined_to_build_server",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_core_imports_without_the_sdk",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-009-5: import tekmerion failing in an environment without the mcp package; or a non-stdlib dependency appearing in the core package's dependency list."
+      ],
+      "uncertainty": "low",
+      "severity": "medium",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "domain": "",
+      "confidence": 0.999959,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-009-05-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-009-05",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-009-05-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-009-05",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-009-05 may contradict CLM-009-06",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-009-05-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-009-05",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-009-05 may contradict CLM-009-07",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-009-05-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-009-05",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-009-05 may contradict CLM-009-10",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-009-06",
+      "text": "Clean-room installability: from the three built wheels alone (Axiomere bindings, axiomere, tekmerion[mcp]), a fresh virtual environment with no repository checkout reaches a running tekmerion-mcp server by following docs/install.md exactly, with no undocumented step.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: the local wheel set + docs/install.md. Index publication (PyPI) is an owner decision outside this spec (\u00a78)."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/009-mcp-server/spec.md \u00a77 (acceptance definition)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": ".github/workflows (CI already builds the Axiomere wheel with maturin and installs all three packages from artifacts \u2014 the wheel set is a proven shape)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "docs/install.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-009-6: the \u00a77 acceptance run requiring any step, path, or environment variable not documented in docs/install.md; or an import in the clean room resolving into a repository checkout."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "domain": "",
+      "confidence": 0.987609,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-009-06-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-009-06",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-009-06-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-009-06",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-009-06 may contradict CLM-009-09",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-009-07",
+      "text": "The full study lifecycle is drivable through MCP tool calls alone \u2014 create study, register claims, check citations, adjudicate, freeze, run, read verdicts, export \u2014 ending in an audit bundle that verifies standalone from the bundle alone, with no direct service call and no repository import anywhere in the flow.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: the \u00a77 acceptance flow. Verdict values are whatever the machinery issues on the acceptance evidence (including INCONCLUSIVE or CONTRADICTED); the claim is about drivability and verifiability, not about a pre-chosen verdict."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/009-mcp-server/spec.md \u00a74, \u00a77",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_full_flow_two_instances",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-009-7: any acceptance step performed outside an MCP tool call; or the exported bundle failing standalone verification."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "domain": "",
+      "confidence": 0.998952,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-009-07-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-009-07",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-009-07-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-009-07",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-009-07 may contradict CLM-009-09",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-009-08",
+      "text": "Lane-1 checker honesty states pass through the tool layer unchanged: adapter outcomes (run_by_us / recorded_output / not_runnable_here) and Lean compile states (not_attempted / claimed_by_source / run_by_us / not_runnable_here) are returned exactly as the adapters and ingestion recorded them; no tool upgrades, elides, or renames a state into a stronger one.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: Spec 009 adapter/math tools. The states themselves are defined by Specs 003/006/007/008."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/009-mcp-server/spec.md \u00a74 (adapters, math)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/adapters/core.py::adapter_runs (the replay the tool results are checked against)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_grim_run_records_impossibility_and_attaches_evidence",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_lean_ingestion_records_state_as_it_is",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_checkcif_without_binary_or_recorded_output_is_not_runnable",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-009-8: a tool result whose outcome/compile state is stronger than the underlying adapter.run or math.lean_ingested ledger record for the same invocation."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "domain": "",
+      "confidence": 0.999998,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-009-08-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-009-08",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-009-09",
+      "text": "The agent skill (skill/SKILL.md) is sufficient operating instructions for the flow it teaches: an agent with the installed server and only the skill can complete the documented quickstart study end-to-end, following its playbooks, and its troubleshooting section resolves the refusal shapes the flow can produce (falsifier refusal, role denial, INVALID run, deposit gate).",
+      "kind": "prediction",
+      "status": "draft",
+      "boundary": [
+        "Scope: skill/SKILL.md + docs/install.md quickstart. The exercising run is the coordinator's post-acceptance skill-driven run from the main environment; until it happens this claim stays a prediction."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/009-mcp-server/spec.md \u00a71, \u00a77 (skill is a deliverable; its sufficiency is tested by a run that uses only it)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-009-9: the skill-driven run hitting a step the skill does not cover, an instruction the server contradicts, or a refusal shape absent from its troubleshooting section."
+      ],
+      "uncertainty": "medium",
+      "severity": "medium",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-009-09-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-009-09",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-009-09-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-009-09",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-009-09 may contradict CLM-009-11",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-009-09-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-009-09",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-009-09 may contradict CLM-009-12",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-009-10",
+      "text": "The tool inventory contains no delete, no update-in-place, and no history-rewriting operation (Article IV / DN-005). Withdrawal is exposed only as the dead-snapshot path with a mandatory reason and score 0.0, and there is no free-floating evidence attach/detach: evidence enters only via checked citations, adapter runs, and math proof items, and leaves a claim's basis only by an adjudicator's exclude decision.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: the \u00a74 tool inventory, exhaustively."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/009-mcp-server/spec.md \u00a74, \u00a76 (inventory + non-goals)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/store.py::StudyStore.withdraw (the only removal-shaped operation in the engine: dead snapshot, reason recorded)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_no_delete_shaped_tool_exists",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-009-10: a tool in the shipped inventory that deletes or mutates a record, attaches unverified evidence directly to a claim's basis, or removes evidence other than through adjudication."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "domain": "",
+      "confidence": 0.999187,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-009-10-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-009-10",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-009-11",
+      "text": "The quickstart's demonstration study is seeded through the same MCP tools a user calls (a scripted client session recorded in the acceptance transcript), never through a privileged seeding path: what a new user tries is the real flow, including its refusals.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: docs/install.md quickstart + the \u00a77 acceptance driver. Fixture data (citations, GRIM cases) are inputs to tool calls, not ledger writes."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/009-mcp-server/spec.md \u00a77",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "docs/install.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-009-11: any quickstart or demo artifact that writes a study ledger except through the MCP tools / production services."
+      ],
+      "uncertainty": "low",
+      "severity": "medium",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "domain": "",
+      "confidence": 0.984011,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-009-11-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-009-11",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-009-12",
+      "text": "stdio is the shipped transport, and the tool layer is transport-agnostic: tool handlers receive only their declared arguments plus the instance configuration, never transport or request context, so a streamable-HTTP front end can be added later without changing any tool.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: Spec 009 \u00a72. The HTTP front end itself is future work (\u00a78), not claimed here."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/009-mcp-server/spec.md \u00a72",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_mcp_server.py (handlers called directly and via server.call_tool, no transport)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-009-12: a tool handler importing or reading transport/request/session context from the MCP runtime."
+      ],
+      "uncertainty": "low",
+      "severity": "low",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "domain": "",
+      "confidence": 0.998952,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-009-12-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-009-12",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    }
+  ],
+  "scores": {
+    "CLM-009-01": {
+      "claim_id": "CLM-009-01",
+      "direct_score": 0.999187,
+      "propagated_score": 0.999187,
+      "band": "high",
+      "components": {
+        "evidence": 0.998523,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-009-02": {
+      "claim_id": "CLM-009-02",
+      "direct_score": 0.999959,
+      "propagated_score": 0.999959,
+      "band": "high",
+      "components": {
+        "evidence": 0.999926,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-009-03": {
+      "claim_id": "CLM-009-03",
+      "direct_score": 0.999998,
+      "propagated_score": 0.999998,
+      "band": "high",
+      "components": {
+        "evidence": 0.999996,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-009-04": {
+      "claim_id": "CLM-009-04",
+      "direct_score": 0.999187,
+      "propagated_score": 0.999187,
+      "band": "high",
+      "components": {
+        "evidence": 0.998523,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-009-05": {
+      "claim_id": "CLM-009-05",
+      "direct_score": 0.999959,
+      "propagated_score": 0.999959,
+      "band": "high",
+      "components": {
+        "evidence": 0.999926,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-009-06": {
+      "claim_id": "CLM-009-06",
+      "direct_score": 0.987609,
+      "propagated_score": 0.987609,
+      "band": "high",
+      "components": {
+        "evidence": 0.977471,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-009-07": {
+      "claim_id": "CLM-009-07",
+      "direct_score": 0.998952,
+      "propagated_score": 0.998952,
+      "band": "high",
+      "components": {
+        "evidence": 0.998094,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-009-08": {
+      "claim_id": "CLM-009-08",
+      "direct_score": 0.999998,
+      "propagated_score": 0.999998,
+      "band": "high",
+      "components": {
+        "evidence": 0.999996,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-009-09": {
+      "claim_id": "CLM-009-09",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-009-10": {
+      "claim_id": "CLM-009-10",
+      "direct_score": 0.999187,
+      "propagated_score": 0.999187,
+      "band": "high",
+      "components": {
+        "evidence": 0.998523,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-009-11": {
+      "claim_id": "CLM-009-11",
+      "direct_score": 0.984011,
+      "propagated_score": 0.984011,
+      "band": "high",
+      "components": {
+        "evidence": 0.97093,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-009-12": {
+      "claim_id": "CLM-009-12",
+      "direct_score": 0.998952,
+      "propagated_score": 0.998952,
+      "band": "high",
+      "components": {
+        "evidence": 0.998094,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    }
+  },
+  "recoveries": [
+    {
+      "failure_id": "AEE-CLM-009-01-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-009-01",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-009-01-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-009-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-009-01-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-009-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-009-02-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-009-02",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-009-02-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-009-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-009-02-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-009-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-009-02-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-009-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-009-02-NEGATION-CONFLICT-CHALLE-4",
+      "claim_id": "CLM-009-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-009-03-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-009-03",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-009-03-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-009-03",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-009-03-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-009-03",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-009-04-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-009-04",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-009-04-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-009-04",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-009-04-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-009-04",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-009-05-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-009-05",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-009-05-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-009-05",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-009-05-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-009-05",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-009-05-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-009-05",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-009-06-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-009-06",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-009-06-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-009-06",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-009-07-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-009-07",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-009-07-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-009-07",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-009-08-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-009-08",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-009-09-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-009-09",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-009-09-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-009-09",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-009-09-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-009-09",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-009-10-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-009-10",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-009-11-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-009-11",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-009-12-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-009-12",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    }
+  ],
+  "metadata": {
+    "threshold": 0.7,
+    "input": "specs/009-mcp-server/aee-claims.json"
+  }
+}

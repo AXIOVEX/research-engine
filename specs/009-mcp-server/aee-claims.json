@@ -1,1 +1,511 @@
-{"claims":[{"boundary":["Scope: Spec 009 (MCP server surface). The engine's semantics are Specs 001-008 and are not modified by this spec."],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/009-mcp-server/spec.md §1, §4 (tool-by-tool service mapping table)","source_quality":"primary"},{"direction":"supports","kind":"asserted","ref":"src/tekmerion/ui/state.py (the shared orchestration: action_register_claim, action_attach_citation, action_freeze, action_run, action_export, action_deposit)","source_quality":"artifact"}],"falsification_tests":["F-009-1: a tool whose ledger effects cannot be reproduced by the corresponding production service call, or a tool-emitted event type/payload that no service emits."],"id":"CLM-009-01","kind":"requirement","severity":"high","source_ref":"specs/009-mcp-server/spec.md","status":"draft","text":"Every MCP tool maps onto a production service operation, driven through the same workspace orchestration the shipped UI uses (tekmerion.ui.state actions and the service modules beneath them). The tool layer introduces no record semantics of its own: it emits no ledger event type, payload shape, or state transition that the production services do not already emit.","uncertainty":"low"},{"boundary":["Scope: Spec 009 §5. Surface-originated refusals (role, transport, unknown study) are the surface's own text, as in the UI."],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/009-mcp-server/spec.md §5 (error shapes)","source_quality":"primary"},{"direction":"supports","kind":"asserted","ref":"src/tekmerion/claims.py::ClaimRegister.register (falsifier validated before any append — the refusal CLM-009-02 must surface)","source_quality":"artifact"}],"falsification_tests":["F-009-2: an acceptance or test transcript in which an engine refusal is softened, paraphrased, or reported as success; or a ledger event appended by a refused call."],"id":"CLM-009-02","kind":"requirement","severity":"high","source_ref":"specs/009-mcp-server/spec.md","status":"draft","text":"Engine refusals propagate verbatim: when a production service refuses (RegistrationError, FreezeError, ExportError, DepositError, AdapterEvidenceError, IngestionError), the MCP error result carries the exception's text unchanged, and the refused call appends nothing to any ledger.","uncertainty":"low"},{"boundary":["Scope: Spec 009 §3. Multi-actor work is multiple configured instances, as with the UI's SSO-hook identity."],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/009-mcp-server/spec.md §3","source_quality":"primary"},{"direction":"supports","kind":"asserted","ref":"src/tekmerion/ui/server.py::PERMISSIONS (the WS6 §1 matrix the tool layer imports)","source_quality":"artifact"}],"falsification_tests":["F-009-3: a mutation succeeding under a role the WS6 matrix denies; an event whose actor differs from the instance configuration; the server starting with TEKMERION_ACTOR unset."],"id":"CLM-009-03","kind":"requirement","severity":"high","source_ref":"specs/009-mcp-server/spec.md","status":"draft","text":"A server instance carries exactly one configured actor identity and one WS6 role (TEKMERION_ACTOR / TEKMERION_ROLE at launch; the entry point refuses to start with no actor named). No tool accepts an actor parameter. Appends record the configured actor; role denials apply the shipped UI's permission matrix (tekmerion.ui.server.PERMISSIONS), imported rather than re-typed, so the surfaces cannot drift.","uncertainty":"low"},{"boundary":["Scope: Spec 009 §4 (deposit_bundle). Transports are configuration, as in the UI workspace; approval never is."],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/009-mcp-server/spec.md §3, §4","source_quality":"primary"},{"direction":"supports","kind":"asserted","ref":"src/tekmerion/deposit.py::deposit_bundle (the mechanical gate: no named approver -> DepositError)","source_quality":"artifact"}],"falsification_tests":["F-009-4: a deposit succeeding with approved_by empty or absent, an anchor.recorded event caused by an unapproved deposit call, or any config/env path that supplies approval implicitly."],"id":"CLM-009-04","kind":"requirement","severity":"high","source_ref":"specs/009-mcp-server/spec.md","status":"draft","text":"The deposit tool exposes the engine's mechanical adjudicator-approval gate (WS5 §3) and never bypasses it: approval is a per-call parameter that defaults to empty, no configuration supplies it, and a deposit attempted without a named approver is refused with the engine's DepositError text and appends no anchor event.","uncertainty":"low"},{"boundary":["Scope: packaging (pyproject). The Axiomere native extension remains a separate wheel, as in CI."],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/009-mcp-server/spec.md §2","source_quality":"primary"},{"direction":"supports","kind":"asserted","ref":"pyproject.toml (dependencies = [] at spec time; the extra is the only addition this spec makes)","source_quality":"artifact"}],"falsification_tests":["F-009-5: import tekmerion failing in an environment without the mcp package; or a non-stdlib dependency appearing in the core package's dependency list."],"id":"CLM-009-05","kind":"requirement","severity":"medium","source_ref":"specs/009-mcp-server/spec.md","status":"draft","text":"The core tekmerion package remains dependency-free (Python standard library only). The MCP SDK is an optional extra (tekmerion[mcp], pinned mcp>=2,<3): importing tekmerion succeeds with the SDK absent, and only the tekmerion-mcp entry point requires it, failing with a message that names the extra.","uncertainty":"low"},{"boundary":["Scope: the local wheel set + docs/install.md. Index publication (PyPI) is an owner decision outside this spec (§8)."],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/009-mcp-server/spec.md §7 (acceptance definition)","source_quality":"primary"},{"direction":"supports","kind":"asserted","ref":".github/workflows (CI already builds the Axiomere wheel with maturin and installs all three packages from artifacts — the wheel set is a proven shape)","source_quality":"artifact"}],"falsification_tests":["F-009-6: the §7 acceptance run requiring any step, path, or environment variable not documented in docs/install.md; or an import in the clean room resolving into a repository checkout."],"id":"CLM-009-06","kind":"requirement","severity":"high","source_ref":"specs/009-mcp-server/spec.md","status":"draft","text":"Clean-room installability: from the three built wheels alone (Axiomere bindings, axiomere, tekmerion[mcp]), a fresh virtual environment with no repository checkout reaches a running tekmerion-mcp server by following docs/install.md exactly, with no undocumented step.","uncertainty":"medium"},{"boundary":["Scope: the §7 acceptance flow. Verdict values are whatever the machinery issues on the acceptance evidence (including INCONCLUSIVE or CONTRADICTED); the claim is about drivability and verifiability, not about a pre-chosen verdict."],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/009-mcp-server/spec.md §4, §7","source_quality":"primary"}],"falsification_tests":["F-009-7: any acceptance step performed outside an MCP tool call; or the exported bundle failing standalone verification."],"id":"CLM-009-07","kind":"requirement","severity":"high","source_ref":"specs/009-mcp-server/spec.md","status":"draft","text":"The full study lifecycle is drivable through MCP tool calls alone — create study, register claims, check citations, adjudicate, freeze, run, read verdicts, export — ending in an audit bundle that verifies standalone from the bundle alone, with no direct service call and no repository import anywhere in the flow.","uncertainty":"medium"},{"boundary":["Scope: Spec 009 adapter/math tools. The states themselves are defined by Specs 003/006/007/008."],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/009-mcp-server/spec.md §4 (adapters, math)","source_quality":"primary"},{"direction":"supports","kind":"asserted","ref":"src/tekmerion/adapters/core.py::adapter_runs (the replay the tool results are checked against)","source_quality":"artifact"}],"falsification_tests":["F-009-8: a tool result whose outcome/compile state is stronger than the underlying adapter.run or math.lean_ingested ledger record for the same invocation."],"id":"CLM-009-08","kind":"requirement","severity":"high","source_ref":"specs/009-mcp-server/spec.md","status":"draft","text":"Lane-1 checker honesty states pass through the tool layer unchanged: adapter outcomes (run_by_us / recorded_output / not_runnable_here) and Lean compile states (not_attempted / claimed_by_source / run_by_us / not_runnable_here) are returned exactly as the adapters and ingestion recorded them; no tool upgrades, elides, or renames a state into a stronger one.","uncertainty":"low"},{"boundary":["Scope: skill/SKILL.md + docs/install.md quickstart. The exercising run is the coordinator's post-acceptance skill-driven run from the main environment; until it happens this claim stays a prediction."],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/009-mcp-server/spec.md §1, §7 (skill is a deliverable; its sufficiency is tested by a run that uses only it)","source_quality":"primary"}],"falsification_tests":["F-009-9: the skill-driven run hitting a step the skill does not cover, an instruction the server contradicts, or a refusal shape absent from its troubleshooting section."],"id":"CLM-009-09","kind":"prediction","severity":"medium","source_ref":"specs/009-mcp-server/spec.md","status":"draft","text":"The agent skill (skill/SKILL.md) is sufficient operating instructions for the flow it teaches: an agent with the installed server and only the skill can complete the documented quickstart study end-to-end, following its playbooks, and its troubleshooting section resolves the refusal shapes the flow can produce (falsifier refusal, role denial, INVALID run, deposit gate).","uncertainty":"medium"},{"boundary":["Scope: the §4 tool inventory, exhaustively."],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/009-mcp-server/spec.md §4, §6 (inventory + non-goals)","source_quality":"primary"},{"direction":"supports","kind":"asserted","ref":"src/tekmerion/store.py::StudyStore.withdraw (the only removal-shaped operation in the engine: dead snapshot, reason recorded)","source_quality":"artifact"}],"falsification_tests":["F-009-10: a tool in the shipped inventory that deletes or mutates a record, attaches unverified evidence directly to a claim's basis, or removes evidence other than through adjudication."],"id":"CLM-009-10","kind":"requirement","severity":"high","source_ref":"specs/009-mcp-server/spec.md","status":"draft","text":"The tool inventory contains no delete, no update-in-place, and no history-rewriting operation (Article IV / DN-005). Withdrawal is exposed only as the dead-snapshot path with a mandatory reason and score 0.0, and there is no free-floating evidence attach/detach: evidence enters only via checked citations, adapter runs, and math proof items, and leaves a claim's basis only by an adjudicator's exclude decision.","uncertainty":"low"},{"boundary":["Scope: docs/install.md quickstart + the §7 acceptance driver. Fixture data (citations, GRIM cases) are inputs to tool calls, not ledger writes."],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/009-mcp-server/spec.md §7","source_quality":"primary"}],"falsification_tests":["F-009-11: any quickstart or demo artifact that writes a study ledger except through the MCP tools / production services."],"id":"CLM-009-11","kind":"requirement","severity":"medium","source_ref":"specs/009-mcp-server/spec.md","status":"draft","text":"The quickstart's demonstration study is seeded through the same MCP tools a user calls (a scripted client session recorded in the acceptance transcript), never through a privileged seeding path: what a new user tries is the real flow, including its refusals.","uncertainty":"low"},{"boundary":["Scope: Spec 009 §2. The HTTP front end itself is future work (§8), not claimed here."],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/009-mcp-server/spec.md §2","source_quality":"primary"}],"falsification_tests":["F-009-12: a tool handler importing or reading transport/request/session context from the MCP runtime."],"id":"CLM-009-12","kind":"requirement","severity":"low","source_ref":"specs/009-mcp-server/spec.md","status":"draft","text":"stdio is the shipped transport, and the tool layer is transport-agnostic: tool handlers receive only their declared arguments plus the instance configuration, never transport or request context, so a streamable-HTTP front end can be added later without changing any tool.","uncertainty":"medium"}],"date":"2026-10-12","spec":"specs/009-mcp-server/spec.md","version":"0.1.0"}
+{
+  "claims": [
+    {
+      "boundary": [
+        "Scope: Spec 009 (MCP server surface). The engine's semantics are Specs 001-008 and are not modified by this spec."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "specs/009-mcp-server/spec.md \u00a71, \u00a74 (tool-by-tool service mapping table)",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/ui/state.py (the shared orchestration: action_register_claim, action_attach_citation, action_freeze, action_run, action_export, action_deposit)",
+          "source_quality": "artifact"
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_full_flow_two_instances",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        }
+      ],
+      "falsification_tests": [
+        "F-009-1: a tool whose ledger effects cannot be reproduced by the corresponding production service call, or a tool-emitted event type/payload that no service emits."
+      ],
+      "id": "CLM-009-01",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "status": "supported",
+      "text": "Every MCP tool maps onto a production service operation, driven through the same workspace orchestration the shipped UI uses (tekmerion.ui.state actions and the service modules beneath them). The tool layer introduces no record semantics of its own: it emits no ledger event type, payload shape, or state transition that the production services do not already emit.",
+      "uncertainty": "low",
+      "lifecycle_stage": "checked"
+    },
+    {
+      "boundary": [
+        "Scope: Spec 009 \u00a75. Surface-originated refusals (role, transport, unknown study) are the surface's own text, as in the UI."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "specs/009-mcp-server/spec.md \u00a75 (error shapes)",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/claims.py::ClaimRegister.register (falsifier validated before any append \u2014 the refusal CLM-009-02 must surface)",
+          "source_quality": "artifact"
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_falsifier_refusal_is_verbatim_and_appends_nothing",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_sdk_shell_carries_refusals_verbatim",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        }
+      ],
+      "falsification_tests": [
+        "F-009-2: an acceptance or test transcript in which an engine refusal is softened, paraphrased, or reported as success; or a ledger event appended by a refused call."
+      ],
+      "id": "CLM-009-02",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "status": "supported",
+      "text": "Engine refusals propagate verbatim: when a production service refuses (RegistrationError, FreezeError, ExportError, DepositError, AdapterEvidenceError, IngestionError), the MCP error result carries the exception's text unchanged, and the refused call appends nothing to any ledger.",
+      "uncertainty": "low",
+      "lifecycle_stage": "checked"
+    },
+    {
+      "boundary": [
+        "Scope: Spec 009 \u00a73. Multi-actor work is multiple configured instances, as with the UI's SSO-hook identity."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "specs/009-mcp-server/spec.md \u00a73",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/ui/server.py::PERMISSIONS (the WS6 \u00a71 matrix the tool layer imports)",
+          "source_quality": "artifact"
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_tool_roles_are_the_ui_matrix_not_a_copy",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_role_denials",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_events_carry_the_configured_actor",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        }
+      ],
+      "falsification_tests": [
+        "F-009-3: a mutation succeeding under a role the WS6 matrix denies; an event whose actor differs from the instance configuration; the server starting with TEKMERION_ACTOR unset."
+      ],
+      "id": "CLM-009-03",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "status": "supported",
+      "text": "A server instance carries exactly one configured actor identity and one WS6 role (TEKMERION_ACTOR / TEKMERION_ROLE at launch; the entry point refuses to start with no actor named). No tool accepts an actor parameter. Appends record the configured actor; role denials apply the shipped UI's permission matrix (tekmerion.ui.server.PERMISSIONS), imported rather than re-typed, so the surfaces cannot drift.",
+      "uncertainty": "low",
+      "lifecycle_stage": "checked"
+    },
+    {
+      "boundary": [
+        "Scope: Spec 009 \u00a74 (deposit_bundle). Transports are configuration, as in the UI workspace; approval never is."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "specs/009-mcp-server/spec.md \u00a73, \u00a74",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/deposit.py::deposit_bundle (the mechanical gate: no named approver -> DepositError)",
+          "source_quality": "artifact"
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_deposit_gate_refuses_without_approver",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        }
+      ],
+      "falsification_tests": [
+        "F-009-4: a deposit succeeding with approved_by empty or absent, an anchor.recorded event caused by an unapproved deposit call, or any config/env path that supplies approval implicitly."
+      ],
+      "id": "CLM-009-04",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "status": "supported",
+      "text": "The deposit tool exposes the engine's mechanical adjudicator-approval gate (WS5 \u00a73) and never bypasses it: approval is a per-call parameter that defaults to empty, no configuration supplies it, and a deposit attempted without a named approver is refused with the engine's DepositError text and appends no anchor event.",
+      "uncertainty": "low",
+      "lifecycle_stage": "checked"
+    },
+    {
+      "boundary": [
+        "Scope: packaging (pyproject). The Axiomere native extension remains a separate wheel, as in CI."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "specs/009-mcp-server/spec.md \u00a72",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "pyproject.toml (dependencies = [] at spec time; the extra is the only addition this spec makes)",
+          "source_quality": "artifact"
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_sdk_import_is_confined_to_build_server",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_core_imports_without_the_sdk",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        }
+      ],
+      "falsification_tests": [
+        "F-009-5: import tekmerion failing in an environment without the mcp package; or a non-stdlib dependency appearing in the core package's dependency list."
+      ],
+      "id": "CLM-009-05",
+      "kind": "requirement",
+      "severity": "medium",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "status": "supported",
+      "text": "The core tekmerion package remains dependency-free (Python standard library only). The MCP SDK is an optional extra (tekmerion[mcp], pinned mcp>=2,<3): importing tekmerion succeeds with the SDK absent, and only the tekmerion-mcp entry point requires it, failing with a message that names the extra.",
+      "uncertainty": "low",
+      "lifecycle_stage": "checked"
+    },
+    {
+      "boundary": [
+        "Scope: the local wheel set + docs/install.md. Index publication (PyPI) is an owner decision outside this spec (\u00a78)."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "specs/009-mcp-server/spec.md \u00a77 (acceptance definition)",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": ".github/workflows (CI already builds the Axiomere wheel with maturin and installs all three packages from artifacts \u2014 the wheel set is a proven shape)",
+          "source_quality": "artifact"
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "docs/install.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary"
+        }
+      ],
+      "falsification_tests": [
+        "F-009-6: the \u00a77 acceptance run requiring any step, path, or environment variable not documented in docs/install.md; or an import in the clean room resolving into a repository checkout."
+      ],
+      "id": "CLM-009-06",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "status": "supported",
+      "text": "Clean-room installability: from the three built wheels alone (Axiomere bindings, axiomere, tekmerion[mcp]), a fresh virtual environment with no repository checkout reaches a running tekmerion-mcp server by following docs/install.md exactly, with no undocumented step.",
+      "uncertainty": "low",
+      "lifecycle_stage": "checked"
+    },
+    {
+      "boundary": [
+        "Scope: the \u00a77 acceptance flow. Verdict values are whatever the machinery issues on the acceptance evidence (including INCONCLUSIVE or CONTRADICTED); the claim is about drivability and verifiability, not about a pre-chosen verdict."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "specs/009-mcp-server/spec.md \u00a74, \u00a77",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_full_flow_two_instances",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        }
+      ],
+      "falsification_tests": [
+        "F-009-7: any acceptance step performed outside an MCP tool call; or the exported bundle failing standalone verification."
+      ],
+      "id": "CLM-009-07",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "status": "supported",
+      "text": "The full study lifecycle is drivable through MCP tool calls alone \u2014 create study, register claims, check citations, adjudicate, freeze, run, read verdicts, export \u2014 ending in an audit bundle that verifies standalone from the bundle alone, with no direct service call and no repository import anywhere in the flow.",
+      "uncertainty": "low",
+      "lifecycle_stage": "checked"
+    },
+    {
+      "boundary": [
+        "Scope: Spec 009 adapter/math tools. The states themselves are defined by Specs 003/006/007/008."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "specs/009-mcp-server/spec.md \u00a74 (adapters, math)",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/adapters/core.py::adapter_runs (the replay the tool results are checked against)",
+          "source_quality": "artifact"
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_grim_run_records_impossibility_and_attaches_evidence",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_lean_ingestion_records_state_as_it_is",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_checkcif_without_binary_or_recorded_output_is_not_runnable",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        }
+      ],
+      "falsification_tests": [
+        "F-009-8: a tool result whose outcome/compile state is stronger than the underlying adapter.run or math.lean_ingested ledger record for the same invocation."
+      ],
+      "id": "CLM-009-08",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "status": "supported",
+      "text": "Lane-1 checker honesty states pass through the tool layer unchanged: adapter outcomes (run_by_us / recorded_output / not_runnable_here) and Lean compile states (not_attempted / claimed_by_source / run_by_us / not_runnable_here) are returned exactly as the adapters and ingestion recorded them; no tool upgrades, elides, or renames a state into a stronger one.",
+      "uncertainty": "low",
+      "lifecycle_stage": "checked"
+    },
+    {
+      "boundary": [
+        "Scope: skill/SKILL.md + docs/install.md quickstart. The exercising run is the coordinator's post-acceptance skill-driven run from the main environment; until it happens this claim stays a prediction."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "specs/009-mcp-server/spec.md \u00a71, \u00a77 (skill is a deliverable; its sufficiency is tested by a run that uses only it)",
+          "source_quality": "primary"
+        }
+      ],
+      "falsification_tests": [
+        "F-009-9: the skill-driven run hitting a step the skill does not cover, an instruction the server contradicts, or a refusal shape absent from its troubleshooting section."
+      ],
+      "id": "CLM-009-09",
+      "kind": "prediction",
+      "severity": "medium",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "status": "draft",
+      "text": "The agent skill (skill/SKILL.md) is sufficient operating instructions for the flow it teaches: an agent with the installed server and only the skill can complete the documented quickstart study end-to-end, following its playbooks, and its troubleshooting section resolves the refusal shapes the flow can produce (falsifier refusal, role denial, INVALID run, deposit gate).",
+      "uncertainty": "medium",
+      "lifecycle_stage": "created"
+    },
+    {
+      "boundary": [
+        "Scope: the \u00a74 tool inventory, exhaustively."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "specs/009-mcp-server/spec.md \u00a74, \u00a76 (inventory + non-goals)",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/store.py::StudyStore.withdraw (the only removal-shaped operation in the engine: dead snapshot, reason recorded)",
+          "source_quality": "artifact"
+        },
+        {
+          "ref": "tests/test_mcp_server.py::test_no_delete_shaped_tool_exists",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        }
+      ],
+      "falsification_tests": [
+        "F-009-10: a tool in the shipped inventory that deletes or mutates a record, attaches unverified evidence directly to a claim's basis, or removes evidence other than through adjudication."
+      ],
+      "id": "CLM-009-10",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "status": "supported",
+      "text": "The tool inventory contains no delete, no update-in-place, and no history-rewriting operation (Article IV / DN-005). Withdrawal is exposed only as the dead-snapshot path with a mandatory reason and score 0.0, and there is no free-floating evidence attach/detach: evidence enters only via checked citations, adapter runs, and math proof items, and leaves a claim's basis only by an adjudicator's exclude decision.",
+      "uncertainty": "low",
+      "lifecycle_stage": "checked"
+    },
+    {
+      "boundary": [
+        "Scope: docs/install.md quickstart + the \u00a77 acceptance driver. Fixture data (citations, GRIM cases) are inputs to tool calls, not ledger writes."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "specs/009-mcp-server/spec.md \u00a77",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "docs/install.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary"
+        }
+      ],
+      "falsification_tests": [
+        "F-009-11: any quickstart or demo artifact that writes a study ledger except through the MCP tools / production services."
+      ],
+      "id": "CLM-009-11",
+      "kind": "requirement",
+      "severity": "medium",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "status": "supported",
+      "text": "The quickstart's demonstration study is seeded through the same MCP tools a user calls (a scripted client session recorded in the acceptance transcript), never through a privileged seeding path: what a new user tries is the real flow, including its refusals.",
+      "uncertainty": "low",
+      "lifecycle_stage": "checked"
+    },
+    {
+      "boundary": [
+        "Scope: Spec 009 \u00a72. The HTTP front end itself is future work (\u00a78), not claimed here."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "specs/009-mcp-server/spec.md \u00a72",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "tests/test_mcp_server.py (handlers called directly and via server.call_tool, no transport)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        },
+        {
+          "ref": "specs/009-mcp-server/acceptance-2026-10-12.md",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary"
+        }
+      ],
+      "falsification_tests": [
+        "F-009-12: a tool handler importing or reading transport/request/session context from the MCP runtime."
+      ],
+      "id": "CLM-009-12",
+      "kind": "requirement",
+      "severity": "low",
+      "source_ref": "specs/009-mcp-server/spec.md",
+      "status": "supported",
+      "text": "stdio is the shipped transport, and the tool layer is transport-agnostic: tool handlers receive only their declared arguments plus the instance configuration, never transport or request context, so a streamable-HTTP front end can be added later without changing any tool.",
+      "uncertainty": "low",
+      "lifecycle_stage": "checked"
+    }
+  ],
+  "date": "2026-10-12",
+  "spec": "specs/009-mcp-server/spec.md",
+  "version": "0.2.0"
+}
