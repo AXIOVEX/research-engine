@@ -49,10 +49,16 @@ values — the same read-back standard as AR-1.
 - **Submission state.** A completed deposit is a **submitted** registration,
   not a draft: public/immediate by default; with an embargo end date it is
   submitted under embargo. Where the provider interposes an admin-approval
-  step (the depositing account is the project admin), the transport performs
-  the approval actions the record itself offers and reports the final state
-  from the fetched record — it never reports "submitted" for a record the
-  provider still shows as pending.
+  step, the deposit is complete only when the fetched record is final —
+  it never reports "submitted" for a record the provider still shows as
+  pending. *Correction (2026-10-12, from the live build): the approval
+  step is not performable through the token API at all — plain OSF is
+  unmoderated (review-actions refused, HTTP 409) and the depositing
+  account is "not a pending approver" for the schema response
+  (HTTP 403). Admin approval runs through OSF's own channel (the
+  approval email link). A provider-held pending record is therefore a
+  recorded, resumable non-final deposit state, and the finalize step
+  raises with the observed state named rather than acting on it.*
 - **Deposit state + idempotency.** Progress is persisted to a deposit-state
   JSON (caller-chosen path; for the demonstration, in this spec's records —
   never inside the bundle, never inside a frozen study directory). Before

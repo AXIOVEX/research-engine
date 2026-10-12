@@ -1,1 +1,322 @@
-{"claims":[{"boundary":["Scope: Spec 010 OSF deposit action (pilot DESIGN §4); the osf_metadata mapping in tekmerion.deposit is the contract and is not modified by this spec"],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/010-osf-registration/spec.md (design decision: the mapping is the contract)","source_quality":"primary"}],"falsification_tests":["F-010-1: an OSF record produced by the deposit action whose title, description, tags, component set, file set, or registration summary differs from osf_metadata(that bundle's manifest), or a deposit API parameter that lets a caller override any of them."],"id":"CLM-010-01","kind":"requirement","severity":"high","source_ref":"specs/010-osf-registration/spec.md","status":"draft","text":"Every OSF-visible field of a deposit — project title, description, category, tags, the component set, each component's file set, and the registration's summary — is computed from osf_metadata of the deposited bundle's manifest. No code path accepts a caller-supplied title, description, or component structure for the record.","uncertainty":"medium"},{"boundary":["Scope: Spec 010 OSF deposit action; the approval gate is DESIGN §4.2.1's identical application of the WS5 §3 gate in tekmerion.deposit.deposit_bundle"],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/010-osf-registration/spec.md (design decision: approval gate)","source_quality":"primary"}],"falsification_tests":["F-010-2: a refusal case (empty approver, tampered bundle, unfrozen bundle) in which any OSF object was created before the refusal, observed via a counting transport in tests."],"id":"CLM-010-02","kind":"requirement","severity":"high","source_ref":"specs/010-osf-registration/spec.md","status":"draft","text":"The deposit refuses, before creating any OSF object, when approved_by is empty, when the bundle does not verify standalone, or when the bundle's manifest carries no freeze binding (missing registration_hash or checkpoint_root).","uncertainty":"low"},{"boundary":["Scope: repeat attempts that have the deposit state or the project GUID available to the check; a from-nothing run cannot know a prior project exists (recorded in plan.md, not hidden)"],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/010-osf-registration/spec.md (design decision: deposit state + idempotency)","source_quality":"primary"}],"falsification_tests":["F-010-3: two distinct registration GUIDs binding the same study + schema after a repeat deposit attempt that had the deposit state or the project GUID available."],"id":"CLM-010-03","kind":"requirement","severity":"high","source_ref":"specs/010-osf-registration/spec.md","status":"draft","text":"Submission is idempotent: before creating a draft registration the action checks for an existing registration binding the same registration_hash under the same schema (deposit state first; the project's registration list when a project GUID is known), and a repeat attempt creates no second registration — it reports the existing registration's GUID and URL.","uncertainty":"medium"},{"boundary":["Scope: Spec 010 OSF transport + deposit action; a 429 is a stop, never a retry (the Zenodo transport's rule, adopted unchanged)"],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/010-osf-registration/spec.md (design decisions: transport shape; deposit state + idempotency)","source_quality":"primary"}],"falsification_tests":["F-010-4: a swallowed provider error, an automatically retried create that produced a duplicate OSF object, or a resumed run that re-created the project or components instead of continuing from the recorded state."],"id":"CLM-010-04","kind":"requirement","severity":"high","source_ref":"specs/010-osf-registration/spec.md","status":"draft","text":"Provider failures abort the action with the provider's actual HTTP status and response body carried in the error; an ambiguous create is never retried blind into a duplicate; partial progress is persisted to the deposit state and a later run resumes from it instead of starting over.","uncertainty":"medium"},{"boundary":["Scope: Spec 010 receipt + verify_osf_anchor; comparison is against the deposited bundle's osf_metadata anchor_values (plan.md ambiguity 5)"],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/010-osf-registration/spec.md (design decision: receipt)","source_quality":"primary"}],"falsification_tests":["F-010-5: verify_osf_anchor passing on a fetched record whose stated checkpoint root, bundle hash, or registration hash differs from the bundle's anchor values, or whose component structure diverges from the mapping."],"id":"CLM-010-05","kind":"requirement","severity":"high","source_ref":"specs/010-osf-registration/spec.md","status":"draft","text":"A completed deposit returns a receipt (mechanism, root, bundle hash, registration hash, project GUID, registration GUID, URL/DOI, approver, anchored-at, embargo state), and verify_osf_anchor independently re-fetches the registration from the OSF API and passes only if the fetched record states the mapping's anchor values and the project structure matches the component mapping.","uncertainty":"medium"},{"boundary":["Scope: the T-P4 demonstration only; the anchor.recorded ledgering of DESIGN §4.2.4 remains the flow for future live studies and is test-exercised on fixtures (plan.md ambiguity 1)"],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/010-osf-registration/spec.md (design decision: receipt) + plan.md ambiguity 1","source_quality":"primary"}],"falsification_tests":["F-010-6: any differing file hash in specs/002-mvp-implementation/evaluation/study/ across the demonstration, or a receipt written anywhere inside that directory."],"id":"CLM-010-06","kind":"requirement","severity":"high","source_ref":"specs/010-osf-registration/spec.md","status":"draft","text":"The T-P4 demonstration modifies nothing in the Phase 7 study directory: every file's bytes are identical before and after (hashes recorded), and the registration references the study externally — the receipt lives in this spec's records, not in the frozen study's ledger or bundles.","uncertainty":"low"},{"boundary":["Scope: DESIGN §4.2.3's embargo demonstration requirement; the demonstration registration itself is public/immediate (plan.md ambiguity 2)"],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/010-osf-registration/spec.md (requirement CLM-010-07) + docs/pilot/DESIGN.md §4.2.3","source_quality":"primary"}],"falsification_tests":["F-010-7: embargo support claimed in any record without a fetched-back test registration record showing embargoed = true and the embargo end date as set."],"id":"CLM-010-07","kind":"requirement","severity":"medium","source_ref":"specs/010-osf-registration/spec.md","status":"draft","text":"The embargo path is demonstrated, not asserted: a test registration created with an embargo end date is fetched back showing the embargoed state (not public, the embargo end date as set) before embargo support is claimed anywhere.","uncertainty":"high"},{"boundary":["Scope: all Spec 010 surfaces and any pilot material describing OSF anchoring (DESIGN §6 evidence pack language included)"],"evidence":[{"direction":"supports","kind":"asserted","ref":"specs/010-osf-registration/spec.md (requirement CLM-010-08, scope)","source_quality":"primary"}],"falsification_tests":["F-010-8: any presentation of an OSF registration as validating a study's verdicts or as human acceptance, or a verification path that reads anchor values from the mutable project instead of the registration record."],"id":"CLM-010-08","kind":"requirement","severity":"medium","source_ref":"specs/010-osf-registration/spec.md","status":"draft","text":"SCOPE: an OSF registration is an anchor and a discovery record, not a validation: it certifies that this bundle, stating these anchor values, was snapshotted at a point in time. It does not certify the study's verdicts, is not lane-2 acceptance of anything, and — because the OSF project remains editable after registration — anchor verification reads the values from the registration record, never from the live project.","uncertainty":"low"}],"date":"2026-10-12","spec":"specs/010-osf-registration/spec.md","version":"0.1.0"}
+{
+ "build_note": "2026-10-12 build (DN-012 pilot OSF workstream): claims moved only on shipped-test and live-provider evidence; CLM-010-05 and CLM-010-07 are partially_supported with the residue stated in their evidence \u2014 both wait on OSF admin approval through the provider's email-link channel, which the token API cannot perform (409/403 observed). Lifecycle stage checked throughout (author's own tests and live runs; DN-010 convention).",
+ "claims": [
+  {
+   "boundary": [
+    "Scope: Spec 010 OSF deposit action (pilot DESIGN \u00a74); the osf_metadata mapping in tekmerion.deposit is the contract and is not modified by this spec"
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/010-osf-registration/spec.md (design decision: the mapping is the contract)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "src/tekmerion/osf_deposit.py::deposit_bundle_osf (all record fields computed from osf_metadata(manifest); signature carries no title/description/component parameters)",
+     "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_osf_deposit.py::test_payload_is_derived_from_the_mapping (project title/description/category/tags, component set, per-component file sets, draft summary == mapping output)",
+     "source_quality": "test"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Live: OSF projects xwdr5 (embargo test) and dvrew (T-P4 demo) carry the mapping's title + anchor-statement description; registration records state the anchor values (records/embargo-test-registration.json; records/demo-deposit-observation.md)",
+     "source_quality": "primary"
+    }
+   ],
+   "falsification_tests": [
+    "F-010-1: an OSF record produced by the deposit action whose title, description, tags, component set, file set, or registration summary differs from osf_metadata(that bundle's manifest), or a deposit API parameter that lets a caller override any of them."
+   ],
+   "id": "CLM-010-01",
+   "kind": "requirement",
+   "lifecycle_stage": "checked",
+   "severity": "high",
+   "source_ref": "specs/010-osf-registration/spec.md",
+   "stage_basis": "Built and exercised: unit derivation test plus two live deposits whose OSF records carry the mapping's values. Checking, not settlement (DN-010): the author's own runs.",
+   "status": "supported",
+   "text": "Every OSF-visible field of a deposit \u2014 project title, description, category, tags, the component set, each component's file set, and the registration's summary \u2014 is computed from osf_metadata of the deposited bundle's manifest. No code path accepts a caller-supplied title, description, or component structure for the record.",
+   "uncertainty": "low"
+  },
+  {
+   "boundary": [
+    "Scope: Spec 010 OSF deposit action; the approval gate is DESIGN \u00a74.2.1's identical application of the WS5 \u00a73 gate in tekmerion.deposit.deposit_bundle"
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/010-osf-registration/spec.md (design decision: approval gate)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "src/tekmerion/osf_deposit.py::deposit_bundle_osf gate order (approver -> verify_bundle -> freeze binding -> subjects), all before state or any transport call",
+     "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_osf_deposit.py::test_gate_refusals_create_nothing (counting fake transport: zero calls, zero objects, for empty approver, tampered bundle, unfrozen bundle)",
+     "source_quality": "test"
+    }
+   ],
+   "falsification_tests": [
+    "F-010-2: a refusal case (empty approver, tampered bundle, unfrozen bundle) in which any OSF object was created before the refusal, observed via a counting transport in tests."
+   ],
+   "id": "CLM-010-02",
+   "kind": "requirement",
+   "lifecycle_stage": "checked",
+   "severity": "high",
+   "source_ref": "specs/010-osf-registration/spec.md",
+   "stage_basis": "Exercised by the seeded-refusal tests with a counting transport (the falsifier's exact shape). Checking.",
+   "status": "supported",
+   "text": "The deposit refuses, before creating any OSF object, when approved_by is empty, when the bundle does not verify standalone, or when the bundle's manifest carries no freeze binding (missing registration_hash or checkpoint_root).",
+   "uncertainty": "low"
+  },
+  {
+   "boundary": [
+    "Scope: repeat attempts that have the deposit state or the project GUID available to the check; a from-nothing run cannot know a prior project exists (recorded in plan.md, not hidden)"
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/010-osf-registration/spec.md (design decision: deposit state + idempotency)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_osf_deposit.py::test_repeat_deposit_creates_no_second_registration (state path and fresh-state+GUID scan path both return the existing registration; drafts stay at 1)",
+     "source_quality": "test"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Live: the embargo deposit was re-run six times across provider-driven fixes against state records/embargo-test-state.json \u2014 exactly one project (xwdr5), one draft, one registration (kcysa) exist; the T-P4 demo likewise names exactly one registration (h94bf) in records/demo-deposit-state.json",
+     "source_quality": "primary"
+    }
+   ],
+   "falsification_tests": [
+    "F-010-3: two distinct registration GUIDs binding the same study + schema after a repeat deposit attempt that had the deposit state or the project GUID available."
+   ],
+   "id": "CLM-010-03",
+   "kind": "requirement",
+   "lifecycle_stage": "checked",
+   "severity": "high",
+   "source_ref": "specs/010-osf-registration/spec.md",
+   "stage_basis": "Unit tests plus an unusually strong live exercise: six resumed runs against the real provider produced no duplicate project, draft, or registration. Checking.",
+   "status": "supported",
+   "text": "Submission is idempotent: before creating a draft registration the action checks for an existing registration binding the same registration_hash under the same schema (deposit state first; the project's registration list when a project GUID is known), and a repeat attempt creates no second registration \u2014 it reports the existing registration's GUID and URL.",
+   "uncertainty": "low"
+  },
+  {
+   "boundary": [
+    "Scope: Spec 010 OSF transport + deposit action; a 429 is a stop, never a retry (the Zenodo transport's rule, adopted unchanged)"
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/010-osf-registration/spec.md (design decisions: transport shape; deposit state + idempotency)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_osf_deposit.py::test_provider_failure_surfaces_and_state_resumes + ::test_pending_registration_is_recorded_resumable_not_complete",
+     "source_quality": "test"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Live walk, 2026-10-12: provider refusals surfaced verbatim and drove fixes (400 category required; 411/413 WaterButler framing; 400 draft_registration field; 400 subjects required; 400 lift_embargo datetime; 409 unmoderated provider; 403 not a pending approver; non-final state named in the deposit error) \u2014 partial state resumed each time, no duplicate objects",
+     "source_quality": "primary"
+    }
+   ],
+   "falsification_tests": [
+    "F-010-4: a swallowed provider error, an automatically retried create that produced a duplicate OSF object, or a resumed run that re-created the project or components instead of continuing from the recorded state."
+   ],
+   "id": "CLM-010-04",
+   "kind": "requirement",
+   "lifecycle_stage": "checked",
+   "severity": "high",
+   "source_ref": "specs/010-osf-registration/spec.md",
+   "stage_basis": "Unit tests plus the live provider walk: every refusal surfaced with the provider's status and body, and every partial state resumed. Checking.",
+   "status": "supported",
+   "text": "Provider failures abort the action with the provider's actual HTTP status and response body carried in the error; an ambiguous create is never retried blind into a duplicate; partial progress is persisted to the deposit state and a later run resumes from it instead of starting over.",
+   "uncertainty": "low"
+  },
+  {
+   "boundary": [
+    "Scope: Spec 010 receipt + verify_osf_anchor; comparison is against the deposited bundle's osf_metadata anchor_values (plan.md ambiguity 5)"
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/010-osf-registration/spec.md (design decision: receipt)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "src/tekmerion/osf_deposit.py::verify_osf_anchor + receipt construction in deposit_bundle_osf (Zenodo receipt shape + OSF fields)",
+     "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_osf_deposit.py::test_verify_osf_anchor_passes_and_catches_divergence (pass on the deposited record; fails on anchor-value removal and on component divergence)",
+     "source_quality": "test"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Live: the embargo test registration was fetched back authenticated and states the anchor values (records/embargo-test-registration.json)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "contradicts",
+     "kind": "observed",
+     "ref": "RESIDUE at build exit: no live receipt has issued \u2014 both live registrations sit in OSF's approval window (admin approval runs through OSF's email-link channel, outside the token API), and the demo registration h94bf subsequently read HTTP 410 / absent from the project list (records/demo-deposit-observation.md). Public unauthenticated verification and the live receipt remain outstanding until the record's provider-side fate is resolved and it is final.",
+     "source_quality": "primary"
+    }
+   ],
+   "falsification_tests": [
+    "F-010-5: verify_osf_anchor passing on a fetched record whose stated checkpoint root, bundle hash, or registration hash differs from the bundle's anchor values, or whose component structure diverges from the mapping."
+   ],
+   "id": "CLM-010-05",
+   "kind": "requirement",
+   "lifecycle_stage": "checked",
+   "severity": "high",
+   "source_ref": "specs/010-osf-registration/spec.md",
+   "stage_basis": "PARTIAL at build exit: machinery built and unit-proven, embargo record fetched back stating the values; the live receipt and the public verification are outstanding on provider-side finalization outside the API (see residue evidence).",
+   "status": "partially_supported",
+   "text": "A completed deposit returns a receipt (mechanism, root, bundle hash, registration hash, project GUID, registration GUID, URL/DOI, approver, anchored-at, embargo state), and verify_osf_anchor independently re-fetches the registration from the OSF API and passes only if the fetched record states the mapping's anchor values and the project structure matches the component mapping.",
+   "uncertainty": "medium"
+  },
+  {
+   "boundary": [
+    "Scope: the T-P4 demonstration only; the anchor.recorded ledgering of DESIGN \u00a74.2.4 remains the flow for future live studies and is test-exercised on fixtures (plan.md ambiguity 1)"
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/010-osf-registration/spec.md (design decision: receipt) + plan.md ambiguity 1",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "records/study-dir-hashes-before.json vs records/study-dir-hashes-after.json: 30 files, SHA-256 sets identical across the T-P4 deposit; receipt + state recorded only under specs/010-osf-registration/records/",
+     "source_quality": "primary"
+    }
+   ],
+   "falsification_tests": [
+    "F-010-6: any differing file hash in specs/002-mvp-implementation/evaluation/study/ across the demonstration, or a receipt written anywhere inside that directory."
+   ],
+   "id": "CLM-010-06",
+   "kind": "requirement",
+   "lifecycle_stage": "checked",
+   "severity": "high",
+   "source_ref": "specs/010-osf-registration/spec.md",
+   "stage_basis": "Directly measured: SHA-256 of all 30 study files identical before/after the demonstration deposit. Checking (measurement, not testimony).",
+   "status": "supported",
+   "text": "The T-P4 demonstration modifies nothing in the Phase 7 study directory: every file's bytes are identical before and after (hashes recorded), and the registration references the study externally \u2014 the receipt lives in this spec's records, not in the frozen study's ledger or bundles.",
+   "uncertainty": "low"
+  },
+  {
+   "boundary": [
+    "Scope: DESIGN \u00a74.2.3's embargo demonstration requirement; the demonstration registration itself is public/immediate (plan.md ambiguity 2)"
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/010-osf-registration/spec.md (requirement CLM-010-07) + docs/pilot/DESIGN.md \u00a74.2.3",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_osf_deposit.py::test_embargoed_submission_records_its_state (unit level)",
+     "source_quality": "test"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Live: test registration kcysa created under embargo via the deposit action and fetched back: public=false, embargo_end_date 2027-10-12T00:00:00Z as set, registration not publicly fetchable (records/embargo-test-registration.json)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "contradicts",
+     "kind": "observed",
+     "ref": "RESIDUE: the record's embargoed attribute reads false with pending_embargo_approval=true \u2014 the embargo terms are accepted and recorded by the provider, but the embargo takes effect only on admin approval through OSF's email-link channel, outside the token API.",
+     "source_quality": "primary"
+    }
+   ],
+   "falsification_tests": [
+    "F-010-7: embargo support claimed in any record without a fetched-back test registration record showing embargoed = true and the embargo end date as set."
+   ],
+   "id": "CLM-010-07",
+   "kind": "requirement",
+   "lifecycle_stage": "checked",
+   "severity": "medium",
+   "source_ref": "specs/010-osf-registration/spec.md",
+   "stage_basis": "PARTIAL at build exit: the embargo path is demonstrated to provider acceptance of the embargo terms (fetched record, non-public, end date as set); embargoed=true awaits admin approval via OSF's channel (see residue evidence).",
+   "status": "partially_supported",
+   "text": "The embargo path is demonstrated, not asserted: a test registration created with an embargo end date is fetched back showing the embargoed state (not public, the embargo end date as set) before embargo support is claimed anywhere.",
+   "uncertainty": "medium"
+  },
+  {
+   "boundary": [
+    "Scope: all Spec 010 surfaces and any pilot material describing OSF anchoring (DESIGN \u00a76 evidence pack language included)"
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/010-osf-registration/spec.md (requirement CLM-010-08, scope)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "src/tekmerion/osf_deposit.py::verify_osf_anchor reads anchor values from the registration record (never the project); spec.md requirement CLM-010-08",
+     "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_osf_deposit.py::test_verify_osf_anchor_passes_and_catches_divergence (tampering the registration record's stated values fails verification)",
+     "source_quality": "test"
+    }
+   ],
+   "falsification_tests": [
+    "F-010-8: any presentation of an OSF registration as validating a study's verdicts or as human acceptance, or a verification path that reads anchor values from the mutable project instead of the registration record."
+   ],
+   "id": "CLM-010-08",
+   "kind": "requirement",
+   "lifecycle_stage": "checked",
+   "severity": "medium",
+   "source_ref": "specs/010-osf-registration/spec.md",
+   "stage_basis": "Scope claim: the verification path reads the registration record by construction and the tamper test exercises it. Checking.",
+   "status": "supported",
+   "text": "SCOPE: an OSF registration is an anchor and a discovery record, not a validation: it certifies that this bundle, stating these anchor values, was snapshotted at a point in time. It does not certify the study's verdicts, is not lane-2 acceptance of anything, and \u2014 because the OSF project remains editable after registration \u2014 anchor verification reads the values from the registration record, never from the live project.",
+   "uncertainty": "low"
+  }
+ ],
+ "date": "2026-10-12",
+ "spec": "specs/010-osf-registration/spec.md",
+ "version": "0.2.0"
+}

@@ -1,0 +1,38 @@
+{
+  "absent_mapped_paths": [
+    "evidence/content/"
+  ],
+  "bundle_hash": "a325a09a8bb47f52d7c6e895e057484c12f6c11220c01480832a9be703ed06c6",
+  "components": {
+    "evidence": "g3a4e",
+    "record": "6vwhq",
+    "registration": "rfu23",
+    "verdicts": "cz82m",
+    "verification": "nhzky"
+  },
+  "draft_id": "6accf4edf68d30b422ca44d6",
+  "project_guid": "dvrew",
+  "registration_guid": "h94bf",
+  "registration_hash": "977c1db162e9ba06b3e34c633a5bbae96fe4779aa49c43356b564cc8c3b9ac9b",
+  "schema_id": "5df83f7dd28338001ac0ab0d",
+  "schema_name": "Open-Ended Registration",
+  "stage": "submitted",
+  "subjects": [
+    "Medicine and Health Sciences"
+  ],
+  "uploaded": [
+    "registration:registration.json",
+    "registration:claims.json",
+    "registration:controls.json",
+    "evidence:items.json",
+    "evidence:groups.json",
+    "evidence:coverage.json",
+    "verification:verification.json",
+    "verification:queries.json",
+    "verdicts:verdicts.json",
+    "verdicts:adjudication.json",
+    "record:ledger/study.axmr",
+    "record:manifest.json",
+    "record:HUMAN-README.md"
+  ]
+}

@@ -66,3 +66,24 @@
    their component (folders created for nested paths), so the OSF
    structure mirrors the bundle structure under each component, and
    verification checks the same layout.
+
+## Build exit (2026-10-12)
+
+Built and live-exercised the same day. The live walk taught the
+transport six provider behaviors that are now encoded and recorded
+(assessment-2026-10-12.md, after_implement): component category
+required; WaterButler empty-body framing; registration create field
+names; subjects required and caller-named; `lift_embargo` as a
+datetime; and the approval state machine — admin approval is not an
+API action on this provider (409/403), so a pending record is a
+resumable non-final state by design. Two demonstration deposits were
+submitted live: the embargo test (project `xwdr5`, registration
+`kcysa`, embargo to 2027-10-12) and the Phase 7 study (project
+`dvrew`, registration `h94bf`, 13 files; study directory verified
+byte-identical before/after). Claims at exit (bundle v0.2.0, assessed
+after_implement, outcome `clarify`): six supported at 0.98–1.00;
+CLM-010-05 and CLM-010-07 partially_supported at 0.25, held by the
+recorded residue — OSF-side finalization runs through the provider's
+email-link approval channel, and the demo registration read HTTP 410
+on re-fetch at exit (open observation, `records/`). Completion is
+task T-P4b.
