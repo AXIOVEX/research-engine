@@ -1,193 +1,208 @@
 {
-  "claims": [
+ "claims": [
+  {
+   "boundary": [
+    "Scope: Spec 001 product design (founding spec)",
+    "Assessment at design phase; implementation evidence accrues under Spec 002"
+   ],
+   "evidence": [
     {
-      "boundary": [
-        "Scope: Spec 001 product design (founding spec)",
-        "Assessment at design phase; implementation evidence accrues under Spec 002"
-      ],
-      "evidence": [
-        {
-          "direction": "supports",
-          "kind": "asserted",
-          "ref": "docs/design-notes/DN-001-founding-decisions.md \u00a76",
-          "source_quality": "primary"
-        },
-        {
-          "direction": "supports",
-          "kind": "asserted",
-          "ref": "docs/architecture/03-verdict-engine.md",
-          "source_quality": "primary"
-        }
-      ],
-      "falsification_tests": [
-        "F-001-D1: a run where a post-freeze criterion change altered a verdict without an appended amendment record."
-      ],
-      "id": "CLM-001-01",
-      "kind": "requirement",
-      "severity": "high",
-      "source_ref": "specs/001-research-engine/spec.md",
-      "status": "draft",
-      "text": "Freezing the research design (question, sources, criteria, verdict rules) before retrieval prevents post-hoc criterion drift in verdicts.",
-      "uncertainty": "high"
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "docs/design-notes/DN-001-founding-decisions.md §6",
+     "source_quality": "primary"
     },
     {
-      "boundary": [
-        "Scope: Spec 001 product design (founding spec)",
-        "Assessment at design phase; implementation evidence accrues under Spec 002"
-      ],
-      "evidence": [
-        {
-          "direction": "supports",
-          "kind": "asserted",
-          "ref": "docs/architecture/02-claim-evidence-model.md",
-          "source_quality": "primary"
-        }
-      ],
-      "falsification_tests": [
-        "F-001-D2: an exported artifact in which two items sharing one origin increase an evidence count or weight."
-      ],
-      "id": "CLM-001-02",
-      "kind": "requirement",
-      "severity": "high",
-      "source_ref": "specs/001-research-engine/spec.md",
-      "status": "draft",
-      "text": "Counting evidence by origin group prevents derivative sources from inflating support for a claim.",
-      "uncertainty": "high"
-    },
-    {
-      "boundary": [
-        "Scope: Spec 001 product design (founding spec)",
-        "Assessment at design phase; implementation evidence accrues under Spec 002"
-      ],
-      "evidence": [
-        {
-          "direction": "supports",
-          "kind": "asserted",
-          "ref": "docs/architecture/03-verdict-engine.md",
-          "source_quality": "primary"
-        }
-      ],
-      "falsification_tests": [
-        "F-001-D3: a seeded-defect run (e.g. swapped source, corrupted evidence) that the control suite passes as valid."
-      ],
-      "id": "CLM-001-03",
-      "kind": "requirement",
-      "severity": "high",
-      "source_ref": "specs/001-research-engine/spec.md",
-      "status": "draft",
-      "text": "A control suite with discriminating positive and negative controls detects defective runs that a pass-only check suite would certify.",
-      "uncertainty": "high"
-    },
-    {
-      "boundary": [
-        "Scope: Spec 001 product design (founding spec)",
-        "Assessment at design phase; implementation evidence accrues under Spec 002"
-      ],
-      "evidence": [
-        {
-          "direction": "supports",
-          "kind": "asserted",
-          "ref": "docs/architecture/04-records-export.md",
-          "source_quality": "primary"
-        }
-      ],
-      "falsification_tests": [
-        "F-001-D4: a tampered record (altered verdict or evidence entry) whose replay verifies clean against its recorded hashes."
-      ],
-      "id": "CLM-001-04",
-      "kind": "requirement",
-      "severity": "high",
-      "source_ref": "specs/001-research-engine/spec.md",
-      "status": "draft",
-      "text": "An append-only hash-chained event store makes silent rewriting of a research record detectable on replay.",
-      "uncertainty": "high"
-    },
-    {
-      "boundary": [
-        "Scope: Spec 001 product design (founding spec)",
-        "Assessment at design phase; implementation evidence accrues under Spec 002"
-      ],
-      "evidence": [
-        {
-          "direction": "supports",
-          "kind": "asserted",
-          "ref": "docs/architecture/05-trust-safety.md",
-          "source_quality": "primary"
-        },
-        {
-          "direction": "supports",
-          "kind": "asserted",
-          "ref": "docs/architecture/01-source-layer.md",
-          "source_quality": "primary"
-        }
-      ],
-      "falsification_tests": [
-        "F-001-D5: any exported citation that does not resolve to a real, retrievable record (kill criterion K1)."
-      ],
-      "id": "CLM-001-05",
-      "kind": "requirement",
-      "severity": "high",
-      "source_ref": "specs/001-research-engine/spec.md",
-      "status": "draft",
-      "text": "Resolving every citation against its source of record before use reduces fabricated-reference incidence to zero in exported artifacts.",
-      "uncertainty": "high"
-    },
-    {
-      "boundary": [
-        "Scope: Spec 001 product design (founding spec)",
-        "Assessment at design phase; implementation evidence accrues under Spec 002"
-      ],
-      "evidence": [
-        {
-          "direction": "supports",
-          "kind": "asserted",
-          "ref": "docs/architecture/03-verdict-engine.md",
-          "source_quality": "primary"
-        }
-      ],
-      "falsification_tests": [
-        "F-001-D6: an audit scenario in which a blended score and the per-claim register lead an adjudicator to the same decision quality and speed, measured under the K3 protocol."
-      ],
-      "id": "CLM-001-06",
-      "kind": "requirement",
-      "severity": "high",
-      "source_ref": "specs/001-research-engine/spec.md",
-      "status": "draft",
-      "text": "A per-claim verdict taxonomy (INVALID/INCONCLUSIVE/CONTRADICTED/SUPPORTED) preserves information that a single blended study score destroys \u2014 specifically, which claims failed and why.",
-      "uncertainty": "high"
-    },
-    {
-      "boundary": [
-        "Scope: Spec 001 product design (founding spec)",
-        "Assessment at design phase; implementation evidence accrues under Spec 002"
-      ],
-      "evidence": [
-        {
-          "direction": "supports",
-          "kind": "asserted",
-          "ref": "specs/001-research-engine/spec.md \u00a76",
-          "source_quality": "primary"
-        },
-        {
-          "direction": "supports",
-          "kind": "asserted",
-          "ref": "docs/architecture/06-product-shape.md",
-          "source_quality": "primary"
-        }
-      ],
-      "falsification_tests": [
-        "F-001-D7: a smaller workflow that exercises Articles I-XII completely, or a demonstration that the U2 slice omits an article (owner decision OD-1)."
-      ],
-      "id": "CLM-001-07",
-      "kind": "decision",
-      "severity": "high",
-      "source_ref": "specs/001-research-engine/spec.md",
-      "status": "supported",
-      "text": "The systematic-review evidence-question workflow (U2) is the smallest workflow that exercises every constitutional article end-to-end, and is therefore the correct MVP slice.",
-      "uncertainty": "low"
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "docs/architecture/03-verdict-engine.md",
+     "source_quality": "primary"
     }
-  ],
-  "date": "2026-10-12",
-  "spec": "001-research-engine",
-  "version": "0.2.0"
+   ],
+   "falsification_tests": [
+    "F-001-D1: a run where a post-freeze criterion change altered a verdict without an appended amendment record."
+   ],
+   "id": "CLM-001-01",
+   "kind": "requirement",
+   "severity": "high",
+   "source_ref": "specs/001-research-engine/spec.md",
+   "status": "draft",
+   "text": "Freezing the research design (question, sources, criteria, verdict rules) before retrieval prevents post-hoc criterion drift in verdicts.",
+   "uncertainty": "high",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Freeze mechanism built and tested under Spec 002 (freeze checks, amendment records); the claim's drift-prevention efficacy over live studies is not yet exercised — checked, with that limit."
+  },
+  {
+   "boundary": [
+    "Scope: Spec 001 product design (founding spec)",
+    "Assessment at design phase; implementation evidence accrues under Spec 002"
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "docs/architecture/02-claim-evidence-model.md",
+     "source_quality": "primary"
+    }
+   ],
+   "falsification_tests": [
+    "F-001-D2: an exported artifact in which two items sharing one origin increase an evidence count or weight."
+   ],
+   "id": "CLM-001-02",
+   "kind": "requirement",
+   "severity": "high",
+   "source_ref": "specs/001-research-engine/spec.md",
+   "status": "draft",
+   "text": "Counting evidence by origin group prevents derivative sources from inflating support for a claim.",
+   "uncertainty": "high",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Scoring/verdict machinery built and tested under Spec 002 with seeded defects; checked."
+  },
+  {
+   "boundary": [
+    "Scope: Spec 001 product design (founding spec)",
+    "Assessment at design phase; implementation evidence accrues under Spec 002"
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "docs/architecture/03-verdict-engine.md",
+     "source_quality": "primary"
+    }
+   ],
+   "falsification_tests": [
+    "F-001-D3: a seeded-defect run (e.g. swapped source, corrupted evidence) that the control suite passes as valid."
+   ],
+   "id": "CLM-001-03",
+   "kind": "requirement",
+   "severity": "high",
+   "source_ref": "specs/001-research-engine/spec.md",
+   "status": "draft",
+   "text": "A control suite with discriminating positive and negative controls detects defective runs that a pass-only check suite would certify.",
+   "uncertainty": "high",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Controls machinery built and tested; the Phase 5 demo run is live evidence the controls bite (swap-control failure invalidated the run). Checked."
+  },
+  {
+   "boundary": [
+    "Scope: Spec 001 product design (founding spec)",
+    "Assessment at design phase; implementation evidence accrues under Spec 002"
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "docs/architecture/04-records-export.md",
+     "source_quality": "primary"
+    }
+   ],
+   "falsification_tests": [
+    "F-001-D4: a tampered record (altered verdict or evidence entry) whose replay verifies clean against its recorded hashes."
+   ],
+   "id": "CLM-001-04",
+   "kind": "requirement",
+   "severity": "high",
+   "source_ref": "specs/001-research-engine/spec.md",
+   "status": "draft",
+   "text": "An append-only hash-chained event store makes silent rewriting of a research record detectable on replay.",
+   "uncertainty": "high",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Evidence/provenance machinery (hash-verified retrieval records, RT-5 caps) built and tested under Spec 002; checked."
+  },
+  {
+   "boundary": [
+    "Scope: Spec 001 product design (founding spec)",
+    "Assessment at design phase; implementation evidence accrues under Spec 002"
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "docs/architecture/05-trust-safety.md",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "docs/architecture/01-source-layer.md",
+     "source_quality": "primary"
+    }
+   ],
+   "falsification_tests": [
+    "F-001-D5: any exported citation that does not resolve to a real, retrievable record (kill criterion K1)."
+   ],
+   "id": "CLM-001-05",
+   "kind": "requirement",
+   "severity": "high",
+   "source_ref": "specs/001-research-engine/spec.md",
+   "status": "draft",
+   "text": "Resolving every citation against its source of record before use reduces fabricated-reference incidence to zero in exported artifacts.",
+   "uncertainty": "high",
+   "lifecycle_stage": "created",
+   "stage_basis": "Design claim only; no implementation or test evidence yet. Created."
+  },
+  {
+   "boundary": [
+    "Scope: Spec 001 product design (founding spec)",
+    "Assessment at design phase; implementation evidence accrues under Spec 002"
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "docs/architecture/03-verdict-engine.md",
+     "source_quality": "primary"
+    }
+   ],
+   "falsification_tests": [
+    "F-001-D6: an audit scenario in which a blended score and the per-claim register lead an adjudicator to the same decision quality and speed, measured under the K3 protocol."
+   ],
+   "id": "CLM-001-06",
+   "kind": "requirement",
+   "severity": "high",
+   "source_ref": "specs/001-research-engine/spec.md",
+   "status": "draft",
+   "text": "A per-claim verdict taxonomy (INVALID/INCONCLUSIVE/CONTRADICTED/SUPPORTED) preserves information that a single blended study score destroys — specifically, which claims failed and why.",
+   "uncertainty": "high",
+   "lifecycle_stage": "created",
+   "stage_basis": "Design claim only, and its falsifier F-001-D6 is comparative against a K3 protocol that does not exist — inoperable today (audit NC). Created."
+  },
+  {
+   "boundary": [
+    "Scope: Spec 001 product design (founding spec)",
+    "Assessment at design phase; implementation evidence accrues under Spec 002"
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/001-research-engine/spec.md §6",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "docs/architecture/06-product-shape.md",
+     "source_quality": "primary"
+    }
+   ],
+   "falsification_tests": [
+    "F-001-D7: a smaller workflow that exercises Articles I-XII completely, or a demonstration that the U2 slice omits an article (owner decision OD-1)."
+   ],
+   "id": "CLM-001-07",
+   "kind": "decision",
+   "severity": "high",
+   "source_ref": "specs/001-research-engine/spec.md",
+   "status": "supported",
+   "text": "The systematic-review evidence-question workflow (U2) is the smallest workflow that exercises every constitutional article end-to-end, and is therefore the correct MVP slice.",
+   "uncertainty": "low",
+   "lifecycle_stage": "accepted",
+   "stage_basis": "Accepted by the owner's OD-1 ratification recorded in DN-002. Reclassification also resolves the prior presentation tension (status 'supported' at assessor score 0.68): the lifecycle stage, not the score, now carries the state (audit NC-4)."
+  }
+ ],
+ "date": "2026-10-12",
+ "spec": "001-research-engine",
+ "version": "0.3.0",
+ "audit_note": "2026-10-12 Tao realignment audit (DN-010 standard): lifecycle_stage + stage_basis added to every claim by reclassification only; no claim text, falsifier, or evidence was rewritten. Git history is the append-only trail for AEE bundles."
 }

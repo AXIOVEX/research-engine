@@ -34,7 +34,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "The record layer is append-only: events are hash-chained and Ed25519-signed, and no API operation in the record layer or the framework mutates a stored event.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -70,7 +72,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "Every connector-retrieved item carries a per-record license_basis, and material without an asserted licence is not treated as reusable (Crossref abstracts without a licence are dropped).",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -106,7 +110,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "OpenAlex access is budget-disciplined: calls reserve credits before they run (filter preferred at the verified ~10x cost relation) and exhaustion stops the run rather than overrunning.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -136,7 +142,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "A claim cannot be registered without a falsifier, and claim statements are immutable after registration — a changed statement is a new claim that supersedes the old, with the link recorded.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -166,7 +174,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "Circular claim dependencies are rejected: the dependency graph is a DAG and the freeze check names any cycle as circular support.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -196,7 +206,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "INVALID attaches to the run, not the claim: a control failure, unverified citation, chain break, or deviation from the frozen registration yields a run verdict of INVALID and zero claim verdicts.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -226,7 +238,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "SUPPORTED requires exposure to refutation: the falsifier test must have been capable of firing and the interval of net support must clear the registered margin; otherwise the verdict is INCONCLUSIVE.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -256,7 +270,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "Controls certify through the production paths: positive/negative controls are evaluated by the same evaluate_claim function real claims use, and the swap control requires the production Axiomere verifier to detect a provenance swap in a copy of the study ledger.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -286,7 +302,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "Exploratory results cannot be promoted: a confirmation run without a frozen registration is INVALID, and a confirmation registration must disclose its linked exploratory studies (an explicit empty list is required, not an omission).",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -316,7 +334,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "draft",
    "text": "The citation pipeline (existence, metadata agreement, content support) will drive fabricated or unsupported citations to zero in the evaluation corpus (kill criterion K1: 100% citation resolution).",
-   "uncertainty": "high"
+   "uncertainty": "high",
+   "lifecycle_stage": "created",
+   "stage_basis": "K1 held draft by design: its falsifier is the Phase 7 frozen evaluation, which has not run. Created only."
   },
   {
    "boundary": [
@@ -352,7 +372,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "A complete study run can be exported as an audit bundle whose manifest verifies standalone, using only the bundle and the log files it contains.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -381,7 +403,9 @@
    "source_ref": "docs/design-notes/DN-005-absolute-append-only.md",
    "status": "supported",
    "text": "Withdrawal is a dead snapshot: status dead, a mandatory reason on the record, score forced to 0.0, and the record's full history remains readable.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -418,7 +442,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "Before any pilot, a study checkpoint root will be deposited with an external anchor the operator does not control, and the deposit receipt will be part of the study record (AR-1 / gate G2).",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "accepted",
+   "stage_basis": "Checked as above, and its substance (the AR-1 anchor demonstration) was accepted by the owner's G2 ratification act recorded in DN-008 (2026-10-12). Acceptance applies to the gate demonstration; no digestion record exists."
   },
   {
    "boundary": [
@@ -460,7 +486,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "Every citation processed by the verification pipeline receives exactly one explicit resolution outcome — resolved, not-found, or error — recorded as an event in the study ledger; no citation is silently skipped (K1 accounting at pipeline level).",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -502,7 +530,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "A material metadata disagreement between the citing context and the resolved record quarantines the citation: it enters the adjudication queue and contributes no evidence until an adjudicator resolves it.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -544,7 +574,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "A citation is content-verified only when stance extraction runs on retrieved content the record's licence permits using; where no such content exists the citation is metadata-only, never content-verified.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -580,7 +612,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "Citations are folded to origin groups by the WS2 precedence keys (shared identifier, shared dataset/registration, explicit derivation), and near-duplicate suspects under key 4 are flagged for human adjudication, never auto-merged.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -622,7 +656,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "The adjudication queue is durable and ledger-backed: queued items, decisions, and second reviews are appended events naming the actor, and an item leaves the pending state only through a recorded decision.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -664,7 +700,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "Grouping adjudications are sampled for independent second review at the registered fraction (default 10%) by a deterministic seeded draw, the sample's disagreement rate is computed from the record, and a reviewed window at or above the minimum sample with zero disagreements is flagged as an anomaly (RT-4).",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -700,7 +738,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "The metadata-only cap is mechanized in the verdict path: a metadata-only item contributes no support mass and cannot falsify, and a claim whose entire supporting basis is metadata-only caps at INCONCLUSIVE (RT-5).",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -730,7 +770,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "An exported audit bundle contains the study's complete record: the ledger copied byte-for-byte and the full claim register of the frozen registration; an export that would be partial is labeled partial in the manifest and the HUMAN-README, never silently incomplete.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -760,7 +802,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "Every file in an audit bundle is listed in manifest.json with its SHA-256 and byte size, and the manifest carries a bundle hash computed over that file set; an altered file or an unlisted file is a verification failure, never a silent difference.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -790,7 +834,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "Bundle integrity is verifiable from the bundle alone: the standalone verifier re-checks every manifest hash, verifies the exported ledger with the production Axiomere verifier (hash chain and signatures), and requires the manifest's checkpoint root to equal the latest Merkle checkpoint root recorded in the exported ledger.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -820,7 +866,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "The bundle's registration document is bound to the ledger: its registration hash, recomputed with the production freeze code, equals the registration hash committed in the ledger's study.frozen event and recorded in the manifest.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -850,7 +898,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "Every bundle reports support-check coverage per claim (WS5 §2): origin groups are counted as content-checked or metadata-only from the group records Phase 4 emits, and a claim resting partly on metadata-only groups shows that share as a number in the bundle.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -880,7 +930,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "Retrieved source content enters a bundle's content files only where the record's licence basis permits redistribution; otherwise the bundle carries the provenance stub and the manifest lists the substitution (WS5 §4).",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -910,7 +962,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "A deposit action runs only with a named adjudicator's approval recorded for that bundle; without approval the deposit is refused and the bundle stays internal (WS5 §3). The deposit metadata states the bundle hash and the checkpoint root the deposit anchors.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -946,7 +1000,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "A study checkpoint root can be anchored with an external party the operator does not control — a Zenodo deposit minting a DOI (Spec 002 AR-1; DN-005 layer 5) — yielding a receipt that names the anchored root, the DOI/record locator, and the time the external record was created.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -981,7 +1037,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "A completed anchor's receipt is part of the study record: it is appended to the study ledger as an anchor event naming the mechanism, the anchored root, and the locator, and it is carried in the manifest of every bundle exported afterward (Article XIII).",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -1017,7 +1075,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "supported",
    "text": "Given only a bundle and the public anchor record, verification confirms that the anchored root is a Merkle checkpoint root of the bundle's own ledger and that the public record states that same root and the deposited bundle's hash; a different study's receipt, or a root the public record does not state, fails verification.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the phase test suite (seeded-defect tests through production paths, CI green by read-back); evidence is the author's own tests plus, where cited, upstream records. No named human explanation or acceptance act names this claim: not explained, not accepted, not digested (DN-010)."
   },
   {
    "boundary": [
@@ -1047,7 +1107,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "draft",
    "text": "The study workspace is register-first: opening a study presents its claim register — claims with their falsifiers, lifecycle statuses, and verdicts — as the primary surface; no landing page, dashboard, or chat surface stands in front of the register.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "created",
+   "stage_basis": "UI claims authored claims-first; the UI is unbuilt and the wireframe gate T219-WF is pending owner approval. Created only."
   },
   {
    "boundary": [
@@ -1077,7 +1139,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "draft",
    "text": "Registration through the UI obeys the engine's rules identically: a claim submitted without a falsifier is refused with the engine's RegistrationError, and nothing is appended to the study ledger — the refusal is the engine's, surfaced, not a UI-side gate that can diverge from it.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "created",
+   "stage_basis": "UI claims authored claims-first; the UI is unbuilt and the wireframe gate T219-WF is pending owner approval. Created only."
   },
   {
    "boundary": [
@@ -1107,7 +1171,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "draft",
    "text": "The UI exposes no edit or delete affordance for record objects: every mutation it offers is an append through the existing services (register/supersede, adjudication decision, second review, withdraw-as-dead, freeze, verdict, export); no UI endpoint mutates a stored event or snapshot in place.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "created",
+   "stage_basis": "UI claims authored claims-first; the UI is unbuilt and the wireframe gate T219-WF is pending owner approval. Created only."
   },
   {
    "boundary": [
@@ -1137,7 +1203,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "draft",
    "text": "Dead records render as dead: a withdrawn claim is displayed with its dead status, the recorded withdrawal reason, and score 0.0 — it is neither omitted from the register nor shown as live.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "created",
+   "stage_basis": "UI claims authored claims-first; the UI is unbuilt and the wireframe gate T219-WF is pending owner approval. Created only."
   },
   {
    "boundary": [
@@ -1167,7 +1235,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "draft",
    "text": "An INVALID run renders as INVALID with its reasons and zero claim verdicts: the workspace never substitutes per-claim verdicts for a run the verdict service invalidated, and never softens the run verdict's presentation.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "created",
+   "stage_basis": "UI claims authored claims-first; the UI is unbuilt and the wireframe gate T219-WF is pending owner approval. Created only."
   },
   {
    "boundary": [
@@ -1197,7 +1267,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "draft",
    "text": "Metadata-only evidence is visibly metadata-only wherever the workspace presents evidence — claim evidence folds and citation outcomes carry the flag — so the basis of the RT-5 cap is inspectable from the surface rather than hidden behind an aggregate.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "created",
+   "stage_basis": "UI claims authored claims-first; the UI is unbuilt and the wireframe gate T219-WF is pending owner approval. Created only."
   },
   {
    "boundary": [
@@ -1227,7 +1299,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "draft",
    "text": "Adjudication through the UI is the engine's adjudication: decisions are named appends via tekmerion.verification.decide, a decision on an already-decided item is refused by the engine and the refusal is surfaced, and every decision records its adjudicator and rationale.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "created",
+   "stage_basis": "UI claims authored claims-first; the UI is unbuilt and the wireframe gate T219-WF is pending owner approval. Created only."
   },
   {
    "boundary": [
@@ -1257,7 +1331,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "draft",
    "text": "Role views bound the workspace's affordances per WS6 §1: the integrity view offers no mutating action, adjudication actions are offered only in the adjudicator view, and every mutation records the acting identity as the event actor — identity is supplied to the server (the SSO hook: an actor header), not typed per action.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "created",
+   "stage_basis": "UI claims authored claims-first; the UI is unbuilt and the wireframe gate T219-WF is pending owner approval. Created only."
   },
   {
    "boundary": [
@@ -1287,7 +1363,9 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "draft",
    "text": "Bundle export is reachable from the workspace and its verification result is shown truthfully: export refusals (unfrozen study, registration-hash mismatch, broken chain) and standalone-verifier failures surface with the engine's reasons, and a bundle is presented as verified only when tekmerion.export.verify_bundle passes on it.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "created",
+   "stage_basis": "UI claims authored claims-first; the UI is unbuilt and the wireframe gate T219-WF is pending owner approval. Created only."
   },
   {
    "boundary": [
@@ -1317,10 +1395,13 @@
    "source_ref": "specs/002-mvp-implementation/spec.md",
    "status": "draft",
    "text": "An anchored study displays its anchor receipt from the record — mechanism, locator/DOI, and the checkpoint root it anchors — read from the study's anchor.recorded events, so what the UI shows is what the ledger holds.",
-   "uncertainty": "low"
+   "uncertainty": "low",
+   "lifecycle_stage": "created",
+   "stage_basis": "UI claims authored claims-first; the UI is unbuilt and the wireframe gate T219-WF is pending owner approval. Created only."
   }
  ],
  "date": "2026-10-12",
  "spec": "002-mvp-implementation",
- "version": "0.6.0"
+ "version": "0.7.0",
+ "audit_note": "2026-10-12 Tao realignment audit (DN-010 standard): lifecycle_stage + stage_basis added to every claim by reclassification only; no claim text, falsifier, or evidence was rewritten. Git history is the append-only trail for AEE bundles."
 }

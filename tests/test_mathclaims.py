@@ -348,3 +348,39 @@ def test_full_theorem_run_and_report(tmp_path):
     assert rec["remains_not_understood"] == "why the method works"
     keys = _keys_deep(rec, set())
     assert not any("solved" in k for k in keys)  # CLM-003-10: no tallies
+
+
+# ------------------------------------------------------------- openness (audit NC fix)
+
+def test_openness_check_emits_evidence_not_a_verdict(tmp_path):
+    """Audit NC (2026-10-12): openness_check shipped untested. Fixture:
+    a stub status source + stub connector; the check must ledger an
+    evidence record (math.openness_checked + connector.query), hash the
+    page, surface status words, and issue NO verdict of its own."""
+    from tekmerion.connectors import RetrievedItem
+    from tekmerion.mathclaims import openness_check
+
+    class StubConnector:
+        name = "stub"
+        def search(self, query, limit=10):
+            return [RetrievedItem(source="stub", source_id="10.0000/stub.1",
+                                  title="A prior solution in the literature",
+                                  authors=["A. Prior"], year=1998, venue="Stub J.",
+                                  abstract=None, license_basis="cc0", hosted_ok=True)]
+
+    store = _store(tmp_path)
+    page = "Erdos problem 9999 — Status: open. No solution is known."
+    rec = openness_check(
+        store, problem="Erdos problem 9999",
+        status_url="https://status.example/9999", actor="researcher",
+        connectors=(StubConnector(),), queries=("erdos 9999 solution",),
+        status_fetcher=lambda url: (200, page), retrieved="2026-10-12")
+    assert rec["http_status"] == 200
+    assert rec["page_sha256"] == hashlib.sha256(page.encode()).hexdigest()
+    assert "open" in rec["status_words_present"]
+    assert rec["searches"][0]["results"] == 1
+    types = [e["type"] for e in store.db.events()]
+    assert "math.openness_checked" in types
+    assert "connector.query" in types
+    assert not any(t.startswith("verdict") for t in types)
+    assert store.verify().ok

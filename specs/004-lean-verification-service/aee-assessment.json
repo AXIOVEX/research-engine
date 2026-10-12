@@ -1,0 +1,875 @@
+{
+  "schema_version": "1.0",
+  "methodology_version": "1.0",
+  "project": "tekmerion",
+  "phase": "after_specify",
+  "outcome": "iterate",
+  "summary": "Assessed 10 claim(s); found 17 failure mode(s); 10 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T12:39:09.715009Z",
+  "claims": [
+    {
+      "id": "CLM-004-01",
+      "text": "The service's scope claim is registered as a first-class claim with falsifiers enumerating its blind spots: a clean check does not establish faithfulness, novelty, attribution, significance, or (in single-file mode) transitive sorry-freedom beyond the kernel-checked closure.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/004-lean-verification-service/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-004-1: a service output presented (in any study or UI) as establishing faithfulness/novelty/attribution/significance, or a single-file result whose inherited-dependency trust is not labeled."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/004-lean-verification-service/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-004-01-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-004-01",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-004-01-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-004-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-004-01 may contradict CLM-004-05",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-004-01-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-004-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-004-01 may contradict CLM-004-06",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-004-01-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-004-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-004-01 may contradict CLM-004-08",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-004-01-NEGATION-CONFLICT-CHALLE-4",
+          "claim_id": "CLM-004-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-004-01 may contradict CLM-004-10",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-004-02",
+      "text": "Every check output names its pinned toolchain and pinned Mathlib commit; results under different pins are distinct results and are never merged.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/004-lean-verification-service/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-004-2: an output lacking either pin, or two outputs under different pins recorded as the same result."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/004-lean-verification-service/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-004-02-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-004-02",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-004-02-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-004-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-004-02 may contradict CLM-004-10",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-004-03",
+      "text": "The axiom audit names every non-standard axiom found by #print axioms; sorryAx in the audit is a falsifying observation on the proof evidence, not a warning.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/004-lean-verification-service/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-004-3: an artifact whose target declaration depends on sorryAx or a non-standard axiom, whose service output does not name it / does not attach the falsifying observation."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/004-lean-verification-service/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-004-03-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-004-03",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-004-04",
+      "text": "Compile honesty states are exactly the Spec 003 four (run_by_us / not_runnable_here / claimed_by_source / not_attempted); a compile the service did not run is never recorded as run, and an environment failure is never recorded as a proof failure.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/004-lean-verification-service/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-004-4: a ledgered ingestion whose compile_status says run_by_us for a compile no service log shows, or an environment failure scored as contradiction of a proof claim."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/004-lean-verification-service/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-004-04-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-004-04",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-004-04-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-004-04",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-004-04 may contradict CLM-004-08",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-004-05",
+      "text": "Whole-project mode kernel-checks the transitive closure; single-file mode labels inherited-dependency trust in the output itself.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/004-lean-verification-service/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-004-5: a single-file-mode output without the inherited-trust label, or a whole-project output produced without building/restoring the pinned closure."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/004-lean-verification-service/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-004-05-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-004-05",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-004-06",
+      "text": "The service returns the formal statement text extracted from the artifact bytes, pinned beside the registered claim id it supports (and beside the original statement where a faithfulness pair exists).",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/004-lean-verification-service/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-004-6: a pinned statement that differs from the artifact bytes (paraphrase, normalization, or a statement taken from documentation instead of the artifact)."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/004-lean-verification-service/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-004-06-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-004-06",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-004-07",
+      "text": "Adapter outputs are evidence only: the service issues no verdicts and settles no claims; composition remains with the register/verdict machinery.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/004-lean-verification-service/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-004-7: any service output carrying a verdict field, or a study whose register records a claim settled on adapter output alone."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/004-lean-verification-service/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-004-07-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-004-07",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-004-08",
+      "text": "Sequencing decision (owner-delegated): the Spec 003 narrow ingestion (mathclaims.LeanRunner + ingest_lean_artifact) is this service's first increment and served the worked study; the full pinned-build service is built later, gated on study demand for run-by-us compiles at claimant pins.",
+      "kind": "decision",
+      "status": "draft",
+      "boundary": [
+        "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/004-lean-verification-service/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-004-8: a future study needing run-by-us compiles at claimant pins for which the full service was neither built nor the gap recorded as a study limitation."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/004-lean-verification-service/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-004-08-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-004-08",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-004-09",
+      "text": "Per-check resource budgets (time/space) are recorded in every output; a budget-exceeded check returns partial state honestly (parse-level results with compile not_attempted), never a silent pass or fail.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/004-lean-verification-service/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-004-9: a budget-exceeded check whose output claims a compile result, or lacks the budget record."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/004-lean-verification-service/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-004-09-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-004-09",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-004-09-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-004-09",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-004-09 may contradict CLM-004-10",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-004-10",
+      "text": "Sorry/admit counts are computed over comment-stripped bytes of the fetched artifact, and the artifact's SHA-256 is in every output, so a count can always be re-derived from the named bytes.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/004-lean-verification-service/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-004-10: an output whose sorry count cannot be reproduced from the bytes at the recorded hash."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/004-lean-verification-service/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-004-10-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-004-10",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    }
+  ],
+  "scores": {
+    "CLM-004-01": {
+      "claim_id": "CLM-004-01",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-004-02": {
+      "claim_id": "CLM-004-02",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-004-03": {
+      "claim_id": "CLM-004-03",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-004-04": {
+      "claim_id": "CLM-004-04",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-004-05": {
+      "claim_id": "CLM-004-05",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-004-06": {
+      "claim_id": "CLM-004-06",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-004-07": {
+      "claim_id": "CLM-004-07",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-004-08": {
+      "claim_id": "CLM-004-08",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-004-09": {
+      "claim_id": "CLM-004-09",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-004-10": {
+      "claim_id": "CLM-004-10",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    }
+  },
+  "recoveries": [
+    {
+      "failure_id": "AEE-CLM-004-01-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-004-01",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-004-01-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-004-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-004-01-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-004-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-004-01-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-004-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-004-01-NEGATION-CONFLICT-CHALLE-4",
+      "claim_id": "CLM-004-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-004-02-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-004-02",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-004-02-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-004-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-004-03-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-004-03",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-004-04-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-004-04",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-004-04-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-004-04",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-004-05-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-004-05",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-004-06-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-004-06",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-004-07-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-004-07",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-004-08-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-004-08",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-004-09-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-004-09",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-004-09-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-004-09",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-004-10-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-004-10",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    }
+  ],
+  "metadata": {
+    "threshold": 0.7,
+    "input": "specs/004-lean-verification-service/aee-claims.json"
+  }
+}

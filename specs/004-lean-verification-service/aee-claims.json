@@ -1,0 +1,237 @@
+{
+ "spec": "specs/004-lean-verification-service/spec.md",
+ "version": "0.1.0",
+ "date": "2026-10-12",
+ "claims": [
+  {
+   "id": "CLM-004-01",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/004-lean-verification-service/spec.md",
+   "text": "The service's scope claim is registered as a first-class claim with falsifiers enumerating its blind spots: a clean check does not establish faithfulness, novelty, attribution, significance, or (in single-file mode) transitive sorry-freedom beyond the kernel-checked closure.",
+   "boundary": [
+    "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+   ],
+   "falsification_tests": [
+    "F-004-1: a service output presented (in any study or UI) as establishing faithfulness/novelty/attribution/significance, or a single-file result whose inherited-dependency trust is not labeled."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/004-lean-verification-service/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-004-02",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/004-lean-verification-service/spec.md",
+   "text": "Every check output names its pinned toolchain and pinned Mathlib commit; results under different pins are distinct results and are never merged.",
+   "boundary": [
+    "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+   ],
+   "falsification_tests": [
+    "F-004-2: an output lacking either pin, or two outputs under different pins recorded as the same result."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/004-lean-verification-service/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-004-03",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/004-lean-verification-service/spec.md",
+   "text": "The axiom audit names every non-standard axiom found by #print axioms; sorryAx in the audit is a falsifying observation on the proof evidence, not a warning.",
+   "boundary": [
+    "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+   ],
+   "falsification_tests": [
+    "F-004-3: an artifact whose target declaration depends on sorryAx or a non-standard axiom, whose service output does not name it / does not attach the falsifying observation."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/004-lean-verification-service/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-004-04",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/004-lean-verification-service/spec.md",
+   "text": "Compile honesty states are exactly the Spec 003 four (run_by_us / not_runnable_here / claimed_by_source / not_attempted); a compile the service did not run is never recorded as run, and an environment failure is never recorded as a proof failure.",
+   "boundary": [
+    "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+   ],
+   "falsification_tests": [
+    "F-004-4: a ledgered ingestion whose compile_status says run_by_us for a compile no service log shows, or an environment failure scored as contradiction of a proof claim."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/004-lean-verification-service/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-004-05",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/004-lean-verification-service/spec.md",
+   "text": "Whole-project mode kernel-checks the transitive closure; single-file mode labels inherited-dependency trust in the output itself.",
+   "boundary": [
+    "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+   ],
+   "falsification_tests": [
+    "F-004-5: a single-file-mode output without the inherited-trust label, or a whole-project output produced without building/restoring the pinned closure."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/004-lean-verification-service/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-004-06",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/004-lean-verification-service/spec.md",
+   "text": "The service returns the formal statement text extracted from the artifact bytes, pinned beside the registered claim id it supports (and beside the original statement where a faithfulness pair exists).",
+   "boundary": [
+    "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+   ],
+   "falsification_tests": [
+    "F-004-6: a pinned statement that differs from the artifact bytes (paraphrase, normalization, or a statement taken from documentation instead of the artifact)."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/004-lean-verification-service/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-004-07",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/004-lean-verification-service/spec.md",
+   "text": "Adapter outputs are evidence only: the service issues no verdicts and settles no claims; composition remains with the register/verdict machinery.",
+   "boundary": [
+    "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+   ],
+   "falsification_tests": [
+    "F-004-7: any service output carrying a verdict field, or a study whose register records a claim settled on adapter output alone."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/004-lean-verification-service/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-004-08",
+   "kind": "decision",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/004-lean-verification-service/spec.md",
+   "text": "Sequencing decision (owner-delegated): the Spec 003 narrow ingestion (mathclaims.LeanRunner + ingest_lean_artifact) is this service's first increment and served the worked study; the full pinned-build service is built later, gated on study demand for run-by-us compiles at claimant pins.",
+   "boundary": [
+    "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+   ],
+   "falsification_tests": [
+    "F-004-8: a future study needing run-by-us compiles at claimant pins for which the full service was neither built nor the gap recorded as a study limitation."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/004-lean-verification-service/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-004-09",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/004-lean-verification-service/spec.md",
+   "text": "Per-check resource budgets (time/space) are recorded in every output; a budget-exceeded check returns partial state honestly (parse-level results with compile not_attempted), never a silent pass or fail.",
+   "boundary": [
+    "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+   ],
+   "falsification_tests": [
+    "F-004-9: a budget-exceeded check whose output claims a compile result, or lacks the budget record."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/004-lean-verification-service/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-004-10",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/004-lean-verification-service/spec.md",
+   "text": "Sorry/admit counts are computed over comment-stripped bytes of the fetched artifact, and the artifact's SHA-256 is in every output, so a count can always be re-derived from the named bytes.",
+   "boundary": [
+    "Scope: Spec 004 Lean verification service (lane-1 evidence only, DN-010)"
+   ],
+   "falsification_tests": [
+    "F-004-10: an output whose sorry count cannot be reproduced from the bytes at the recorded hash."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/004-lean-verification-service/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  }
+ ]
+}

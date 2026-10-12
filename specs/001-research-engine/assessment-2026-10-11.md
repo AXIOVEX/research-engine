@@ -21,3 +21,7 @@ No claim is marked supported: at design phase every design claim is a *commitmen
 ---
 
 **Addendum (2026-10-12):** the claims bundle was normalized to the AEE engine's native claim format (the founding file used a pre-engine vocabulary the assessor cannot load) and re-assessed mechanically: `aee-assessment.json`, outcome **gather_evidence** — the same reading as above, now machine-produced. This hand assessment remains the historical record of the founding review.
+
+## Addendum — 2026-10-12 Tao realignment audit (DN-010)
+
+Bundle reclassified v0.2.0 → v0.3.0: every claim now carries `lifecycle_stage` + `stage_basis` (created / checked / explained / accepted / digested). No claim text, falsifier, or evidence was rewritten; git history is the append-only trail. Stages: CLM-001-01…04 checked; CLM-001-05, CLM-001-06 created; CLM-001-07 accepted (owner OD-1 ratification, DN-002 — this also resolves the v0.2.0 presentation tension of status "supported" at assessor score 0.68; the stage, not the score, now carries the state). Falsifier finding: F-001-D6 is comparative against a K3 protocol that does not exist and is inoperable today — recorded as an audit nonconformance, not silently repaired. Full audit: docs/audits/2026-10-12-tao-realignment-audit.md.

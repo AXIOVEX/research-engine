@@ -1,6 +1,6 @@
 {
  "spec": "specs/003-math-claims/spec.md",
- "version": "0.1.0",
+ "version": "0.1.1",
  "date": "2026-10-12",
  "claims": [
   {
@@ -31,7 +31,9 @@
      "ref": "tekmerion.claims.ClaimRegister (parent/dependency DAG exists in the production register)",
      "source_quality": "artifact"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built in tekmerion.mathclaims with seeded-defect tests green (full suite 82/82, CI read-back success). Checked; no human explanation or acceptance act on record."
   },
   {
    "id": "CLM-003-02",
@@ -61,7 +63,9 @@
      "ref": "tekmerion.verdicts.evaluate_run/evaluate_claim (WS3 sub-verdicts the composition consumes)",
      "source_quality": "artifact"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built in tekmerion.mathclaims with seeded-defect tests green (full suite 82/82, CI read-back success). Checked; no human explanation or acceptance act on record."
   },
   {
    "id": "CLM-003-03",
@@ -91,7 +95,9 @@
      "ref": "tekmerion.connectors HttpJson fetch discipline + WS1 query ledgering (pattern reused)",
      "source_quality": "artifact"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built in tekmerion.mathclaims with seeded-defect tests green (full suite 82/82, CI read-back success). Checked; no human explanation or acceptance act on record."
   },
   {
    "id": "CLM-003-04",
@@ -121,7 +127,9 @@
      "ref": "Lean 4.33.1 toolchain binaries present at ~/.elan/toolchains/leanprover--lean4---v4.33.1/bin (lean --version run during spec drafting)",
      "source_quality": "artifact"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built in tekmerion.mathclaims with seeded-defect tests green (full suite 82/82, CI read-back success). Checked; no human explanation or acceptance act on record."
   },
   {
    "id": "CLM-003-05",
@@ -145,7 +153,9 @@
      "ref": "DN-010 point 2(i); Spec 003 §3 faithfulness pinning",
      "source_quality": "primary"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Faithfulness pinning built and exercised by the scope-mismatch seeded-defect test (a mismatched pair opens and contradicts the faithfulness claim). Checked."
   },
   {
    "id": "CLM-003-06",
@@ -175,7 +185,9 @@
      "ref": "tekmerion.connectors.run_query (queries ledgered before results are used)",
      "source_quality": "artifact"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built in tekmerion.mathclaims; fixture test landed 2026-10-12 (audit NC correction), and openness_check ran LIVE in the worked study (Clay page HTTP 200; erdosproblems.com HTTP 403 recorded as retrieved). Checked."
   },
   {
    "id": "CLM-003-07",
@@ -205,7 +217,9 @@
      "ref": "tekmerion.verification.queue_state precedent: state as replay of appends, never edits",
      "source_quality": "artifact"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built in tekmerion.mathclaims with seeded-defect tests green (full suite 82/82, CI read-back success). Checked; no human explanation or acceptance act on record."
   },
   {
    "id": "CLM-003-08",
@@ -229,7 +243,9 @@
      "ref": "DN-010 point 3; Spec 003 §5 (digestion)",
      "source_quality": "primary"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built in tekmerion.mathclaims with seeded-defect tests green (full suite 82/82, CI read-back success). Checked; no human explanation or acceptance act on record."
   },
   {
    "id": "CLM-003-09",
@@ -253,7 +269,9 @@
      "ref": "DN-010 points 1 + 6; Spec 003 §5 (two lanes)",
      "source_quality": "primary"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built in tekmerion.mathclaims with seeded-defect tests green (full suite 82/82, CI read-back success). Checked; no human explanation or acceptance act on record."
   },
   {
    "id": "CLM-003-10",
@@ -277,7 +295,9 @@
      "ref": "DN-010 point 5 (anti-gradability); Spec 003 §6",
      "source_quality": "primary"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built in tekmerion.mathclaims with seeded-defect tests green (full suite 82/82, CI read-back success). Checked; no human explanation or acceptance act on record."
   },
   {
    "id": "CLM-003-11",
@@ -307,7 +327,9 @@
      "ref": "Append-only projection pattern (verification.queue_state; export coverage) reused",
      "source_quality": "artifact"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built in tekmerion.mathclaims with seeded-defect tests green (full suite 82/82, CI read-back success). Checked; no human explanation or acceptance act on record."
   },
   {
    "id": "CLM-003-12",
@@ -337,7 +359,10 @@
      "ref": "Phase 5 demo: single-actor study ran INVALID and issued no verdicts (Zenodo DOI 10.5281/zenodo.23311479 record)",
      "source_quality": "artifact"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "The worked study ran end-to-end on the production machinery (2026-10-12): multi-actor ledger, freeze root 5b497655..., run VALID, five theorem verdicts issued (contested / contested / inconclusive / inconclusive / supported), bundle deposited at DOI 10.5281/zenodo.23317259 and anchor verified independently. Checked; the study's claims are not thereby explained or digested."
   }
- ]
+ ],
+ "audit_note": "2026-10-12 Tao realignment audit (DN-010 standard): lifecycle_stage + stage_basis added to every claim by reclassification only; no claim text, falsifier, or evidence was rewritten. Git history is the append-only trail for AEE bundles."
 }
