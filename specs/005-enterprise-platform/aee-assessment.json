@@ -1,0 +1,4576 @@
+{
+  "schema_version": "1.0",
+  "methodology_version": "1.0",
+  "project": "tekmerion",
+  "phase": "after_specify",
+  "outcome": "gather_evidence",
+  "summary": "Assessed 31 claim(s); found 136 failure mode(s); 20 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T12:48:41.182189Z",
+  "claims": [
+    {
+      "id": "CLM-005-01",
+      "text": "Human users authenticate only through a tenant-configured external IdP over OpenID Connect (authorization code flow with PKCE); the platform keeps no local password store and offers no local credential login.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: interactive human sign-in, hosted and self-hosted shapes (E1)",
+        "Excludes service accounts / API keys (CLM-005-18) and the standalone bundle verifier, which needs no account (WS6 \u00a72)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) \u00a71",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Constitution Articles IV, XII, XIII (tekmerion .specify/memory/constitution.md)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "docs/wireframes/WIREFRAMES.md \u00a74 \u2014 actor block: identity arrives via the SSO hook",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-01: any code path, schema, or admin function that creates, stores, or verifies a local password credential; or an OIDC flow completing without PKCE (S256) proof."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.752176,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-01-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-01",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-01-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-01 may contradict CLM-005-14",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-01-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-01 may contradict CLM-005-15",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-01-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-01 may contradict CLM-005-19",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-01-NEGATION-CONFLICT-CHALLE-4",
+          "claim_id": "CLM-005-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-01 may contradict CLM-005-30",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-02",
+      "text": "The platform acts as a SAML 2.0 service provider with per-tenant IdP configuration (entity ID, metadata, attribute mapping), so Shibboleth / InCommon-class federated IdPs authenticate their tenants; unsigned or untrusted assertions are never accepted.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: SAML 2.0 Web Browser SSO profile, SP-initiated and IdP-initiated (E2)",
+        "Excludes SAML artifact binding and federation-metadata aggregate automation in v1 (manual per-tenant metadata, refreshed on a schedule)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) \u00a71 \u2014 federation institutions speak SAML; one-protocol excludes them",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "WS6 \u00a71 role matrix (docs/architecture/06-product-shape.md)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-02: an authentication succeeding on an unsigned assertion, an assertion from an IdP not configured for that tenant, or a SAML login for a tenant with no SAML IdP configured."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-02-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-02",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-02 may contradict CLM-005-03",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-02 may contradict CLM-005-06",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-02 may contradict CLM-005-14",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE-4",
+          "claim_id": "CLM-005-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-02 may contradict CLM-005-22",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE-5",
+          "claim_id": "CLM-005-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-02 may contradict CLM-005-15",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE-6",
+          "claim_id": "CLM-005-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-02 may contradict CLM-005-19",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE-7",
+          "claim_id": "CLM-005-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-02 may contradict CLM-005-21",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE-8",
+          "claim_id": "CLM-005-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-02 may contradict CLM-005-29",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE-9",
+          "claim_id": "CLM-005-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-02 may contradict CLM-005-30",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-03",
+      "text": "Every append the service accepts is signed by an Ed25519 key enrolled to an IdP identity (issuer + subject) through a recorded enrollment event; appends signed by unenrolled, expired-binding, or revoked keys are rejected at the service layer.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: all study-ledger appends made through the platform service (E1)",
+        "Excludes offline bundle verification, which verifies historical signatures against enrollment-era records without live service state"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "Constitution Articles IV, XII, XIII (tekmerion .specify/memory/constitution.md) \u2014 Article XIII: every append is signed with its actor's key",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/store.py \u2014 every mutating call takes a named actor and appends via Axiomere",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) \u00a72",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-03: a service-accepted append whose signing key has no enrollment event binding it to the authenticated actor's IdP identity; or acceptance of an append signed by a revoked key."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.752176,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-03-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-03",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-03-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-03",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-03 may contradict CLM-005-07",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-03-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-03",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-03 may contradict CLM-005-08",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-03-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-03",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-03 may contradict CLM-005-11",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-03-NEGATION-CONFLICT-CHALLE-4",
+          "claim_id": "CLM-005-03",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-03 may contradict CLM-005-13",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-03-NEGATION-CONFLICT-CHALLE-5",
+          "claim_id": "CLM-005-03",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-03 may contradict CLM-005-18",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-03-NEGATION-CONFLICT-CHALLE-6",
+          "claim_id": "CLM-005-03",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-03 may contradict CLM-005-27",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-04",
+      "text": "Key enrollment, rotation, and revocation are appended, timestamped events in the platform record; rotation supersedes a binding without editing it, and signatures made before a revocation continue to verify after it.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: the identity/key registry (platform plane), E1 with lifecycle completion in E3",
+        "Excludes the DN-005 break-glass erasure certificate, which governs payload keys, not actor signing keys"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) \u00a72",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "DN-005 \u2014 change happens only by appending new snapshots; lineage stays readable",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-04: a rotation or revocation that mutates an earlier enrollment event; or a pre-revocation signature failing verification solely because of the later revocation."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-04-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-04",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-04-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-04",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-04 may contradict CLM-005-07",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-04-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-04",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-04 may contradict CLM-005-10",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-04-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-04",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-04 may contradict CLM-005-11",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-04-NEGATION-CONFLICT-CHALLE-4",
+          "claim_id": "CLM-005-04",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-04 may contradict CLM-005-13",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-04-NEGATION-CONFLICT-CHALLE-5",
+          "claim_id": "CLM-005-04",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-04 may contradict CLM-005-17",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-04-NEGATION-CONFLICT-CHALLE-6",
+          "claim_id": "CLM-005-04",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-04 may contradict CLM-005-25",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-04-NEGATION-CONFLICT-CHALLE-7",
+          "claim_id": "CLM-005-04",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-04 may contradict CLM-005-27",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-04-NEGATION-CONFLICT-CHALLE-8",
+          "claim_id": "CLM-005-04",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-04 may contradict CLM-005-28",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-05",
+      "text": "Deprovisioning an identity ends its ability to append and to read \u2014 effective at the next authenticated request after the deactivation event \u2014 while every historical append, signature, and attribution by that identity remains intact and verifiable.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: deprovisioning via SCIM deactivate, tenant-admin action, or IdP-driven lifecycle (E3)",
+        "Excludes erasure of off-ledger directory PII under legal duty, which follows ordinary data controls and never touches ledger content"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) \u00a73",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Constitution Article IV \u2014 no delete operation in any API, UI, or admin path",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-05: a deprovisioned identity's key completing an append after deactivation; or deprovisioning altering, masking, or deleting any historical event or signature."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-05-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-05",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-05-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-05",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-05 may contradict CLM-005-07",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-05-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-05",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-05 may contradict CLM-005-11",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-05-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-05",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-05 may contradict CLM-005-16",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-06",
+      "text": "SCIM 2.0 provisioning from the tenant's IdP (create, update, deactivate) is honored as the tenant's lifecycle source of truth, and a SCIM deactivate produces exactly CLM-005-05 deprovisioning semantics.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: SCIM 2.0 Users resource (E3); Groups map to role grants only via recorded tenant-admin-approved mappings",
+        "Excludes SCIM as an authentication mechanism \u2014 SCIM provisions, IdPs authenticate"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) \u00a73",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "WS6 \u00a71 role matrix (docs/architecture/06-product-shape.md)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-06: a SCIM deactivate that deletes the user's history, leaves append capability live, or a SCIM create that grants a study role without a recorded mapping/grant."
+      ],
+      "uncertainty": "low",
+      "severity": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-06-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-06",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-06-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-06",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-06 may contradict CLM-005-07",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-06-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-06",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-06 may contradict CLM-005-13",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-06-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-06",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-06 may contradict CLM-005-16",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-06-NEGATION-CONFLICT-CHALLE-4",
+          "claim_id": "CLM-005-06",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-06 may contradict CLM-005-17",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-06-NEGATION-CONFLICT-CHALLE-5",
+          "claim_id": "CLM-005-06",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-06 may contradict CLM-005-27",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-07",
+      "text": "Just-in-time provisioning creates an identity only in the tenant whose IdP asserted it, with no study role by default (least privilege); a role exists only after a recorded grant.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: first-login provisioning for OIDC and SAML tenants without SCIM (E3)",
+        "Excludes platform-admin bootstrap for a brand-new tenant, which is a named, audited platform event"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) \u00a73, \u00a75",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "WS6 \u00a71 role matrix (docs/architecture/06-product-shape.md)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-07: a JIT-created identity holding any study role before a grant event; or an identity created in a tenant other than the asserting IdP's tenant."
+      ],
+      "uncertainty": "medium",
+      "severity": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-07-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-07",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-07-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-07",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-07 may contradict CLM-005-14",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-07-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-07",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-07 may contradict CLM-005-15",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-07-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-07",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-07 may contradict CLM-005-19",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-07-NEGATION-CONFLICT-CHALLE-4",
+          "claim_id": "CLM-005-07",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-07 may contradict CLM-005-30",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-08",
+      "text": "Authorization for every read and mutation is enforced in the service layer against the WS6 \u00a71 role matrix (researcher / reviewer / adjudicator / integrity officer); no endpoint relies on the UI hiding an affordance.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: all platform API surfaces serving study or admin data (E1, hardened E4)",
+        "Excludes the deliberately public standalone bundle-verification endpoint, which serves only what a bundle already contains"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "WS6 \u00a71 role matrix (docs/architecture/06-product-shape.md)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Constitution Article IX \u2014 a named human adjudicator signs every verdict set",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/store.py \u2014 every mutating call takes a named actor and appends via Axiomere",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-08: a direct API call with a valid session but an insufficient role succeeding at a matrix-forbidden action \u2014 e.g., a researcher approving a freeze, a reviewer altering a frozen registration, a non-adjudicator signing a verdict set."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.752176,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-08-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-08",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-08-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-08",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-08 may contradict CLM-005-14",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-08-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-08",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-08 may contradict CLM-005-26",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-09",
+      "text": "Platform-admin, tenant-admin, and study roles are disjoint planes: no plane's authority implies another's \u2014 a platform admin cannot sign study verdicts, and a tenant admin can reach nothing outside their tenant.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: authorization model across hosted and self-hosted shapes (E1 model, E4 test battery)",
+        "Excludes break-glass, which is a separate named mechanism (CLM-005-10), not a plane"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) \u00a75",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "WS6 \u00a71 role matrix (docs/architecture/06-product-shape.md)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-09: a platform-admin credential issuing or signing a study verdict; or a tenant-admin session reading or mutating any resource of another tenant."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-09-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-09",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-09-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-09",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-09 may contradict CLM-005-22",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-09-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-09",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-09 may contradict CLM-005-15",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-09-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-09",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-09 may contradict CLM-005-21",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-09-NEGATION-CONFLICT-CHALLE-4",
+          "claim_id": "CLM-005-09",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-09 may contradict CLM-005-29",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-10",
+      "text": "Break-glass access exists only as a named mechanism: pre-declared per tenant, dual-authorized, time-boxed, alarmed on use, and every use appended to the platform audit record; there is no standing or silent backdoor credential.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: emergency access to tenant data/administration in the hosted shape (E4); in the self-hosted shape the institution's own operators hold infrastructure access outside this mechanism, stated honestly",
+        "Excludes DN-005's erasure certificate \u2014 a legal-compulsion protocol, not an access path"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) \u00a75",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "DN-005 \u2014 the program's only other break-glass is owner-signed, on the record, legal compulsion only",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-10: any break-glass session whose use leaves no platform audit event; a break-glass credential that works without the second authorization or outside its time box."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-10-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-10",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-10-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-10",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-10 may contradict CLM-005-14",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-10-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-10",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-10 may contradict CLM-005-22",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-10-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-10",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-10 may contradict CLM-005-15",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-10-NEGATION-CONFLICT-CHALLE-4",
+          "claim_id": "CLM-005-10",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-10 may contradict CLM-005-26",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-10-NEGATION-CONFLICT-CHALLE-5",
+          "claim_id": "CLM-005-10",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-10 may contradict CLM-005-30",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-11",
+      "text": "Tenant isolation holds by construction: every study, identity binding, and platform record carries a tenant scope enforced at the data-access layer, and the E4 isolation battery's canonical test \u2014 tenant A's credential presented against tenant B's study at every endpoint class \u2014 returns no tenant-B data.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: hosted multi-tenant shape (E4); the self-hosted shape is single-tenant by deployment",
+        "Excludes information disclosure via shared *public* artifacts (anchored bundles a tenant chose to deposit publicly)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) \u00a74",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "DN-003 \u2014 custody of the record is a hard architectural boundary, not a deployment afterthought",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-11: any response in the isolation battery containing another tenant's study data, metadata, or existence signal beyond a uniform not-found."
+      ],
+      "uncertainty": "high",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-11-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-11",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-11-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-11",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-11 may contradict CLM-005-22",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-11-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-11",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-11 may contradict CLM-005-15",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-11-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-11",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-11 may contradict CLM-005-19",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-12",
+      "text": "Hosted multi-tenant and self-hosted single-tenant are one codebase and one role/authorization model; each tenant's residency pin (deployment shape, region) is recorded configuration, and a self-hosted tenant's study data never transits or rests in the hosted plane.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: deployment shapes (E6 productizes self-hosted); hybrid per DN-003 remains an architectural target",
+        "Excludes connector traffic (Crossref/OpenAlex queries), which leaves any shape by design and is ledgered per study"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "DN-003 \u2014 hybrid ratified; hosted-first pilot; bundle export is the exit guarantee",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) \u00a74",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-12: a behavioral or authorization difference between shapes not traceable to recorded configuration; or self-hosted study payloads found in hosted-plane storage, logs, or backups."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-12-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-12",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-12-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-12",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-12 may contradict CLM-005-14",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-12-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-12",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-12 may contradict CLM-005-22",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-12-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-12",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-12 may contradict CLM-005-15",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-12-NEGATION-CONFLICT-CHALLE-4",
+          "claim_id": "CLM-005-12",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-12 may contradict CLM-005-19",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-12-NEGATION-CONFLICT-CHALLE-5",
+          "claim_id": "CLM-005-12",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-12 may contradict CLM-005-21",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-13",
+      "text": "No admin-console screen ships before its rendered wireframes are added to docs/wireframes/ and approved by the owner; Spec 005 scopes the console functionally (tenant, IdP, user, role, key, audit management) and designs no screens.",
+      "kind": "compliance",
+      "status": "draft",
+      "boundary": [
+        "Scope: the E5 admin console and any later console surface",
+        "Excludes the Spec 002 study UI (Phase 6), which carries its own wireframe package and gate"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "Constitution Article XIV (drafted per DN-009; wireframe package approved by the owner 2026-10-12)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "docs/wireframes/WIREFRAMES.md \u00a71 \u2014 the wireframes are the requirements; approval is of rendered screens",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "The Article XIV process operating: owner approved the rendered Phase 6 wireframe package 2026-10-12, discharging gate T219-WF \u2014 the same gate E5 inherits",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "human",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-13: a console screen present in any build or release whose rendered-wireframe approval is absent from docs/wireframes/ and the project record."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.904068,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-13-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-13",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-13-AUTHORITY-CHALLENGE",
+          "claim_id": "CLM-005-13",
+          "challenge": "Authority challenge",
+          "breakpoint": "Compliance claim lacks observed primary-authority or test evidence",
+          "severity": "high",
+          "category": "missing_evidence",
+          "recovery_hint": "Cite the controlling text and attach assessment evidence.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-13-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-13",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-13 may contradict CLM-005-14",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-13-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-13",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-13 may contradict CLM-005-22",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-14",
+      "text": "Every platform-plane administrative action \u2014 IdP configuration change, role grant or revocation, key enrollment/rotation/revocation, SCIM sync outcome, break-glass use \u2014 is recorded as an append-only, signed, hash-chained event in the platform audit ledger.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: platform audit ledger, distinct from study ledgers (E1 core, complete by E4)",
+        "Excludes study-internal events, which live in study ledgers under Spec 002"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "Constitution Article XIII \u2014 signed, checkpointed, anchored records",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "WS6 \u00a71 \u2014 integrity officer: inspection access is itself logged",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-14: an administrative action with no corresponding platform audit event; or an audit event that can be altered without breaking the ledger's verification."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-14-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-14",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-14-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-14",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-14 may contradict CLM-005-16",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-14-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-14",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-14 may contradict CLM-005-17",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-14-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-14",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-14 may contradict CLM-005-18",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-14-NEGATION-CONFLICT-CHALLE-4",
+          "claim_id": "CLM-005-14",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-14 may contradict CLM-005-24",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-14-NEGATION-CONFLICT-CHALLE-5",
+          "claim_id": "CLM-005-14",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-14 may contradict CLM-005-25",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-14-NEGATION-CONFLICT-CHALLE-6",
+          "claim_id": "CLM-005-14",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-14 may contradict CLM-005-27",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-14-NEGATION-CONFLICT-CHALLE-7",
+          "claim_id": "CLM-005-14",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-14 may contradict CLM-005-28",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-22",
+      "text": "An actor's platform-plane audit events and study-ledger appends are joinable on the identity\u2194key binding, so an auditor can walk from an administrative action to everything that identity signed, and back.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: the reconciliation path between the platform audit ledger and study ledgers (E4)",
+        "Excludes actors whose binding was established before this spec in single-tenant prototype use (actor strings in Phase 1\u20135 ledgers), which join by recorded assertion, not by binding"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "CLM-005-03 (identity\u2194key binding) + CLM-005-14 (platform audit ledger)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) \u00a72",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-22: a legitimately bound actor whose platform events and study appends cannot be joined; or a join that pairs records of two different identities."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-22-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-22",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-22-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-22",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-22 may contradict CLM-005-17",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-22-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-22",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-22 may contradict CLM-005-18",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-22-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-22",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-22 may contradict CLM-005-25",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-22-NEGATION-CONFLICT-CHALLE-4",
+          "claim_id": "CLM-005-22",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-22 may contradict CLM-005-28",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-15",
+      "text": "The platform audit record exports in the Phase 5 audit-bundle pattern \u2014 manifest, per-file hashes, standalone verification, optional external anchor \u2014 so a tenant or an external auditor can verify the platform-plane record offline, and tampering with an export fails that verification.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: platform-plane export (E6), reusing tekmerion.export/deposit machinery",
+        "Excludes study bundles, already shipped in Spec 002 Phase 5"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "Spec 002 Phase 5: bundle + standalone verifier + live Zenodo anchor (CI run 38214358137, 68/68 tests) \u2014 DN-008 evidence",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) \u2014 audit & compliance evidence direction",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-15: a platform audit export with an altered event (including an attacker-rehashed manifest) passing standalone verification."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-15-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-15",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-15-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-15",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-15 may contradict CLM-005-17",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-15-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-15",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-15 may contradict CLM-005-24",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-15-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-15",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-15 may contradict CLM-005-25",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-15-NEGATION-CONFLICT-CHALLE-4",
+          "claim_id": "CLM-005-15",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-15 may contradict CLM-005-27",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-15-NEGATION-CONFLICT-CHALLE-5",
+          "claim_id": "CLM-005-15",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-15 may contradict CLM-005-28",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-16",
+      "text": "The product claims SOC 2 readiness and evidence mapping only \u2014 never certification; FERPA and GDPR appear only as design constraints, never as compliance certifications; and every SOC 2 mapping entry points at machinery that exists or is specced in Spec 005, not at aspirations.",
+      "kind": "compliance",
+      "status": "draft",
+      "boundary": [
+        "Scope: all product surfaces, spec text, and sales-facing descriptions of the enterprise platform",
+        "Excludes a future, separately-gated audit engagement, whose outcome would be recorded as its own decision"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) \u2014 'What enterprise will NOT claim in v1'",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Constitution Article X \u2014 statuses are claims; only verified states are stated",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "The discipline operating: the Phase 5 Zenodo record's description was corrected in place when it overstated the run's outcome (DN-008, recorded caveat 1)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-16: any product or spec text claiming a certification not held; or a mapping entry whose named machinery cannot be located in the codebase or this spec."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.968023,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-16-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-16",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-16-AUTHORITY-CHALLENGE",
+          "claim_id": "CLM-005-16",
+          "challenge": "Authority challenge",
+          "breakpoint": "Compliance claim lacks observed primary-authority or test evidence",
+          "severity": "high",
+          "category": "missing_evidence",
+          "recovery_hint": "Cite the controlling text and attach assessment evidence.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-16-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-16",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-16 may contradict CLM-005-30",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-17",
+      "text": "Retention and legal hold are implemented as export + anchor + access-restriction markers only; no retention feature deletes or masks ledger content, and the sole erasure path for chain content anywhere in the platform is DN-005's break-glass erasure certificate under documented legal compulsion.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: study ledgers and the platform audit ledger (E6)",
+        "Excludes off-ledger data (identity-directory PII, session stores), which follows ordinary data controls and minimization"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "DN-005 \u2014 no delete operation; the erasure certificate is the single exception, owner-signed, on the record",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Constitution Article IV",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-17: a retention or hold operation that removes, masks, or renders unverifiable any ledger event outside the certificate protocol."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-17-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-17",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-17-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-17",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-17 may contradict CLM-005-19",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-17-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-17",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-17 may contradict CLM-005-29",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-17-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-17",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-17 may contradict CLM-005-30",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-18",
+      "text": "Programmatic access uses scoped, expiring, revocable API keys / service accounts whose scopes cannot exceed the WS6 role matrix; every service-account action is attributed to the account and ledgered like a human actor's.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: API access for integrations and automation (E1 keys core; egress signing completes the baseline in E4)",
+        "Excludes connector credentials (Crossref/OpenAlex), which are the operator's, not tenants'"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "WS6 \u00a71 role matrix (docs/architecture/06-product-shape.md) (API-first shape, \u00a72)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) \u00a75",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-18: an unscoped, non-expiring, or irrevocable key; a scope granting a power the role matrix denies the equivalent human role; or a service-account append with no attributable identity in the record."
+      ],
+      "uncertainty": "medium",
+      "severity": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-18-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-18",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-18-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-18",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-18 may contradict CLM-005-26",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-19",
+      "text": "The session and transport baseline holds, in enumerable terms: HTTP requests are refused or redirected to TLS; session cookies carry Secure, HttpOnly, and SameSite attributes; sessions die at a configured idle lifetime and a configured absolute lifetime; per-tenant rate limits answer excess requests with 429; responses carry HSTS, a Content-Security-Policy, X-Content-Type-Options, Referrer-Policy, and frame-ancestors restrictions.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: hosted shape in full; self-hosted inherits the same defaults behind the institution's TLS termination (E4)",
+        "Excludes penetration-test attestation, which is an E6 evidence item, not a design claim"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) \u2014 platform security baseline direction",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "WS5 \u00a75 \u2014 abuse and failure cases designed for (docs/architecture/05-trust-safety.md)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-19: a session cookie missing any named attribute; a session accepted after its absolute lifetime; an endpoint class with no rate-limit response under the battery's load pattern; a response missing any named header."
+      ],
+      "uncertainty": "low",
+      "severity": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.674984,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-19-PRECISION-CHALLENGE",
+          "claim_id": "CLM-005-19",
+          "challenge": "Precision challenge",
+          "breakpoint": "Claim contains an undefined or non-measurable term",
+          "severity": "medium",
+          "category": "ambiguous_requirement",
+          "recovery_hint": "Replace vague language with a threshold, observable, or decision rule.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-19-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-19",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-19-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-19",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-19 may contradict CLM-005-27",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-19-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-19",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-19 may contradict CLM-005-28",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-21",
+      "text": "Webhook and event-egress payloads are signed (HMAC-SHA256 with the tenant's egress secret, or Ed25519), and the reference receiver rejects unsigned, badly signed, and replayed (outside the stated timestamp window) deliveries.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: platform event egress to tenant-registered endpoints (E4)",
+        "Excludes inbound webhooks from IdPs, which follow the IdP's own protocol security (SAML/OIDC)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) \u2014 platform security baseline direction",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Constitution Article XIII \u2014 the platform's records are signed; its egress is held to the same standard",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-21: a delivery accepted by the reference receiver with a missing/invalid signature or a timestamp outside the replay window."
+      ],
+      "uncertainty": "medium",
+      "severity": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-21-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-21",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-20",
+      "text": "The enterprise build does not weaken any Spec 002 guarantee: the full Spec 002 test battery (including seeded-defect tests) passes unchanged against the multi-tenant service build, and no enterprise feature adds a mutation or deletion path to study records.",
+      "kind": "prediction",
+      "status": "draft",
+      "boundary": [
+        "Scope: regression obligation at every enterprise phase exit, E1\u2013E6",
+        "Excludes performance characteristics, which get their own thresholds at the evaluation freeze (OD-5 pattern)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "Spec 002 battery: 68/68 tests green at Phase 5 (CI run 38214358137), incl. rehashed-manifest tamper defects",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Constitution Article IV",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-20: any Spec 002 test failing for an enterprise-caused reason at a phase exit; or any enterprise endpoint capable of mutating or deleting a study-ledger event."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-20-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-20",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-23",
+      "text": "All product language frames CMMC truthfully: CMMC (32 CFR Part 170) certifies organizations and assessment boundaries, not software; Tekmerion claims only CMMC Level 2 alignment / compliance support, implies Level 1 by that alignment, and nowhere claims Level 3 (SP 800-172) practices.",
+      "kind": "compliance",
+      "status": "draft",
+      "boundary": [
+        "Scope: every product surface \u2014 docs, spec language, UI copy, exports, marketing-adjacent text in this repo",
+        "The qualifier structure (alignment / compliance support) is the claim; dropping it anywhere is a violation, not a wording choice"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12), CMMC posture section",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Spec 005 \u00a713 (CMMC amendment, claims-first, 2026-10-12) \u00a713.1",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "32 CFR Part 170 (CMMC program rule: certification attaches to organizations/assessment boundaries)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-23: any surface stating or implying a 'CMMC compliant product', 'CMMC certified' software, or Level 3 practice coverage without the \u00a713.1 qualifier structure."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.756173,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-23-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-23",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-23-AUTHORITY-CHALLENGE",
+          "claim_id": "CLM-005-23",
+          "challenge": "Authority challenge",
+          "breakpoint": "Compliance claim lacks observed primary-authority or test evidence",
+          "severity": "high",
+          "category": "missing_evidence",
+          "recovery_hint": "Cite the controlling text and attach assessment evidence.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-23-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-23",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-23 may contradict CLM-005-26",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-23-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-23",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-23 may contradict CLM-005-29",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-23-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-23",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-23 may contradict CLM-005-30",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-24",
+      "text": "Every NIST SP 800-171 Rev 2 requirement (110, 14 families) is classified in the control responsibility matrix as Platform, Supports, or Organizational, with a stated basis; no family or requirement is omitted, and any phase-exit reclassification updates the matrix in the same commit.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: SP 800-171 Rev 2 only; SP 800-172 (Level 3) is out of scope per \u00a711",
+        "The 800-53 SA family has no 800-171 counterpart; the matrix records that absence explicitly rather than mapping it silently"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/005-enterprise-platform/cmmc-responsibility-matrix.md (all 14 families, 110 requirements classified)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Spec 005 \u00a713 (CMMC amendment, claims-first, 2026-10-12) \u00a713.2",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-24: a requirement ID from SP 800-171 Rev 2 absent from cmmc-responsibility-matrix.md, a family with no classification rows, or a classification whose named machinery does not exist at the phase exit that claims it."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.958063,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-24-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-24",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-24-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-24",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-24 may contradict CLM-005-26",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-24-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-24",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-24 may contradict CLM-005-29",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-24-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-24",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-24 may contradict CLM-005-30",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-25",
+      "text": "The platform makes no FIPS-validation claim it cannot evidence: every cryptographic operation in the platform plane is listed in the crypto inventory with its implementation and validation status; \u00a73.13.11 (FIPS-validated modules) is recorded as an open gap with recorded migration routes, a cross-repo dependency on the Axiomere roadmap, and an owner decision pending \u2014 never as satisfied.",
+      "kind": "compliance",
+      "status": "draft",
+      "boundary": [
+        "Scope: platform plane incl. the Axiomere record layer it embeds; tenant-side IdP/KMS cryptography is the tenant's inventory, not this claim's",
+        "E1 delivers the inventory (T549); the validated-module migration itself is NOT an E1 deliverable and this claim must not be read as promising it"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "Spec 005 \u00a713 (CMMC amendment, claims-first, 2026-10-12) \u00a713.3",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Axiomere core Cargo.toml: sha2 0.10, ed25519-dalek 2 (capable implementations; neither is a FIPS-validated module)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12), CMMC posture section",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-25: a cryptographic operation reachable in the platform plane that is absent from crypto-inventory.md; or any text claiming FIPS 140-3 validation for a module that is not on the CMVP validated-modules list."
+      ],
+      "uncertainty": "medium",
+      "severity": "critical",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.968023,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-25-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-25",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-25-AUTHORITY-CHALLENGE",
+          "claim_id": "CLM-005-25",
+          "challenge": "Authority challenge",
+          "breakpoint": "Compliance claim lacks observed primary-authority or test evidence",
+          "severity": "high",
+          "category": "missing_evidence",
+          "recovery_hint": "Cite the controlling text and attach assessment evidence.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-25-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-25",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-25 may contradict CLM-005-26",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-25-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-25",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-25 may contradict CLM-005-29",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-25-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-005-25",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-25 may contradict CLM-005-30",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-26",
+      "text": "The platform audit ledger emits the SP 800-171 \u00a73.3.1/\u00a73.3.2 event classes from E1: account creation and modification, authentication successes and failures, authorization decisions on mutations including denials, administrative actions, the complete key lifecycle, session lifecycle, and API-key lifecycle \u2014 each event carrying actor identity, event type, timestamp, target, and outcome.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: platform plane (deployment + per-tenant audit ledgers); study-plane events remain Spec 002's vocabulary",
+        "E1 delivers the emission; E4 completes review/retention semantics \u2014 this claim is discharged in halves and must be scored as such"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "Spec 005 \u00a713 (CMMC amendment, claims-first, 2026-10-12) \u00a713.4",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Spec 005 \u00a78 (platform audit ledger) + T510/T550",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-26: a mutation or authentication attempt in the E1 surface that produces no corresponding audit event in the T550 sweep, or an audit event missing any element of the AU content set."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-26-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-26",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-26-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-26",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-26 may contradict CLM-005-27",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-26-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-26",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-26 may contradict CLM-005-28",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-27",
+      "text": "Interactive platform access requires MFA at the tenant IdP, enforced platform-side: tenant IdP policy records the required acr/amr, a session whose assertion lacks MFA evidence cannot act beyond sign-in completion and cannot step up, and authenticator management is the \u00a73 key lifecycle (enrollment with proof of possession, rotation, revocation, closure).",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: interactive human access; service accounts authenticate under CLM-005-18, not this claim",
+        "Password-family requirements (\u00a73.5.7\u20133.5.10) are not applicable by design \u2014 no local passwords exist (CLM-005-01) \u2014 and are recorded against the tenant IdP in the matrix, not silently skipped"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "Spec 005 \u00a713 (CMMC amendment, claims-first, 2026-10-12) \u00a713.5",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Spec 005 \u00a72 (step-up) + \u00a73 (key lifecycle as authenticator management)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-27: a session established from an assertion without MFA evidence performing any platform mutation, or stepping up to a verdict-class or admin-plane action."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-27-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-27",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-27-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-27",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-27 may contradict CLM-005-29",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-27-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-27",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-27 may contradict CLM-005-30",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-28",
+      "text": "Audit bundles and platform exports carry CUI marking support: banner/footer marking fields in the manifest and HUMAN-README, populated from recorded study/tenant fields (category, controlling authority, dissemination controls); the platform records markings, it does not adjudicate them.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: export artifacts (study bundles from E6 platform export; study-plane bundle marking fields ride the same manifest extension)",
+        "Specced in the amendment so E1/E4 payloads never need re-shaping; the rendering itself is an E6 deliverable (T551)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "Spec 005 \u00a713 (CMMC amendment, claims-first, 2026-10-12) \u00a713.6",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Spec 005 \u00a78 (export pattern) + T551",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-28: an exported bundle for a study/tenant whose record carries CUI marking fields, whose manifest or HUMAN-README omits the corresponding markings."
+      ],
+      "uncertainty": "medium",
+      "severity": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-28-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-28",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-28-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-005-28",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-28 may contradict CLM-005-29",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-28-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-005-28",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-005-28 may contradict CLM-005-30",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-29",
+      "text": "The platform maintains its SP 800-171 control states in SPRS-ready form: per-requirement state, the weighted deduction class of any unimplemented requirement under the DoD scoring methodology (the -203\u2026110 scale), and an evidence link \u2014 so an operator can compute and maintain their self-assessment score from platform-maintained inputs.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: platform-owned and platform-supported requirements; the operator's SPRS submission itself is the operator's act and is not claimed",
+        "E6 deliverable (T552); the matrix (\u00a713.2) is its data source and must stay current per phase exit"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "Spec 005 \u00a713 (CMMC amendment, claims-first, 2026-10-12) \u00a713.7 (SPRS self-assessment support)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/005-enterprise-platform/cmmc-responsibility-matrix.md (the maintained data source)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-29: a requirement whose matrix classification and SPRS-form state disagree, or an unimplemented requirement with no deduction class recorded."
+      ],
+      "uncertainty": "high",
+      "severity": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.958063,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-29-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-29",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-30",
+      "text": "Incident-response support is mechanized: security-significant platform events (authentication-failure bursts, break-glass use, revocation storms, audit-verification failures) are first-class signed egress events over the webhook channel, and unimplemented 800-171 requirements live in an append-only POA&M register (items, milestones, status as events) seeded with the \u00a73.13.11 FIPS gap.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: IR family support only \u2014 the incident-response capability and its testing remain the organization's (matrix 3.6)",
+        "Webhook channel is E4 (CLM-005-21); the IR event classes and the POA&M register are E6 (T553/T554) \u2014 the claim joins both and is discharged across them"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "Spec 005 \u00a713 (CMMC amendment, claims-first, 2026-10-12) \u00a713.7 (POA&M register; incident-response hooks)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Spec 005 \u00a79 (webhook egress) + T553/T554",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-30: a security-significant event class that produces no egress event in the E4/E6 battery, or a POA&M item whose status changes without an appended event."
+      ],
+      "uncertainty": "medium",
+      "severity": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-30-PRECISION-CHALLENGE",
+          "claim_id": "CLM-005-30",
+          "challenge": "Precision challenge",
+          "breakpoint": "Claim contains an undefined or non-measurable term",
+          "severity": "medium",
+          "category": "ambiguous_requirement",
+          "recovery_hint": "Replace vague language with a threshold, observable, or decision rule.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-30-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-30",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-005-31",
+      "text": "The hosted shape's CUI posture is an open owner/legal decision, recorded and visible: DFARS 252.204-7012's FedRAMP-Moderate-equivalency expectation for cloud providers storing CUI is not met by the Axiovex-hosted shape today, hosted-shape materials carry the flag wherever CUI hosting is described, and engineering does not resolve or conceal the question.",
+      "kind": "compliance",
+      "status": "draft",
+      "boundary": [
+        "Scope: the Axiovex-hosted shape only; the self-hosted shape (T546) is the fully capable CUI path in the meantime",
+        "This claim is about the flag's visibility and honesty, not about the decision's outcome, which is not engineering's to make"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "Spec 005 \u00a713 (CMMC amendment, claims-first, 2026-10-12) \u00a713.8",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12), CMMC posture section (hosted-shape flag)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-005-31: hosted-shape material describing CUI hosting without the open-decision flag, or any engineering artifact treating FedRAMP equivalency as settled."
+      ],
+      "uncertainty": "high",
+      "severity": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-005-31-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-005-31",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-005-31-AUTHORITY-CHALLENGE",
+          "claim_id": "CLM-005-31",
+          "challenge": "Authority challenge",
+          "breakpoint": "Compliance claim lacks observed primary-authority or test evidence",
+          "severity": "high",
+          "category": "missing_evidence",
+          "recovery_hint": "Cite the controlling text and attach assessment evidence.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    }
+  ],
+  "scores": {
+    "CLM-005-01": {
+      "claim_id": "CLM-005-01",
+      "direct_score": 0.752176,
+      "propagated_score": 0.752176,
+      "band": "high",
+      "components": {
+        "evidence": 0.54941,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-02": {
+      "claim_id": "CLM-005-02",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-03": {
+      "claim_id": "CLM-005-03",
+      "direct_score": 0.752176,
+      "propagated_score": 0.752176,
+      "band": "high",
+      "components": {
+        "evidence": 0.54941,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-04": {
+      "claim_id": "CLM-005-04",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-05": {
+      "claim_id": "CLM-005-05",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-06": {
+      "claim_id": "CLM-005-06",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-07": {
+      "claim_id": "CLM-005-07",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-08": {
+      "claim_id": "CLM-005-08",
+      "direct_score": 0.752176,
+      "propagated_score": 0.752176,
+      "band": "high",
+      "components": {
+        "evidence": 0.54941,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-09": {
+      "claim_id": "CLM-005-09",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-10": {
+      "claim_id": "CLM-005-10",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-11": {
+      "claim_id": "CLM-005-11",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-12": {
+      "claim_id": "CLM-005-12",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-13": {
+      "claim_id": "CLM-005-13",
+      "direct_score": 0.904068,
+      "propagated_score": 0.904068,
+      "band": "high",
+      "components": {
+        "evidence": 0.825578,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-005-14": {
+      "claim_id": "CLM-005-14",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-22": {
+      "claim_id": "CLM-005-22",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-15": {
+      "claim_id": "CLM-005-15",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-005-16": {
+      "claim_id": "CLM-005-16",
+      "direct_score": 0.968023,
+      "propagated_score": 0.968023,
+      "band": "high",
+      "components": {
+        "evidence": 0.941859,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-005-17": {
+      "claim_id": "CLM-005-17",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-18": {
+      "claim_id": "CLM-005-18",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-19": {
+      "claim_id": "CLM-005-19",
+      "direct_score": 0.674984,
+      "propagated_score": 0.674984,
+      "band": "medium",
+      "components": {
+        "evidence": 0.409062,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-21": {
+      "claim_id": "CLM-005-21",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-20": {
+      "claim_id": "CLM-005-20",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-005-23": {
+      "claim_id": "CLM-005-23",
+      "direct_score": 0.756173,
+      "propagated_score": 0.756173,
+      "band": "high",
+      "components": {
+        "evidence": 0.556678,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-24": {
+      "claim_id": "CLM-005-24",
+      "direct_score": 0.958063,
+      "propagated_score": 0.958063,
+      "band": "high",
+      "components": {
+        "evidence": 0.92375,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-005-25": {
+      "claim_id": "CLM-005-25",
+      "direct_score": 0.968023,
+      "propagated_score": 0.968023,
+      "band": "high",
+      "components": {
+        "evidence": 0.941859,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-005-26": {
+      "claim_id": "CLM-005-26",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-27": {
+      "claim_id": "CLM-005-27",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-28": {
+      "claim_id": "CLM-005-28",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-29": {
+      "claim_id": "CLM-005-29",
+      "direct_score": 0.958063,
+      "propagated_score": 0.958063,
+      "band": "high",
+      "components": {
+        "evidence": 0.92375,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-005-30": {
+      "claim_id": "CLM-005-30",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-005-31": {
+      "claim_id": "CLM-005-31",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    }
+  },
+  "recoveries": [
+    {
+      "failure_id": "AEE-CLM-005-13-AUTHORITY-CHALLENGE",
+      "claim_id": "CLM-005-13",
+      "strategy": "gather_evidence",
+      "action": "Cite the controlling text and attach assessment evidence.",
+      "priority": 2,
+      "verification": "At least one inspectable non-self-attested evidence item is attached."
+    },
+    {
+      "failure_id": "AEE-CLM-005-16-AUTHORITY-CHALLENGE",
+      "claim_id": "CLM-005-16",
+      "strategy": "gather_evidence",
+      "action": "Cite the controlling text and attach assessment evidence.",
+      "priority": 2,
+      "verification": "At least one inspectable non-self-attested evidence item is attached."
+    },
+    {
+      "failure_id": "AEE-CLM-005-23-AUTHORITY-CHALLENGE",
+      "claim_id": "CLM-005-23",
+      "strategy": "gather_evidence",
+      "action": "Cite the controlling text and attach assessment evidence.",
+      "priority": 2,
+      "verification": "At least one inspectable non-self-attested evidence item is attached."
+    },
+    {
+      "failure_id": "AEE-CLM-005-25-AUTHORITY-CHALLENGE",
+      "claim_id": "CLM-005-25",
+      "strategy": "gather_evidence",
+      "action": "Cite the controlling text and attach assessment evidence.",
+      "priority": 2,
+      "verification": "At least one inspectable non-self-attested evidence item is attached."
+    },
+    {
+      "failure_id": "AEE-CLM-005-31-AUTHORITY-CHALLENGE",
+      "claim_id": "CLM-005-31",
+      "strategy": "gather_evidence",
+      "action": "Cite the controlling text and attach assessment evidence.",
+      "priority": 2,
+      "verification": "At least one inspectable non-self-attested evidence item is attached."
+    },
+    {
+      "failure_id": "AEE-CLM-005-01-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-01",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-01-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-01-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-01-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-01-NEGATION-CONFLICT-CHALLE-4",
+      "claim_id": "CLM-005-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-02-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-02",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE-4",
+      "claim_id": "CLM-005-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE-5",
+      "claim_id": "CLM-005-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE-6",
+      "claim_id": "CLM-005-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE-7",
+      "claim_id": "CLM-005-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE-8",
+      "claim_id": "CLM-005-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-02-NEGATION-CONFLICT-CHALLE-9",
+      "claim_id": "CLM-005-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-03-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-03",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-03-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-03",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-03-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-03",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-03-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-03",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-03-NEGATION-CONFLICT-CHALLE-4",
+      "claim_id": "CLM-005-03",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-03-NEGATION-CONFLICT-CHALLE-5",
+      "claim_id": "CLM-005-03",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-03-NEGATION-CONFLICT-CHALLE-6",
+      "claim_id": "CLM-005-03",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-04-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-04",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-04-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-04",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-04-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-04",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-04-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-04",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-04-NEGATION-CONFLICT-CHALLE-4",
+      "claim_id": "CLM-005-04",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-04-NEGATION-CONFLICT-CHALLE-5",
+      "claim_id": "CLM-005-04",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-04-NEGATION-CONFLICT-CHALLE-6",
+      "claim_id": "CLM-005-04",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-04-NEGATION-CONFLICT-CHALLE-7",
+      "claim_id": "CLM-005-04",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-04-NEGATION-CONFLICT-CHALLE-8",
+      "claim_id": "CLM-005-04",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-05-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-05",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-05-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-05",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-05-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-05",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-05-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-05",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-06-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-06",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-06-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-06",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-06-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-06",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-06-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-06",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-06-NEGATION-CONFLICT-CHALLE-4",
+      "claim_id": "CLM-005-06",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-06-NEGATION-CONFLICT-CHALLE-5",
+      "claim_id": "CLM-005-06",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-07-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-07",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-07-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-07",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-07-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-07",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-07-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-07",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-07-NEGATION-CONFLICT-CHALLE-4",
+      "claim_id": "CLM-005-07",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-08-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-08",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-08-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-08",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-08-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-08",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-09-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-09",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-09-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-09",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-09-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-09",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-09-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-09",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-09-NEGATION-CONFLICT-CHALLE-4",
+      "claim_id": "CLM-005-09",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-10-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-10",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-10-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-10",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-10-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-10",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-10-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-10",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-10-NEGATION-CONFLICT-CHALLE-4",
+      "claim_id": "CLM-005-10",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-10-NEGATION-CONFLICT-CHALLE-5",
+      "claim_id": "CLM-005-10",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-11-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-11",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-11-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-11",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-11-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-11",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-11-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-11",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-12-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-12",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-12-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-12",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-12-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-12",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-12-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-12",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-12-NEGATION-CONFLICT-CHALLE-4",
+      "claim_id": "CLM-005-12",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-12-NEGATION-CONFLICT-CHALLE-5",
+      "claim_id": "CLM-005-12",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-13-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-13",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-13-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-13",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-13-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-13",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-14-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-14",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-14-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-14",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-14-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-14",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-14-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-14",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-14-NEGATION-CONFLICT-CHALLE-4",
+      "claim_id": "CLM-005-14",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-14-NEGATION-CONFLICT-CHALLE-5",
+      "claim_id": "CLM-005-14",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-14-NEGATION-CONFLICT-CHALLE-6",
+      "claim_id": "CLM-005-14",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-14-NEGATION-CONFLICT-CHALLE-7",
+      "claim_id": "CLM-005-14",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-15-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-15",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-15-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-15",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-15-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-15",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-15-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-15",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-15-NEGATION-CONFLICT-CHALLE-4",
+      "claim_id": "CLM-005-15",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-15-NEGATION-CONFLICT-CHALLE-5",
+      "claim_id": "CLM-005-15",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-16-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-16",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-16-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-16",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-17-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-17",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-17-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-17",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-17-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-17",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-17-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-17",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-18-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-18",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-18-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-18",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-19-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-19",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-19-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-19",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-19-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-19",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-19-PRECISION-CHALLENGE",
+      "claim_id": "CLM-005-19",
+      "strategy": "clarify",
+      "action": "Replace vague language with a threshold, observable, or decision rule.",
+      "priority": 3,
+      "verification": "The revised claim contains a measurable observable or decision rule."
+    },
+    {
+      "failure_id": "AEE-CLM-005-20-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-20",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-21-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-21",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-22-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-22",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-22-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-22",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-22-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-22",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-22-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-22",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-22-NEGATION-CONFLICT-CHALLE-4",
+      "claim_id": "CLM-005-22",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-23-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-23",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-23-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-23",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-23-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-23",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-23-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-23",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-24-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-24",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-24-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-24",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-24-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-24",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-24-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-24",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-25-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-25",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-25-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-25",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-25-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-25",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-25-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-005-25",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-26-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-26",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-26-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-26",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-26-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-26",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-27-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-27",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-27-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-27",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-27-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-27",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-28-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-28",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-28-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-005-28",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-28-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-005-28",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-005-29-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-29",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-30-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-30",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-005-30-PRECISION-CHALLENGE",
+      "claim_id": "CLM-005-30",
+      "strategy": "clarify",
+      "action": "Replace vague language with a threshold, observable, or decision rule.",
+      "priority": 3,
+      "verification": "The revised claim contains a measurable observable or decision rule."
+    },
+    {
+      "failure_id": "AEE-CLM-005-31-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-005-31",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    }
+  ],
+  "metadata": {
+    "threshold": 0.7,
+    "input": "specs/005-enterprise-platform/aee-claims.json"
+  }
+}
