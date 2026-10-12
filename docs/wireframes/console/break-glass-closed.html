@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Break-glass — expired / closed / revoked — Tekmerion console wireframe (8d)</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side tenant">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Admin console</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Tenant</div>
+      <div class="study-name">University A</div>
+      <span class="tenant-chip">Tenant plane · uni-a</span>
+    </div>
+    <nav class="nav">
+      <a href="users.html">Users &amp; roles <span class="count">4</span></a>
+      <a href="keys.html">Keys &amp; bindings</a>
+      <a href="events.html">Lifecycle events</a>
+      <a href="break-glass.html" class="active">Break-glass</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">Alice Researcher</div>
+      <div class="role-switch"><span class="on">Tenant admin</span></div>
+      <p class="micro">Identity arrives via University A's IdP. Tenant admin powers are
+        disjoint from study roles — an admin grant signs no verdicts (CLM-005-09).
+        Every action is appended under this name.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="plane-strip tenant"><span class="plane-name">Tenant plane</span><span>University A only — break-glass policy is declared per tenant; the platform-plane variant lists every tenant's policy state and session log.</span></div>
+      <h1>Break-glass</h1>
+      <p class="page-sub">Break-glass exists only as a named mechanism (CLM-005-10): pre-declared
+        per tenant, dually authorized, time-boxed, alarmed, and every action under the session
+        marked in the audit record. It mints a <em>session</em>, never a credential.
+        <strong>There is no standing backdoor.</strong></p>
+
+      <h2>Most recent session</h2>
+      <div class="card">
+        <div class="verify-line">
+          <span class="chip dead">session expired</span>
+          <span class="mono">bg_4f1d9a77c2e84b10</span>
+        </div>
+        <dl class="kv" style="margin-top:12px">
+          <dt>Closed</dt><dd>2026-10-12 11:17 — <strong>time box exhausted</strong>. Expiry is lazy and total: the first touch after the box runs out closes the session (with its review item) before anything else can use it.</dd>
+          <dt>Actions taken</dt><dd>1 — <span class="mono">tenant.audit_export</span>, each a marked event in both ledgers</dd>
+          <dt>Review item</dt><dd><span class="mono">bgr_8c1e05aa93f2</span> — created automatically at close (<span class="mono">breakglass.review_created</span>); its disposition is a tenant admin's recorded act, completable exactly once</dd>
+        </dl>
+        <div class="row-actions" style="margin-bottom:0">
+          <a class="btn primary" href="break-glass-review.html">Record the post-use review</a>
+        </div>
+      </div>
+
+      <h2>Session log</h2>
+      <div class="card flush">
+        <table>
+          <thead>
+            <tr><th style="width:20%">Session</th><th style="width:16%">Invoker</th><th style="width:14%">State</th><th style="width:26%">How it ended</th><th style="width:24%">Review</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-h="Session" class="mono">bg_4f1d9a77…</td>
+              <td data-h="Invoker">Alice Researcher</td>
+              <td data-h="State"><span class="chip dead">expired</span></td>
+              <td data-h="How it ended">time box exhausted · 1 action</td>
+              <td data-h="Review"><span class="chip inconclusive">review outstanding</span></td>
+            </tr>
+            <tr>
+              <td data-h="Session" class="mono">bg_01be77c2…</td>
+              <td data-h="Invoker">Alice Researcher</td>
+              <td data-h="State"><span class="chip dead">closed</span></td>
+              <td data-h="How it ended">closed by the invoker · 0 actions</td>
+              <td data-h="Review"><span class="chip supported">review recorded</span></td>
+            </tr>
+            <tr>
+              <td data-h="Session" class="mono">bg_6d02aa19…</td>
+              <td data-h="Invoker">Alice Researcher</td>
+              <td data-h="State"><span class="chip contradicted">denied</span></td>
+              <td data-h="How it ended">second authorizer refused — no action was ever possible</td>
+              <td data-h="Review">— (never activated)</td>
+            </tr>
+            <tr class="dead-row">
+              <td data-h="Session" class="mono">bg_5520fe91…</td>
+              <td data-h="Invoker">Alice Researcher</td>
+              <td data-h="State"><span class="chip dead">closed</span></td>
+              <td data-h="How it ended"><strong>declaration revoked</strong> — the active session was closed on the spot; revocation never leaves a live session behind</td>
+              <td data-h="Review"><span class="chip supported">review recorded</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small muted">A denied session creates no review item — it never activated, and
+        nothing was exercised under it. Closed and expired sessions always do: the review item is
+        part of the close, not an administrator's afterthought.</p>
+
+      <div class="screen-note">Console wireframe 8d of 10 — break-glass EXPIRED / CLOSED / REVOKED
+        states, tenant plane (E5 extension, drawn 2026-10-12 from the as-built E4 mechanism:
+        lazy expiry on first touch, close-on-policy-revocation, denial without activation).
+        Specimen values throughout.</div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

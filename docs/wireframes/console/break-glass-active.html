@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Break-glass — active session — Tekmerion console wireframe (8c)</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side tenant">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Admin console</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Tenant</div>
+      <div class="study-name">University A</div>
+      <span class="tenant-chip">Tenant plane · uni-a</span>
+    </div>
+    <nav class="nav">
+      <a href="users.html">Users &amp; roles <span class="count">4</span></a>
+      <a href="keys.html">Keys &amp; bindings</a>
+      <a href="events.html">Lifecycle events</a>
+      <a href="break-glass.html" class="active">Break-glass</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">Alice Researcher</div>
+      <div class="role-switch"><span class="on">Tenant admin</span></div>
+      <p class="micro">Identity arrives via University A's IdP. Tenant admin powers are
+        disjoint from study roles — an admin grant signs no verdicts (CLM-005-09).
+        Every action is appended under this name.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="plane-strip tenant"><span class="plane-name">Tenant plane</span><span>University A only — break-glass policy is declared per tenant; the platform-plane variant lists every tenant's policy state and session log.</span></div>
+      <h1>Break-glass</h1>
+      <p class="page-sub">Break-glass exists only as a named mechanism (CLM-005-10): pre-declared
+        per tenant, dually authorized, time-boxed, alarmed, and every action under the session
+        marked in the audit record. It mints a <em>session</em>, never a credential.
+        <strong>There is no standing backdoor.</strong></p>
+
+      <div class="gap-card">
+        <div class="verify-line">
+          <span class="chip invalid">break-glass session active</span>
+          <span class="mono">bg_4f1d9a77c2e84b10</span>
+        </div>
+        <dl class="kv" style="margin-top:12px">
+          <dt>Invoker</dt><dd>Alice Researcher (tenant admin) — <span class="mono">actor 7f3a…c21e</span></dd>
+          <dt>Authorized by</dt><dd>Root Operator (platform admin) — the declared second-authorizer plane, 2026-10-12 09:17</dd>
+          <dt>Reason</dt><dd>IdP signing-certificate rotation — emergency membership repair</dd>
+          <dt>Expires</dt><dd>2026-10-12 11:17 — <strong>no extension exists</strong>; a longer need is a new declaration and a new session. At expiry the session closes automatically and its post-use review item is created.</dd>
+          <dt>Alarm</dt><dd>authorization was recorded in both ledgers and egressed as <span class="mono">security.break_glass_use</span> <span class="phase-chip">E4 · T554</span></dd>
+        </dl>
+        <div class="row-actions" style="margin-bottom:0">
+          <a class="btn danger" href="break-glass-closed.html">Close session now</a>
+          <span class="muted small">Closing ends the session immediately and creates the post-use
+            review item. The invoker or an eligible second authorizer may close it.</span>
+        </div>
+      </div>
+
+      <h2>Act under this session</h2>
+      <div class="card">
+        <p class="muted" style="margin-top:0">Only the declaration's scopes can be exercised, and
+          they dispatch through the <strong>same service cores</strong> as the tenant plane — a
+          deactivation under break-glass is the tenant's own deactivation act, recorded
+          <span class="mono">via="break-glass"</span>. Every act, granted or refused, is a marked
+          <span class="mono">breakglass.action</span> event in <strong>both</strong> ledgers.</p>
+        <div class="row-actions">
+          <a class="btn" href="break-glass-active.html">Export the tenant audit record</a>
+          <span class="mono small">tenant.audit_export</span>
+        </div>
+        <div class="row-actions">
+          <a class="btn" href="break-glass-active.html">Revoke a key</a>
+          <span class="mono small">tenant.key_manage</span>
+          <span class="muted small">by fingerprint, from the Keys &amp; bindings record</span>
+        </div>
+        <div class="row-actions" style="margin-bottom:0">
+          <a class="btn" href="break-glass-active.html">Deactivate an identity</a>
+          <span class="mono small">tenant.member_manage</span>
+          <span class="muted small">sessions revoked, keys closed — the shared deactivation core</span>
+        </div>
+      </div>
+
+      <h2>Marked actions under this session</h2>
+      <div class="card flush">
+        <table>
+          <thead>
+            <tr><th style="width:14%">When</th><th style="width:24%">Action</th><th style="width:34%">Target</th><th style="width:28%">Recorded</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-h="When">2026-10-12 09:21</td>
+              <td data-h="Action" class="evt">tenant.audit_export</td>
+              <td data-h="Target">tenant ledger · uni-a</td>
+              <td data-h="Recorded"><span class="mono">breakglass.action</span> · both ledgers · <span class="mono">break_glass=true</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="screen-note">Console wireframe 8c of 10 — break-glass ACTIVE-SESSION state, tenant
+        plane (E5 extension, drawn 2026-10-12 from the as-built E4 mechanism). The active state is
+        drawn in the gap/alarm treatment deliberately: an active break-glass session is a
+        security-significant state, never a routine one. Specimen values throughout.</div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

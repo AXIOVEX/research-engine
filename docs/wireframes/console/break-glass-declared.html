@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Break-glass — declared — Tekmerion console wireframe (8a)</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side tenant">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Admin console</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Tenant</div>
+      <div class="study-name">University A</div>
+      <span class="tenant-chip">Tenant plane · uni-a</span>
+    </div>
+    <nav class="nav">
+      <a href="users.html">Users &amp; roles <span class="count">4</span></a>
+      <a href="keys.html">Keys &amp; bindings</a>
+      <a href="events.html">Lifecycle events</a>
+      <a href="break-glass.html" class="active">Break-glass</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">Alice Researcher</div>
+      <div class="role-switch"><span class="on">Tenant admin</span></div>
+      <p class="micro">Identity arrives via University A's IdP. Tenant admin powers are
+        disjoint from study roles — an admin grant signs no verdicts (CLM-005-09).
+        Every action is appended under this name.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="plane-strip tenant"><span class="plane-name">Tenant plane</span><span>University A only — break-glass policy is declared per tenant; the platform-plane variant lists every tenant's policy state and session log.</span></div>
+      <h1>Break-glass</h1>
+      <p class="page-sub">Break-glass exists only as a named mechanism (CLM-005-10): pre-declared
+        per tenant, dually authorized, time-boxed, alarmed, and every action under the session
+        marked in the audit record. It mints a <em>session</em>, never a credential.
+        <strong>There is no standing backdoor.</strong></p>
+
+      <h2>Policy — University A</h2>
+      <div class="card">
+        <div class="verify-line">
+          <span class="chip supported">policy declared</span>
+          <span class="phase-chip">mechanism · E4 · T529</span>
+        </div>
+        <dl class="kv" style="margin-top:12px">
+          <dt>Invoker roles</dt><dd>tenant admin — a holder of a named role may request a session</dd>
+          <dt>Second authorizer</dt><dd>a <strong>platform admin</strong>, per this tenant's declaration — never the invoker, whatever roles the invoker holds</dd>
+          <dt>Time box</dt><dd>declared maximum <strong>2 h</strong> — the 4 h ceiling is hard-coded; a declaration may set less, nothing sets more</dd>
+          <dt>Scopes</dt><dd><span class="mono">tenant.audit_export</span> · <span class="mono">tenant.key_manage</span> · <span class="mono">tenant.member_manage</span> — only actions the mechanism can exercise are declarable; study powers can never be declared</dd>
+          <dt>Declared</dt><dd>2026-10-12 08:58 by a tenant admin (<span class="mono">breakglass.policy_declared</span>, tenant ledger) — declaration is itself a recorded act</dd>
+          <dt>Alarm</dt><dd>every step is recorded in this tenant's ledger <em>and</em> the deployment security log; authorization egresses a <span class="mono">security.break_glass_use</span> incident-response event <span class="phase-chip">E4 · T554</span></dd>
+        </dl>
+        <div class="row-actions">
+          <a class="btn" href="break-glass-declared.html">Revoke declaration</a>
+          <span class="muted small">Revoking a declaration denies pending sessions and closes
+            active ones on the spot — revocation never leaves a live session behind.</span>
+        </div>
+      </div>
+
+      <h2>Invoke a session</h2>
+      <div class="card">
+        <p class="muted" style="margin-top:0">Invocation mints a <strong>pending</strong> session —
+          it confers nothing until a second authorizer activates it, and the time box starts
+          only at authorization.</p>
+        <div class="field">
+          <label for="bg-reason">Reason (recorded verbatim)</label>
+          <input id="bg-reason" type="text" value="IdP signing-certificate rotation — emergency membership repair">
+        </div>
+        <div class="field">
+          <label for="bg-duration">Requested time box</label>
+          <select id="bg-duration">
+            <option>30 minutes</option>
+            <option>1 hour</option>
+            <option selected>2 hours (the declared maximum)</option>
+          </select>
+          <div class="help">A request outside the declared maximum is refused and the refusal
+            is recorded — in this tenant's ledger and the deployment log — before it is shown.</div>
+        </div>
+        <div class="row-actions" style="margin-bottom:0">
+          <a class="btn primary" href="break-glass-pending.html">Invoke break-glass</a>
+          <span class="muted small">Appends <span class="mono">breakglass.invoked</span> in both ledgers.</span>
+        </div>
+      </div>
+
+      <h2>Session log</h2>
+      <div class="card empty">No break-glass sessions yet — for this tenant, none have occurred.
+        When one does, it appears here as it happens: invoker, second authorizer, time box,
+        alarm state, and the marked audit trail, closing with its post-use review item.</div>
+
+      <div class="screen-note">Console wireframe 8a of 10 — break-glass DECLARED state, tenant plane
+        (E5 extension of the T534-WF package, drawn 2026-10-12 from the as-built E4 mechanism:
+        <span class="mono">src/tekmerion/platform/breakglass.py</span> + the break-glass section of
+        <span class="mono">service.py</span>). The approved break-glass.html draws the undeclared state;
+        this page and 8b–8e draw the states that exist once a declaration does. Specimen values throughout.</div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

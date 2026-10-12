@@ -84,3 +84,23 @@ Each is a genuine choice the build will otherwise have to guess at; the package 
 ## 8. What approval does and does not do
 
 Approving this package (the rendered screenshots, per Article XIV) passes gate **T534-WF** and authorizes T535+ implementation to build *to these screens*. It does not approve: any E3/E4/E6 machinery the screens depend on (each keeps its own phase gate), any change to the Phase 6 study UI, or any claim state — the claims these screens touch (CLM-005-13 above all) are re-assessed at E5's phase exit with build evidence, per the Spec 005 plan. Changes after approval follow the Phase 6 process: amend the wireframes here, re-render, re-approve, then build.
+
+---
+
+## Addendum — approval + break-glass flow extension (2026-10-12)
+
+**Approval.** The owner approved this package **with the coordinator recommendation block** on 2026-10-12 (PR #11 merged; gate T534-WF checked off in `specs/005-enterprise-platform/tasks.md`). Where a recommendation differs from the specimen drawing, the ratified recommendation governs the build:
+
+- **Q1** inherited study-UI density · **Q2** separate plane shells · **Q3** tenant landing = Users & roles, as drawn · **Q4** inline row expansion for event detail (events + audit screens) · **Q5** phase chips are wireframe-only annotations — state labels ship in the product, task ids do not · **Q6** break-glass flows wireframed from as-built E4 behavior before that screen is implemented (the extension below) · **Q7** compliance screen platform-only in v1 · **Q8** tenant-by-identifier entry at sign-in, not the enumerated picker drawn in `signin.html` (the picker discloses tenant names to anyone who reaches the page).
+
+**Break-glass flow extension (Q6).** Screen 8 as approved draws only the UNDECLARED state. E4 has since built the mechanism (`src/tekmerion/platform/breakglass.py` + the break-glass section of `platform/service.py`), so the states that exist once a declaration does are drawn here — strictly from as-built behavior, no invented capability — as five extension pages in the same shell, each rendered at 1440×900 + 390×844 into `screens/`:
+
+| Page | State (as-built source) |
+|------|--------------------------|
+| `break-glass-declared.html` | Policy declared (`declare_break_glass_policy`: invoker roles, second-authorizer plane, scopes restricted to implementable actions, time box ≤ the hard-coded 4 h ceiling) + the invoke form (invocation mints a *pending* session; refusals recorded in both ledgers before the raise) |
+| `break-glass-pending.html` | Pending authorization (`invoke_break_glass` → `STATE_PENDING`: confers nothing; the invoker can never self-authorize; wrong-plane authorizers refused + recorded) — invoker's view; the authorizer's variant is the same card under the authorizer plane's shell |
+| `break-glass-active.html` | Active session (`authorize_break_glass`: box starts at authorization, T554 `security.break_glass_use` egress; actions dispatch through the same service cores, marked `breakglass.action` in both ledgers; no extension exists) |
+| `break-glass-closed.html` | Expired / closed / denied / policy-revoked (`_touch_bg_session` lazy expiry; close creates the review item; policy revocation denies pending and closes active sessions on the spot; a denied session creates no review item) |
+| `break-glass-review.html` | Post-use review (`record_break_glass_review`: the auto-created item, completable exactly once; the disposition is itself a recorded act) |
+
+Specimen values throughout (session `bg_4f1d9a77…`, review item `bgr_8c1e05aa93f2`), in the record's real formats. These five pages are the E5 build's wireframes for screen 8's post-declaration states; per the Article XIV sequence they are surfaced to the owner through the coordinator while the other screens build, and the break-glass screen is implemented last.
