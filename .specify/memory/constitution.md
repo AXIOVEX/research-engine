@@ -1,4 +1,4 @@
-# Axiovex Research Engine — Project Constitution
+# Tekmerion — Project Constitution
 
 **Version:** 1.1.0 · **Ratified:** 2026-10-11 · **Amended:** 2026-10-11 (Article IV strengthened + Article XIII added, per DN-005) · **Owner:** Tristen Pierson, Axiovex Systems, LLC
 

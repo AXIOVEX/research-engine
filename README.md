@@ -1,4 +1,4 @@
-<h1 align="center">Axiovex Research Engine</h1>
+<h1 align="center">Tekmerion</h1>
 
 <p align="center">
   <strong>Defensible AI research — built for universities that have to stand behind the result.</strong>
@@ -7,7 +7,10 @@
 <p align="center">
   🌐 <a href="https://axiovexsystems.com"><strong>axiovexsystems.com</strong></a>
   &nbsp;·&nbsp; Theory sibling: <a href="https://github.com/AXIOVEX/epistemic-ledger">AXIOVEX/epistemic-ledger</a>
+  &nbsp;·&nbsp; Record layer: <a href="https://github.com/AXIOVEX/axiomere">AXIOVEX/axiomere</a>
 </p>
+
+**Tekmerion** (τεκμήριον — *conclusive evidence by which a thing is proved*; renamed from the Axiovex Research Engine, 2026-10-11, DN-006) is Axiovex's defensible-research framework. Its records live in [Axiomere](https://github.com/AXIOVEX/axiomere), a truth ledger where records are revised by new snapshots and never deleted.
 
 Most AI research tools sell speed and summaries. This one sells something different: **an audit trail a university can rely on.** Every claim the engine makes carries the evidence it rests on and the test that would falsify it. Verdicts are registered before outcomes are seen. Records are append-only — a correction is a new entry, never a quiet rewrite of the old one. When the engine cannot support a claim, it says so, in a verdict designed for exactly that: *inconclusive* is an answer, not a failure.
 

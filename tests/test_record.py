@@ -7,8 +7,8 @@ would be INVALID."""
 
 import json
 
-from research_engine import EventStore, verify_log
-from research_engine.record import export_events, replay
+from tekmerion import EventStore, verify_log
+from tekmerion.record import export_events, replay
 
 
 def make_store(tmp_path):
