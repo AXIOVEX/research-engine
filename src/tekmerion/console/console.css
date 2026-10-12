@@ -1,0 +1,84 @@
+/* Tekmerion admin console wireframes — console layer (Spec 005, E5).
+   Layered AFTER ../style.css: the Phase 6 stylesheet is an approved
+   artifact and is not modified. Everything here is additive — the
+   plane system, the sign-in layout, and console-only components.
+   Tokens, typography, chips, banners, tables, and the 760px
+   responsive rules are inherited from ../style.css unchanged. */
+
+/* ---------- plane system ----------
+   The two admin planes are disjoint (Spec 005 §5, CLM-005-09) and
+   the shells must not be confusable:
+   - PLATFORM plane: the dark brand sidebar (deployment scope).
+   - TENANT plane: a light sidebar on paper, ink text, hairline edge.
+   Both planes also carry a plane strip at the top of the content
+   column naming the plane and its scope, in words, on every screen. */
+
+.plane-strip {
+  border-radius: var(--radius); padding: 9px 14px; margin-bottom: 16px;
+  font-size: 12.5px; display: flex; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; align-items: center;
+}
+.plane-strip .plane-name { font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: 11.5px; }
+.plane-strip.platform { background: var(--brand); color: #DCE6F2; }
+.plane-strip.platform .plane-name { color: #FFF; }
+.plane-strip.tenant { background: var(--brand-tint); color: var(--brand); border: 1px solid #B9C9DC; }
+
+/* tenant-plane shell: light sidebar */
+.side.tenant { background: var(--surface); color: var(--ink); border-right: 1px solid var(--line-strong); }
+.side.tenant .brand-name { color: var(--brand); }
+.side.tenant .brand-tag { color: var(--ink-3); }
+.side.tenant .study-block { border-top-color: var(--line); }
+.side.tenant .study-label { color: var(--ink-3); }
+.side.tenant .study-name { color: var(--ink); }
+.side.tenant .nav a { color: var(--ink-2); }
+.side.tenant .nav a:hover { background: var(--surface-2); }
+.side.tenant .nav a.active { background: var(--brand); color: #FFF; }
+.side.tenant .nav .count { background: var(--brand-tint); color: var(--brand); }
+.side.tenant .nav a.active .count { background: #FFF; color: var(--brand); }
+.side.tenant .actor-block { border-top-color: var(--line); }
+.side.tenant .actor-block .who { color: var(--ink); }
+.side.tenant .role-switch span { border-color: var(--line-strong); color: var(--ink-2); }
+.side.tenant .role-switch span.on { background: var(--brand); color: #FFF; border-color: var(--brand); }
+.side.tenant .micro { color: var(--ink-3) !important; }
+.tenant-chip {
+  background: var(--brand-tint); border: 1px solid #B9C9DC; color: var(--brand);
+  border-radius: 999px; padding: 1px 9px; font-size: 11.5px; font-weight: 600; white-space: nowrap;
+}
+
+/* ---------- sign-in / plane selection (no shell) ---------- */
+.signin-wrap { max-width: 880px; margin: 0 auto; padding: 40px 20px 56px; }
+.signin-head { text-align: left; margin-bottom: 20px; }
+.plane-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.plane-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+.plane-card.platform { border-top: 5px solid var(--brand); }
+.plane-card.tenant { border-top: 5px solid var(--line-strong); }
+.plane-card h2 { margin: 0 0 4px; font-size: 19px; }
+.plane-card .scope { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; }
+@media (max-width: 760px) { .plane-cards { grid-template-columns: 1fr; } .signin-wrap { padding-top: 24px; } }
+
+/* ---------- console components ---------- */
+/* Phase chip: names the phase/task that makes a depicted element real.
+   Honesty furniture — a chip is a label on the wireframe, and whether
+   it also ships in the product UI is open question Q6 in README.md. */
+.phase-chip {
+  display: inline-block; font-family: var(--mono); font-size: 10.5px; color: var(--ink-2);
+  background: var(--surface-2); border: 1px dashed var(--line-strong); border-radius: var(--radius-s);
+  padding: 0 6px; white-space: nowrap; vertical-align: 1px;
+}
+/* Open-gap panel: a standing, recorded non-satisfaction (e.g. FIPS
+   §3.13.11). Invalid palette because it IS a defect state against the
+   requirement — shown as a gap, never softened. */
+.gap-card {
+  background: var(--surface); border: 1px solid var(--invalid-line); border-left: 5px solid var(--invalid);
+  border-radius: var(--radius); padding: 16px 18px; margin-bottom: 16px;
+}
+/* Scope segmented control (audit inspector: deployment vs per-tenant). */
+.seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: var(--radius-s); overflow: hidden; }
+.seg span { padding: 6px 12px; font-size: 12.5px; font-weight: 600; color: var(--ink-2); background: var(--surface); }
+.seg span.on { background: var(--brand); color: #FFF; }
+/* Event-type cell: mono event names are the ledger's own vocabulary. */
+td.evt { font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+/* Verification summary line inside the audit inspector. */
+.verify-line { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+/* Custody chips reuse neutral brand styling; custody is a fact, not a status. */
+.chip.custody { background: var(--surface-2); border-color: var(--line-strong); color: var(--ink-2); }
