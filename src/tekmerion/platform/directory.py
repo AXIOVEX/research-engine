@@ -263,6 +263,41 @@ class Directory:
         iid = self._identity_by_triple.get((tenant_id, issuer, subject))
         return self.identities.get(iid) if iid else None
 
+    def change_subject(self, identity: Identity, new_subject: str) -> None:
+        """Rebind an identity to a new subject under the same issuer
+        (a SCIM userName rename, E3). The (tenant, issuer, subject)
+        triple is the login lookup; the identity — and its actor ID —
+        is unchanged, so the ledger's attribution is untouched."""
+        old_key = (identity.tenant_id, identity.issuer, identity.subject)
+        new_key = (identity.tenant_id, identity.issuer, new_subject)
+        holder = self._identity_by_triple.get(new_key)
+        if holder is not None and holder != identity.identity_id:
+            raise ConfigurationError(
+                "subject already bound to another identity in this tenant")
+        self._identity_by_triple.pop(old_key, None)
+        self._identity_by_triple[new_key] = identity.identity_id
+        identity.subject = new_subject
+
+    def erase_identity_pii(self, identity_id: str) -> bool:
+        """Off-ledger directory erasure under a legal duty (T523).
+        Blanks the directory's PII for the identity and drops the
+        (tenant, issuer, subject) lookup, so the same person arriving
+        later is a NEW identity with a NEW actor ID — identifiers are
+        never reused (matrix 3.5.5). The actor ID itself is random,
+        not PII, and stays: chain attribution remains verifiable
+        through the enrollment record (§4), while the directory
+        forgets who it was. Nothing here can reach a ledger."""
+        ident = self.identities.get(identity_id)
+        if ident is None:
+            return False
+        ident.display_name = ""
+        ident.email = ""
+        ident.affiliation = ""
+        self._identity_by_triple.pop(
+            (ident.tenant_id, ident.issuer, ident.subject), None)
+        ident.subject = ""
+        return True
+
     # -- sessions -------------------------------------------------------------
 
     def new_session(self, identity: Identity, *, amr: tuple[str, ...] = (), acr: str = "",

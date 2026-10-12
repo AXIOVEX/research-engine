@@ -46,6 +46,16 @@ IDP_UPDATED = "idp.updated"
 IDENTITY_CREATED = "identity.created"
 IDENTITY_UPDATED = "identity.updated"
 IDENTITY_DEACTIVATED = "identity.deactivated"
+IDENTITY_REACTIVATED = "identity.reactivated"
+DIRECTORY_PII_ERASED = "identity.pii_erased"
+SCIM_SYNC_SUCCEEDED = "scim.sync_succeeded"
+SCIM_SYNC_FAILED = "scim.sync_failed"
+SCIM_TOKEN_ISSUED = "scim.token_issued"
+SCIM_TOKEN_REVOKED = "scim.token_revoked"
+GROUP_MAPPING_APPROVED = "scim.group_mapping_approved"
+GROUP_MAPPING_REVOKED = "scim.group_mapping_revoked"
+GROUP_MEMBERSHIP_GRANTED = "scim.group_membership_granted"
+GROUP_MEMBERSHIP_REVOKED = "scim.group_membership_revoked"
 AUTH_LOGIN_SUCCEEDED = "auth.login_succeeded"
 AUTH_LOGIN_FAILED = "auth.login_failed"
 AUTH_LOGOUT = "auth.logout"
@@ -67,13 +77,20 @@ SESSION_REVOKED = "session.revoked"
 #: class is exercised by the E1 surface.
 AU_EVENT_CLASSES = {
     "account_creation": {IDENTITY_CREATED},
-    "account_modification": {IDENTITY_UPDATED, IDENTITY_DEACTIVATED, ROLE_GRANTED, ROLE_REVOKED},
+    "account_modification": {
+        IDENTITY_UPDATED, IDENTITY_DEACTIVATED, IDENTITY_REACTIVATED,
+        ROLE_GRANTED, ROLE_REVOKED, SCIM_SYNC_SUCCEEDED, DIRECTORY_PII_ERASED,
+    },
     "authentication_success": {AUTH_LOGIN_SUCCEEDED},
     "authentication_failure": {AUTH_LOGIN_FAILED, AUTH_APIKEY_FAILED},
     "authorization_decision_denial": {AUTHZ_DENIED},
     "administrative_action": {
         TENANT_CREATED, TENANT_UPDATED, IDP_CONFIGURED, IDP_UPDATED,
         PLATFORM_BOOTSTRAPPED, APIKEY_ISSUED, APIKEY_REVOKED, SESSION_REVOKED,
+        IDENTITY_REACTIVATED, DIRECTORY_PII_ERASED,
+        SCIM_SYNC_SUCCEEDED, SCIM_SYNC_FAILED, SCIM_TOKEN_ISSUED,
+        SCIM_TOKEN_REVOKED, GROUP_MAPPING_APPROVED, GROUP_MAPPING_REVOKED,
+        GROUP_MEMBERSHIP_GRANTED, GROUP_MEMBERSHIP_REVOKED,
     },
     "key_lifecycle": {KEY_ENROLLED, KEY_ROTATED, KEY_REVOKED, KEY_CLOSED},
     "session_lifecycle": {AUTH_LOGIN_SUCCEEDED, AUTH_LOGOUT, AUTH_STEPUP, SESSION_REVOKED},

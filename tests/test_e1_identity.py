@@ -360,6 +360,36 @@ def test_au_event_class_completeness_sweep(world):
                         proof_signature=msigner.sign(mnonce.encode()), nonce=mnonce)
     svc.deactivate_identity(admin2_session, identity_id=mallory.identity_id, reason="sweep")
     svc.logout(rudy_session)
+    # E3 provisioning surface: the AU vocabulary grew with E3 (SCIM
+    # sync outcomes, reactivation, directory erasure), so the sweep
+    # battery grows with it rather than the vocabulary shrinking to
+    # fit an E1-only surface.
+    from tekmerion.platform.scim import IDENTITY_EXTENSION, ScimAuthenticationError
+    cred, scim_secret = svc.issue_scim_token(admin2_session, tenant_id=world.tenant_id)
+    with pytest.raises(ScimAuthenticationError):
+        svc.scim_list_users(world.tenant_id, cred.credential_id, "wrong-secret")
+    _, u1 = svc.scim_create_user(
+        world.tenant_id, cred.credential_id, scim_secret,
+        {"userName": "sweep.user", "displayName": "Sweep User"})
+    sweep_identity_id = u1[IDENTITY_EXTENSION]["identity_id"]
+    _, g1 = svc.scim_create_group(
+        world.tenant_id, cred.credential_id, scim_secret,
+        {"displayName": "Sweep Group", "members": [{"value": sweep_identity_id}]})
+    mapping = svc.approve_group_mapping(admin2_session, tenant_id=world.tenant_id,
+                                        group_ref="Sweep Group", role=authz.RESEARCHER)
+    svc.scim_patch_group(world.tenant_id, cred.credential_id, scim_secret, g1["id"],
+                         {"Operations": [{"op": "remove", "path": "members",
+                                          "value": [{"value": sweep_identity_id}]}]})
+    svc.revoke_group_mapping(admin2_session, tenant_id=world.tenant_id,
+                             mapping_id=mapping.mapping_id)
+    svc.scim_patch_user(world.tenant_id, cred.credential_id, scim_secret, u1["id"],
+                        {"Operations": [{"op": "replace", "path": "active", "value": False}]})
+    svc.scim_patch_user(world.tenant_id, cred.credential_id, scim_secret, u1["id"],
+                        {"Operations": [{"op": "replace", "path": "active", "value": True}]})
+    svc.scim_delete_user(world.tenant_id, cred.credential_id, scim_secret, u1["id"])
+    svc.revoke_scim_token(admin2_session, tenant_id=world.tenant_id,
+                          credential_id=cred.credential_id)
+    svc.erase_directory_pii(admin2_session, identity_id=mallory.identity_id)
 
     recorded = set(tenant_types(world)) | set(svc.deployment_ledger.event_types())
     for cls, types in AU_EVENT_CLASSES.items():

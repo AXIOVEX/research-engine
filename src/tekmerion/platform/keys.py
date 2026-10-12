@@ -127,11 +127,16 @@ class KeyRegistry:
 
     def enroll(self, *, identity_id: str, actor_id: str, public_key: bytes,
                custody: str, proof_signature: bytes, nonce: str,
-               recorded_by_actor_id: str) -> KeyRecord:
+               recorded_by_actor_id: str,
+               countersigned_by_actor_id: Optional[str] = None) -> KeyRecord:
         """Enroll a key after proof of possession: the presenter signs
         the server nonce with the private key; the registry verifies
         before the enrollment event exists. A failed proof records
-        nothing and raises — there is no pending state to exploit."""
+        nothing and raises — there is no pending state to exploit.
+        `countersigned_by_actor_id` records a tenant admin's
+        countersign on the event where §3 requires one (adjudicator
+        re-enrollment, T522) — the subject's own actor ID stays the
+        payload's `subject_actor_id`; the countersign is additive."""
         if custody not in CUSTODY_MODES:
             raise GateDenied(f"unknown custody mode: {custody}")
         pending = self._nonces.pop(nonce, None)
@@ -142,11 +147,15 @@ class KeyRegistry:
         fp = fingerprint(public_key)
         if fp in self.keys and self.keys[fp].status == STATUS_ENROLLED:
             raise GateDenied("key already enrolled")
+        extra = {}
+        if countersigned_by_actor_id is not None:
+            extra["countersigned_by_actor_id"] = countersigned_by_actor_id
         self.ledger.record(
             KEY_ENROLLED, actor_id=recorded_by_actor_id,
             target=f"key:{fp}",
             identity_id=identity_id, subject_actor_id=actor_id,
             key_fingerprint=fp, public_key=public_key.hex(), custody=custody,
+            **extra,
         )
         self.rebuild()
         return self.keys[fp]
