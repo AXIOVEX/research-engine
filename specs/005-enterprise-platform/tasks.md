@@ -70,14 +70,14 @@
 
 ## Phase E6 — Compliance evidence (SOC 2 readiness + CMMC Level 2 support) + self-hosted shape
 
-- [ ] T541 Residency pin: recorded tenant configuration (shape, region); pin change = export + anchor + migration event flow.
-- [ ] T542 Platform audit export: Phase 5 bundle pattern (manifest, hashes, standalone verifier) for platform + per-tenant ledgers. [CMMC: POA&M register (T553) exports with it.]
-- [ ] T543 Anchored demonstration: a platform audit export deposited/anchored and verified against the public record (AR-1 pattern, platform plane).
-- [ ] T544 SOC 2 readiness mapping document: criteria → machinery → claim IDs; every entry resolvable (F-005-16); labeled readiness, never certification. [CMMC: §13 framing sweep rides this task — no unqualified CMMC language (CLM-005-23).]
-- [ ] T545 Retention & legal hold: hold = marker event + export + anchor + access restriction; off-ledger retention schedules only; zero deletion paths (F-005-17 audit).
-- [ ] T551 [CMMC] CUI marking support: banner/footer marking fields in bundle manifest + HUMAN-README, populated from recorded study/tenant marking fields (CLM-005-28).
-- [ ] T552 [CMMC] SPRS self-assessment support: platform control states maintained in SPRS-input form — per-requirement state, DoD weighted deduction class for unimplemented requirements, evidence link; matrix/state agreement check (CLM-005-29).
-- [ ] T553 [CMMC] POA&M register: append-only register (items, affected requirements, milestones, status as events) in the platform plane, seeded with the §3.13.11 FIPS gap (CLM-005-30, POA&M half; CLM-005-25).
-- [ ] T546 Self-hosted packaging: single-tenant deployment of the same codebase/role model; institution KMS option; upgrade path; shape-parity battery vs hosted (F-005-12).
-- [ ] T547 Wording sweep: product surfaces checked against CLM-005-16 (no certification claims; FERPA/GDPR as constraints only).
-- [ ] T548 Final re-assessment of all 22 claims at `after_implement`; Spec 002 battery green; spec close-out record.
+- [x] T541 Residency pin: recorded tenant configuration (shape, region); pin change = export + anchor + migration event flow.
+- [x] T542 Platform audit export: Phase 5 bundle pattern (manifest, hashes, standalone verifier) for platform + per-tenant ledgers. [CMMC: POA&M register (T553) exports with it.]
+- [x] T543 Anchored demonstration: a platform audit export anchored and verified standalone from the committed bundle (records/e6-audit-export-demonstration.md). [E6 completion note: executed under the phase's no-external-accounts/no-uploads boundary — the anchor is the ledger's audit.export_anchored record + the committed demonstration record; the public-deposit leg (AR-1/Zenodo pattern) was NOT executed and stands as recorded residue in the demonstration record, not as done.]
+- [x] T544 SOC 2 readiness mapping document: criteria → machinery → claim IDs; every entry resolvable (F-005-16); labeled readiness, never certification. [CMMC: §13 framing sweep rides this task — no unqualified CMMC language (CLM-005-23).]
+- [x] T545 Retention & legal hold: hold = marker event + export + anchor + access restriction; off-ledger retention schedules only; zero deletion paths (F-005-17 audit).
+- [x] T551 [CMMC] CUI marking support: banner/footer marking fields in bundle manifest + HUMAN-README, populated from recorded study/tenant marking fields (CLM-005-28).
+- [x] T552 [CMMC] SPRS self-assessment support: platform control states maintained in SPRS-input form — per-requirement state, DoD weighted deduction class for unimplemented requirements, evidence link; matrix/state agreement check (CLM-005-29).
+- [x] T553 [CMMC] POA&M register: append-only register (items, affected requirements, milestones, status as events) in the platform plane, seeded with the §3.13.11 FIPS gap (CLM-005-30, POA&M half; CLM-005-25).
+- [x] T546 Self-hosted packaging: single-tenant deployment of the same codebase/role model; institution KMS option; upgrade path; shape-parity battery vs hosted (F-005-12).
+- [x] T547 Wording sweep: product surfaces checked against CLM-005-16 (no certification claims; FERPA/GDPR as constraints only).
+- [x] T548 Final re-assessment of all claims at `after_implement` (31 claims — the task text's '22' predates the CMMC amendment's nine; all 31 re-assessed, bundle v0.7.0); Spec 002 battery green; spec close-out record.

@@ -1,0 +1,57 @@
+{
+  "bundle_hash": "7c58b02bf93b260c824572ada4ad4d34190157fb9564958ec01c9d833d703344",
+  "complete": true,
+  "cui_marking": {
+    "authority": null,
+    "category": null,
+    "dissemination": null,
+    "note": "No CUI marking is recorded for this artifact. The absence of a marking is stated, not implied: this block is present in every manifest.",
+    "status": "unmarked"
+  },
+  "files": [
+    {
+      "bytes": 1522,
+      "path": "HUMAN-README.md",
+      "sha256": "4e693a382315a65945b994d6fe8f43990817c783d929764dd0970ea3d61d770f"
+    },
+    {
+      "bytes": 54540,
+      "path": "control-states.json",
+      "sha256": "15e9de01f76b93e544656a7e8c30a1482e2dc676e2daff16b82de8a9357a485a"
+    },
+    {
+      "bytes": 5729,
+      "path": "events.json",
+      "sha256": "533bbd217a82c4e773f9c7dae9f31d35f09e31289fb5274b513c2d577379217e"
+    },
+    {
+      "bytes": 4395,
+      "path": "ledger/audit.axmr",
+      "sha256": "8666044e89d2b83bec295edfd3bcc5b05e44b08637a02a157cae3af888ccc881"
+    },
+    {
+      "bytes": 640,
+      "path": "poam.json",
+      "sha256": "2c1cc10e5c6ebc72230ee8339a4b57b3da75ff319d3cf5fdd0052e3be2a533ab"
+    }
+  ],
+  "format": "tekmerion-platform-audit-export/1",
+  "ledger": {
+    "checkpoint_root": "b4595425a06d83d508dfaed2a62957b1da755213100dbe65d7fe38e932509aba",
+    "checkpoints": [
+      {
+        "merkle_root": "b4595425a06d83d508dfaed2a62957b1da755213100dbe65d7fe38e932509aba",
+        "seq": 8,
+        "upto_seq": 7
+      }
+    ],
+    "event_count": 8,
+    "file": "ledger/audit.axmr",
+    "head_hash": "9adb45fd49616f139771dddd84f3bba2be15f19860d9b614e6c4ef4800a23f36",
+    "head_seq": 8
+  },
+  "scope": {
+    "kind": "tenant",
+    "tenant_id": "uni-a"
+  }
+}

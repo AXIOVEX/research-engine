@@ -30,6 +30,8 @@ from typing import Callable, Optional
 from . import authz, ed25519
 from .authz import AuthorizationService
 from .baseline import ENDPOINT_CLASSES, RateLimiter, tls_posture
+from .compliance import ControlStateStore
+from .exports import export_platform_audit
 from .breakglass import (
     AUTHORIZER_PLANES, AUTHORIZER_PLATFORM, AUTHORIZER_TENANT,
     MAX_DURATION_SECONDS as BREAKGLASS_MAX_DURATION_SECONDS,
@@ -49,24 +51,30 @@ from .keys import (
     fingerprint,
 )
 from .ledger import (
-    APIKEY_ISSUED, APIKEY_REVOKED, AUTH_APIKEY_FAILED, AUTH_LOGIN_FAILED,
+    APIKEY_ISSUED, APIKEY_REVOKED, AUDIT_EXPORT_ANCHORED, AUDIT_EXPORTED,
+    AUTH_APIKEY_FAILED, AUTH_LOGIN_FAILED,
     AUTH_LOGIN_SUCCEEDED, AUTH_LOGOUT, AUTH_STEPUP, AUTHZ_DENIED,
     BREAKGLASS_ACTION, BREAKGLASS_ACTION_REFUSED, BREAKGLASS_AUTHORIZATION_DENIED,
     BREAKGLASS_AUTHORIZED, BREAKGLASS_INVOCATION_REFUSED, BREAKGLASS_INVOKED,
     BREAKGLASS_POLICY_DECLARED, BREAKGLASS_POLICY_REVOKED,
     BREAKGLASS_REVIEW_COMPLETED, BREAKGLASS_REVIEW_CREATED,
-    BREAKGLASS_SESSION_CLOSED, DIRECTORY_PII_ERASED, GROUP_MAPPING_APPROVED,
+    BREAKGLASS_SESSION_CLOSED, COMPLIANCE_STATE_SET_REFUSED,
+    DIRECTORY_PII_ERASED, GROUP_MAPPING_APPROVED,
     GROUP_MAPPING_REVOKED, GROUP_MEMBERSHIP_GRANTED, GROUP_MEMBERSHIP_REVOKED,
     IDENTITY_CREATED, IDENTITY_DEACTIVATED, IDENTITY_REACTIVATED,
-    IDENTITY_UPDATED, IDP_CONFIGURED, IDP_UPDATED, PLATFORM_BOOTSTRAPPED,
+    IDENTITY_UPDATED, IDP_CONFIGURED, IDP_UPDATED, LEGAL_HOLD_ENFORCED,
+    LEGAL_HOLD_PLACED, LEGAL_HOLD_RELEASED, PLATFORM_BOOTSTRAPPED,
     RATE_LIMIT_EXCEEDED, ROLE_GRANTED, ROLE_REVOKED, SCIM_SYNC_FAILED,
     SCIM_SYNC_SUCCEEDED, SCIM_TOKEN_ISSUED, SCIM_TOKEN_REVOKED,
-    SECURITY_EVENT_EMITTED, SESSION_REVOKED, TENANT_CREATED, TENANT_UPDATED,
+    SECURITY_EVENT_EMITTED, SESSION_REVOKED, TENANT_CREATED,
+    TENANT_MARKING_UPDATED, TENANT_RESIDENCY_CHANGE_REFUSED,
+    TENANT_RESIDENCY_MIGRATED, TENANT_UPDATED,
     WEBHOOK_DELIVERY_FAILED, WEBHOOK_DELIVERY_SUCCEEDED,
     WEBHOOK_SUBSCRIPTION_CREATED, WEBHOOK_SUBSCRIPTION_REVOKED,
     PlatformLedger,
 )
 from .oidc import OIDCClient, pkce_pair
+from .poam import PoamRegister
 from .saml import (
     CLOCK_SKEW_SECONDS, SamlAssertion, SamlIdPSettings, build_authn_request,
     new_request_id, parse_metadata, redirect_binding_url, validate_response,
@@ -366,13 +374,26 @@ class PlatformService:
                       name: Optional[str] = None, region: Optional[str] = None) -> Tenant:
         _, admin = self._require(session_token, authz.PLATFORM_TENANT_MANAGE, tenant_id=None)
         tenant = self.directory.tenant(tenant_id)
+        if region is not None and region != tenant.region:
+            # E6 (T541): the region IS the residency pin, and a pin
+            # changes only through the export + anchor + migration
+            # flow — never as a silent field update. The refusal is
+            # ledgered before it is raised, like every refusal here.
+            self.deployment_ledger.record(
+                TENANT_RESIDENCY_CHANGE_REFUSED, actor_id=admin.actor_id,
+                target=f"tenant:{tenant_id}", tenant_id=tenant_id,
+                outcome="refused",
+                reason="region is the residency pin; change it via "
+                       "change_residency_pin (export + anchor + migration, T541)",
+                at=self._now())
+            raise ConfigurationError(
+                "region is the tenant's residency pin — change it via "
+                "change_residency_pin (anchored export + migration event), "
+                "not update_tenant")
         changed = {}
         if name is not None:
             tenant.name = name
             changed["name"] = name
-        if region is not None:
-            tenant.region = region
-            changed["region"] = region
         self.deployment_ledger.record(
             TENANT_UPDATED, actor_id=admin.actor_id, target=f"tenant:{tenant_id}",
             tenant_id=tenant_id, fields=sorted(changed), at=self._now())
@@ -1915,6 +1936,21 @@ class PlatformService:
             raise ConfigurationError(
                 "directory erasure applies to deactivated identities "
                 "(deprovision first)")
+        hold = self._active_hold(tenant_id)
+        if hold is not None:
+            # E6 (T545): a legal hold freezes the erasure path for
+            # the held scope — preservation is the hold's whole
+            # point. Recorded before the raise, like every refusal.
+            self._tenant_ledger(tenant_id).record(
+                LEGAL_HOLD_ENFORCED, actor_id=admin.actor_id,
+                target=f"identity:{identity_id}", outcome="refused",
+                action="identity.pii_erasure", hold_id=hold["hold_id"],
+                reason="an active legal hold covers this tenant; "
+                       "erasure is refused while the hold stands (T545)",
+                at=self._now())
+            raise ConfigurationError(
+                f"directory erasure refused: legal hold {hold['hold_id']} "
+                "is active for this tenant (T545)")
         self.scim.forget_identity(tenant_id, identity_id)
         erased = self.directory.erase_identity_pii(identity_id)
         self._tenant_ledger(tenant_id).record(
@@ -2725,3 +2761,404 @@ class PlatformService:
             "key_mismatches": mismatches,
             "unpaired_appends": unpaired,
         }
+
+    # -- compliance evidence (E6: T541–T545, T551–T553) --------------------
+    #
+    # The evidence machinery the compliance wireframe depicts:
+    # residency pin (T541), audit export + anchor (T542/T543),
+    # legal hold (T545), CUI marking (T551), SPRS-input control
+    # states (T552), and the POA&M register (T553). Scope discipline
+    # matches the rest of the platform: tenant-scope compliance is
+    # the tenant admin's plane (tenant.compliance_manage), the
+    # deployment scope is the platform plane's; reads ride the
+    # audit-access rule. Every write is a ledger event; every
+    # attributable refusal is ledgered before it is raised.
+
+    def _scope_ledger(self, tenant_id: Optional[str]) -> PlatformLedger:
+        return self.deployment_ledger if tenant_id is None \
+            else self._tenant_ledger(tenant_id)
+
+    def _scope_ledger_path(self, tenant_id: Optional[str]) -> Path:
+        return self.root / "deployment.axmr" if tenant_id is None \
+            else self.root / f"tenant-{tenant_id}.axmr"
+
+    def _require_compliance_write(self, session_token: str,
+                                  tenant_id: Optional[str]) -> Identity:
+        if tenant_id is None:
+            _, admin = self._require(
+                session_token, authz.PLATFORM_CONFIG_MANAGE, tenant_id=None)
+            return admin
+        try:
+            _, admin = self._require(
+                session_token, authz.TENANT_COMPLIANCE_MANAGE, tenant_id=tenant_id)
+            return admin
+        except AuthorizationDenied:
+            _, admin = self._require(
+                session_token, authz.PLATFORM_CONFIG_MANAGE, tenant_id=None)
+            return admin
+
+    # -- CUI marking (T551) ----------------------------------------------
+
+    def set_tenant_marking(self, session_token: str, tenant_id: str, *,
+                           category: Optional[str],
+                           authority: Optional[str] = None,
+                           dissemination: Optional[str] = None) -> dict:
+        """Record (or clear, with category=None) the tenant's CUI
+        marking fields. The platform records markings; it does not
+        adjudicate them — the recorded values are the tenant's."""
+        admin = self._require_compliance_write(session_token, tenant_id)
+        tenant = self.directory.tenant(tenant_id)
+        tenant.cui_marking = (
+            {"category": category, "authority": authority,
+             "dissemination": dissemination}
+            if category else None)
+        self.deployment_ledger.record(
+            TENANT_MARKING_UPDATED, actor_id=admin.actor_id,
+            target=f"tenant:{tenant_id}", tenant_id=tenant_id,
+            category=category, authority=authority,
+            dissemination=dissemination, at=self._now())
+        return tenant.cui_marking or {"status": "unmarked"}
+
+    # -- residency pin (T541) ----------------------------------------------
+
+    def residency_pin(self, tenant_id: str) -> dict:
+        """The tenant's recorded pin: shape + region as recorded at
+        creation, plus the migration history (pin changes exist
+        only as migration events — there is no other write path)."""
+        tenant = self.directory.tenant(tenant_id)
+        migrations = [
+            e for e in self.deployment_ledger.events()
+            if e["type"] == TENANT_RESIDENCY_MIGRATED
+            and e["payload"].get("tenant_id") == tenant_id
+        ]
+        return {
+            "tenant_id": tenant_id, "shape": tenant.shape,
+            "region": tenant.region, "migrations": len(migrations),
+            "last_migration_seq": migrations[-1]["seq"] if migrations else None,
+        }
+
+    def change_residency_pin(self, session_token: str, *, tenant_id: str,
+                             shape: str, region: Optional[str]) -> dict:
+        """The T541 flow, enforced: an anchored audit export of the
+        tenant's own ledger must exist before the pin moves; the
+        move itself is a migration event in both ledgers, carrying
+        the export that authorized it. A held tenant's pin does not
+        move at all."""
+        _, admin = self._require(session_token, authz.PLATFORM_TENANT_MANAGE,
+                                 tenant_id=None)
+        tenant = self.directory.tenant(tenant_id)
+
+        def refuse(reason: str) -> ConfigurationError:
+            self.deployment_ledger.record(
+                TENANT_RESIDENCY_CHANGE_REFUSED, actor_id=admin.actor_id,
+                target=f"tenant:{tenant_id}", tenant_id=tenant_id,
+                outcome="refused", reason=reason, at=self._now())
+            return ConfigurationError(reason)
+
+        if self._active_hold(tenant_id) is not None:
+            raise refuse("a legal hold is active for this tenant; the "
+                         "residency pin does not move under a hold (T545)")
+        tenant_events = self._tenant_ledger(tenant_id).events()
+        exported = {e["payload"].get("export_id") for e in tenant_events
+                    if e["type"] == AUDIT_EXPORTED}
+        anchored = {e["payload"].get("export_id") for e in tenant_events
+                    if e["type"] == AUDIT_EXPORT_ANCHORED}
+        ready = exported & anchored
+        if not ready:
+            raise refuse("residency pin change requires an anchored audit "
+                         "export of the tenant's ledger first "
+                         "(export + anchor + migration, T541)")
+        export_id = sorted(ready)[-1]
+        fields = dict(
+            tenant_id=tenant_id, old_shape=tenant.shape,
+            old_region=tenant.region, new_shape=shape, new_region=region,
+            export_id=export_id)
+        tenant.shape, tenant.region = shape, region
+        self.deployment_ledger.record(
+            TENANT_RESIDENCY_MIGRATED, actor_id=admin.actor_id,
+            target=f"tenant:{tenant_id}", at=self._now(), **fields)
+        self._tenant_ledger(tenant_id).record(
+            TENANT_RESIDENCY_MIGRATED, actor_id=admin.actor_id,
+            target=f"tenant:{tenant_id}", at=self._now(), **fields)
+        return self.residency_pin(tenant_id)
+
+    # -- audit export + anchor (T542/T543) ---------------------------------
+
+    def _export_scope_audit(self, admin: Identity, tenant_id: Optional[str],
+                            out_dir: str) -> dict:
+        ledger = self._scope_ledger(tenant_id)
+        ledger.checkpoint(actor_id=admin.actor_id)
+        store = ControlStateStore(ledger)
+        sprs = store.sprs_report() if store.is_seeded() else None
+        marking = None
+        if tenant_id is not None:
+            marking = self.directory.tenant(tenant_id).cui_marking
+        try:
+            manifest = export_platform_audit(
+                ledger, str(self._scope_ledger_path(tenant_id)), out_dir,
+                marking=marking,
+                poam_document=PoamRegister(ledger).register_document(),
+                sprs_report=sprs)
+        except ValueError as exc:
+            raise ConfigurationError(str(exc)) from exc
+        export_id = f"exp-{manifest['bundle_hash'][:12]}"
+        ledger.record(
+            AUDIT_EXPORTED, actor_id=admin.actor_id, target=f"export:{export_id}",
+            export_id=export_id, bundle_hash=manifest["bundle_hash"],
+            event_count=manifest["ledger"]["event_count"],
+            marking_status=manifest["cui_marking"]["status"], at=self._now())
+        return {**manifest, "export_id": export_id}
+
+    def export_tenant_audit(self, session_token: str, tenant_id: str,
+                            out_dir: str) -> dict:
+        """Export one tenant's audit ledger in the Phase 5 bundle
+        pattern (T542). While a legal hold covers the tenant, the
+        tenant plane may not export — the platform plane may (the
+        hold restricts access; it does not strand the record)."""
+        try:
+            _, admin = self._require(
+                session_token, authz.TENANT_AUDIT_EXPORT, tenant_id=tenant_id)
+            tenant_plane = True
+        except AuthorizationDenied:
+            _, admin = self._require(
+                session_token, authz.PLATFORM_CONFIG_MANAGE, tenant_id=None)
+            tenant_plane = False
+        hold = self._active_hold(tenant_id)
+        if hold is not None and tenant_plane:
+            self._tenant_ledger(tenant_id).record(
+                LEGAL_HOLD_ENFORCED, actor_id=admin.actor_id,
+                target=f"tenant:{tenant_id}", outcome="refused",
+                action="audit.export", hold_id=hold["hold_id"],
+                reason="an active legal hold restricts tenant-plane "
+                       "audit export; the platform plane retains "
+                       "export access (T545)",
+                at=self._now())
+            raise AuthorizationDenied(
+                f"audit export refused: legal hold {hold['hold_id']} "
+                "restricts tenant-plane export while it stands")
+        return self._export_scope_audit(admin, tenant_id, out_dir)
+
+    def export_deployment_audit(self, session_token: str, out_dir: str) -> dict:
+        """Export the deployment (platform-plane) audit ledger —
+        the platform's own record, POA&M register included."""
+        _, admin = self._require(
+            session_token, authz.PLATFORM_CONFIG_MANAGE, tenant_id=None)
+        return self._export_scope_audit(admin, None, out_dir)
+
+    def _record_anchor(self, admin: Identity, tenant_id: Optional[str], *,
+                       export_id: str, mechanism: str, ref: str,
+                       uri: str = "") -> dict:
+        return self._scope_ledger(tenant_id).record(
+            AUDIT_EXPORT_ANCHORED, actor_id=admin.actor_id,
+            target=f"export:{export_id}", export_id=export_id,
+            mechanism=mechanism, ref=ref, uri=uri, at=self._now())
+
+    def record_export_anchor(self, session_token: str, *,
+                             tenant_id: Optional[str] = None,
+                             export_id: str, mechanism: str, ref: str,
+                             uri: str = "") -> dict:
+        """Record that an export was anchored — the receipt fields
+        of wherever the export's hash now also lives (T543). The
+        anchor record is what a later standalone verification is
+        checked against; the platform records receipts, and the
+        receipt's truth is the anchor target's, verifiable there."""
+        admin = self._require_compliance_write(session_token, tenant_id)
+        known = {e["payload"].get("export_id")
+                 for e in self._scope_ledger(tenant_id).events()
+                 if e["type"] == AUDIT_EXPORTED}
+        if export_id not in known:
+            raise ConfigurationError(
+                f"no audit export {export_id!r} recorded for this scope")
+        return self._record_anchor(
+            admin, tenant_id, export_id=export_id, mechanism=mechanism,
+            ref=ref, uri=uri)
+
+    # -- retention & legal hold (T545) --------------------------------------
+
+    def _active_hold(self, tenant_id: Optional[str]) -> Optional[dict]:
+        """The scope's active hold, by replay: a hold stands from
+        its placed event until its released event. Holds are
+        markers — the replay is their only state."""
+        active: dict[str, dict] = {}
+        for event in self._scope_ledger(tenant_id).events():
+            payload = event["payload"]
+            if event["type"] == LEGAL_HOLD_PLACED:
+                active[payload["hold_id"]] = {
+                    "hold_id": payload["hold_id"],
+                    "scope_ref": payload.get("scope_ref"),
+                    "reason": payload.get("reason"),
+                    "authority": payload.get("authority"),
+                    "export_id": payload.get("export_id"),
+                    "placed_seq": event["seq"],
+                    "placed_by": payload.get("actor_id"),
+                }
+            elif event["type"] == LEGAL_HOLD_RELEASED:
+                active.pop(payload["hold_id"], None)
+        if not active:
+            return None
+        return next(iter(active.values()))
+
+    def active_holds(self, tenant_id: Optional[str] = None) -> list[dict]:
+        hold = self._active_hold(tenant_id)
+        return [hold] if hold is not None else []
+
+    def place_legal_hold(self, session_token: str, *,
+                         tenant_id: Optional[str] = None, scope_ref: str,
+                         reason: str, authority: str, out_dir: str) -> dict:
+        """Place a hold: export the held scope, anchor the export
+        record, and append the hold marker naming both (T545's
+        flow — marker + export + anchor + access restriction; the
+        restriction is enforced at the erasure, pin-change, and
+        tenant-plane export surfaces). Nothing about a hold ever
+        deletes or masks ledger content."""
+        admin = self._require_compliance_write(session_token, tenant_id)
+        if self._active_hold(tenant_id) is not None:
+            raise ConfigurationError(
+                "a legal hold is already active for this scope")
+        manifest = self._export_scope_audit(admin, tenant_id, out_dir)
+        self._record_anchor(
+            admin, tenant_id, export_id=manifest["export_id"],
+            mechanism="legal-hold-snapshot", ref=manifest["bundle_hash"])
+        ledger = self._scope_ledger(tenant_id)
+        number = sum(1 for e in ledger.events()
+                     if e["type"] == LEGAL_HOLD_PLACED) + 1
+        hold_id = f"HOLD-{number:04d}"
+        ledger.record(
+            LEGAL_HOLD_PLACED, actor_id=admin.actor_id,
+            target=f"hold:{hold_id}", hold_id=hold_id, scope_ref=scope_ref,
+            reason=reason, authority=authority,
+            export_id=manifest["export_id"],
+            bundle_hash=manifest["bundle_hash"], at=self._now())
+        return {"hold_id": hold_id, "export_id": manifest["export_id"],
+                "bundle_hash": manifest["bundle_hash"]}
+
+    def release_legal_hold(self, session_token: str, *,
+                           tenant_id: Optional[str] = None, hold_id: str,
+                           note: str = "") -> dict:
+        """Release a hold — itself an appended event; the hold's
+        history (placed, enforced, released) stays in the record."""
+        admin = self._require_compliance_write(session_token, tenant_id)
+        hold = self._active_hold(tenant_id)
+        if hold is None or hold["hold_id"] != hold_id:
+            raise ConfigurationError(f"no active legal hold {hold_id!r} "
+                                     "for this scope")
+        return self._scope_ledger(tenant_id).record(
+            LEGAL_HOLD_RELEASED, actor_id=admin.actor_id,
+            target=f"hold:{hold_id}", hold_id=hold_id, note=note,
+            at=self._now())
+
+    # -- SPRS-input control states (T552) ------------------------------------
+
+    def seed_control_states(self, session_token: str, *,
+                            tenant_id: Optional[str] = None) -> bool:
+        admin = self._require_compliance_write(session_token, tenant_id)
+        return ControlStateStore(self._scope_ledger(tenant_id)).ensure_seeded(
+            actor_id=admin.actor_id)
+
+    def set_control_state(self, session_token: str, *,
+                          tenant_id: Optional[str] = None,
+                          requirement: str, state: str,
+                          evidence_link: Optional[str] = None,
+                          gap_marker: Optional[str] = None,
+                          note: str = "") -> dict:
+        admin = self._require_compliance_write(session_token, tenant_id)
+        ledger = self._scope_ledger(tenant_id)
+        store = ControlStateStore(ledger)
+        if not store.is_seeded():
+            raise ConfigurationError(
+                "control states are not seeded for this scope — "
+                "seed_control_states first (the seed is a recorded act)")
+        try:
+            return store.set_state(
+                actor_id=admin.actor_id, requirement=requirement,
+                state=state, evidence_link=evidence_link,
+                gap_marker=gap_marker, note=note)
+        except ValueError as exc:
+            ledger.record(
+                COMPLIANCE_STATE_SET_REFUSED, actor_id=admin.actor_id,
+                target=f"requirement:{requirement}", outcome="refused",
+                requirement=requirement, reason=str(exc), at=self._now())
+            raise ConfigurationError(str(exc)) from exc
+
+    def sprs_report(self, session_token: str, *,
+                    tenant_id: Optional[str] = None) -> dict:
+        """The scope's SPRS-input record + computed score. A report
+        is computed from recorded inputs only; the platform never
+        submits it — submission is the operator's act."""
+        if tenant_id is None:
+            self._require(session_token, authz.PLATFORM_CONFIG_MANAGE,
+                          tenant_id=None)
+        else:
+            self._require_audit_access(session_token, tenant_id)
+        store = ControlStateStore(self._scope_ledger(tenant_id))
+        if not store.is_seeded():
+            raise ConfigurationError(
+                "control states are not seeded for this scope")
+        return store.sprs_report()
+
+    # -- POA&M register (T553) ------------------------------------------------
+
+    def _poam(self, tenant_id: Optional[str]) -> PoamRegister:
+        return PoamRegister(self._scope_ledger(tenant_id))
+
+    def seed_poam_fips_item(self, session_token: str) -> Optional[str]:
+        """Seed the deployment register with the §3.13.11 item
+        exactly as the records carry it (T553)."""
+        _, admin = self._require(
+            session_token, authz.PLATFORM_CONFIG_MANAGE, tenant_id=None)
+        return self._poam(None).seed_fips_item(actor_id=admin.actor_id)
+
+    def poam_create_item(self, session_token: str, *,
+                         tenant_id: Optional[str] = None, title: str,
+                         weakness: str, affected_requirements: list,
+                         source_ref: str, owner: str = "") -> str:
+        admin = self._require_compliance_write(session_token, tenant_id)
+        try:
+            return self._poam(tenant_id).create_item(
+                actor_id=admin.actor_id, title=title, weakness=weakness,
+                affected_requirements=affected_requirements,
+                source_ref=source_ref, owner=owner)
+        except ValueError as exc:
+            raise ConfigurationError(str(exc)) from exc
+
+    def poam_add_milestone(self, session_token: str, *,
+                           tenant_id: Optional[str] = None, item_id: str,
+                           text: str, due: str = "") -> str:
+        admin = self._require_compliance_write(session_token, tenant_id)
+        try:
+            return self._poam(tenant_id).add_milestone(
+                actor_id=admin.actor_id, item_id=item_id, text=text, due=due)
+        except ValueError as exc:
+            raise ConfigurationError(str(exc)) from exc
+
+    def poam_complete_milestone(self, session_token: str, *,
+                                tenant_id: Optional[str] = None,
+                                item_id: str, milestone_id: str,
+                                note: str = "") -> dict:
+        admin = self._require_compliance_write(session_token, tenant_id)
+        try:
+            return self._poam(tenant_id).complete_milestone(
+                actor_id=admin.actor_id, item_id=item_id,
+                milestone_id=milestone_id, note=note)
+        except ValueError as exc:
+            raise ConfigurationError(str(exc)) from exc
+
+    def poam_set_status(self, session_token: str, *,
+                        tenant_id: Optional[str] = None, item_id: str,
+                        status: str, note: str = "") -> dict:
+        admin = self._require_compliance_write(session_token, tenant_id)
+        try:
+            return self._poam(tenant_id).set_status(
+                actor_id=admin.actor_id, item_id=item_id, status=status,
+                note=note)
+        except ValueError as exc:
+            raise ConfigurationError(str(exc)) from exc
+
+    def poam_register_document(self, session_token: str, *,
+                               tenant_id: Optional[str] = None) -> dict:
+        if tenant_id is None:
+            self._require(session_token, authz.PLATFORM_CONFIG_MANAGE,
+                          tenant_id=None)
+        else:
+            self._require_audit_access(session_token, tenant_id)
+        return self._poam(tenant_id).register_document()

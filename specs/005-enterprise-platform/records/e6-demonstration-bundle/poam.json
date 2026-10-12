@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "affected_requirements": [
+        "3.5.2"
+      ],
+      "created_seq": 7,
+      "item_id": "POAM-0001",
+      "milestones": [],
+      "owner": "",
+      "source_ref": "demonstration/ssp-input",
+      "status": "open",
+      "status_history": [
+        {
+          "actor_id": "83ccb2ec29cc48aaba05491f112a53f8",
+          "note": "item created",
+          "seq": 7,
+          "status": "open"
+        }
+      ],
+      "title": "Demonstration item — IdP certificate rotation",
+      "weakness": "Tenant IdP signing certificate expires within the demonstration window; rotation is an operator act."
+    }
+  ]
+}

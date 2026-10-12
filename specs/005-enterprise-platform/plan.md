@@ -250,3 +250,111 @@ at institutional event volumes; break-glass under a real incident's
 human process (the mechanism is built and batteried; the drill is
 an E6/pilot activity); SCIM↔login account linking remains
 unspecced (carried from E3).
+
+**E6 — Compliance evidence + self-hosted shape: EXITED 2026-10-12**
+(branch `enterprise/e6-compliance`; PR opened for CI; merging is the
+coordinator's). Delivered: the residency pin as recorded tenant
+configuration whose only change path is the export + anchor +
+migration flow — a bare `update_tenant` region change is refused
+and ledgered, a migration without an anchored export of the
+tenant's own ledger is refused and ledgered, and a landed migration
+is an event in both ledgers carrying the export that authorized it
+(T541); platform audit export in the Phase 5 pattern for both
+ledger scopes — ledger copy, events/POA&M/control-state
+projections, hash manifest, HUMAN-README, and a standalone
+verifier that runs the production Axiomere verifier over the copy
+and cross-checks every projection against it (T542); the anchored
+demonstration — a tenant export produced by the tenant's own admin,
+verified standalone from the committed bundle, anchor recorded in
+the continuing chain (T543; `records/e6-audit-export-
+demonstration.md`) — with its public-deposit leg NOT executed under
+the phase's no-uploads boundary and recorded there as residue, not
+rounded up; the SOC 2 readiness mapping (CC1–CC9 → mechanisms →
+claim IDs, every entry machine-checked resolvable; labeled
+readiness only) with the §13 framing sweep riding it (T544);
+retention & legal hold — hold = export + anchor + marker event +
+access restriction (erasure, pin change, and tenant-plane export
+refused and ledgered under an active hold; release is an event),
+off-ledger retention schedules only, and the F-005-17 audit
+asserting no deletion path over ledger content exists in the
+platform (T545); CUI marking in both export families — manifest
+block + README banner/footer from recorded fields, unmarked stated
+explicitly (T551); SPRS self-assessment machinery — per-requirement
+states as ledger events over a seed derived mechanically from the
+responsibility matrix, DoD Assessment Methodology v1.2.1 weights
+(44×5 + 14×3 + 51×1 = 313; §3.12.4 unscored per Annex A; §5(e)
+partials), deterministic score computation, completeness enforced
+at write time, and the matrix/state agreement check (T552); the
+append-only POA&M register — items, milestones, status as events
+only, a status change without an event unrepresentable — seeded
+with the §3.13.11 item exactly as the records carry it (POAM-0001)
+(T553); self-hosted packaging — one codebase, one role model
+(fingerprint-matched), the parity battery run against both shapes,
+the payload-absence check, the institution KMS option as the
+delegated-custody signer reference, and the upgrade path (T546);
+and the wording sweep over README, docs, and the Spec 005 surfaces
+— 25 certification-vocabulary hits, every one reviewed as a
+negation, a not-claimed entry, the sanctioned posture phrase, the
+quoted owner directive, or a framing statement; zero unqualified
+claims (T547). Tests: 368 passed, 2 skipped locally (343 prior +
+25 new); the full Spec 002 battery is green unchanged at this
+final exit, discharging CLM-005-20's per-phase regression
+prediction. Claims at exit (bundle v0.7.0, re-assessed
+`after_implement`, outcome `gather_evidence` — **0 of 31 claims
+below threshold**): supported — CLM-005-12 (shapes + pin), 15
+(audit export), 16 (readiness posture + resolvable mapping), 17
+(hold construction), 20 (no Spec 002 weakening, discharged at the
+final exit), 23 (CMMC framing, swept), 24 (matrix maintained,
+no reclassifications), 28 (CUI marking), 29 (SPRS machinery), 30
+(completed — the POA&M register joins E4's IR egress; its
+partially_supported residue is discharged). **Spec 005 close-out
+state:** of 31 claims, 29 stand supported. Two remain open, both
+by design rather than by shortfall: **CLM-005-13** (admin console)
+is unbuilt — E5 is gated on the owner's approval of the PR #11
+wireframes (T534-WF), which has not been given; its 0.904 draft
+score is not the feature existing, and E6 does not move it.
+**CLM-005-31** (the hosted shape's DFARS 252.204-7012 equivalency
+flag) stands as a draft permanently until the owner/legal decision
+lands — E6's spot-check confirms hosted-shape materials still
+carry the flag; engineering neither resolves nor conceals it.
+The computed SPRS self-score over the seed inputs is **−156**
+(total deduction 266; §3.13.11 contributes its §5(e) partial
+deduction of 3) — an output of the machinery over the platform's
+own recorded inputs with every operator remainder open, reported
+as an output, never as compliance evidence. CMMC maintenance: the
+responsibility matrix was reviewed — **no classification
+changes**; the E6 note in the matrix records the evidence changes
+(3.12.2's register built; 3.3.3/3.3.6's exports; 3.8.4's marking;
+3.11.1/3.12.1/3.12.4's state inputs; 3.13.11's basis now names
+POAM-0001); the crypto inventory gains no row (E6 note records
+the judgment: export hashing is row 9's operation). Pilot gate
+(T533): **DISCHARGED** — the isolation half was green at E4 and
+the audit-export demonstration half is the T543 record above.
+One in-phase defect, caught by the work itself and recorded: the
+coordinator's brief scoped E6 to five claims (12, 17, 28, 29,
+30†); the plan's own claim→phase map assigns ten (12, 15, 16, 17,
+23, 24, 28, 29, 30†, 31) plus the per-phase CLM-005-20 — the map
+governed, per the E2/E3/E4 precedent, and the full assignment is
+what this exit reports. Two scope facts stated plainly: the SPRS
+seed score measures the platform's inputs alone (a tenant's real
+self-assessment starts from these inputs and moves as the
+operator's own evidence lands — the machinery tracks that; no
+score was submitted anywhere, and no submission path exists); and
+T543's public-anchor leg remains open machinery, not a done thing
+— the deposit transport exists (Spec 002's), and running it is a
+future, separately-authorized act. What remains not understood at
+this exit: no real organization's SPRS inputs have been maintained
+yet (the seed's mechanical derivation from the matrix is a
+starting record, and its Platform-row "implemented" states assert
+the matrix's own construction claim — an operator's assessor may
+score some differently, which the state machinery accommodates but
+cannot prejudge); the audit export has never been verified by an
+external auditor against a live deployment (the demonstration
+world is the E1 fixture world, specimen identities, as labeled);
+legal hold has never been exercised under a real preservation
+demand (its enforcement points are batteried, its human process
+is an organizational drill, like break-glass); and the self-hosted
+shape has never been installed by an institution (the parity
+battery is in-process service-layer evidence, not an installer or
+a load test — packaging in the distribution sense follows a named
+institution's requirements).

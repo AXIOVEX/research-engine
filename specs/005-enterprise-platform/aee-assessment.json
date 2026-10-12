@@ -4,8 +4,8 @@
   "project": "tekmerion",
   "phase": "after_implement",
   "outcome": "gather_evidence",
-  "summary": "Assessed 31 claim(s); found 136 failure mode(s); 4 claim(s) below the 0.70 confidence threshold.",
-  "created_at": "2026-10-12T16:59:58.708650Z",
+  "summary": "Assessed 31 claim(s); found 133 failure mode(s); 0 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T17:38:20.789463Z",
   "claims": [
     {
       "id": "CLM-005-01",
@@ -1477,7 +1477,7 @@
       "id": "CLM-005-12",
       "text": "Hosted multi-tenant and self-hosted single-tenant are one codebase and one role/authorization model; each tenant's residency pin (deployment shape, region) is recorded configuration, and a self-hosted tenant's study data never transits or rests in the hosted plane.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: deployment shapes (E6 productizes self-hosted); hybrid per DN-003 remains an architectural target",
         "Excludes connector traffic (Crossref/OpenAlex queries), which leaves any shape by design and is ledgered per study"
@@ -1506,6 +1506,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "E6 (T541/T546): the residency pin is recorded tenant configuration and moves only through export + anchor + migration events in both ledgers (bare update_tenant region change refused and ledgered); the shape-parity battery runs one scenario (seed, SPRS report, audit export, standalone verify) against hosted and self-hosted profiles with identical outcomes and a matching role-model fingerprint, and asserts the self-hosted tenant's identifiers and payloads are absent from the hosted deployment's ledgers and files (tests/test_e6_packaging.py, tests/test_e6_compliance.py)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/platform/packaging.py + specs/005-enterprise-platform/self-hosted-packaging.md (DeploymentProfile descriptor; institution KMS option recorded as the delegated-custody signer reference; upgrade = signed release, ledgers open in place)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -1517,8 +1539,8 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-12-IRREDUCIBILITY-CHALLENGE",
@@ -1984,7 +2006,7 @@
       "id": "CLM-005-15",
       "text": "The platform audit record exports in the Phase 5 audit-bundle pattern \u2014 manifest, per-file hashes, standalone verification, optional external anchor \u2014 so a tenant or an external auditor can verify the platform-plane record offline, and tampering with an export fails that verification.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: platform-plane export (E6), reusing tekmerion.export/deposit machinery",
         "Excludes study bundles, already shipped in Spec 002 Phase 5"
@@ -2008,6 +2030,17 @@
           "kind": "asserted",
           "direction": "supports",
           "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "E6 (T542/T543): platform audit exports in the Phase 5 pattern (src/tekmerion/platform/exports.py) \u2014 manifest + per-file hashes + ledger copy + projections; the standalone verifier runs the production Axiomere verifier over the copy and cross-checks projections payload-for-payload. The tamper battery covers a flipped projection, the same flip under an attacker-rehashed manifest, and an altered event inside the ledger copy \u2014 all fail (F-005-15). The T543 demonstration (records/e6-audit-export-demonstration.md) exported a tenant's ledger under its own admin and verified the committed bundle standalone from a clean process; the public-deposit anchor leg was not executed under the phase's no-uploads boundary and is recorded as residue in that record, not claimed",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
           "description": "",
           "source_id": "",
           "independent_of": [],
@@ -2094,7 +2127,7 @@
       "id": "CLM-005-16",
       "text": "The product claims SOC 2 readiness and evidence mapping only \u2014 never certification; FERPA and GDPR appear only as design constraints, never as compliance certifications; and every SOC 2 mapping entry points at machinery that exists or is specced in Spec 005, not at aspirations.",
       "kind": "compliance",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: all product surfaces, spec text, and sales-facing descriptions of the enterprise platform",
         "Excludes a future, separately-gated audit engagement, whose outcome would be recorded as its own decision"
@@ -2134,6 +2167,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "E6 (T544): specs/005-enterprise-platform/soc2-readiness-mapping.md \u2014 CC1\u2013CC9 criteria mapped to mechanisms/records with claim IDs, labeled READINESS MAPPING ONLY with the no-report statement in its header; the resolvability battery parses the document and asserts every cited claim exists in this bundle and every cited code path exists in the tree (F-005-16)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "E6 (T547): the wording sweep over README.md, docs/**, and the Spec 005 documents found 25 certification-vocabulary hits \u2014 every one a negation, a not-claimed list entry, the sanctioned \u00a713 posture phrase, the owner's directive quoted in the records that adopt it truthfully, or a framing/ecosystem statement (reviewed hit by hit; baseline pinned in tests/test_e6_compliance.py)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -2145,7 +2200,7 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.968023,
+      "confidence": 1.0,
       "confidence_band": "high",
       "failures": [
         {
@@ -2156,16 +2211,6 @@
           "severity": "medium",
           "category": "coverage_gap",
           "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
-          "resolved": false
-        },
-        {
-          "id": "AEE-CLM-005-16-AUTHORITY-CHALLENGE",
-          "claim_id": "CLM-005-16",
-          "challenge": "Authority challenge",
-          "breakpoint": "Compliance claim lacks observed primary-authority or test evidence",
-          "severity": "high",
-          "category": "missing_evidence",
-          "recovery_hint": "Cite the controlling text and attach assessment evidence.",
           "resolved": false
         },
         {
@@ -2185,7 +2230,7 @@
       "id": "CLM-005-17",
       "text": "Retention and legal hold are implemented as export + anchor + access-restriction markers only; no retention feature deletes or masks ledger content, and the sole erasure path for chain content anywhere in the platform is DN-005's break-glass erasure certificate under documented legal compulsion.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: study ledgers and the platform audit ledger (E6)",
         "Excludes off-ledger data (identity-directory PII, session stores), which follows ordinary data controls and minimization"
@@ -2214,6 +2259,17 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "E6 (T545): legal hold as marker + export + anchor + access restriction (src/tekmerion/platform/service.py place_legal_hold): the hold flow produces the export and its anchor record; under an active hold the directory-PII erasure (the T524 off-ledger path), the residency-pin change, and tenant-plane audit export are each refused and the refusal ledgered as legal.hold_enforced; release is itself an appended event. The F-005-17 audit battery asserts no deletion/mutation path over ledger content exists in any platform module (PlatformLedger exposes none; no unlink/remove/rmtree over ledger files in src/tekmerion/platform)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -2225,8 +2281,8 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-17-IRREDUCIBILITY-CHALLENGE",
@@ -2561,7 +2617,7 @@
       "id": "CLM-005-20",
       "text": "The enterprise build does not weaken any Spec 002 guarantee: the full Spec 002 test battery (including seeded-defect tests) passes unchanged against the multi-tenant service build, and no enterprise feature adds a mutation or deletion path to study records.",
       "kind": "prediction",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: regression obligation at every enterprise phase exit, E1\u2013E6",
         "Excludes performance characteristics, which get their own thresholds at the evaluation freeze (OD-5 pattern)"
@@ -2585,6 +2641,17 @@
           "kind": "asserted",
           "direction": "supports",
           "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Discharge at the final exit (the claim is a per-phase regression obligation, E1\u2013E6): the full suite at E6 is 368 passed, 2 skipped with the Spec 002 battery (incl. seeded-defect and rehashed-manifest tamper tests) and the Spec 011 backward-compat pins green unchanged against the completed enterprise build; E6 touched shared code (study-bundle marking in tekmerion.export, platform service) and the battery still passes unchanged; the F-005-17 audit at this exit confirms no enterprise feature adds a mutation or deletion path to study or platform records",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
           "description": "",
           "source_id": "",
           "independent_of": [],
@@ -2621,7 +2688,7 @@
       "id": "CLM-005-23",
       "text": "All product language frames CMMC truthfully: CMMC (32 CFR Part 170) certifies organizations and assessment boundaries, not software; Tekmerion claims only CMMC Level 2 alignment / compliance support, implies Level 1 by that alignment, and nowhere claims Level 3 (SP 800-172) practices.",
       "kind": "compliance",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: every product surface \u2014 docs, spec language, UI copy, exports, marketing-adjacent text in this repo",
         "The qualifier structure (alignment / compliance support) is the claim; dropping it anywhere is a violation, not a wording choice"
@@ -2661,6 +2728,17 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "E6: the \u00a713 framing sweep rode T544/T547 \u2014 the wording sweep over every public surface (README, docs incl. the pilot readiness packet, the Spec 005 documents) found no unqualified CMMC claim: the 25 hits are negations, not-claimed lists, the sanctioned 'alignment / compliance support' phrase, or the owner's directive quoted where the records adopt it in its truthful form (tests/test_e6_compliance.py)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -2672,7 +2750,7 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.756173,
+      "confidence": 1.0,
       "confidence_band": "high",
       "failures": [
         {
@@ -2683,16 +2761,6 @@
           "severity": "medium",
           "category": "coverage_gap",
           "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
-          "resolved": false
-        },
-        {
-          "id": "AEE-CLM-005-23-AUTHORITY-CHALLENGE",
-          "claim_id": "CLM-005-23",
-          "challenge": "Authority challenge",
-          "breakpoint": "Compliance claim lacks observed primary-authority or test evidence",
-          "severity": "high",
-          "category": "missing_evidence",
-          "recovery_hint": "Cite the controlling text and attach assessment evidence.",
           "resolved": false
         },
         {
@@ -2732,7 +2800,7 @@
       "id": "CLM-005-24",
       "text": "Every NIST SP 800-171 Rev 2 requirement (110, 14 families) is classified in the control responsibility matrix as Platform, Supports, or Organizational, with a stated basis; no family or requirement is omitted, and any phase-exit reclassification updates the matrix in the same commit.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: SP 800-171 Rev 2 only; SP 800-172 (Level 3) is out of scope per \u00a711",
         "The 800-53 SA family has no 800-171 counterpart; the matrix records that absence explicitly rather than mapping it silently"
@@ -2761,6 +2829,17 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "E6 maintenance (per phase exit): classifications reviewed against the landed E6 machinery \u2014 NO reclassifications; SPRS/POA&M landing changed the evidence for rows (3.12.2's register now exists; 3.3.3/3.3.6's exports; 3.8.4's marking; 3.11.1/3.12.1/3.12.4's state inputs), recorded in the matrix's E6 note, classes unchanged. The battery re-parses the matrix document and asserts the machinery's classification table equals it (110/110), so the document and the code cannot drift silently (tests/test_e6_compliance.py)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -2772,7 +2851,7 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.958063,
+      "confidence": 1.0,
       "confidence_band": "high",
       "failures": [
         {
@@ -3181,7 +3260,7 @@
       "id": "CLM-005-28",
       "text": "Audit bundles and platform exports carry CUI marking support: banner/footer marking fields in the manifest and HUMAN-README, populated from recorded study/tenant fields (category, controlling authority, dissemination controls); the platform records markings, it does not adjudicate them.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: export artifacts (study bundles from E6 platform export; study-plane bundle marking fields ride the same manifest extension)",
         "Specced in the amendment so E1/E4 payloads never need re-shaping; the rendering itself is an E6 deliverable (T551)"
@@ -3210,6 +3289,17 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "E6 (T551): marking blocks ride both export families \u2014 src/tekmerion/marking.py normalizes the recorded fields; platform audit exports and Spec 002 study bundles both carry cui_marking in the manifest and the banner/footer in HUMAN-README, populated from the tenant's recorded marking (set_tenant_marking) or the export caller's recorded fields; unmarked artifacts state 'UNMARKED' explicitly in both places; the study-bundle verifier fails a bundle whose README banner disagrees with its manifest block (tests/test_e6_compliance.py)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -3221,8 +3311,8 @@
       "severity": "medium",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-28-IRREDUCIBILITY-CHALLENGE",
@@ -3261,7 +3351,7 @@
       "id": "CLM-005-29",
       "text": "The platform maintains its SP 800-171 control states in SPRS-ready form: per-requirement state, the weighted deduction class of any unimplemented requirement under the DoD scoring methodology (the -203\u2026110 scale), and an evidence link \u2014 so an operator can compute and maintain their self-assessment score from platform-maintained inputs.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: platform-owned and platform-supported requirements; the operator's SPRS submission itself is the operator's act and is not claimed",
         "E6 deliverable (T552); the matrix (\u00a713.2) is its data source and must stay current per phase exit"
@@ -3290,6 +3380,17 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "E6 (T552): the machinery exists and is batteried (src/tekmerion/platform/compliance.py) \u2014 DoD Assessment Methodology v1.2.1 weights (44x5 + 14x3 + 51x1 = 313; 3.12.4 unscored per Annex A; \u00a75(e) partials for 3.5.3/3.13.11); the table-integrity test pins the counts and the -203 floor; the seed derives mechanically from the matrix and computes -156 with \u00a73.13.11's partial deduction of 3 visible; a state change moves the computed score by exactly its deduction class; completeness (no state without evidence link or gap marker) is enforced at write time and checked on read; the agreement check catches the F-005-29 shapes in the platform-asserted seed layer. The score is reported as an output of recorded inputs; submission remains the operator's act \u2014 no submission path exists",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -3297,11 +3398,11 @@
       "falsification_tests": [
         "F-005-29: a requirement whose matrix classification and SPRS-form state disagree, or an unimplemented requirement with no deduction class recorded."
       ],
-      "uncertainty": "high",
+      "uncertainty": "medium",
       "severity": "medium",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.958063,
+      "confidence": 1.0,
       "confidence_band": "high",
       "failures": [
         {
@@ -3321,7 +3422,7 @@
       "id": "CLM-005-30",
       "text": "Incident-response support is mechanized: security-significant platform events (authentication-failure bursts, break-glass use, revocation storms, audit-verification failures) are first-class signed egress events over the webhook channel, and unimplemented 800-171 requirements live in an append-only POA&M register (items, milestones, status as events) seeded with the \u00a73.13.11 FIPS gap.",
       "kind": "requirement",
-      "status": "partially_supported",
+      "status": "supported",
       "boundary": [
         "Scope: IR family support only \u2014 the incident-response capability and its testing remain the organization's (matrix 3.6)",
         "Webhook channel is E4 (CLM-005-21); the IR event classes and the POA&M register are E6 (T553/T554) \u2014 the claim joins both and is discharged across them"
@@ -3363,7 +3464,7 @@
           "content_hash": null
         },
         {
-          "ref": "Residue, named: the POA&M register half (T553) is E6 and does not exist yet \u2014 items/milestones/status-as-events are unbuilt; this claim joins both halves and stays partially_supported until E6, per its own boundary",
+          "ref": "E6 (T553): the POA&M register half is delivered \u2014 src/tekmerion/platform/poam.py: items, milestones, and status exist only as appended events (poam.item_created / milestone_added / milestone_completed / status_changed) and the register is a replay, so a status change without an event is unrepresentable (F-005-30); the deployment register is seeded with the \u00a73.13.11 item exactly as the records carry it (POAM-0001, three milestones incl. the owner-decision trigger). The claim's two halves now both stand: T554 IR egress (E4) + the register (E6)",
           "kind": "observed",
           "direction": "supports",
           "source_quality": "test",
@@ -3442,6 +3543,17 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "E6 spot-check (per phase exit; the claim stands open by design \u2014 it is not engineering's to close): hosted-shape materials still carry the open-decision flag \u2014 docs/pilot/readiness/VENDOR-PACKET.md \u00a75 (the DFARS equivalency question stated as a recorded open owner/legal decision) and \u00a79 (not-claimed list); the E6 wording sweep covered the packet; the self-hosted packaging note (specs/005-enterprise-platform/self-hosted-packaging.md) names the self-hosted shape as the capable CUI path meanwhile, per this claim's boundary",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -3453,8 +3565,8 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-31-IRREDUCIBILITY-CHALLENGE",
@@ -3464,16 +3576,6 @@
           "severity": "medium",
           "category": "coverage_gap",
           "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
-          "resolved": false
-        },
-        {
-          "id": "AEE-CLM-005-31-AUTHORITY-CHALLENGE",
-          "claim_id": "CLM-005-31",
-          "challenge": "Authority challenge",
-          "breakpoint": "Compliance claim lacks observed primary-authority or test evidence",
-          "severity": "high",
-          "category": "missing_evidence",
-          "recovery_hint": "Cite the controlling text and attach assessment evidence.",
           "resolved": false
         }
       ],
@@ -3637,19 +3739,17 @@
     },
     "CLM-005-12": {
       "claim_id": "CLM-005-12",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-13": {
       "claim_id": "CLM-005-13",
@@ -3709,11 +3809,11 @@
     },
     "CLM-005-16": {
       "claim_id": "CLM-005-16",
-      "direct_score": 0.968023,
-      "propagated_score": 0.968023,
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
       "band": "high",
       "components": {
-        "evidence": 0.941859,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
@@ -3723,19 +3823,17 @@
     },
     "CLM-005-17": {
       "claim_id": "CLM-005-17",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-18": {
       "claim_id": "CLM-005-18",
@@ -3795,27 +3893,25 @@
     },
     "CLM-005-23": {
       "claim_id": "CLM-005-23",
-      "direct_score": 0.756173,
-      "propagated_score": 0.756173,
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
       "band": "high",
       "components": {
-        "evidence": 0.556678,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-24": {
       "claim_id": "CLM-005-24",
-      "direct_score": 0.958063,
-      "propagated_score": 0.958063,
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
       "band": "high",
       "components": {
-        "evidence": 0.92375,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
@@ -3867,27 +3963,25 @@
     },
     "CLM-005-28": {
       "claim_id": "CLM-005-28",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-29": {
       "claim_id": "CLM-005-29",
-      "direct_score": 0.958063,
-      "propagated_score": 0.958063,
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
       "band": "high",
       "components": {
-        "evidence": 0.92375,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
@@ -3911,19 +4005,17 @@
     },
     "CLM-005-31": {
       "claim_id": "CLM-005-31",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     }
   },
   "recoveries": [
@@ -3936,32 +4028,8 @@
       "verification": "At least one inspectable non-self-attested evidence item is attached."
     },
     {
-      "failure_id": "AEE-CLM-005-16-AUTHORITY-CHALLENGE",
-      "claim_id": "CLM-005-16",
-      "strategy": "gather_evidence",
-      "action": "Cite the controlling text and attach assessment evidence.",
-      "priority": 2,
-      "verification": "At least one inspectable non-self-attested evidence item is attached."
-    },
-    {
-      "failure_id": "AEE-CLM-005-23-AUTHORITY-CHALLENGE",
-      "claim_id": "CLM-005-23",
-      "strategy": "gather_evidence",
-      "action": "Cite the controlling text and attach assessment evidence.",
-      "priority": 2,
-      "verification": "At least one inspectable non-self-attested evidence item is attached."
-    },
-    {
       "failure_id": "AEE-CLM-005-25-AUTHORITY-CHALLENGE",
       "claim_id": "CLM-005-25",
-      "strategy": "gather_evidence",
-      "action": "Cite the controlling text and attach assessment evidence.",
-      "priority": 2,
-      "verification": "At least one inspectable non-self-attested evidence item is attached."
-    },
-    {
-      "failure_id": "AEE-CLM-005-31-AUTHORITY-CHALLENGE",
-      "claim_id": "CLM-005-31",
       "strategy": "gather_evidence",
       "action": "Cite the controlling text and attach assessment evidence.",
       "priority": 2,
@@ -5018,6 +5086,6 @@
   ],
   "metadata": {
     "threshold": 0.7,
-    "input": "specs/005-enterprise-platform/aee-claims.json"
+    "input": "aee-claims.json"
   }
 }

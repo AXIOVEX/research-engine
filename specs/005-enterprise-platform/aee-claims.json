@@ -1,6 +1,6 @@
 {
  "spec": "specs/005-enterprise-platform/spec.md",
- "version": "0.6.0",
+ "version": "0.7.0",
  "date": "2026-10-12",
  "claims": [
   {
@@ -487,7 +487,7 @@
   {
    "id": "CLM-005-12",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "medium",
    "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -511,6 +511,18 @@
      "kind": "asserted",
      "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) §4",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "E6 (T541/T546): the residency pin is recorded tenant configuration and moves only through export + anchor + migration events in both ledgers (bare update_tenant region change refused and ledgered); the shape-parity battery runs one scenario (seed, SPRS report, audit export, standalone verify) against hosted and self-hosted profiles with identical outcomes and a matching role-model fingerprint, and asserts the self-hosted tenant's identifiers and payloads are absent from the hosted deployment's ledgers and files (tests/test_e6_packaging.py, tests/test_e6_compliance.py)",
+     "source_quality": "test"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "src/tekmerion/platform/packaging.py + specs/005-enterprise-platform/self-hosted-packaging.md (DeploymentProfile descriptor; institution KMS option recorded as the delegated-custody signer reference; upgrade = signed release, ledgers open in place)",
+     "source_quality": "artifact"
     }
    ]
   },
@@ -649,7 +661,7 @@
   {
    "id": "CLM-005-15",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "low",
    "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -673,13 +685,19 @@
      "kind": "asserted",
      "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) — audit & compliance evidence direction",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "E6 (T542/T543): platform audit exports in the Phase 5 pattern (src/tekmerion/platform/exports.py) — manifest + per-file hashes + ledger copy + projections; the standalone verifier runs the production Axiomere verifier over the copy and cross-checks projections payload-for-payload. The tamper battery covers a flipped projection, the same flip under an attacker-rehashed manifest, and an altered event inside the ledger copy — all fail (F-005-15). The T543 demonstration (records/e6-audit-export-demonstration.md) exported a tenant's ledger under its own admin and verified the committed bundle standalone from a clean process; the public-deposit anchor leg was not executed under the phase's no-uploads boundary and is recorded as residue in that record, not claimed",
+     "source_quality": "test"
     }
    ]
   },
   {
    "id": "CLM-005-16",
    "kind": "compliance",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "low",
    "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -709,13 +727,25 @@
      "kind": "observed",
      "ref": "The discipline operating: the Phase 5 Zenodo record's description was corrected in place when it overstated the run's outcome (DN-008, recorded caveat 1)",
      "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "E6 (T544): specs/005-enterprise-platform/soc2-readiness-mapping.md — CC1–CC9 criteria mapped to mechanisms/records with claim IDs, labeled READINESS MAPPING ONLY with the no-report statement in its header; the resolvability battery parses the document and asserts every cited claim exists in this bundle and every cited code path exists in the tree (F-005-16)",
+     "source_quality": "test"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "E6 (T547): the wording sweep over README.md, docs/**, and the Spec 005 documents found 25 certification-vocabulary hits — every one a negation, a not-claimed list entry, the sanctioned §13 posture phrase, the owner's directive quoted in the records that adopt it truthfully, or a framing/ecosystem statement (reviewed hit by hit; baseline pinned in tests/test_e6_compliance.py)",
+     "source_quality": "test"
     }
    ]
   },
   {
    "id": "CLM-005-17",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "low",
    "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -739,6 +769,12 @@
      "kind": "asserted",
      "ref": "Constitution Article IV",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "E6 (T545): legal hold as marker + export + anchor + access restriction (src/tekmerion/platform/service.py place_legal_hold): the hold flow produces the export and its anchor record; under an active hold the directory-PII erasure (the T524 off-ledger path), the residency-pin change, and tenant-plane audit export are each refused and the refusal ledgered as legal.hold_enforced; release is itself an appended event. The F-005-17 audit battery asserts no deletion/mutation path over ledger content exists in any platform module (PlatformLedger exposes none; no unlink/remove/rmtree over ledger files in src/tekmerion/platform)",
+     "source_quality": "test"
     }
    ]
   },
@@ -871,7 +907,7 @@
   {
    "id": "CLM-005-20",
    "kind": "prediction",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "medium",
    "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -895,13 +931,19 @@
      "kind": "asserted",
      "ref": "Constitution Article IV",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Discharge at the final exit (the claim is a per-phase regression obligation, E1–E6): the full suite at E6 is 368 passed, 2 skipped with the Spec 002 battery (incl. seeded-defect and rehashed-manifest tamper tests) and the Spec 011 backward-compat pins green unchanged against the completed enterprise build; E6 touched shared code (study-bundle marking in tekmerion.export, platform service) and the battery still passes unchanged; the F-005-17 audit at this exit confirms no enterprise feature adds a mutation or deletion path to study or platform records",
+     "source_quality": "test"
     }
    ]
   },
   {
    "id": "CLM-005-23",
    "kind": "compliance",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "low",
    "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -931,13 +973,19 @@
      "kind": "asserted",
      "ref": "32 CFR Part 170 (CMMC program rule: certification attaches to organizations/assessment boundaries)",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "E6: the §13 framing sweep rode T544/T547 — the wording sweep over every public surface (README, docs incl. the pilot readiness packet, the Spec 005 documents) found no unqualified CMMC claim: the 25 hits are negations, not-claimed lists, the sanctioned 'alignment / compliance support' phrase, or the owner's directive quoted where the records adopt it in its truthful form (tests/test_e6_compliance.py)",
+     "source_quality": "test"
     }
    ]
   },
   {
    "id": "CLM-005-24",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "medium",
    "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -961,6 +1009,12 @@
      "kind": "asserted",
      "ref": "Spec 005 §13 (CMMC amendment, claims-first, 2026-10-12) §13.2",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "E6 maintenance (per phase exit): classifications reviewed against the landed E6 machinery — NO reclassifications; SPRS/POA&M landing changed the evidence for rows (3.12.2's register now exists; 3.3.3/3.3.6's exports; 3.8.4's marking; 3.11.1/3.12.1/3.12.4's state inputs), recorded in the matrix's E6 note, classes unchanged. The battery re-parses the matrix document and asserts the machinery's classification table equals it (110/110), so the document and the code cannot drift silently (tests/test_e6_compliance.py)",
+     "source_quality": "test"
     }
    ]
   },
@@ -1111,7 +1165,7 @@
   {
    "id": "CLM-005-28",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "medium",
    "uncertainty": "medium",
    "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -1135,15 +1189,21 @@
      "kind": "asserted",
      "ref": "Spec 005 §8 (export pattern) + T551",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "E6 (T551): marking blocks ride both export families — src/tekmerion/marking.py normalizes the recorded fields; platform audit exports and Spec 002 study bundles both carry cui_marking in the manifest and the banner/footer in HUMAN-README, populated from the tenant's recorded marking (set_tenant_marking) or the export caller's recorded fields; unmarked artifacts state 'UNMARKED' explicitly in both places; the study-bundle verifier fails a bundle whose README banner disagrees with its manifest block (tests/test_e6_compliance.py)",
+     "source_quality": "test"
     }
    ]
   },
   {
    "id": "CLM-005-29",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "medium",
-   "uncertainty": "high",
+   "uncertainty": "medium",
    "source_ref": "specs/005-enterprise-platform/spec.md",
    "text": "The platform maintains its SP 800-171 control states in SPRS-ready form: per-requirement state, the weighted deduction class of any unimplemented requirement under the DoD scoring methodology (the -203…110 scale), and an evidence link — so an operator can compute and maintain their self-assessment score from platform-maintained inputs.",
    "boundary": [
@@ -1165,13 +1225,19 @@
      "kind": "observed",
      "ref": "specs/005-enterprise-platform/cmmc-responsibility-matrix.md (the maintained data source)",
      "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "E6 (T552): the machinery exists and is batteried (src/tekmerion/platform/compliance.py) — DoD Assessment Methodology v1.2.1 weights (44x5 + 14x3 + 51x1 = 313; 3.12.4 unscored per Annex A; §5(e) partials for 3.5.3/3.13.11); the table-integrity test pins the counts and the -203 floor; the seed derives mechanically from the matrix and computes -156 with §3.13.11's partial deduction of 3 visible; a state change moves the computed score by exactly its deduction class; completeness (no state without evidence link or gap marker) is enforced at write time and checked on read; the agreement check catches the F-005-29 shapes in the platform-asserted seed layer. The score is reported as an output of recorded inputs; submission remains the operator's act — no submission path exists",
+     "source_quality": "test"
     }
    ]
   },
   {
    "id": "CLM-005-30",
    "kind": "requirement",
-   "status": "partially_supported",
+   "status": "supported",
    "severity": "medium",
    "uncertainty": "medium",
    "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -1205,7 +1271,7 @@
     {
      "direction": "supports",
      "kind": "observed",
-     "ref": "Residue, named: the POA&M register half (T553) is E6 and does not exist yet — items/milestones/status-as-events are unbuilt; this claim joins both halves and stays partially_supported until E6, per its own boundary",
+     "ref": "E6 (T553): the POA&M register half is delivered — src/tekmerion/platform/poam.py: items, milestones, and status exist only as appended events (poam.item_created / milestone_added / milestone_completed / status_changed) and the register is a replay, so a status change without an event is unrepresentable (F-005-30); the deployment register is seeded with the §3.13.11 item exactly as the records carry it (POAM-0001, three milestones incl. the owner-decision trigger). The claim's two halves now both stand: T554 IR egress (E4) + the register (E6)",
      "source_quality": "test"
     }
    ]
@@ -1237,6 +1303,12 @@
      "kind": "asserted",
      "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12), CMMC posture section (hosted-shape flag)",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "E6 spot-check (per phase exit; the claim stands open by design — it is not engineering's to close): hosted-shape materials still carry the open-decision flag — docs/pilot/readiness/VENDOR-PACKET.md §5 (the DFARS equivalency question stated as a recorded open owner/legal decision) and §9 (not-claimed list); the E6 wording sweep covered the packet; the self-hosted packaging note (specs/005-enterprise-platform/self-hosted-packaging.md) names the self-hosted shape as the capable CUI path meanwhile, per this claim's boundary",
+     "source_quality": "test"
     }
    ]
   }
