@@ -143,32 +143,59 @@ groups + sufficiency floor, each citation's identity and pipeline
 outcome, exclusions and their reasons — and to run the verifier and
 identify the bundle's external anchor.
 
-- **Elapsed: 1,047 seconds (~17.5 minutes) for all five questions**
-  — against the G3 budget of 2 hours per question (10 hours total),
-  the audit consumed ~3% of budget.
+- **Elapsed: ~18 minutes for all five questions** (the auditor's
+  own timestamps span 1,085 seconds from first read to final
+  report) — against the G3 budget of 2 hours per question
+  (10 hours total), the audit consumed ~3% of budget.
 - **Completeness: 5 of 5 claims fully retraced** — every element
   (falsifier, verdict, evidence, groups vs floor, citation
   outcomes, exclusions) reached from the bundle alone, nothing
   inferred. The run outcome was located in `verdicts.json`
   (`run_outcome`) and corroborated against the ledger, coverage,
-  and README. The verifier returned **ok (exit 0)**. The anchor was
-  identified completely: the manifest's receipt (DOI
-  10.5281/zenodo.23319126, root, bundle hash) and the freeze root
-  were cross-checked three ways inside the bundle
+  and README. The verifier returned **ok (exit 0)**. The anchor
+  receipt (DOI 10.5281/zenodo.23319126, root, bundle hash) and the
+  freeze root were cross-checked inside the bundle
   (receipt ↔ `registration.json` committed root ↔ the ledger's
   `study.frozen` → checkpoint chain).
-- **Friction, reported by the auditor and confirmed on read-back:**
-  (1) **Abstracts are not in the bundle.** Nine retrieved records
-  are provenance stubs (`content_included: false` — the WS5 rights
-  gate: no licence asserted, no redistribution), so the *stance*
-  is auditable but the abstract text behind a content check is
-  not; the auditor's suggestion (dereference `source_id` at audit
-  time) is the intended path, but a fully offline auditor cannot
-  re-run stage 3 from the bundle alone. This is a genuine limit of
-  the bundle as an audit artifact, recorded as such. (2) The
-  second-review sample shows as a bare count in `verification.json`
-  (the reviewing actor is named only in the ledger events).
-  (3) The auditor **caught a corpus blemish the pipeline did
+- **Friction, reported by the auditor and confirmed on read-back**
+  (the substantive items are also §4.7–4.9):
+  (1) **No control outcomes exist in the bundle.** `controls.json`
+  carries the three control *definitions*; `verdicts.json` states
+  `controls_replayed: []`; no file records a control's result —
+  yet the positive/negative control rationales say the Q1/Q4
+  verdicts are meaningless if the controls fail. That a valid run
+  *implies* the controls passed is true only via the engine's
+  rules, which the bundle does not state: from the artifact alone,
+  an auditor cannot determine whether any control ever ran.
+  (2) **CLM-E-004's falsifier flag contradicts its registration.**
+  The claim's falsifier names Wandel 2010's conclusion as *the*
+  falsifying observation, and CIT-E-401 (that paper) contradicts —
+  but its evidence item records `falsifier_observation: false`,
+  and the verdict fired via the interval path, not the falsifier
+  path. The registration's language overclaims the mechanism; the
+  verdict itself is sound (§4.8).
+  (3) **The anchor binds bundle-v1, not bundle-v2** (§6): v2 is
+  checkable against the public record only through its carried
+  receipt, registration hash, and pre-anchor checkpoint root —
+  v2's own bundle hash is anchored nowhere.
+  (4) **No retrieved content at all**: `evidence/content/` is
+  empty and all nine retrieved records are provenance stubs
+  (WS5 rights gate), so no stance can be re-derived from the
+  bundle alone — stage 3's labels must be taken on the pipeline's
+  word by an offline auditor.
+  (5) **The as-cited forms of citations are absent** — only
+  resolved records and mismatch field *names* are carried, so the
+  fabricated DOI itself and CIT-E-202's corrupted fields cannot
+  be re-inspected, only the adjudicators' rationales.
+  (6) Excluded citations vanish from the evidence files without a
+  marker (recoverable only by cross-referencing
+  `verification.json`/`adjudication.json`); `claims.json` still
+  shows every claim `status: "proposed"`; CIT-E-302's outcome is
+  `metadata_only` in one file and stance `contextual` in another,
+  with no stated mapping; the second-review aggregate does not
+  name its target (it was the ADQ-003 grouping decision — no
+  quarantine decision was second-reviewed).
+  (7) The auditor **caught a corpus blemish the pipeline did
   not**: CIT-E-401's citation names the Wandel paper's first
   author as "Peter Wandel"; the record's author is Simon Wandel
   (the citation conflated him with co-author Peter Jüni).
@@ -179,10 +206,13 @@ identify the bundle's external anchor.
   earned its keep.
 
 **K3: pass** — a reviewer reached every verdict's evidence and
-falsifier from the bundle alone, in ~17.5 minutes against a
-10-hour budget, with the two limits above named rather than
-smoothed over. (This executed pass is also the K3 protocol whose
-existence Spec 001's NC-5 was waiting for — §8.)
+falsifier from the bundle alone, in ~18 minutes against a
+10-hour budget. The pass is on reachability and completeness;
+the friction above — controls, falsifier flag, anchor scope,
+absent content — is the bundle's honest limit list, and items
+(1)–(3) are machinery findings, not auditor error. (This executed
+pass is also the K3 protocol whose existence Spec 001's NC-5 was
+waiting for — §8.)
 
 ### 2.4 K4 — derivative-source inflation
 
@@ -304,6 +334,38 @@ separate-origin pairs. Second review sampled ADQ-003 (§1).
    every checked field; the blemish is the corpus author's, caught
    by the K3 auditor, and stands corrected here — the frozen
    registration itself is not rewritten (DN-005).
+7. **Control outcomes are not recorded anywhere in the bundle**
+   (K3 friction 1). Control evaluation is ephemeral in the engine:
+   `run_controls` returns failures into the run evaluation, and a
+   valid run silently implies success. For an artifact whose
+   control rationales tell auditors the verdicts depend on the
+   controls, the bundle should carry per-control outcomes (and the
+   `run_outcome` projection should not state `controls_replayed:
+   []` for a run whose controls were in fact executed at verdict
+   time). Candidate fix for a future spec: record control results
+   in the run projection from `evaluate_run`'s own execution.
+8. **The falsifier-observation path is unreachable from real
+   pipeline evidence** (K3 friction 2). `to_evidence_item` never
+   sets `falsifier_observation`, so a corpus citation whose
+   content *is* the registered falsifying observation still enters
+   as ordinary contradicting mass and the verdict fires via the
+   interval path. CLM-E-004's registration text ("the registered
+   falsifying observation is the Wandel 2010 conclusion") was
+   written as if the falsifier path would fire; it did not, and
+   the CONTRADICTED verdict rests on the interval (−1.0, −0.6)
+   alone. The outcome is unaffected; the mechanism attribution
+   in the frozen registration is imprecise, and the gap between
+   "the falsifier fired" and "the interval contradicted" should
+   either be closed in the conversion (a contradicting content
+   check against a claim whose falsifier names that observation)
+   or the registration language should stop implying it.
+9. **Bundle-v2's own hash is anchored nowhere** (K3 friction 3):
+   the DN-005 pattern anchors the pre-anchor bundle (v1) and the
+   post-anchor bundle (v2) carries the receipt. An auditor can
+   verify v2's *contents* standalone and its *registration*
+   against the public record, but v2 as an artifact is
+   self-attested. Phase 6's records noted the same v1/v2 split;
+   the evaluation confirms it from a fresh reader's side.
 
 ## 5. The Phase 7 preparation fixes (context for this run)
 
@@ -333,8 +395,11 @@ standing G4 authorization). Receipt: **DOI 10.5281/zenodo.23319126**
 `296786be0f31d212435b64c89f685a9c14b31cff6f36b6c603e41d05c21b10c2`,
 anchoring the freeze root in §0. The anchor was recorded in the
 ledger, the study re-checkpointed, bundle-v2 exported (it carries
-the receipt), and `verify_anchor` confirms bundle-v2 against the
-independently fetched public record.
+the receipt), and `verify_anchor` confirms bundle-v2's carried
+receipt and registration against the independently fetched public
+record. Precisely (K3 friction 3, §4.9): the anchored values are
+bundle-v1's hash and the freeze checkpoint root; bundle-v2's own
+bundle hash is not itself anchored.
 
 ## 7. Execution honesty (driver history)
 
