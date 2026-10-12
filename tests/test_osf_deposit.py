@@ -190,6 +190,7 @@ class FakeOSFTransport:
         self.registrations = {}
         self.calls = []
         self.fail_once = {}
+        self.born_pending = False
         self._seq = 0
 
     def _next(self, prefix):
@@ -280,7 +281,7 @@ class FakeOSFTransport:
         self._fail("create_draft_registration")
         assert schema_id == "schema-open-ended"
         draft = {"id": self._next("draft"), "project": guid, "schema": schema_id,
-                 "responses": {}, "consumed": False}
+                 "responses": {}, "subjects": [], "consumed": False}
         self.drafts[draft["id"]] = draft
         return self._draft_view(draft)
 
@@ -289,10 +290,23 @@ class FakeOSFTransport:
         self.drafts[draft_id]["responses"] = dict(responses)
         return self._draft_view(self.drafts[draft_id])
 
+    def find_subject(self, name):
+        self.calls.append(("find_subject", name))
+        return f"subject:{name}"
+
+    def set_draft_subjects(self, draft_id, subject_ids):
+        self.calls.append(("set_draft_subjects", draft_id))
+        self.drafts[draft_id]["subjects"] = list(subject_ids)
+        return {}
+
     def submit_registration(self, draft_id, *, component_ids, embargo_end_date=None):
         self.calls.append(("submit_registration", draft_id))
         self._fail("submit_registration")
         draft = self.drafts[draft_id]
+        if not draft["subjects"]:
+            raise DepositError(
+                "OSF POST https://api.osf.io/v2/registrations/ failed: HTTP 400: "
+                "Registration must have at least one subject to be registered")
         draft["consumed"] = True
         guid = self._next("reg")
         project = self.nodes[draft["project"]]
@@ -303,13 +317,13 @@ class FakeOSFTransport:
                 "description": project["attributes"]["description"],
                 "registration_responses": dict(draft["responses"]),
                 "registration_supplement": OPEN_ENDED_SCHEMA,
-                "reviews_state": "accepted",
+                "reviews_state": "initial" if self.born_pending else "accepted",
                 "pending_registration_approval": False,
-                "pending_embargo_approval": False,
-                "embargoed": bool(embargo_end_date),
+                "pending_embargo_approval": bool(self.born_pending and embargo_end_date),
+                "embargoed": bool(embargo_end_date) and not self.born_pending,
                 "embargo_end_date": embargo_end_date,
                 "date_registered": "2026-10-12T00:00:00.000000",
-                "public": not embargo_end_date,
+                "public": not embargo_end_date and not self.born_pending,
             },
             "relationships": {"registered_from": {"data": {"id": draft["project"]}}},
             "links": {"html": f"https://osf.io/{guid}/"},
@@ -317,10 +331,6 @@ class FakeOSFTransport:
         self.registrations[guid] = {"project": draft["project"], "view": view,
                                     "components": list(component_ids)}
         return dict(view)
-
-    def registration_action(self, registration_id, trigger):
-        self.calls.append(("registration_action", trigger))
-        return {}
 
     def get_registration(self, registration_id):
         if registration_id not in self.registrations:
@@ -350,7 +360,7 @@ def test_payload_is_derived_from_the_mapping(bundle, tmp_path):
     manifest = json.loads((Path(bundle) / "manifest.json").read_text())
     mapping = osf_metadata(manifest)
     fake = FakeOSFTransport()
-    receipt = deposit_bundle_osf(bundle, fake, approved_by="owner",
+    receipt = deposit_bundle_osf(bundle, fake, approved_by="owner", subjects=("Sleep Medicine",),
                                  state_path=str(tmp_path / "state.json"))
     project = fake.nodes[receipt["project_guid"]]
     assert project["attributes"]["title"] == mapping["title"]
@@ -362,6 +372,7 @@ def test_payload_is_derived_from_the_mapping(bundle, tmp_path):
     assert components == set(mapping["components"])
     draft = next(iter(fake.drafts.values()))
     assert draft["responses"] == {"summary": mapping["description"]}
+    assert draft["subjects"] == ["subject:Sleep Medicine"]  # resolved by name
     for component, entries in mapping["components"].items():
         comp_guid = receipt["components"][component]
         have = {f["path"] for f in fake.list_files(comp_guid)}
@@ -422,15 +433,15 @@ def test_repeat_deposit_creates_no_second_registration(bundle, tmp_path):
     registration instead of duplicating it."""
     fake = FakeOSFTransport()
     state = str(tmp_path / "state.json")
-    first = deposit_bundle_osf(bundle, fake, approved_by="owner", state_path=state)
+    first = deposit_bundle_osf(bundle, fake, approved_by="owner", subjects=("Sleep Medicine",), state_path=state)
     assert len(fake.registrations) == 1
 
-    again = deposit_bundle_osf(bundle, fake, approved_by="owner", state_path=state)
+    again = deposit_bundle_osf(bundle, fake, approved_by="owner", subjects=("Sleep Medicine",), state_path=state)
     assert again["already_existed"] is True
     assert again["registration_guid"] == first["registration_guid"]
     assert len(fake.registrations) == 1
 
-    fresh = deposit_bundle_osf(bundle, fake, approved_by="owner",
+    fresh = deposit_bundle_osf(bundle, fake, approved_by="owner", subjects=("Sleep Medicine",),
                                state_path=str(tmp_path / "fresh.json"),
                                resume_project_guid=first["project_guid"])
     assert fresh["already_existed"] is True
@@ -449,7 +460,7 @@ def test_provider_failure_surfaces_and_state_resumes(bundle, tmp_path):
         "HTTP 500: provider exploded")
     state = str(tmp_path / "state.json")
     with pytest.raises(DepositError, match="HTTP 500: provider exploded"):
-        deposit_bundle_osf(bundle, fake, approved_by="owner", state_path=state)
+        deposit_bundle_osf(bundle, fake, approved_by="owner", subjects=("Sleep Medicine",), state_path=state)
 
     saved = json.loads(Path(state).read_text())
     assert saved["stage"] in ("draft_created", "draft_answered")
@@ -458,7 +469,7 @@ def test_provider_failure_surfaces_and_state_resumes(bundle, tmp_path):
     assert len(projects) == 1 and len(components) == 5
     assert len(fake.registrations) == 0  # partial state is not an anchor
 
-    receipt = deposit_bundle_osf(bundle, fake, approved_by="owner", state_path=state)
+    receipt = deposit_bundle_osf(bundle, fake, approved_by="owner", subjects=("Sleep Medicine",), state_path=state)
     assert receipt["registration_guid"]
     assert len([n for n in fake.nodes.values() if n["parent"] is None]) == 1
     assert len([n for n in fake.nodes.values() if n["parent"] is not None]) == 5
@@ -474,7 +485,7 @@ def test_receipt_ledgers_into_a_live_study_ledger(tmp_path):
     store, reg, _frozen, retrieved = build_study(live)
     bundle2 = export(live, store, reg, retrieved, name="bundle-live")
     fake = FakeOSFTransport()
-    receipt = deposit_bundle_osf(bundle2, fake, approved_by="owner",
+    receipt = deposit_bundle_osf(bundle2, fake, approved_by="owner", subjects=("Sleep Medicine",),
                                  state_path=str(live / "state.json"))
     record_anchor(store, receipt, actor="researcher")
     bundle3 = export(live, store, reg, retrieved, name="bundle-live-v2")
@@ -490,7 +501,7 @@ def test_verify_osf_anchor_passes_and_catches_divergence(bundle, tmp_path):
     record and fails when the record stops stating the anchor values
     or the structure diverges."""
     fake = FakeOSFTransport()
-    receipt = deposit_bundle_osf(bundle, fake, approved_by="owner",
+    receipt = deposit_bundle_osf(bundle, fake, approved_by="owner", subjects=("Sleep Medicine",),
                                  state_path=str(tmp_path / "state.json"))
     good = verify_osf_anchor(bundle, receipt["registration_guid"],
                              project_guid=receipt["project_guid"], reader=fake)
@@ -517,12 +528,43 @@ def test_verify_osf_anchor_passes_and_catches_divergence(bundle, tmp_path):
     assert any("component structure" in f for f in diverged["failures"])
 
 
+def test_pending_registration_is_recorded_resumable_not_complete(bundle, tmp_path):
+    """CLM-010-04/05: a registration the provider holds as pending
+    (embargo approval runs through OSF's own channel, not the API) is
+    a recorded resumable state — the deposit raises, names the state,
+    and issues no receipt; once the record is final, a re-run
+    completes it without creating a second registration."""
+    fake = FakeOSFTransport()
+    fake.born_pending = True
+    state = str(tmp_path / "state.json")
+    with pytest.raises(DepositError, match="NOT complete"):
+        deposit_bundle_osf(bundle, fake, approved_by="owner",
+                           subjects=("Sleep Medicine",), state_path=state,
+                           embargo_end_date="2027-10-12")
+    saved = json.loads(Path(state).read_text())
+    assert saved["stage"] == "submitted"
+    assert "receipt" not in saved
+    assert len(fake.registrations) == 1
+
+    view = next(iter(fake.registrations.values()))["view"]
+    view["attributes"].update({"reviews_state": "accepted",
+                               "pending_embargo_approval": False,
+                               "embargoed": True, "public": False})
+    receipt = deposit_bundle_osf(bundle, fake, approved_by="owner",
+                                 subjects=("Sleep Medicine",), state_path=state,
+                                 embargo_end_date="2027-10-12")
+    assert receipt["already_existed"] is True
+    assert receipt["embargoed"] is True
+    assert len(fake.registrations) == 1
+    assert len(fake.drafts) == 1
+
+
 def test_embargoed_submission_records_its_state(bundle, tmp_path):
     """CLM-010-07: a deposit under embargo returns a receipt whose
     embargo state comes from the provider record (unit-level here; the
     live demonstration is recorded in the spec's records/)."""
     fake = FakeOSFTransport()
-    receipt = deposit_bundle_osf(bundle, fake, approved_by="owner",
+    receipt = deposit_bundle_osf(bundle, fake, approved_by="owner", subjects=("Sleep Medicine",),
                                  state_path=str(tmp_path / "state.json"),
                                  embargo_end_date="2027-10-12")
     assert receipt["embargoed"] is True

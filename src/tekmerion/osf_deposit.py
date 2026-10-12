@@ -31,8 +31,11 @@ or logs a credential value beyond injecting what the caller supplied.
 
 from __future__ import annotations
 
+import http.client
+import io
 import json
 import os
+import ssl
 import time
 import urllib.error
 import urllib.parse
@@ -84,6 +87,10 @@ class OSFTransport:
         req = urllib.request.Request(url, data=data, method=method)
         if data is not None:
             req.add_header("Content-Type", content_type)
+            if not req.has_header("Content-Length"):
+                # urllib omits the header for an empty body; WaterButler
+                # (folder creation) rejects that with HTTP 411.
+                req.add_header("Content-Length", str(len(data)))
         req.add_header("Accept", "application/vnd.api+json")
         if authenticate:
             if self.auth_hook is not None:
@@ -91,6 +98,8 @@ class OSFTransport:
             elif self.token:
                 req.add_header("Authorization", f"Bearer {self.token}")
         self._last = time.time()
+        if data == b"":
+            return self._empty_body_request(method, url, req)
         try:
             with self._opener(req, timeout=90) as resp:
                 body = resp.read().decode("utf-8")
@@ -105,6 +114,61 @@ class OSFTransport:
         except urllib.error.URLError as exc:
             raise DepositError(
                 f"OSF {method} {url} failed: {exc.reason}") from exc
+
+    def _empty_body_request(self, method: str, url: str,
+                            req: urllib.request.Request) -> Any:
+        """Send a zero-length-body request with chunked framing.
+
+        Folder creation is this transport's only empty-body call, and
+        it sits between two hard constraints: WaterButler forbids a
+        body on folder creation (HTTP 413), while its frontend rejects
+        a request whose length framing was lost (HTTP 411) — and a
+        `Content-Length: 0` header does not survive every egress proxy
+        (observed in the build sandbox: the proxy re-originates the
+        request and the zero-length framing is dropped, 411 on every
+        attempt, via urllib and via a hand-written request alike).
+        Chunked framing with an empty body is the encoding both sides
+        accept. Honors the environment's https proxy like urllib does.
+        """
+        parsed = urllib.parse.urlparse(url)
+        proxies = urllib.request.getproxies()
+        proxy_url = proxies.get("https") or proxies.get("http")
+        context = ssl.create_default_context()
+        if proxy_url:
+            proxy = urllib.parse.urlparse(proxy_url)
+            conn = http.client.HTTPSConnection(
+                proxy.hostname, proxy.port, context=context, timeout=90)
+            conn.set_tunnel(parsed.hostname, parsed.port or 443)
+        else:
+            conn = http.client.HTTPSConnection(
+                parsed.hostname, parsed.port or 443, context=context, timeout=90)
+        try:
+            target = parsed.path + (f"?{parsed.query}" if parsed.query else "")
+            conn.putrequest(method, target, skip_accept_encoding=True)
+            for key, value in req.header_items():
+                if key.lower() != "content-length":
+                    conn.putheader(key, value)
+            conn.putheader("Transfer-Encoding", "chunked")
+            conn.endheaders()
+            conn.send(b"0\r\n\r\n")
+            resp = conn.getresponse()
+            body = resp.read()
+            if resp.status >= 400:
+                raise urllib.error.HTTPError(
+                    url, resp.status, resp.reason, resp.headers,
+                    io.BytesIO(body))
+            return json.loads(body.decode("utf-8")) if body.strip() else {}
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", "replace")[:500]
+            if exc.code == 429:
+                raise DepositError(
+                    "OSF rate limit (429) — stopping, not retrying") from exc
+            raise DepositError(
+                f"OSF {method} {url} failed: HTTP {exc.code}: {detail}") from exc
+        except (OSError, http.client.HTTPException) as exc:
+            raise DepositError(f"OSF {method} {url} failed: {exc}") from exc
+        finally:
+            conn.close()
 
     def _json(self, method: str, url: str, payload: Optional[dict] = None,
               **kw: Any) -> Any:
@@ -231,23 +295,50 @@ class OSFTransport:
         return self._data(self._json(
             "PATCH", f"{self.base_url}/draft_registrations/{draft_id}/", payload))
 
+    def find_subject(self, name: str) -> str:
+        """Resolve an OSF taxonomy subject id by its exact text — the
+        same by-name discipline as the registration schema."""
+        url = (f"{self.base_url}/subjects/?filter[text]="
+               f"{urllib.parse.quote(name)}&page[size]=100")
+        resp = self._json("GET", url)
+        for entry in self._data(resp) or []:
+            if (entry.get("attributes") or {}).get("text") == name:
+                return entry["id"]
+        raise DepositError(f"OSF subject not found by exact text: {name!r}")
+
+    def set_draft_subjects(self, draft_id: str, subject_ids: list) -> Any:
+        payload = {"data": [{"type": "subjects", "id": sid}
+                             for sid in subject_ids]}
+        return self._json(
+            "PATCH",
+            f"{self.base_url}/draft_registrations/{draft_id}/relationships/subjects/",
+            payload)
+
     def submit_registration(self, draft_id: str, *, component_ids: list,
                             embargo_end_date: Optional[str] = None) -> dict:
-        attrs: dict[str, Any] = {"draft_registration_id": draft_id,
-                                 "included_node_ids": list(component_ids),
-                                 "embargo_end_date": embargo_end_date}
+        # Field names as the provider's own validation names them: a
+        # create sent with `draft_registration_id` is refused with
+        # "/data/attributes/draft_registration: This field is required"
+        # (observed live, 2026-10-12). The component list travels as
+        # `children` in the same (default-version) shape.
+        attrs: dict[str, Any] = {
+            "draft_registration": draft_id,
+            "registration_choice": "embargo" if embargo_end_date else "immediate",
+            "children": list(component_ids),
+        }
+        if embargo_end_date:
+            attrs["embargo_end_date"] = embargo_end_date
+            # Also required by the provider when embargoing (its own
+            # validation names the field, and its format error names
+            # the type): the datetime at which the embargo lifts,
+            # i.e. the embargo becomes public automatically then — an
+            # embargoed anchor is a delayed anchor, not a private one.
+            attrs["lift_embargo"] = (
+                embargo_end_date if "T" in embargo_end_date
+                else f"{embargo_end_date}T00:00:00")
         return self._data(self._json(
             "POST", f"{self.base_url}/registrations/",
             {"data": {"type": "registrations", "attributes": attrs}}))
-
-    def registration_action(self, registration_id: str, trigger: str) -> dict:
-        payload = {"data": {"type": "review-actions",
-                            "attributes": {"trigger": trigger},
-                            "relationships": {"target": {"data": {
-                                "type": "registrations", "id": registration_id}}}}}
-        return self._data(self._json(
-            "POST", f"{self.base_url}/registrations/{registration_id}/actions/",
-            payload))
 
     def get_registration(self, registration_id: str) -> dict:
         return self._data(self._json(
@@ -350,6 +441,7 @@ def _save_state(state_path: Optional[str], state: dict) -> None:
 
 def deposit_bundle_osf(bundle_dir: str, transport: OSFTransport, *,
                        approved_by: str,
+                       subjects: Optional[tuple] = None,
                        state_path: Optional[str] = None,
                        embargo_end_date: Optional[str] = None,
                        schema_name: str = OPEN_ENDED_SCHEMA,
@@ -380,6 +472,12 @@ def deposit_bundle_osf(bundle_dir: str, transport: OSFTransport, *,
             "deposit refused: bundle carries no freeze binding (manifest study "
             "lacks registration_hash / checkpoint_root) — an unfrozen study "
             "has nothing to anchor")
+
+    if not subjects:
+        raise DepositError(
+            "deposit refused: the provider requires at least one subject "
+            "on a registration — name the subject(s) for this study; the "
+            "choice is part of the deposit decision, not a default")
 
     mapping = osf_metadata(manifest)
     anchor = mapping["anchor_values"]
@@ -428,8 +526,11 @@ def deposit_bundle_osf(bundle_dir: str, transport: OSFTransport, *,
                 comp = existing["id"]
                 resumed_into_existing = True
             else:
+                # The provider requires a category on child nodes; the
+                # component's identity is its title (the mapping key),
+                # so the neutral category is used.
                 node = transport.create_node(title=component, parent=project_guid,
-                                             public=True)
+                                             category="other", public=True)
                 comp = node["id"]
             state["components"][component] = comp
             _save_state(state_path, state)
@@ -509,6 +610,10 @@ def deposit_bundle_osf(bundle_dir: str, transport: OSFTransport, *,
                 draft["id"], {"summary": mapping["description"]})
             state["stage"] = "draft_answered"
             _save_state(state_path, state)
+        subject_ids = [transport.find_subject(name) for name in subjects]
+        transport.set_draft_subjects(draft["id"], subject_ids)
+        state["subjects"] = list(subjects)
+        _save_state(state_path, state)
         registration = transport.submit_registration(
             draft["id"],
             component_ids=[state["components"][c] for c in plan],
@@ -517,25 +622,29 @@ def deposit_bundle_osf(bundle_dir: str, transport: OSFTransport, *,
         state["stage"] = "submitted"
         _save_state(state_path, state)
 
-    # -- finalize: approval actions the record offers, then read back --
+    # -- finalize: the record's own state decides ----------------------
+    # Plain OSF is an unmoderated provider: review-actions are refused
+    # (HTTP 409, observed live), and the API names the account "not a
+    # pending approver" for the schema response (HTTP 403, observed
+    # live). Admin approval of a registration/embargo runs through
+    # OSF's own channel (the approval email link), not this API — so a
+    # record the provider still holds as pending is a recorded,
+    # resumable deposit state, never a completed anchor.
     record = transport.get_registration(state["registration_guid"])
-    for _ in range(5):
-        if _registration_terminal(record, embargo_end_date=embargo_end_date):
-            break
-        attrs = record.get("attributes") or {}
-        if (attrs.get("pending_registration_approval")
-                or attrs.get("pending_embargo_approval")):
-            # The depositing account is the project admin; accepting the
-            # submission is the approval action the record offers it.
-            transport.registration_action(record["id"], "accept_submission")
-        else:
-            break
-        record = transport.get_registration(record["id"])
     if not _registration_terminal(record, embargo_end_date=embargo_end_date):
+        attrs = record.get("attributes") or {}
+        pending = [k for k in ("pending_registration_approval",
+                               "pending_embargo_approval",
+                               "pending_embargo_termination_approval")
+                   if attrs.get(k)]
         raise DepositError(
-            "registration created but not in a final state — the deposit is "
-            "NOT complete and must not be cited as an anchor; resume by "
-            f"re-running. Observed state: {json.dumps(record.get('attributes') or {}, default=str)[:400]}")
+            "registration created and submitted but the provider holds it "
+            f"in a non-final state (reviews_state={attrs.get('reviews_state')!r}, "
+            f"pending={pending}) — admin approval runs through OSF's own "
+            "channel (approval email link), not the API. The deposit is "
+            "NOT complete and must not be cited as an anchor; re-run to "
+            "resume once the record is final. Observed: "
+            f"{json.dumps({k: attrs.get(k) for k in ('reviews_state', 'public', 'embargoed', 'embargo_end_date', *pending)}, default=str)}")
 
     # -- receipt ---------------------------------------------------------
     doi = None
