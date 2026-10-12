@@ -1,0 +1,153 @@
+"""Ed25519 (RFC 8032) sign/verify for the platform service layer.
+
+Why this module exists: the append gate (Spec 005 §3) verifies *actor*
+signatures — proof of possession at enrollment, and per-append intent
+signatures — in-process, before Axiomere writes anything. The record
+layer's own signatures remain Axiomere's (Rust `ed25519-dalek`); this
+module never touches ledger integrity.
+
+Honesty labels, which the crypto inventory (Spec 005 T549) carries:
+this is a compact pure-Python implementation of the standard algorithm.
+It is **not** a FIPS-validated module (§3.13.11 is an open gap,
+CLM-005-25), and it is prototype-grade: correct and test-covered,
+not side-channel hardened and not fast. Key derivation is cross-checked
+against Axiomere's `generate_keypair` in the test suite, so seeds are
+interchangeable with the record layer's keys.
+"""
+
+from __future__ import annotations
+
+import hashlib
+
+_Q = 2**255 - 19
+_L = 2**252 + 27742317777372353535851937790883648493
+_D = (-121665 * pow(121666, _Q - 2, _Q)) % _Q
+_D2 = (2 * _D) % _Q
+_I = pow(2, (_Q - 1) // 4, _Q)
+
+
+def _sha512(data: bytes) -> bytes:
+    return hashlib.sha512(data).digest()
+
+
+def _hint(data: bytes) -> int:
+    return int.from_bytes(_sha512(data), "little")
+
+
+def _xrecover(y: int) -> int:
+    xx = (y * y - 1) * pow(_D * y * y + 1, _Q - 2, _Q) % _Q
+    x = pow(xx, (_Q + 3) // 8, _Q)
+    if (x * x - xx) % _Q != 0:
+        x = (x * _I) % _Q
+    if x % 2 != 0:
+        x = _Q - x
+    return x
+
+
+_BY = (4 * pow(5, _Q - 2, _Q)) % _Q
+_BX = _xrecover(_BY)
+# Extended twisted-Edwards coordinates (X, Y, Z, T): x = X/Z, y = Y/Z, T = XY/Z.
+_B = (_BX % _Q, _BY % _Q, 1, (_BX * _BY) % _Q)
+_IDENTITY = (0, 1, 1, 0)
+
+
+def _edwards_add(P, Q):
+    A = (P[1] - P[0]) * (Q[1] - Q[0]) % _Q
+    Bv = (P[1] + P[0]) * (Q[1] + Q[0]) % _Q
+    C = P[3] * Q[3] * _D2 % _Q
+    Dv = P[2] * Q[2] * 2 % _Q
+    E = (Bv - A) % _Q
+    F = (Dv - C) % _Q
+    G = (Dv + C) % _Q
+    H = (Bv + A) % _Q
+    return (E * F % _Q, G * H % _Q, F * G % _Q, E * H % _Q)
+
+
+def _scalarmult(P, e: int):
+    Q = _IDENTITY
+    while e > 0:
+        if e & 1:
+            Q = _edwards_add(Q, P)
+        P = _edwards_add(P, P)
+        e >>= 1
+    return Q
+
+
+def _encode_point(P) -> bytes:
+    zi = pow(P[2], _Q - 2, _Q)
+    x = P[0] * zi % _Q
+    y = P[1] * zi % _Q
+    bits = [(y >> i) & 1 for i in range(255)] + [x & 1]
+    return bytes(sum(bits[i * 8 + j] << j for j in range(8)) for i in range(32))
+
+
+def _decode_point(data: bytes):
+    if len(data) != 32:
+        raise ValueError("encoded point must be 32 bytes")
+    y = sum(2**i * ((data[i // 8] >> (i % 8)) & 1) for i in range(255))
+    sign = (data[31] >> 7) & 1
+    if y >= _Q:
+        raise ValueError("point y out of range")
+    x = _xrecover(y)
+    if x & 1 != sign:
+        x = _Q - x
+    P = (x, y, 1, (x * y) % _Q)
+    if not _is_on_curve(P):
+        raise ValueError("point not on curve")
+    return P
+
+
+def _is_on_curve(P) -> bool:
+    x, y, z, t = P
+    return (-x * x + y * y - z * z - _D * t * t) % _Q == 0 and (x * y - z * t) % _Q == 0
+
+
+def _clamp(h: bytes) -> int:
+    a = int.from_bytes(h[:32], "little")
+    a &= (1 << 254) - 8
+    a |= 1 << 254
+    return a
+
+
+def publickey_from_seed(seed: bytes) -> bytes:
+    """Derive the 32-byte public key from a 32-byte seed (RFC 8032 §5.1.5).
+    Interchangeable with Axiomere's `generate_keypair` seeds — the test
+    suite cross-checks the two derivations against each other."""
+    if len(seed) != 32:
+        raise ValueError("seed must be 32 bytes")
+    a = _clamp(_sha512(seed))
+    return _encode_point(_scalarmult(_B, a))
+
+
+def sign(seed: bytes, message: bytes) -> bytes:
+    """Sign `message` with the keypair derived from `seed` (RFC 8032 §5.1.6)."""
+    if len(seed) != 32:
+        raise ValueError("seed must be 32 bytes")
+    h = _sha512(seed)
+    a = _clamp(h)
+    pk = _encode_point(_scalarmult(_B, a))
+    r = _hint(h[32:64] + message) % _L
+    R = _encode_point(_scalarmult(_B, r))
+    S = (r + _hint(R + pk + message) * a) % _L
+    return R + S.to_bytes(32, "little")
+
+
+def verify(public_key: bytes, message: bytes, signature: bytes) -> bool:
+    """Verify an Ed25519 signature (RFC 8032 §5.1.7). Returns False —
+    never raises — for malformed keys, points, or signatures: a gate
+    must be able to treat bad input as a refusal, not a crash."""
+    try:
+        if len(public_key) != 32 or len(signature) != 64:
+            return False
+        A = _decode_point(public_key)
+        R = _decode_point(signature[:32])
+        S = int.from_bytes(signature[32:], "little")
+        if S >= _L:
+            return False
+        k = _hint(signature[:32] + public_key + message) % _L
+        # [S]B == R + [k]A
+        left = _scalarmult(_B, S)
+        right = _edwards_add(R, _scalarmult(A, k))
+        return _encode_point(left) == _encode_point(right)
+    except (ValueError, IndexError, ArithmeticError):
+        return False

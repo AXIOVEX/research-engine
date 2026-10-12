@@ -1,0 +1,46 @@
+# Cryptographic Inventory — Platform Plane (Spec 005, T549)
+
+Produced at E1 under the CMMC amendment (§13.3). Purpose: make the
+FIPS boundary explicit — every cryptographic operation the platform
+performs, with its implementing module and its validation status, so
+the §3.13.11 gap is a list, not an impression. **No entry in this
+inventory is a FIPS-validated module today.** The §3.13.11 matrix row
+stays "Supports — OPEN GAP" until an entry that protects CUI changes
+its status on evidence.
+
+| # | Operation | Where | Algorithm | Implementation | FIPS 140-3 validated? |
+|---|---|---|---|---|---|
+| 1 | Ledger hash chain (integrity) | Axiomere core (record layer) | SHA-256 | Rust `sha2` crate | **No** |
+| 2 | Ledger append signatures | Axiomere core | Ed25519 | Rust `ed25519-dalek` | **No** |
+| 3 | Ledger checkpoints (Merkle) | Axiomere core | SHA-256 | Rust `sha2` crate | **No** |
+| 4 | Actor key derivation, intent signing, gate verification | Platform service layer (`platform/ed25519.py`) | Ed25519 (RFC 8032) | Pure-Python implementation in this repo — prototype-grade, correctness cross-checked against #2's key derivation in tests | **No** |
+| 5 | Delegated-custody signing (dev signer) | Platform service layer (`platform/keys.py`) | Ed25519 (RFC 8032) | Same module as #4; seeds held in process memory — stands in for KMS/HSM, is not one | **No** |
+| 6 | OIDC ID-token signature verification | Platform service layer (`platform/oidc.py`) | RS256 (RSASSA-PKCS1-v1_5 + SHA-256), verify-only | Pure-Python modular arithmetic in this repo | **No** |
+| 7 | PKCE (S256) challenge/verifier | Platform service layer | SHA-256 | Python `hashlib` (OpenSSL-backed, not in FIPS mode) | **No** |
+| 8 | API-key secret hashing at rest | Platform service layer | SHA-256 | Python `hashlib` | **No** |
+| 9 | Key fingerprints | Platform service layer | SHA-256 | Python `hashlib` | **No** |
+| 10 | Session tokens, enrollment nonces, API secrets (generation) | Platform service layer | CSPRNG output | Python `secrets` (OS entropy) | Not a module-validation question; listed for completeness |
+| 11 | TLS to IdP endpoints | Platform runtime | TLS 1.2+ | Python `urllib`/OpenSSL as deployed | Deployment-dependent; **no claim** |
+
+## Reading this table
+
+- Rows 1–3 are the **Axiomere dependency**: closing them is a
+  cross-repo decision (DN-011, CMMC amendment §13.3) — validated
+  Rust crypto (e.g. an AWS-LC-based route) or a boundary redesign
+  that places a validated module around the record layer. Not
+  Tekmerion's unilateral roadmap to commit.
+- Rows 4–9 are **Tekmerion's own surface**: the platform services can
+  adopt a validated module (e.g. an OpenSSL FIPS provider route)
+  without touching the record layer. That substitution is the first
+  FIPS work item when the CMMC track is scheduled; until then these
+  rows are the honest gap.
+- **Operational consequence, stated plainly:** a deployment that must
+  satisfy §3.13.11 for CUI today cannot point at any row of this
+  table. That is the platform's recorded position — the self-hosted
+  shape inside an existing compliant boundary, with CUI encrypted by
+  that boundary's validated modules at the storage/transport layers,
+  is the interim posture the matrix (3.13.11, "Supports") describes.
+
+Updated when: any row's implementation changes, a custody provider
+(KMS/HSM) integrates, or the Axiomere dependency's status changes.
+Owner of the update: the phase that makes the change.
