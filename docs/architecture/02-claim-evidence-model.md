@@ -35,6 +35,8 @@ An **origin group** is the set of items that trace to one underlying origin: the
 
 *Hard case, recorded honestly:* two papers from one dataset are two groups or one? Decision: the **dataset** is the origin for data claims; the **paper** is the origin for interpretation claims. The claim kind decides which grouping applies, and the choice is recorded per claim at registration so it cannot be tuned after results arrive.
 
+**Adjudication integrity (RED-TEAM-01 RT-4):** human grouping adjudications (key 4, and DOI-less items generally) are sampled for independent second review at a registered fraction (default 10%), and the sample's disagreement rate is reported in the bundle. A queue with a measured ~0% disagreement rate is flagged as an anomaly in the record — a review that never disagrees is treated with the same suspicion as a control that never fails.
+
 ## 3. Dependency graph
 
 Claims depend on claims and on evidence groups. The graph is a DAG within a study (a cycle is a registration error — it means two claims are each other's justification, which is circular support, and the freeze check rejects it). The graph drives:

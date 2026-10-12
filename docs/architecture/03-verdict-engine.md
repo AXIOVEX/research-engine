@@ -21,7 +21,9 @@ Every run registers, at freeze time, at minimum:
 
 - **Positive control** — a claim with a known answer the pipeline must get right (e.g., a well-established finding inside the search scope). Failure → the retrieval/extraction path is broken → INVALID.
 - **Negative control** — a claim known to be false, or a fabricated-but-plausible citation seeded *into the control channel only*, which the verification step must reject. A pipeline that accepts it → INVALID. (The seeded fabrication never enters the evidence store; it exists only as a test probe, is labeled as one in the record, and its presence is disclosed in the bundle.)
-- **Swap control** — two evidence items' provenance stubs are exchanged in a test copy of the run; the replay/verification step must detect the mismatch by hash. Non-detection → the integrity machinery is decorative → INVALID.
+- **Swap control** — two evidence items' provenance stubs are exchanged in a test copy of the run; the replay/verification step must detect the mismatch by hash. Non-detection → the integrity machinery is decorative → INVALID. *(Amended per RED-TEAM-01 RT-1: the control must execute through the **same verification code path and the same build** as production replay — a control exercised on a divergent test harness certifies nothing. The control record names the build it exercised.)*
+
+Positive controls are drawn from the study's own domain and difficulty class, and the freeze check requires a recorded rationale for why each is representative (RED-TEAM-01 RT-6). A control chosen *because* it passes is an abuse case (WS5 §5).
 
 Design rule: **a control is specified by its failure mode first.** When writing a control, the first sentence states what defect it exists to catch; a control whose author cannot name the defect is deleted, not kept for reassurance.
 
@@ -41,6 +43,8 @@ Two modes, one hard wall:
 - **CONFIRMATION** — requires a frozen registration created *before* the confirmatory evidence is gathered.
 
 The wall: exploratory results cannot be promoted. If exploration suggests a claim is true, confirmation starts from a fresh registration and fresh evidence-gathering under it. The bundle records which mode produced every verdict; a bundle that mixes modes without labels is an INVALID artifact. This is the product-level form of a rule the field already accepts for studies — the engine simply refuses to let software quietly violate it.
+
+**Disclosure duty (RED-TEAM-01 RT-3):** the wall stops relabeling but not design-shopping — exploring until a design yields the wanted answer, then registering that design. A confirmation registration therefore *must* disclose linked exploratory studies on the same question, and the bundle carries that disclosure. The engine cannot prevent motivated design choice; it refuses to hide it.
 
 ## 5. Replay
 

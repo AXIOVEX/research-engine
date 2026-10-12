@@ -18,6 +18,8 @@ One append-only event log per study (the ledger's adopted write model, WS2 §4).
 
 All derived state — claim registers, verdict tables, dashboards — is a projection rebuilt from events. If a projection and the log disagree, the log wins and the projection is rebuilt; the disagreement itself is recorded.
 
+**Sequencing (RED-TEAM-01 RT-2):** each study log has a *single sequencing point* — every append serializes through it, so the chain has exactly one head at any moment. If a fork is ever detected (two events claiming the same predecessor), the study record is INVALID until an appended adjudication event selects the surviving chain; the forked branch is preserved in the record, never silently merged or dropped.
+
 ## 2. Hash chaining and integrity
 
 Each event carries the hash of the previous event in its study log plus its own content hash (SHA-256), forming a chain an external checker can verify without the engine: given the exported log, recompute the chain; any altered, reordered, inserted, or deleted event breaks verification at that point. Study bundles additionally carry a manifest hash over all member files. (Claim CLM-001-04 states the falsifiable form: a tampered record that replays clean kills this design.)

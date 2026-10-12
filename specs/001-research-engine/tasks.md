@@ -12,19 +12,21 @@
 
 ## Architecture workstreams
 
-- [ ] T006 WS1 Source layer — connector contract + source registry with verified API/licensing facts.
-- [ ] T007 WS2 Claim & evidence model — schema + ledger adopt/adapt/supersede map (OD-3).
-- [ ] T008 WS3 Verdict engine — taxonomy mechanics, control patterns, freeze/replay.
-- [ ] T009 WS4 Records & export — event store, hash chain, audit bundle, OSF/Zenodo paths.
-- [ ] T010 WS5 Trust & safety — citation verification, adjudication points, licensing boundaries.
-- [ ] T011 WS6 Product shape — roles, deployment shapes (OD-2), MVP slice (OD-1), competitor gap appendix.
+- [x] T006 WS1 Source layer — connector contract + source registry with verified API/licensing facts.
+- [x] T007 WS2 Claim & evidence model — schema + ledger adopt/adapt/supersede map (OD-3).
+- [x] T008 WS3 Verdict engine — taxonomy mechanics, control patterns, freeze/replay.
+- [x] T009 WS4 Records & export — event store, hash chain, audit bundle, OSF/Zenodo paths.
+- [x] T010 WS5 Trust & safety — citation verification, adjudication points, licensing boundaries.
+- [x] T011 WS6 Product shape — roles, deployment shapes (OD-2), MVP slice (OD-1), competitor gap appendix.
 
 ## Review gates
 
-- [ ] T012 Cross-reference + consistency check (SC-3, SC-4).
-- [ ] T013 Red-team pass over the full architecture set; findings logged.
-- [ ] T014 Revision pass resolving critical red-team findings.
+- [x] T012 Cross-reference + consistency check (SC-3, SC-4) — pass 01 done with RED-TEAM-01; re-run required after WS1 registry facts + WS6 appendix finalize.
+- [x] T013 Red-team pass over the full architecture set; findings logged.
+- [x] T014 Revision pass resolving critical red-team findings.
 - [ ] T015 AEE assessment of spec 001 claims (`aee-claims.json`) recorded.
+- [ ] T019 RED-TEAM pass 02 after WS1/WS6 research finalization.
+- [ ] T020 (Gate on any implementation spec, per RED-TEAM-01 AR-1) At least one external hash anchor implemented (deposit or institutional timestamp) before any institutional pilot.
 
 ## Owner gates (one at a time, never bundled)
 

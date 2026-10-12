@@ -8,7 +8,7 @@ Fabricated references are the signature failure of AI research tools, so verific
 
 1. **Resolution.** Every citation must resolve against a source of record: DOI → Crossref/DataCite metadata; no DOI → source-native record (WS1 connector) matched on title + authors + venue + year. Resolution produces a *retrieved metadata record*, stored as provenance.
 2. **Agreement check.** The fields the study relies on (title, authorship, year, venue, and — where the claim depends on it — the specific result) are compared between the citing context and the resolved record. Material mismatch → the item is quarantined and the run cannot proceed to verdicts until an adjudicator resolves it.
-3. **Content check.** Where the claim attributes a finding to a source, the stance extraction (WS2) is performed on the retrieved content, not on the model's memory of the paper. If content cannot be retrieved (paywall, terms), the item is marked `metadata-only` and its evidentiary weight is capped by rule — a citation whose content nobody checked cannot carry a claim by itself.
+3. **Content check.** Where the claim attributes a finding to a source, the stance extraction (WS2) is performed on the retrieved content, not on the model's memory of the paper. If content cannot be retrieved (paywall, terms), the item is marked `metadata-only`. **The cap, mechanized (RED-TEAM-01 RT-5):** a metadata-only item contributes *no support mass* — context only — and a claim whose entire supporting basis is metadata-only caps at INCONCLUSIVE. A citation whose content nobody checked cannot carry a claim, alone or in aggregate.
 
 No stage is prompt-based. "The model was told not to hallucinate citations" is not a control; resolution against a source of record is.
 
