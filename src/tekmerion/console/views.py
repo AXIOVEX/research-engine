@@ -1422,7 +1422,7 @@ def _bg_session_log(sessions: list[dict], base: str) -> str:
                "pending": "awaiting authorization"}[s["state"]]
         actions = f" · {s['actions_taken']} action(s)" if s["state"] in ("closed", "expired", "active") else ""
         rows.append(f"""<tr>
-          <td data-h="Session" class="mono">{short(s['bg_session_id'], 10, 0)}…</td>
+          <td data-h="Session" class="mono">{short(s['bg_session_id'])}</td>
           <td data-h="Invoker">{e(s['invoker_name'])}</td>
           <td data-h="State">{state_chip('denied' if s['state'] == 'denied' else ('expired' if s['state'] == 'expired' else ('closed' if s['state'] == 'closed' else ('pending second authorization' if s['state'] == 'pending' else 'active'))))}</td>
           <td data-h="How it ended">{e(end)}{actions}</td>
@@ -1478,7 +1478,7 @@ def _bg_reviews(sessions: list[dict], base: str, can_review: bool) -> str:
     if completed:
         rows = "".join(
             f'<tr><td data-h="Review item" class="mono">{e(s["review_item_id"])}</td>'
-            f'<td data-h="Session" class="mono">{short(s["bg_session_id"], 10, 0)}…</td>'
+            f'<td data-h="Session" class="mono">{short(s["bg_session_id"])}</td>'
             f'<td data-h="Disposition">{state_chip("review recorded")}</td></tr>'
             for s in completed)
         done = (f'<h3>Completed reviews</h3><div class="card flush"><table><thead>'
@@ -1562,7 +1562,7 @@ def render_break_glass_tenant(ctx: dict) -> str:
              ("Second authorizer", f"a <strong>{e(policy['second_authorizer_plane'].replace('_', ' '))}</strong>, per this tenant's declaration — never the invoker, whatever roles the invoker holds"),
              ("Time box", f"declared maximum <strong>{fmt_duration(policy['max_duration_seconds'])}</strong> — the 4 h ceiling is hard-coded; a declaration may set less, nothing sets more"),
              ("Scopes", " · ".join(f'<span class="mono">{e(s)}</span>' for s in policy['scopes']) + " — only actions the mechanism can exercise are declarable; study powers can never be declared"),
-             ("Declared", f"{fmt_ts(policy['declared_at'])} by {e(actor_short(policy['declared_by_actor_id']))} (breakglass.policy_declared, tenant ledger) — declaration is itself a recorded act"),
+             ("Declared", f"{fmt_ts(policy['declared_at'])} by {e(ctx['names'].get(policy['declared_by_actor_id'], actor_short(policy['declared_by_actor_id'])))} (breakglass.policy_declared, tenant ledger) — declaration is itself a recorded act"),
              ("Alarm", "every step is recorded in this tenant's ledger <em>and</em> the deployment security log; authorization egresses a security.break_glass_use incident-response event")])}
         <form method="post" action="{base}/revoke-policy">
           <div class="row-actions" style="margin-bottom:0">

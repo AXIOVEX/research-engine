@@ -1305,9 +1305,12 @@ class ConsoleApp:
                        "name": i.display_name or i.subject}
                       for i in _identities(svc.directory, tenant_id)
                       if i.active]
+        names = {i.actor_id: (i.display_name or i.subject)
+                 for i in svc.directory.identities.values()}
         return {**ctx, "tenant": {"tenant_id": tenant_id,
                                   "name": ctx["tenant_name"]},
                 "bg_state": state, "identities": identities,
+                "names": names,
                 "all_roles": [r for r in ALL_GRANTABLE_ROLES
                               if r != "platform_admin"],
                 "bg_scopes": sorted(PlatformService.BREAKGLASS_SCOPES),
