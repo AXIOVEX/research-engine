@@ -309,7 +309,12 @@ def derive_evidence(store: StudyStore, register: ClaimRegister,
                 hosted_ok=bool(rec.get("hosted_ok", True)),
             )
         citation = vf.Citation(citation_id=cid, claim_id=claim_id, proposition="")
-        item = vf.to_evidence_item(citation, res)
+        # The claim rides along so a contradicting item whose record
+        # the claim's registered falsifier names carries the falsifier
+        # observation (Spec 011) — derived from the ledger's outcomes
+        # and the cached resolved record, here as everywhere the
+        # register is rebuilt.
+        item = vf.to_evidence_item(citation, res, claim=register.claims[claim_id])
         raw_items[cid] = item
         items_by_claim.setdefault(claim_id, []).append(item)
 
@@ -594,7 +599,8 @@ def action_export(store: StudyStore, register: ClaimRegister, ws: Workspace,
         store, str(ws.ledger_path(study_id)), str(out), register=register,
         controls=controls, mode=mode, linked_exploratory=linked,
         study_label=ws.meta(study_id)["title"],
-        retrieved=retrieved_items(ws, study_id))
+        retrieved=retrieved_items(ws, study_id),
+        citations=ws.read_sidecar(study_id, "citations.json", {}) or {})
     export_mod.record_export(store, manifest, actor=actor)
     verification = export_mod.verify_bundle(str(out))
     return manifest, verification, out

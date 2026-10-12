@@ -49,8 +49,9 @@
   `{"construction": <the tamper construction the production report names>}` —
   the swap control's fixture *is* the study ledger, and the construction is
   its identity. `observed` is the verdict string for fixture controls and
-  `"detected"` / `"not_detected"` for the swap control (whose `expected`
-  is `"detected"`).
+  `"detected"` / `"not_detected"` for the swap control (whose registered
+  `expected` is null — a swap has no expected verdict; detection is its
+  operative expectation, and `observed`/`passed` record exactly that).
 - **The run carries them.** `RunResult` gains `control_outcomes` (additive,
   default empty); `evaluate_run` populates it on both the valid and invalid
   return paths, so every live consumer (workspace, MCP) sees the same record

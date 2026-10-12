@@ -40,7 +40,7 @@ from typing import Any, Optional
 
 from .claims import Claim, ClaimRegister
 from .freeze import registration_document, registration_hash
-from .verdicts import evaluate_run, swap_control_report
+from .verdicts import evaluate_run, run_controls_report, swap_control_report
 from .verification import queue_state, second_review_report
 
 BUNDLE_FORMAT = "tekmerion-audit-bundle/1"
@@ -120,6 +120,28 @@ class _EventsOnlyStore:
         return self._events
 
 
+def _excluded_markers(queue: dict[str, Any]) -> list[dict[str, Any]]:
+    """Exclusion markers (Spec 011): one per citation a **decided
+    quarantine** item excluded — {citation_id, claim_id, queue_id,
+    decision, rationale}. Grouping decisions and `variant` rulings
+    are not exclusions and mint no marker; undecided items mint none.
+    A marker re-admits nothing: the citation stays absent from the
+    evidence files. Exporter and verifier both derive the set from
+    the queue-state replay, so the projection is checked against the
+    ledger, never merely asserted."""
+    return [
+        {"citation_id": item["citation_id"],
+         "claim_id": item.get("claim_id"),
+         "queue_id": item["queue_id"],
+         "decision": "exclude",
+         "rationale": item.get("rationale", "")}
+        for item in queue.get("decided", [])
+        if item.get("kind") == "quarantine"
+        and item.get("decision") == "exclude"
+        and item.get("citation_id")
+    ]
+
+
 # ------------------------------------------------------------------ coverage
 
 def coverage_report(register: ClaimRegister, events: list[dict[str, Any]]) -> dict[str, Any]:
@@ -155,6 +177,32 @@ def coverage_report(register: ClaimRegister, events: list[dict[str, Any]]) -> di
 
 # ------------------------------------------------------------------ run outcome
 
+def _issued_control_outcomes(controls: list, store: Any,
+                             store_path: str) -> list[dict[str, Any]]:
+    """Per-control outcomes for an issued (valid) run, re-executed at
+    export time through the production path (`run_controls_report`)
+    on the controls presented to the exporter and the study's ledger —
+    the same deterministic computation the issuing run performed
+    (fixture evaluation is a pure function of the fixture; the swap
+    control runs on the ledger being exported).
+
+    A fixture control whose fixture was not presented at export is
+    NOT recorded as failed: the issuing run executed it with its
+    fixture (an invalid run issues no verdicts), so its outcome is
+    recorded as attested by the `verdict.issued` events — `passed:
+    null`, never an outcome the machinery did not produce."""
+    outcomes = run_controls_report(list(controls), store=store, store_path=store_path)
+    adjusted: list[dict[str, Any]] = []
+    for outcome in outcomes:
+        if not outcome["executed"] and outcome["kind"] in ("positive", "negative"):
+            outcome = {**outcome, "passed": None,
+                       "detail": "fixture not presented at export; the control's "
+                                 "pass is attested by the run's verdict.issued "
+                                 "events (an invalid run issues none, WS3 §1)"}
+        adjusted.append(outcome)
+    return adjusted
+
+
 def run_outcome_projection(
     store: Any,
     store_path: str,
@@ -181,24 +229,37 @@ def run_outcome_projection(
       INVALID carries the engine's reasons verbatim; a clean replay
       with no issued verdicts is `not-run`.
 
+    Since Spec 011 the projection also records **per-control
+    outcomes** (`controls`): the replay's own outcomes for unissued
+    runs, and a production-path re-execution for issued runs (see
+    `_issued_control_outcomes`). Before that change control
+    evaluation was ephemeral — a valid run silently implied success
+    and no artifact recorded which controls ran (Phase 7 §4.7).
+
     The standalone verifier cross-checks everything about this
     projection that is decidable from the bundle alone (verdict
-    counts, unverified evidence, the swap control replayed on the
-    bundle's own ledger copy); fixture-dependent control outcomes
-    are attested by this replay and bound by the manifest hashes,
-    like every other projection the bundle carries."""
+    counts, unverified evidence, the recorded control outcomes
+    against the committed registration and the verifier's own swap
+    replay on the bundle's ledger copy); fixture-dependent control
+    outcomes are attested by this replay and bound by the manifest
+    hashes, like every other projection the bundle carries."""
     issued = [e for e in events if e["type"] == "verdict.issued"]
     registered_kinds = [c.get("kind") for c in doc.get("controls", [])]
     if issued:
+        outcomes = _issued_control_outcomes(controls, store, store_path)
         return {
             "outcome": "valid",
             "basis": "verdict.issued events in the exported ledger "
-                     "(an invalid run issues none, WS3 §1)",
+                     "(an invalid run issues none, WS3 §1); control outcomes "
+                     "re-executed at export time through the production path "
+                     "(tekmerion.verdicts.run_controls_report) — the same "
+                     "deterministic computation the issuing run performed",
             "mode": doc.get("mode"),
             "verdicts_issued": len(issued),
             "invalid_reasons": [],
-            "controls_replayed": [],
+            "controls_replayed": [o["kind"] for o in outcomes if o["executed"]],
             "controls_registered": registered_kinds,
+            "controls": outcomes,
         }
     replay = ClaimRegister()
     for cdoc in doc.get("claims", []):
@@ -217,28 +278,32 @@ def run_outcome_projection(
         store=store,
         store_path=store_path,
     )
-    replayed_kinds = [getattr(c, "kind", None) for c in controls]
+    replayed_kinds = [o["kind"] for o in result.control_outcomes if o["executed"]]
     if result.run_verdict == "invalid":
         return {
             "outcome": "invalid",
             "basis": "replayed at export time through tekmerion.verdicts.evaluate_run "
                      "(production path); an invalid run appends nothing, so no "
-                     "verdict.issued events exist to state it",
+                     "verdict.issued events exist to state it; the replay's "
+                     "per-control outcomes are recorded in controls",
             "mode": doc.get("mode"),
             "verdicts_issued": 0,
             "invalid_reasons": list(result.invalid_reasons),
             "controls_replayed": replayed_kinds,
             "controls_registered": registered_kinds,
+            "controls": result.control_outcomes,
         }
     return {
         "outcome": "not-run",
         "basis": "no verdict.issued events in the exported ledger, and the "
-                 "run-level checks replayed at export time found no failure",
+                 "run-level checks replayed at export time found no failure; "
+                 "the replay's per-control outcomes are recorded in controls",
         "mode": doc.get("mode"),
         "verdicts_issued": 0,
         "invalid_reasons": [],
         "controls_replayed": replayed_kinds,
         "controls_registered": registered_kinds,
+        "controls": result.control_outcomes,
     }
 
 
@@ -255,6 +320,7 @@ def export_bundle(
     linked_exploratory: Optional[list[str]] = None,
     study_label: Optional[str] = None,
     retrieved: Optional[dict[str, Any]] = None,
+    citations: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     """Export the study at `store_path` as an audit bundle at
     `out_dir` and return the manifest. Fails closed: a broken chain,
@@ -351,11 +417,23 @@ def export_bundle(
                     "substitute": "provenance stub (evidence/items.json + verification.json)",
                 })
         retrieved_doc[citation_id] = entry
-    put("verification.json", _dump({
+    verification_doc: dict[str, Any] = {
         "citation_outcomes": checked,
         "retrieved": retrieved_doc,
         "second_review": second_review_report(_EventsOnlyStore(events)),
-    }))
+    }
+    if citations:
+        # The as-cited forms — what the researcher actually typed,
+        # including a fabricated DOI or a corrupted field — carried
+        # beside the outcomes so the inputs can be re-inspected from
+        # the bundle alone (Spec 011; Phase 7 §2.3 friction 5). Only
+        # when the caller presents them: a bundle never invents
+        # inputs it was not given.
+        verification_doc["as_cited"] = {
+            cid: (c.as_dict() if hasattr(c, "as_dict") else dict(c))
+            for cid, c in sorted(citations.items())
+        }
+    put("verification.json", _dump(verification_doc))
 
     put("queries.json", _dump({
         "queries": [e["payload"] for e in events if e["type"] == "connector.query"],
@@ -370,6 +448,9 @@ def export_bundle(
     state = queue_state(_EventsOnlyStore(events))
     put("adjudication.json", _dump({
         "pending": state["pending"], "decided": state["decided"],
+        # Excluded citations get an explicit marker (Spec 011) rather
+        # than vanishing from the evidence files unremarked.
+        "excluded_citations": _excluded_markers(state),
     }))
 
     receipts = [e["payload"] for e in events if e["type"] == "anchor.recorded"]
@@ -433,8 +514,9 @@ def _human_readme(manifest: dict[str, Any], register: ClaimRegister,
         "  content *only where the source licence permits redistribution*;",
         "  everything else is a provenance stub (see substitutions below).",
         "- `verification.json` — every citation's pipeline outcome",
-        "  (resolution / agreement / content check) and the second-review",
-        "  report (RT-4).",
+        "  (resolution / agreement / content check), each citation's",
+        "  as-cited form where the exporter was given the citation",
+        "  inputs, and the second-review report (RT-4).",
         "- `coverage.json` — support-check coverage per claim (WS5 §2):",
         "  how many origin groups were content-checked vs metadata-only.",
         "- `verdicts.json`, `controls.json`, `adjudication.json`,",
@@ -460,6 +542,30 @@ def _human_readme(manifest: dict[str, Any], register: ClaimRegister,
         f"- Merkle checkpoint root: `{study['checkpoint_root']}`",
         f"- Registration hash: `{study['registration_hash']}`",
         f"- Bundle hash: stated in `manifest.json` (`bundle_hash`).",
+        "",
+        "## How citation outcomes become evidence",
+        "",
+        "A citation's content outcome in `verification.json` and its",
+        "evidence stance in `evidence/items.json` are two vocabularies",
+        "for two stages; the conversion between them is fixed",
+        "(`tekmerion.verification.to_evidence_item`):",
+        "",
+        "| content check | evidence stance | verdict mass |",
+        "|---|---|---|",
+        "| supports | supports | support mass |",
+        "| contradicts | contradicts | contradiction mass |",
+        "| contextual | contextual | none |",
+        "| metadata_only | contextual | none — no content was checked (RT-5); context only, never carries a claim |",
+        "| (quarantined: unresolved or metadata-disagreeing) | contextual | none — unverified; a run containing it is INVALID until adjudication |",
+        "",
+        "A contradicting item additionally carries",
+        "`falsifier_observation` when the claim's registered falsifier",
+        "names that item's resolved record (by DOI, or by first-author",
+        "surname + year): the falsifier test then fires on the",
+        "observation itself, not only on the interval. A citation",
+        "excluded at adjudication appears in `adjudication.json`'s",
+        "`excluded_citations` markers and nowhere in the evidence",
+        "files.",
         "",
         "## Anchoring",
         "",
@@ -739,6 +845,54 @@ def verify_bundle(bundle_dir: str) -> BundleVerification:
                     "verdicts.json run_outcome claims not-run but the swap "
                     "control replayed on the bundle's ledger does not detect "
                     "its tamper — a replayed run would be invalid")
+        # -- per-control outcomes (Spec 011): checked against everything
+        # the bundle alone can decide — the committed registration's
+        # control set, the stated run outcome, and the verifier's own
+        # swap replay. Absent in pre-Spec-011 bundles: noted, not failed.
+        outcomes = run_outcome.get("controls")
+        if outcomes is None:
+            checks["control_outcomes"] = "absent (pre-Spec-011 bundle)"
+        elif not isinstance(outcomes, list) or not all(
+                isinstance(o, dict) for o in outcomes):
+            failures.append("verdicts.json run_outcome controls is not a list of objects")
+        else:
+            checks["control_outcomes"] = len(outcomes)
+            if registration is not None:
+                canon = lambda lst: sorted(
+                    _canonical([o.get("kind"), o.get("failure_mode"),
+                                o.get("expected")]) for o in lst)
+                if canon(outcomes) != canon(registration.get("controls", [])):
+                    failures.append(
+                        "verdicts.json run_outcome controls do not match the "
+                        "registration's committed control set")
+            failed_outcomes = [o for o in outcomes if o.get("passed") is False]
+            if stated == "valid" and failed_outcomes:
+                failures.append(
+                    "verdicts.json run_outcome claims a valid run but records "
+                    "a failed control outcome")
+            if stated == "not-run" and failed_outcomes:
+                failures.append(
+                    "verdicts.json run_outcome claims not-run but records a "
+                    "failed control outcome — a replayed run would be invalid")
+            if stated == "invalid":
+                if any("control" in r for r in reasons) and not failed_outcomes:
+                    failures.append(
+                        "verdicts.json run_outcome cites a control failure "
+                        "but records no failed control outcome")
+                for o in failed_outcomes:
+                    if o.get("detail") and o["detail"] not in reasons:
+                        failures.append(
+                            "verdicts.json run_outcome records a control "
+                            "failure that is not among the stated invalid "
+                            "reasons")
+            if swap_detected is not None:
+                for o in outcomes:
+                    if o.get("kind") == "swap" and o.get("executed"):
+                        if o.get("passed") is not swap_detected:
+                            failures.append(
+                                "verdicts.json run_outcome records a swap "
+                                "control outcome that disagrees with the swap "
+                                "replayed on the bundle's ledger")
 
     verification_doc = load_json("verification.json")
     if verification_doc is not None:
@@ -748,6 +902,32 @@ def verify_bundle(bundle_dir: str) -> BundleVerification:
         ledger_outcomes = [e["payload"] for e in events if e["type"] == "citation.checked"]
         if outcomes != ledger_outcomes:
             failures.append("verification.json outcomes differ from the ledgered outcomes")
+        # -- as-cited forms (Spec 011): each must key-match and agree
+        # with the ledger on the citation's claim linkage. Absent when
+        # the exporter was not given citation inputs: noted, not failed.
+        as_cited = verification_doc.get("as_cited")
+        if as_cited is None:
+            checks["as_cited"] = "absent"
+        elif not isinstance(as_cited, dict):
+            failures.append("verification.json as_cited is not an object")
+        else:
+            checks["as_cited"] = len(as_cited)
+            outcome_by_id = {o.get("citation_id"): o for o in ledger_outcomes}
+            for cid_key, form in as_cited.items():
+                if not isinstance(form, dict) or form.get("citation_id") != cid_key:
+                    failures.append(
+                        f"verification.json as_cited entry {cid_key} does not "
+                        "carry its own citation id")
+                    continue
+                outcome = outcome_by_id.get(cid_key)
+                if outcome is None:
+                    failures.append(
+                        f"verification.json as_cited carries {cid_key} but the "
+                        "ledger has no citation.checked outcome for it")
+                elif form.get("claim_id") != outcome.get("claim_id"):
+                    failures.append(
+                        f"verification.json as_cited claim for {cid_key} "
+                        "disagrees with the ledger's citation.checked outcome")
         adapter = _EventsOnlyStore(events)
         if verification_doc.get("second_review") != second_review_report(adapter):
             failures.append("verification.json second-review report does not match the ledger")
@@ -781,6 +961,30 @@ def verify_bundle(bundle_dir: str) -> BundleVerification:
                 other = theirs[qid]
                 if (item["status"], item.get("decision")) != (other["status"], other.get("decision")):
                     failures.append(f"adjudication item {qid} disagrees with the ledger replay")
+        # -- exclusion markers (Spec 011): the set the replay derives
+        # vs the set the bundle carries, and no marked citation back
+        # in the evidence files. Absent pre-Spec-011: noted, not failed.
+        markers = adjudication.get("excluded_citations")
+        if markers is None:
+            checks["excluded_citations"] = "absent (pre-Spec-011 bundle)"
+        elif not isinstance(markers, list):
+            failures.append("adjudication.json excluded_citations is not a list")
+        else:
+            checks["excluded_citations"] = len(markers)
+            expected_markers = _excluded_markers(state)
+            canon = lambda lst: sorted(_canonical(m) for m in lst
+                                       if isinstance(m, dict))
+            if len(canon(markers)) != len(markers) or canon(markers) != canon(expected_markers):
+                failures.append(
+                    "adjudication.json excluded_citations do not match the "
+                    "ledger replay")
+            items_doc = load_json("evidence/items.json")
+            evidence_ids = {i.get("item_id") for i in (items_doc or {}).get("items", [])}
+            for marker in markers:
+                if isinstance(marker, dict) and marker.get("citation_id") in evidence_ids:
+                    failures.append(
+                        f"excluded citation {marker.get('citation_id')} is "
+                        "nevertheless present in evidence/items.json")
 
     coverage = load_json("coverage.json")
     groups_doc = load_json("evidence/groups.json")

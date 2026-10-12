@@ -53,6 +53,10 @@ class RunResult:
     claim_verdicts: list[ClaimVerdict] = field(default_factory=list)  # empty when invalid
     mode: str = "exploratory"
     disclosure: list[str] = field(default_factory=list)
+    # Per-control outcomes of this run's control execution
+    # (run_controls_report dicts; Spec 011 — the record the bundle's
+    # run projection carries, so control results stop being ephemeral).
+    control_outcomes: list[dict[str, Any]] = field(default_factory=list)
 
 
 def evaluate_claim(claim: Claim, groups: list[dict[str, Any]]) -> ClaimVerdict:
@@ -121,29 +125,85 @@ class Control:
     representative_rationale: str = ""
 
 
-def run_controls(controls: list[Control], store: Any = None, store_path: Optional[str] = None) -> list[str]:
-    """Execute controls through the production paths. Returns failure
-    reasons (empty = all controls behaved). Positive/negative controls
-    evaluate synthetic claims through `evaluate_claim` itself; the swap
-    control tampers a *copy* of the study ledger and requires the
-    production Axiomere verifier to catch it (RT-1: same code path,
-    same build, named in the record by the caller's freeze event)."""
-    failures: list[str] = []
+def fixture_identity(ctl: Control) -> Optional[dict[str, Any]]:
+    """Identify a fixture control's evaluation fixture: the fixture
+    claim's id plus the SHA-256 of the canonical fixture (claim +
+    groups), so a reader holding a fixture can tell whether it is the
+    fixture that ran. None when the fixture is incomplete — there is
+    no executable fixture to identify."""
+    if ctl.claim is None or ctl.groups is None:
+        return None
+    import hashlib
+    import json as _json
+
+    canonical = _json.dumps(
+        {"claim": ctl.claim.as_dict(), "groups": ctl.groups},
+        sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return {"claim_id": ctl.claim.claim_id,
+            "sha256": hashlib.sha256(canonical.encode("utf-8")).hexdigest()}
+
+
+def run_controls_report(controls: list[Control], store: Any = None,
+                        store_path: Optional[str] = None) -> list[dict[str, Any]]:
+    """Execute controls through the production paths and report one
+    outcome per control, in order. Positive/negative controls evaluate
+    synthetic claims through `evaluate_claim` itself; the swap control
+    tampers a *copy* of the study ledger and requires the production
+    Axiomere verifier to catch it (RT-1: same code path, same build).
+
+    Each outcome: {kind, failure_mode, expected, observed, passed,
+    executed, fixture, detail}. `observed` is the verdict string for
+    fixture controls and "detected"/"not_detected" for the swap
+    control. `detail` carries the
+    exact failure string `run_controls` has always produced for a
+    failed control ("" when it passed) — `run_controls` below is the
+    failure-projection of this report, so the legacy contract and the
+    structured record are one execution, never two (Spec 011)."""
+    outcomes: list[dict[str, Any]] = []
     for ctl in controls:
+        base: dict[str, Any] = {"kind": ctl.kind, "failure_mode": ctl.failure_mode,
+                                "expected": ctl.expected, "observed": None,
+                                "passed": False, "executed": False,
+                                "fixture": None, "detail": ""}
         if ctl.kind in ("positive", "negative"):
             if ctl.claim is None or ctl.groups is None or ctl.expected is None:
-                failures.append(f"control missing claim/groups/expected: {ctl.failure_mode}")
+                base["detail"] = f"control missing claim/groups/expected: {ctl.failure_mode}"
+                outcomes.append(base)
                 continue
             got = evaluate_claim(ctl.claim, ctl.groups).verdict
+            base.update(executed=True, observed=got, passed=got == ctl.expected,
+                        fixture=fixture_identity(ctl))
             if got != ctl.expected:
-                failures.append(
-                    f"{ctl.kind} control failed ({ctl.failure_mode}): expected {ctl.expected}, got {got}"
-                )
+                base["detail"] = (
+                    f"{ctl.kind} control failed ({ctl.failure_mode}): "
+                    f"expected {ctl.expected}, got {got}")
+            outcomes.append(base)
         elif ctl.kind == "swap":
-            failures.extend(_swap_control(store_path))
+            report = swap_control_report(store_path)
+            failures = report["failures"]
+            # `expected` stays the registered value (null for swap
+            # controls — a swap has no expected verdict); its operative
+            # expectation, detection, is what observed/passed record.
+            base.update(executed=True,
+                        observed="detected" if report["detected"] else "not_detected",
+                        passed=report["detected"] and not failures,
+                        fixture=({"construction": report["construction"]}
+                                 if report["construction"] else None),
+                        detail=failures[0] if failures else "")
+            outcomes.append(base)
         else:
-            failures.append(f"unknown control kind {ctl.kind}")
-    return failures
+            base["detail"] = f"unknown control kind {ctl.kind}"
+            outcomes.append(base)
+    return outcomes
+
+
+def run_controls(controls: list[Control], store: Any = None, store_path: Optional[str] = None) -> list[str]:
+    """Execute controls through the production paths. Returns failure
+    reasons (empty = all controls behaved) — the failure-projection of
+    `run_controls_report`, with the same strings in the same order the
+    inline implementation always produced (CLM-011-02)."""
+    return [o["detail"] for o in run_controls_report(controls, store=store, store_path=store_path)
+            if not o["passed"]]
 
 
 #: Actor written by the swap control when a ledger has no two events
@@ -278,15 +338,18 @@ def evaluate_run(
         for item in items:
             if not item.verified:
                 invalid.append(f"unverified citation in evidence for {cid}: {item.item_id}")
-    invalid.extend(run_controls(controls, store=store, store_path=store_path))
+    outcomes = run_controls_report(controls, store=store, store_path=store_path)
+    invalid.extend(o["detail"] for o in outcomes if not o["passed"])
 
     disclosure = list(linked_exploratory or [])
     if invalid:
-        return RunResult(run_verdict=INVALID, invalid_reasons=invalid, mode=mode, disclosure=disclosure)
+        return RunResult(run_verdict=INVALID, invalid_reasons=invalid, mode=mode,
+                         disclosure=disclosure, control_outcomes=outcomes)
 
     verdicts = [
         evaluate_claim(claim, register.group_masses(cid))
         for cid, claim in register.claims.items()
         if claim.status != "superseded"
     ]
-    return RunResult(run_verdict="valid", claim_verdicts=verdicts, mode=mode, disclosure=disclosure)
+    return RunResult(run_verdict="valid", claim_verdicts=verdicts, mode=mode,
+                     disclosure=disclosure, control_outcomes=outcomes)
