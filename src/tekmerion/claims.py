@@ -51,6 +51,7 @@ class EvidenceItem:
     falsifier_observation: bool = False  # the registered falsifying observation itself
     verified: bool = True       # citation passed verification (WS5); unverified -> run INVALID
     hosted_ok: bool = True      # licence permits the hosted shape (WS1)
+    metadata_only: bool = False  # no content check was possible (WS5 §1.3): context only, no mass (RT-5)
 
     def as_dict(self) -> dict[str, Any]:
         return vars(self).copy()
@@ -147,7 +148,17 @@ class ClaimRegister:
                 "origin_group": item.origin_group, "support_mass": 0.0,
                 "contradiction_mass": 0.0, "could_falsify": False,
                 "falsifier_observation": False, "verified": True, "items": 0,
+                "metadata_only": True,
             })
+            if item.metadata_only:
+                # RT-5, mechanized at the fold: a metadata-only item is
+                # context only. Whatever masses were registered for it,
+                # it contributes no support, no contradiction, and no
+                # falsifier exposure — nobody checked its content.
+                g["verified"] = g["verified"] and item.verified
+                g["items"] += 1
+                continue
+            g["metadata_only"] = False
             g["support_mass"] = max(g["support_mass"], item.support_mass)
             g["contradiction_mass"] = max(g["contradiction_mass"], item.contradiction_mass)
             g["could_falsify"] = g["could_falsify"] or item.could_falsify

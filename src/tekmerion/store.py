@@ -55,6 +55,38 @@ class StudyStore:
         provenance of everything retrieved is chained and signed."""
         return self.db.append("connector.query", {"connector": connector, **query}, actor=actor)
 
+    def log_citation_check(self, result: dict[str, Any], *, actor: str) -> dict:
+        """Record one citation's pipeline outcome (Phase 4): every
+        citation gets exactly one of these — that is the K1 accounting."""
+        return self.db.append("citation.checked", result, actor=actor)
+
+    def enqueue_adjudication(self, item: dict[str, Any], *, actor: str) -> dict:
+        """Place an item in the adjudication queue (WS5 §3). Queue state
+        is a projection of these events; there is no queue elsewhere."""
+        return self.db.append("adjudication.enqueued", item, actor=actor)
+
+    def decide_adjudication(self, queue_id: str, decision: str, *, adjudicator: str,
+                            rationale: str = "") -> dict:
+        """Record an adjudicator's decision — named, appended, never an
+        edit to the enqueue event (Article IX)."""
+        return self.db.append(
+            "adjudication.decided",
+            {"queue_id": queue_id, "decision": decision, "rationale": rationale},
+            actor=adjudicator,
+        )
+
+    def log_second_review(self, queue_id: str, *, reviewer: str, agrees: bool) -> dict:
+        """Record an independent second review of an adjudication
+        decision (RT-4 sampling)."""
+        return self.db.append(
+            "adjudication.second_review",
+            {"queue_id": queue_id, "agrees": agrees},
+            actor=reviewer,
+        )
+
+    def events(self) -> list:
+        return self.db.events()
+
     def withdraw(self, record_id: str, *, reason: str, actor: str) -> dict:
         """The only removal that exists: dead snapshot, reason recorded,
         score 0.0 — history intact (DN-005)."""

@@ -135,7 +135,7 @@
       "severity": "high",
       "source_ref": "specs/002-mvp-implementation/spec.md",
       "status": "supported",
-      "text": "A claim cannot be registered without a falsifier, and claim statements are immutable after registration \u2014 a changed statement is a new claim that supersedes the old, with the link recorded.",
+      "text": "A claim cannot be registered without a falsifier, and claim statements are immutable after registration — a changed statement is a new claim that supersedes the old, with the link recorded.",
       "uncertainty": "low"
     },
     {
@@ -261,7 +261,7 @@
     {
       "boundary": [
         "Scope: mode separation inside evaluate_run and freeze_check",
-        "Design-shopping beyond disclosure is a governance risk the engine records but cannot prevent (WS3 \u00a74)"
+        "Design-shopping beyond disclosure is a governance risk the engine records but cannot prevent (WS3 §4)"
       ],
       "evidence": [
         {
@@ -327,7 +327,7 @@
         {
           "direction": "supports",
           "kind": "asserted",
-          "ref": "WS4 \u00a74 bundle format; Spec 002 Phase 5 (T216-T218) not yet built; Axiomere checkpoint roots implemented (AXIOVEX/axiomere)",
+          "ref": "WS4 §4 bundle format; Spec 002 Phase 5 (T216-T218) not yet built; Axiomere checkpoint roots implemented (AXIOVEX/axiomere)",
           "source_quality": "primary"
         }
       ],
@@ -394,9 +394,291 @@
       "status": "draft",
       "text": "Before any pilot, a study checkpoint root will be deposited with an external anchor the operator does not control, and the deposit receipt will be part of the study record (AR-1 / gate G2).",
       "uncertainty": "high"
+    },
+    {
+      "boundary": [
+        "Scope: citations submitted to tekmerion.verification.verify_citations",
+        "Connector transport failures count as explicit error outcomes, never as absence of an outcome"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS5 §1 stage 1 (docs/architecture/05-trust-safety.md): every citation must resolve against a source of record",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Spec 002 §4: K1 citation resolution = 100% on the evaluation corpus",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/verification.py (Phase 4 pipeline, queue, sampling) + RT-5 fold in src/tekmerion/claims.py / cap in src/tekmerion/verdicts.py",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase4.py::test_k1_accounting_every_citation_gets_an_outcome, ::test_transport_error_is_an_explicit_outcome (error is an outcome, not a skip)",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D14: a pipeline run over a mixed batch (resolvable, fabricated, erroring) whose accounting map omits any input citation, or any citation whose outcome exists only in memory and not as a ledger event."
+      ],
+      "id": "CLM-002-14",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "Every citation processed by the verification pipeline receives exactly one explicit resolution outcome — resolved, not-found, or error — recorded as an event in the study ledger; no citation is silently skipped (K1 accounting at pipeline level).",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: title, authorship, year, venue — the fields the study relies on (WS5 §1 stage 2)",
+        "Adjudicator resolution is an appended, named event (Article IX), never an edit"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS5 §1 stage 2: material mismatch → quarantined; the run cannot proceed to verdicts until an adjudicator resolves it",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS5 §3 adjudication table: quarantine resolution default is exclusion",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/verification.py (Phase 4 pipeline, queue, sampling) + RT-5 fold in src/tekmerion/claims.py / cap in src/tekmerion/verdicts.py",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase4.py::test_tampered_metadata_fails_stage_2 (quarantined; run INVALID while it stands)",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D15: a citation whose cited year or authorship materially differs from the resolved record that nevertheless contributes evidence mass to a verdict without an adjudication record."
+      ],
+      "id": "CLM-002-15",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "A material metadata disagreement between the citing context and the resolved record quarantines the citation: it enters the adjudication queue and contributes no evidence until an adjudicator resolves it.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: stage 3 of the pipeline; content = connector-retrieved abstract/full text surviving the connectors' licence rules (CLM-002-02)",
+        "The stance extractor's identity is recorded with every check (WS2); the deterministic lexical baseline is the Phase 4 extractor"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS5 §1 stage 3: stance extraction is performed on the retrieved content, not on the model's memory; unretrievable content → metadata-only",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS2 §2: every evidence item carries a stance extraction with the extractor identified",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/verification.py (Phase 4 pipeline, queue, sampling) + RT-5 fold in src/tekmerion/claims.py / cap in src/tekmerion/verdicts.py",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase4.py::test_pipeline_happy_path_content_verified, ::test_unsupported_content_fails_stage_3, ::test_metadata_only_pipeline_result_marks_the_item",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D16: a citation marked content-verified whose retrieved record carried no licence-permitted content, or whose stance was taken from anything other than the retrieved content."
+      ],
+      "id": "CLM-002-16",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "A citation is content-verified only when stance extraction runs on retrieved content the record's licence permits using; where no such content exists the citation is metadata-only, never content-verified.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: citation-level grouping in the verification service; claim-level evidence folding (CLM-002-04 era, claims.group_masses) is reused, not duplicated",
+        "Grouping defaults are conservative: undecided suspects count as separate groups until adjudicated (WS5 §3 default is one origin for display; grouping assignment stays explicit)"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS2 §2 grouping keys in precedence order; key 4 flagged for human adjudication, never auto-merged silently",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/verification.py (Phase 4 pipeline, queue, sampling) + RT-5 fold in src/tekmerion/claims.py / cap in src/tekmerion/verdicts.py",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase4.py::test_grouping_precedence_keys, ::test_key4_suspects_flagged_not_merged",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D17: two citations sharing a DOI or dataset id assigned to different origin groups, or a key-4 near-duplicate pair merged without an adjudication event."
+      ],
+      "id": "CLM-002-17",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "Citations are folded to origin groups by the WS2 precedence keys (shared identifier, shared dataset/registration, explicit derivation), and near-duplicate suspects under key 4 are flagged for human adjudication, never auto-merged.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: quarantine items (stage disagreements, not-found, errors) and key-4 grouping disputes",
+        "Queue state is a replay of ledger events; there is no queue database outside the record (DN-005/DN-007)"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS5 §3: judgment enters at designed points, each recorded as an event with a named person",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-005/DN-007: the record is append-only on Axiomere; queue state is projection, not storage",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/verification.py (Phase 4 pipeline, queue, sampling) + RT-5 fold in src/tekmerion/claims.py / cap in src/tekmerion/verdicts.py",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase4.py::test_queue_is_ledger_backed_and_decisions_are_appends (state rebuilt by replay; re-decision refused)",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D18: a queue item whose pending/resolved state cannot be reconstructed by replaying the study ledger, or a decision event with no named adjudicator."
+      ],
+      "id": "CLM-002-18",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "The adjudication queue is durable and ledger-backed: queued items, decisions, and second reviews are appended events naming the actor, and an item leaves the pending state only through a recorded decision.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: adjudication decisions on grouping/quarantine items in the verification service",
+        "The fraction is a registered study parameter; 10% is the RT-4 default, not a universal constant"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "RED-TEAM-01 RT-4: grouping adjudications sampled for second review (registered fraction, default 10%); a measured ~0% disagreement rate is itself a flagged anomaly",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS2 §2 adjudication integrity (RT-4 restated in the claim model)",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/verification.py (Phase 4 pipeline, queue, sampling) + RT-5 fold in src/tekmerion/claims.py / cap in src/tekmerion/verdicts.py",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase4.py::test_sampling_is_deterministic_and_actually_samples, ::test_second_review_flow_and_anomaly, ::test_disagreement_in_window_clears_the_anomaly",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D19: two sampling runs with the same seed and decision set selecting different items; or a zero-disagreement window above the minimum sample that produces no anomaly flag in the report."
+      ],
+      "id": "CLM-002-19",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "Grouping adjudications are sampled for independent second review at the registered fraction (default 10%) by a deterministic seeded draw, the sample's disagreement rate is computed from the record, and a reviewed window at or above the minimum sample with zero disagreements is flagged as an anomaly (RT-4).",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: tekmerion.verdicts.evaluate_claim via ClaimRegister.group_masses folding",
+        "A claim with any content-checked supporting group is outside the cap; only the entire-basis case binds"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "RED-TEAM-01 RT-5 + WS5 §1.3: the rule — entire metadata-only basis caps at INCONCLUSIVE; a single metadata-only item contributes no support mass; mechanized in the verdict function, not left as guidance",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/verification.py (Phase 4 pipeline, queue, sampling) + RT-5 fold in src/tekmerion/claims.py / cap in src/tekmerion/verdicts.py",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase4.py::test_rt5_cap_binds_in_the_verdict_path, ::test_rt5_cap_does_not_bind_a_mixed_basis",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D20: a SUPPORTED verdict for a claim whose evidence items are all metadata-only, however large their registered support masses."
+      ],
+      "id": "CLM-002-20",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "The metadata-only cap is mechanized in the verdict path: a metadata-only item contributes no support mass and cannot falsify, and a claim whose entire supporting basis is metadata-only caps at INCONCLUSIVE (RT-5).",
+      "uncertainty": "low"
     }
   ],
   "date": "2026-10-12",
   "spec": "002-mvp-implementation",
-  "version": "0.3.0"
+  "version": "0.4.1"
 }

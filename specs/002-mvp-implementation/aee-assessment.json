@@ -4,8 +4,8 @@
   "project": "tekmerion",
   "phase": "after_implement",
   "outcome": "iterate",
-  "summary": "Assessed 13 claim(s); found 13 failure mode(s); 3 claim(s) below the 0.70 confidence threshold.",
-  "created_at": "2026-10-12T05:36:24.078685Z",
+  "summary": "Assessed 20 claim(s); found 31 failure mode(s); 3 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T06:30:58.584080Z",
   "claims": [
     {
       "id": "CLM-002-01",
@@ -73,6 +73,16 @@
           "severity": "medium",
           "category": "coverage_gap",
           "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-002-01-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-002-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-002-01 may contradict CLM-002-18",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
           "resolved": false
         }
       ],
@@ -144,6 +154,16 @@
           "severity": "medium",
           "category": "coverage_gap",
           "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-002-02-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-002-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-002-02 may contradict CLM-002-19",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
           "resolved": false
         }
       ],
@@ -275,6 +295,16 @@
           "severity": "medium",
           "category": "coverage_gap",
           "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-002-04-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-002-04",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-002-04 may contradict CLM-002-19",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
           "resolved": false
         }
       ],
@@ -456,6 +486,16 @@
           "category": "coverage_gap",
           "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
           "resolved": false
+        },
+        {
+          "id": "AEE-CLM-002-07-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-002-07",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-002-07 may contradict CLM-002-20",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
         }
       ],
       "metadata": {}
@@ -515,6 +555,16 @@
           "severity": "medium",
           "category": "coverage_gap",
           "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-002-08-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-002-08",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-002-08 may contradict CLM-002-14",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
           "resolved": false
         }
       ],
@@ -636,6 +686,36 @@
           "category": "coverage_gap",
           "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
           "resolved": false
+        },
+        {
+          "id": "AEE-CLM-002-10-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-002-10",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-002-10 may contradict CLM-002-14",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-002-10-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-002-10",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-002-10 may contradict CLM-002-16",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-002-10-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-002-10",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-002-10 may contradict CLM-002-20",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
         }
       ],
       "metadata": {}
@@ -744,6 +824,16 @@
           "category": "coverage_gap",
           "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
           "resolved": false
+        },
+        {
+          "id": "AEE-CLM-002-12-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-002-12",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-002-12 may contradict CLM-002-16",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
         }
       ],
       "metadata": {}
@@ -787,6 +877,578 @@
         {
           "id": "AEE-CLM-002-13-IRREDUCIBILITY-CHALLENGE",
           "claim_id": "CLM-002-13",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-14",
+      "text": "Every citation processed by the verification pipeline receives exactly one explicit resolution outcome \u2014 resolved, not-found, or error \u2014 recorded as an event in the study ledger; no citation is silently skipped (K1 accounting at pipeline level).",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: citations submitted to tekmerion.verification.verify_citations",
+        "Connector transport failures count as explicit error outcomes, never as absence of an outcome"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "WS5 \u00a71 stage 1 (docs/architecture/05-trust-safety.md): every citation must resolve against a source of record",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Spec 002 \u00a74: K1 citation resolution = 100% on the evaluation corpus",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/verification.py (Phase 4 pipeline, queue, sampling) + RT-5 fold in src/tekmerion/claims.py / cap in src/tekmerion/verdicts.py",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_phase4.py::test_k1_accounting_every_citation_gets_an_outcome, ::test_transport_error_is_an_explicit_outcome (error is an outcome, not a skip)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D14: a pipeline run over a mixed batch (resolvable, fabricated, erroring) whose accounting map omits any input citation, or any citation whose outcome exists only in memory and not as a ledger event."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-14-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-14",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-002-14-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-002-14",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-002-14 may contradict CLM-002-19",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-15",
+      "text": "A material metadata disagreement between the citing context and the resolved record quarantines the citation: it enters the adjudication queue and contributes no evidence until an adjudicator resolves it.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: title, authorship, year, venue \u2014 the fields the study relies on (WS5 \u00a71 stage 2)",
+        "Adjudicator resolution is an appended, named event (Article IX), never an edit"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "WS5 \u00a71 stage 2: material mismatch \u2192 quarantined; the run cannot proceed to verdicts until an adjudicator resolves it",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "WS5 \u00a73 adjudication table: quarantine resolution default is exclusion",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/verification.py (Phase 4 pipeline, queue, sampling) + RT-5 fold in src/tekmerion/claims.py / cap in src/tekmerion/verdicts.py",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_phase4.py::test_tampered_metadata_fails_stage_2 (quarantined; run INVALID while it stands)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D15: a citation whose cited year or authorship materially differs from the resolved record that nevertheless contributes evidence mass to a verdict without an adjudication record."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-15-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-15",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-16",
+      "text": "A citation is content-verified only when stance extraction runs on retrieved content the record's licence permits using; where no such content exists the citation is metadata-only, never content-verified.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: stage 3 of the pipeline; content = connector-retrieved abstract/full text surviving the connectors' licence rules (CLM-002-02)",
+        "The stance extractor's identity is recorded with every check (WS2); the deterministic lexical baseline is the Phase 4 extractor"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "WS5 \u00a71 stage 3: stance extraction is performed on the retrieved content, not on the model's memory; unretrievable content \u2192 metadata-only",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "WS2 \u00a72: every evidence item carries a stance extraction with the extractor identified",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/verification.py (Phase 4 pipeline, queue, sampling) + RT-5 fold in src/tekmerion/claims.py / cap in src/tekmerion/verdicts.py",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_phase4.py::test_pipeline_happy_path_content_verified, ::test_unsupported_content_fails_stage_3, ::test_metadata_only_pipeline_result_marks_the_item",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D16: a citation marked content-verified whose retrieved record carried no licence-permitted content, or whose stance was taken from anything other than the retrieved content."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-16-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-16",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-17",
+      "text": "Citations are folded to origin groups by the WS2 precedence keys (shared identifier, shared dataset/registration, explicit derivation), and near-duplicate suspects under key 4 are flagged for human adjudication, never auto-merged.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: citation-level grouping in the verification service; claim-level evidence folding (CLM-002-04 era, claims.group_masses) is reused, not duplicated",
+        "Grouping defaults are conservative: undecided suspects count as separate groups until adjudicated (WS5 \u00a73 default is one origin for display; grouping assignment stays explicit)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "WS2 \u00a72 grouping keys in precedence order; key 4 flagged for human adjudication, never auto-merged silently",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/verification.py (Phase 4 pipeline, queue, sampling) + RT-5 fold in src/tekmerion/claims.py / cap in src/tekmerion/verdicts.py",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_phase4.py::test_grouping_precedence_keys, ::test_key4_suspects_flagged_not_merged",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D17: two citations sharing a DOI or dataset id assigned to different origin groups, or a key-4 near-duplicate pair merged without an adjudication event."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-17-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-17",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-002-17-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-002-17",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-002-17 may contradict CLM-002-19",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-18",
+      "text": "The adjudication queue is durable and ledger-backed: queued items, decisions, and second reviews are appended events naming the actor, and an item leaves the pending state only through a recorded decision.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: quarantine items (stage disagreements, not-found, errors) and key-4 grouping disputes",
+        "Queue state is a replay of ledger events; there is no queue database outside the record (DN-005/DN-007)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "WS5 \u00a73: judgment enters at designed points, each recorded as an event with a named person",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "DN-005/DN-007: the record is append-only on Axiomere; queue state is projection, not storage",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/verification.py (Phase 4 pipeline, queue, sampling) + RT-5 fold in src/tekmerion/claims.py / cap in src/tekmerion/verdicts.py",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_phase4.py::test_queue_is_ledger_backed_and_decisions_are_appends (state rebuilt by replay; re-decision refused)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D18: a queue item whose pending/resolved state cannot be reconstructed by replaying the study ledger, or a decision event with no named adjudicator."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-18-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-18",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-19",
+      "text": "Grouping adjudications are sampled for independent second review at the registered fraction (default 10%) by a deterministic seeded draw, the sample's disagreement rate is computed from the record, and a reviewed window at or above the minimum sample with zero disagreements is flagged as an anomaly (RT-4).",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: adjudication decisions on grouping/quarantine items in the verification service",
+        "The fraction is a registered study parameter; 10% is the RT-4 default, not a universal constant"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "RED-TEAM-01 RT-4: grouping adjudications sampled for second review (registered fraction, default 10%); a measured ~0% disagreement rate is itself a flagged anomaly",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "WS2 \u00a72 adjudication integrity (RT-4 restated in the claim model)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/verification.py (Phase 4 pipeline, queue, sampling) + RT-5 fold in src/tekmerion/claims.py / cap in src/tekmerion/verdicts.py",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_phase4.py::test_sampling_is_deterministic_and_actually_samples, ::test_second_review_flow_and_anomaly, ::test_disagreement_in_window_clears_the_anomaly",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D19: two sampling runs with the same seed and decision set selecting different items; or a zero-disagreement window above the minimum sample that produces no anomaly flag in the report."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-19-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-19",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-20",
+      "text": "The metadata-only cap is mechanized in the verdict path: a metadata-only item contributes no support mass and cannot falsify, and a claim whose entire supporting basis is metadata-only caps at INCONCLUSIVE (RT-5).",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: tekmerion.verdicts.evaluate_claim via ClaimRegister.group_masses folding",
+        "A claim with any content-checked supporting group is outside the cap; only the entire-basis case binds"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "RED-TEAM-01 RT-5 + WS5 \u00a71.3: the rule \u2014 entire metadata-only basis caps at INCONCLUSIVE; a single metadata-only item contributes no support mass; mechanized in the verdict function, not left as guidance",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/verification.py (Phase 4 pipeline, queue, sampling) + RT-5 fold in src/tekmerion/claims.py / cap in src/tekmerion/verdicts.py",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_phase4.py::test_rt5_cap_binds_in_the_verdict_path, ::test_rt5_cap_does_not_bind_a_mixed_basis",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D20: a SUPPORTED verdict for a claim whose evidence items are all metadata-only, however large their registered support masses."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-20-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-20",
           "challenge": "Irreducibility challenge",
           "breakpoint": "Claim may contain multiple independently falsifiable propositions",
           "severity": "medium",
@@ -988,6 +1650,104 @@
         "No observed supporting evidence",
         "Fewer than two independent supporting sources"
       ]
+    },
+    "CLM-002-14": {
+      "claim_id": "CLM-002-14",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-002-15": {
+      "claim_id": "CLM-002-15",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-002-16": {
+      "claim_id": "CLM-002-16",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-002-17": {
+      "claim_id": "CLM-002-17",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-002-18": {
+      "claim_id": "CLM-002-18",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-002-19": {
+      "claim_id": "CLM-002-19",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-002-20": {
+      "claim_id": "CLM-002-20",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
     }
   },
   "recoveries": [
@@ -1000,12 +1760,28 @@
       "verification": "Every resulting claim contains one independently falsifiable proposition."
     },
     {
+      "failure_id": "AEE-CLM-002-01-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-002-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
       "failure_id": "AEE-CLM-002-02-IRREDUCIBILITY-CHALLENGE",
       "claim_id": "CLM-002-02",
       "strategy": "decompose",
       "action": "Split the claim into atomic propositions and link them explicitly.",
       "priority": 3,
       "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-02-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-002-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
     },
     {
       "failure_id": "AEE-CLM-002-03-IRREDUCIBILITY-CHALLENGE",
@@ -1022,6 +1798,14 @@
       "action": "Split the claim into atomic propositions and link them explicitly.",
       "priority": 3,
       "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-04-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-002-04",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
     },
     {
       "failure_id": "AEE-CLM-002-05-IRREDUCIBILITY-CHALLENGE",
@@ -1048,12 +1832,28 @@
       "verification": "Every resulting claim contains one independently falsifiable proposition."
     },
     {
+      "failure_id": "AEE-CLM-002-07-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-002-07",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
       "failure_id": "AEE-CLM-002-08-IRREDUCIBILITY-CHALLENGE",
       "claim_id": "CLM-002-08",
       "strategy": "decompose",
       "action": "Split the claim into atomic propositions and link them explicitly.",
       "priority": 3,
       "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-08-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-002-08",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
     },
     {
       "failure_id": "AEE-CLM-002-09-IRREDUCIBILITY-CHALLENGE",
@@ -1072,6 +1872,30 @@
       "verification": "Every resulting claim contains one independently falsifiable proposition."
     },
     {
+      "failure_id": "AEE-CLM-002-10-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-002-10",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-002-10-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-002-10",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-002-10-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-002-10",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
       "failure_id": "AEE-CLM-002-11-IRREDUCIBILITY-CHALLENGE",
       "claim_id": "CLM-002-11",
       "strategy": "decompose",
@@ -1088,8 +1912,88 @@
       "verification": "Every resulting claim contains one independently falsifiable proposition."
     },
     {
+      "failure_id": "AEE-CLM-002-12-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-002-12",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
       "failure_id": "AEE-CLM-002-13-IRREDUCIBILITY-CHALLENGE",
       "claim_id": "CLM-002-13",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-14-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-14",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-14-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-002-14",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-002-15-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-15",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-16-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-16",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-17-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-17",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-17-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-002-17",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-002-18-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-18",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-19-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-19",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-20-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-20",
       "strategy": "decompose",
       "action": "Split the claim into atomic propositions and link them explicitly.",
       "priority": 3,

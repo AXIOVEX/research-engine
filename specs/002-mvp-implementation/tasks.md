@@ -37,8 +37,8 @@
 
 ## Phase 4 — Verification
 
-- [ ] T214 Citation pipeline stages 1–3 (resolution, agreement, content check).
-- [ ] T215 Origin grouping + adjudication queue + second-review sampling (RT-4); metadata-only cap mechanized (RT-5).
+- [x] T214 Citation pipeline stages 1–3 done (`tekmerion.verification`): stage 1 resolution gives every citation exactly one explicit outcome (resolved / not-found / error), each appended as a `citation.checked` ledger event (K1 accounting); stage 2 agreement compares title/authors/year/venue and quarantines material mismatches; stage 3 content check runs stance extraction (deterministic lexical baseline, extractor identity recorded) on licence-permitted retrieved content only — no content means `metadata_only`, never content-verified. Seeded defects green: fabricated DOI fails stage 1, tampered metadata fails stage 2, unsupported content fails stage 3. **Live smoke 2026-10-12** against Crossref: real DOI resolved, fabricated DOI not-found, translated-title citation correctly routed to adjudication as a variant case.
+- [x] T215 Origin grouping + adjudication queue done: citations fold to origin groups by WS2 keys 1–3 as pairwise equivalence (union-find); key-4 near-duplicate suspects are flagged to the ledger-backed adjudication queue, never auto-merged. Queue state is a replay of `adjudication.*` events; decisions are named appends (re-decision refused). RT-4: deterministic seeded sampling at the registered fraction (default 10%) of decided items for second review; the report flags a zero-disagreement window at/above the minimum sample (5) as a rubber-stamp anomaly. RT-5 mechanized: metadata-only items fold to zero mass and no falsifier exposure in `group_masses`, and `evaluate_claim` caps an entire-metadata-only basis at INCONCLUSIVE — test proves the cap binds and that a mixed basis is not capped.
 
 ## Phase 5 — Export + anchor
 

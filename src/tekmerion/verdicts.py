@@ -66,6 +66,14 @@ def evaluate_claim(claim: Claim, groups: list[dict[str, Any]]) -> ClaimVerdict:
     if n == 0:
         return ClaimVerdict(claim.claim_id, INCONCLUSIVE, "no evidence groups", 0, (0.0, 0.0), 0.0)
 
+    if all(g.get("metadata_only", False) for g in groups):
+        # RT-5 cap, mechanized: a claim whose entire supporting basis is
+        # metadata-only caps at INCONCLUSIVE. A citation whose content
+        # nobody checked cannot carry a claim, alone or in aggregate.
+        return ClaimVerdict(claim.claim_id, INCONCLUSIVE,
+                            "entire supporting basis is metadata-only — capped at inconclusive (RT-5)",
+                            n, (0.0, 0.0), 0.0)
+
     s = sum(g["support_mass"] for g in groups) / n
     c = sum(g["contradiction_mass"] for g in groups) / n
     i = max(0.0, 1.0 - s - c)
