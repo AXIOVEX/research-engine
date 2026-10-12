@@ -1,7 +1,7 @@
 # Spec 005 — Plan: Enterprise Platform
 
 **Date:** 2026-10-12 · Companion to `spec.md`. Authority: DN-011 (adopted); DN-003; DN-005; Constitution Articles IV, XII, XIII, XIV.
-**Gate:** owner G-ENT-1 go-ahead on Spec 005 before E1 code. Claims assessed first (`aee-claims.json` v0.1.0 → `aee-assessment.json`, outcome **gather_evidence**, 2026-10-12).
+**Gate:** owner G-ENT-1 go-ahead on Spec 005 before E1 code. Claims assessed first (`aee-claims.json` v0.1.0 → `aee-assessment.json`, outcome **gather_evidence**, 2026-10-12). **G-ENT-1 GIVEN by the owner 2026-10-12** (Glossa-Lab chat) — E1 authorized. The same day's CMMC directive is absorbed as a claims-first amendment (claims v0.2.0, Spec 005 §13) before E1 code.
 
 ## Build order
 

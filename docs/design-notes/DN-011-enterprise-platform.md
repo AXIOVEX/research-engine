@@ -1,6 +1,6 @@
 # Design Note 011 — Enterprise Platform: Direction
 
-**Date:** 2026-10-12 · **Status:** Adopted as direction (owner directive); implementation gated — see "Gate" below.
+**Date:** 2026-10-12 · **Status:** Adopted as direction (owner directive); **gate G-ENT-1 GIVEN by the owner 2026-10-12** — E1 implementation authorized (see "Gate" below).
 **Decided by:** Tristen Pierson · **Governs:** Spec 005 (enterprise platform) · **Extends:** DN-003 (deployment shapes) · **Bound by:** Constitution Articles IV, XII, XIII, XIV (draft); DN-005.
 
 ## The directive
@@ -26,6 +26,8 @@ Owner, 2026-10-12: *"make tekmerion a full enterprise solution with SSO and othe
 ## Gate
 
 Spec 005 is drafted claims-first (AEE bundle assessed at `after_specify`). **No enterprise implementation code before the owner's G1-style go-ahead on Spec 005**, mirroring the Spec 002 precedent (G1, DN-002/DN-003 era). Hosted-infrastructure choices that cost money return to the owner as their own decision (DN-003's rule, unchanged).
+
+**G-ENT-1 GIVEN — 2026-10-12.** The owner gave the go-ahead on Spec 005 in the Glossa-Lab chat (*"Give Spec 005 the G-ENT-1 go-ahead — start E1 identity core"*), following the delivered spec package (branch `enterprise-spec` @ `d29eb0e`; 22 claims assessed `gather_evidence`). E1 (identity core) is authorized. Phases E2–E6 proceed per the plan's per-phase exits; the remaining gates in Spec 005 §12 (Article XIV wireframe gate, pilot gate, spend gate) are unaffected. A second owner directive the same day (*"also make this tool CMMC compliant"*) is absorbed as a claims-first amendment to Spec 005 (Spec 005 §13, plus the CMMC section added to this note by that amendment) **before** E1 code, so the E1 build carries the CMMC requirements that touch it.
 
 ## Falsifier for this decision
 
