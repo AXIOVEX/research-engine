@@ -1,7 +1,6 @@
 # Tekmerion — Project Constitution
 
-**Version:** 1.1.0 · **Ratified:** 2026-10-11 · **Amended:** 2026-10-11 (Article IV strengthened + Article XIII added, per DN-005) · **Owner:** Tristen Pierson, Axiovex Systems, LLC
-**Draft amendment pending:** v1.2.0 — Article XIV (below) is drafted per DN-009 and takes effect, with the version increment, on the owner's approval of the Phase 6 wireframe package. Until that approval it is a proposal recorded here, not a rule in force.
+**Version:** 1.2.0 · **Ratified:** 2026-10-11 · **Amended:** 2026-10-11 (Article IV strengthened + Article XIII added, per DN-005) · **Amended:** 2026-10-12 (Article XIV added, per DN-009, ratified by the owner's approval of the rendered Phase 6 wireframe package) · **Owner:** Tristen Pierson, Axiovex Systems, LLC
 
 The constitution governs all work in this repository. Where a spec, plan, or implementation conflicts with an article here, the constitution wins and the conflict is recorded.
 
@@ -57,7 +56,7 @@ Work runs constitution → spec → plan → tasks, with AEE claims on each spec
 
 Every append is signed with its actor's Ed25519 key. Event ranges are periodically closed under signed Merkle checkpoints. Checkpoint roots are anchored externally (deposit or timestamp authority the operator does not control) before any institutional reliance — a chain whose only copy the operator holds proves consistency, not history; anchoring is what makes rewriting detectable by anyone. (DN-005, layers 1–5.)
 
-## Article XIV — Wireframe-governed UI *(DRAFT — pending owner approval of the Phase 6 wireframe package; DN-009)*
+## Article XIV — Wireframe-governed UI (DN-009; in force 2026-10-12)
 
 The wireframes are the requirements for the UI's layout and appearance. No UI change ships without the wireframes (`docs/wireframes/`) being updated first and the **rendered** wireframes — screenshots at desktop and mobile widths — approved by the owner. A shipped UI that differs from the approved wireframes is a defect against the wireframes. The surface is where this product's discipline is either visible or faked — an INVALID run softened, a dead record omitted, a metadata-only basis hidden — so the surface is governed like the record: specified before built, reviewed as rendered, amended in the open.
 
