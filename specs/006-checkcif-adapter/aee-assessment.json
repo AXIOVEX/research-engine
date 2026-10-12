@@ -2,16 +2,16 @@
   "schema_version": "1.0",
   "methodology_version": "1.0",
   "project": "tekmerion",
-  "phase": "after_specify",
+  "phase": "after_implement",
   "outcome": "iterate",
-  "summary": "Assessed 4 claim(s); found 4 failure mode(s); 4 claim(s) below the 0.70 confidence threshold.",
-  "created_at": "2026-10-12T12:43:17.460588Z",
+  "summary": "Assessed 4 claim(s); found 4 failure mode(s); 0 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T13:02:52.265805Z",
   "claims": [
     {
       "id": "CLM-006-01",
       "text": "The adapter's evidence item records the CIF SHA-256, the checker (checkCIF service vs local PLATON), and the PLATON/check.def version for every run; an alert record without all three is not evidence.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
       ],
@@ -28,6 +28,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/adapters/checkcif.py (run_checkcif: evidence withheld unless artifact hash + PLATON/check.def version pair are recorded) + src/tekmerion/adapters/core.py (emit_adapter_evidence refusals)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_adapters_checkcif.py::test_recorded_output_without_artifact_is_context_not_evidence, ::test_output_without_versions_is_not_evidence, ::test_recorded_run_matched_pair_contextual_evidence_and_replay (ledger replay carries CIF SHA-256, checker identity, check.def version, raw-output hash)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -39,8 +61,8 @@
       "severity": "high",
       "source_ref": "specs/006-checkcif-adapter/spec.md",
       "domain": "",
-      "confidence": 0.480625,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-006-01-IRREDUCIBILITY-CHALLENGE",
@@ -59,7 +81,7 @@
       "id": "CLM-006-02",
       "text": "BLIND SPOT (scope claim): a clean checkCIF result (no A/B alerts) establishes only that the CIF is internally consistent under the check.def suite. It does NOT establish that the structure is chemically correct, that the claimed chemistry is the chemistry in the crystal, or that the dataset is genuine \u2014 IUCr states in every report that the absence of alerts does not guarantee there are no aspects needing attention, and internally consistent fabricated datasets are known to pass.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
       ],
@@ -76,6 +98,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/adapters/core.py (every adapter run record carries scope_claim_id; emit_adapter_evidence refuses scope-claim-less evidence) + src/tekmerion/adapters/checkcif.py module docstring (blind spot stated with the mapping)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_adapters_checkcif.py::test_scope_claim_attachment_is_mechanically_enforced, ::test_alert_mapping_registered_rows (a clean run builds contextual evidence with zero support mass \u2014 a pass is never recorded as support)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -87,8 +131,8 @@
       "severity": "high",
       "source_ref": "specs/006-checkcif-adapter/spec.md",
       "domain": "",
-      "confidence": 0.480625,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-006-02-IRREDUCIBILITY-CHALLENGE",
@@ -107,7 +151,7 @@
       "id": "CLM-006-03",
       "text": "Alert mapping is monotone and disclosed: A alerts attach contradiction mass to the supported claim's structure sub-claim; B alerts attach partial contradiction; C/G attach context only. The mapping table is part of this spec's record and may not be tuned per-study.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
       ],
@@ -124,6 +168,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/adapters/checkcif.py::map_alert_counts (the registered mapping table as a pure function of parsed counts; no per-study parameter exists)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_adapters_checkcif.py::test_alert_mapping_registered_rows, ::test_a_alerts_build_contradiction_evidence (A: full contradiction + falsifier observation; B: 0.50 partial; C/G: context only \u2014 exercised on the recorded IUCr sucrose report's parsed alerts)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -135,8 +201,8 @@
       "severity": "high",
       "source_ref": "specs/006-checkcif-adapter/spec.md",
       "domain": "",
-      "confidence": 0.480625,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-006-03-IRREDUCIBILITY-CHALLENGE",
@@ -155,7 +221,7 @@
       "id": "CLM-006-04",
       "text": "The adapter supplies lane-1 evidence only: it issues no verdicts, and a checkCIF pass can never be the sole evidence for a supported verdict on a structure claim.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
       ],
@@ -172,6 +238,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/adapters/ (the adapter package exposes evidence emission only; no verdict type, verdict function, or register mutation beyond add_evidence exists in it)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_adapters_checkcif.py (every run path terminates in an evidence item or a ledgered no-evidence run; no test or code path issues a verdict)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -183,8 +271,8 @@
       "severity": "high",
       "source_ref": "specs/006-checkcif-adapter/spec.md",
       "domain": "",
-      "confidence": 0.480625,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-006-04-IRREDUCIBILITY-CHALLENGE",
@@ -203,71 +291,59 @@
   "scores": {
     "CLM-006-01": {
       "claim_id": "CLM-006-01",
-      "direct_score": 0.480625,
-      "propagated_score": 0.480625,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.2375,
-        "independence": 0.5,
+        "evidence": 1.0,
+        "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence",
-        "Fewer than two independent supporting sources"
-      ]
+      "notes": []
     },
     "CLM-006-02": {
       "claim_id": "CLM-006-02",
-      "direct_score": 0.480625,
-      "propagated_score": 0.480625,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.2375,
-        "independence": 0.5,
+        "evidence": 1.0,
+        "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence",
-        "Fewer than two independent supporting sources"
-      ]
+      "notes": []
     },
     "CLM-006-03": {
       "claim_id": "CLM-006-03",
-      "direct_score": 0.480625,
-      "propagated_score": 0.480625,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.2375,
-        "independence": 0.5,
+        "evidence": 1.0,
+        "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence",
-        "Fewer than two independent supporting sources"
-      ]
+      "notes": []
     },
     "CLM-006-04": {
       "claim_id": "CLM-006-04",
-      "direct_score": 0.480625,
-      "propagated_score": 0.480625,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.2375,
-        "independence": 0.5,
+        "evidence": 1.0,
+        "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence",
-        "Fewer than two independent supporting sources"
-      ]
+      "notes": []
     }
   },
   "recoveries": [

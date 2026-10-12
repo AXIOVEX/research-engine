@@ -1,6 +1,6 @@
 # Spec 007 — CODECHECK Adapter (P3: independent re-execution)
 
-- **Date:** 2026-10-12 · **Status:** Draft (claims first; assessed before code) · **Build: NOT started — gated on the owner's shortlist approval.**
+- **Date:** 2026-10-12 · **Status:** Built 2026-10-12 (claims first; assessed before code; owner shortlist gate passed 2026-10-12).
 - **Pattern:** P3 (independent re-execution). **Survey record:** docs/surveys/2026-10-12-domain-evidence-adapters.md §3/P3.
 - **Adapter triple:** artifact = a CODECHECK certificate (timestamped, in the public register) + the codecheck.yml it certifies · independent checker = the named, unaffiliated codechecker who performed the re-execution · scope claim = CLM-007-02 (blind spots).
 - **Function:** given a paper/work with a CODECHECK certificate, ingest the certificate as evidence: checker identity, date, scope (which figures/tables/outputs were recreated), register DOI, and the work's artifact hash. The engine does not re-execute anything itself under this adapter — it consumes institutional re-execution as evidence, which is exactly the P6-style consumption pattern, with CODECHECK as the certificate issuer.

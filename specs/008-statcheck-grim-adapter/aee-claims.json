@@ -1,18 +1,18 @@
 {
  "spec": "specs/008-statcheck-grim-adapter/spec.md",
- "version": "0.1.0",
+ "version": "0.2.0",
  "date": "2026-10-12",
  "claims": [
   {
    "id": "CLM-008-01",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "low",
    "source_ref": "specs/008-statcheck-grim-adapter/spec.md",
    "text": "The adapter's evidence item records the checker + version, the extraction coverage (how many results were extractable vs present), and every flagged result with its recomputed values; an item without the coverage record is not evidence.",
    "boundary": [
-    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
    ],
    "falsification_tests": [
     "F-008-1: an adapter evidence item lacking checker version or extraction coverage."
@@ -23,19 +23,33 @@
      "kind": "asserted",
      "ref": "specs/008-statcheck-grim-adapter/spec.md",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "src/tekmerion/adapters/statconsistency.py::extraction_coverage + run_statcheck (coverage recorded on every run, live, recorded, and unavailable alike; recorded outputs without the computed-p/classification columns are refused as unverifiable)",
+     "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_adapters_statcheck_grim.py::test_extraction_and_coverage_on_fixture_manuscript (19 extracted / 19 present, per-type counts), ::test_extraction_silence_is_visible_in_coverage (0 extracted / 1 present \u2014 the gap is the record), ::test_statcheck_unavailable_is_honest_state (coverage lands even when the checker cannot run)",
+     "source_quality": "test"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the adapter test suite (seeded negatives through production paths; published worked examples + brute-force dataset enumeration for the GRIM family; recorded statcheck classifications from the project's own test suite); evidence is the author's own tests \u2014 checking, not settlement (DN-010 audit convention)."
   },
   {
    "id": "CLM-008-02",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "low",
    "source_ref": "specs/008-statcheck-grim-adapter/spec.md",
-   "text": "BLIND SPOT (scope claim): these checkers establish internal arithmetic consistency of reported statistics only. They do NOT establish that the underlying data exist, that the analysis was appropriate, or that conclusions follow. statcheck is silent on everything it cannot parse (non-APA formats, tables, model-based/Bayesian results) — no flags is not a clean paper. A GRIM fail proves inconsistency, not its cause (typo, wrong N, exclusions all produce fails). SPRITE reconstructions are candidate datasets, never the real data.",
+   "text": "BLIND SPOT (scope claim): these checkers establish internal arithmetic consistency of reported statistics only. They do NOT establish that the underlying data exist, that the analysis was appropriate, or that conclusions follow. statcheck is silent on everything it cannot parse (non-APA formats, tables, model-based/Bayesian results) \u2014 no flags is not a clean paper. A GRIM fail proves inconsistency, not its cause (typo, wrong N, exclusions all produce fails). SPRITE reconstructions are candidate datasets, never the real data.",
    "boundary": [
-    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
    ],
    "falsification_tests": [
     "F-008-2: any presentation of a no-flag statcheck run as a clean bill, of a GRIM fail as evidence of fabrication, or of a SPRITE reconstruction as the paper's actual data."
@@ -46,19 +60,33 @@
      "kind": "asserted",
      "ref": "specs/008-statcheck-grim-adapter/spec.md",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "src/tekmerion/adapters/core.py (scope_claim_id on every run record; emission refused without it) + src/tekmerion/adapters/statconsistency.py module docstring (blind spots stated: consistency only, statcheck silence, GRIM proves inconsistency not cause, SPRITE not implemented)",
+     "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_adapters_statcheck_grim.py::test_statcheck_recorded_run_maps_findings_and_replays (a fully consistent extracted set earns capped 0.50 support for the reporting-consistency sub-claim only, with coverage attached) and Spec 006's ::test_scope_claim_attachment_is_mechanically_enforced (shared seam)",
+     "source_quality": "test"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the adapter test suite (seeded negatives through production paths; published worked examples + brute-force dataset enumeration for the GRIM family; recorded statcheck classifications from the project's own test suite); evidence is the author's own tests \u2014 checking, not settlement (DN-010 audit convention)."
   },
   {
    "id": "CLM-008-03",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "low",
    "source_ref": "specs/008-statcheck-grim-adapter/spec.md",
-   "text": "A GRIM/GRIMMER impossibility (a mathematical impossibility given the reported N and granularity) attaches contradiction mass to the reporting-consistency sub-claim with falsifier_observation set — it is the registered falsifying observation for that sub-claim — while a statcheck decision_error attaches partial contradiction, and mere inconsistencies attach context.",
+   "text": "A GRIM/GRIMMER impossibility (a mathematical impossibility given the reported N and granularity) attaches contradiction mass to the reporting-consistency sub-claim with falsifier_observation set \u2014 it is the registered falsifying observation for that sub-claim \u2014 while a statcheck decision_error attaches partial contradiction, and mere inconsistencies attach context.",
    "boundary": [
-    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
    ],
    "falsification_tests": [
     "F-008-3: an impossibility finding recorded as context only, or a typo-class inconsistency recorded as a falsifying observation."
@@ -69,19 +97,33 @@
      "kind": "asserted",
      "ref": "specs/008-statcheck-grim-adapter/spec.md",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "src/tekmerion/adapters/statconsistency.py (registered mapping: GRIM/GRIMMER impossibility -> contradiction 1.00 + falsifier_observation; statcheck decision error -> 0.50 partial; inconsistency -> context)",
+     "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_adapters_statcheck_grim.py::test_grim_run_impossibility_is_falsifier_observation, ::test_grimmer_hand_verified_cases, ::test_statcheck_recorded_run_maps_findings_and_replays (12 decision errors -> 0.50, falsifier_observation false; 6 inconsistencies -> context)",
+     "source_quality": "test"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the adapter test suite (seeded negatives through production paths; published worked examples + brute-force dataset enumeration for the GRIM family; recorded statcheck classifications from the project's own test suite); evidence is the author's own tests \u2014 checking, not settlement (DN-010 audit convention)."
   },
   {
    "id": "CLM-008-04",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "low",
    "source_ref": "specs/008-statcheck-grim-adapter/spec.md",
    "text": "Applicability is checked before mass is assigned: GRIM-family checks run only where data are integer-granular and N/decimals give the test power; where the test is uninformative (large N, continuous data), the adapter records not_applicable rather than a pass.",
    "boundary": [
-    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
    ],
    "falsification_tests": [
     "F-008-4: a GRIM pass recorded as supporting evidence in a regime the spec's applicability table marks uninformative."
@@ -92,8 +134,23 @@
      "kind": "asserted",
      "ref": "specs/008-statcheck-grim-adapter/spec.md",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "src/tekmerion/adapters/statconsistency.py::grim_applicability (integer-granularity + power regime checked before any mass; not_applicable recorded per case)",
+     "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_adapters_statcheck_grim.py::test_applicability_regimes (n=150 at 2dp uninformative; same n at 3dp informative; continuous data inapplicable), ::test_grim_run_all_not_applicable_emits_no_evidence (no pass is manufactured from an uninformative regime)",
+     "source_quality": "test"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the adapter test suite (seeded negatives through production paths; published worked examples + brute-force dataset enumeration for the GRIM family; recorded statcheck classifications from the project's own test suite); evidence is the author's own tests \u2014 checking, not settlement (DN-010 audit convention)."
   }
- ]
+ ],
+ "build_note": "2026-10-12 build (owner shortlist gate passed): claims moved only on shipped-test evidence; lifecycle stages per the DN-010 audit convention (the author's own seeded-defect tests are checking, not settlement)."
 }

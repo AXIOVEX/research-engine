@@ -1,6 +1,6 @@
 # Spec 008 — statcheck + GRIM-family Adapter (P7: reporting-consistency)
 
-- **Date:** 2026-10-12 · **Status:** Draft (claims first; assessed before code) · **Build: NOT started — gated on the owner's shortlist approval.**
+- **Date:** 2026-10-12 · **Status:** Built 2026-10-12 (claims first; assessed before code; owner shortlist gate passed 2026-10-12). Scope notes from the build: GRIMMER is implemented as its core tests (the parity/reconstruction test is not applied — see plan.md); SPRITE is not implemented; statcheck runs live only where an R runtime exists (open task T4), and otherwise consumes recorded outputs or records `not_runnable_here`.
 - **Pattern:** P7 (reporting-consistency checkers). **Survey record:** docs/surveys/2026-10-12-domain-evidence-adapters.md §3/P7.
 - **Adapter triple:** artifact = a manuscript (statcheck) or reported summary statistics + N (GRIM/GRIMMER/SPRITE) · independent checkers = the statcheck R package and the GRIM-family implementations (`scrutiny`) · scope claim = CLM-008-02 (blind spots).
 - **Function:** extract APA-style NHST results and recompute p-values (statcheck); test reported means/SDs for arithmetic possibility given N and scale granularity (GRIM/GRIMMER); optionally reconstruct candidate datasets (SPRITE, plausibility display only). Findings attach as evidence to the claim that a paper's *reported statistics are internally consistent* — a decomposition sub-claim, never the paper's headline claim directly.

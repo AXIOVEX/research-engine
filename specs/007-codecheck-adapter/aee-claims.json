@@ -1,18 +1,18 @@
 {
  "spec": "specs/007-codecheck-adapter/spec.md",
- "version": "0.1.0",
+ "version": "0.2.0",
  "date": "2026-10-12",
  "claims": [
   {
    "id": "CLM-007-01",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "low",
    "source_ref": "specs/007-codecheck-adapter/spec.md",
    "text": "The adapter's evidence item records the certificate's named codechecker, certificate date, register DOI, certified scope (outputs recreated), and the certified work's identifier; a certificate record missing any of these is context, not evidence.",
    "boundary": [
-    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
    ],
    "falsification_tests": [
     "F-007-1: an adapter evidence item lacking checker identity, date, DOI, or scope."
@@ -23,19 +23,33 @@
      "kind": "asserted",
      "ref": "specs/007-codecheck-adapter/spec.md",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "src/tekmerion/adapters/codecheck.py::certificate_record (completeness computed field-by-field; incomplete records demote to context) + ingest path withholding evidence on any missing field",
+     "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_adapters_codecheck.py::test_incomplete_certificate_record_is_context_not_evidence (real codecheck.yml with the codechecker block stripped -> no evidence, gap named), ::test_ingest_partial_scope_by_default_and_replay (complete record carries checker, date, DOI, scope, work identifier)",
+     "source_quality": "test"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the adapter test suite (seeded negatives through production paths; recorded real register material as fixtures); evidence is the author's own tests \u2014 checking, not settlement (DN-010 audit convention)."
   },
   {
    "id": "CLM-007-02",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "low",
    "source_ref": "specs/007-codecheck-adapter/spec.md",
    "text": "BLIND SPOT (scope claim): a CODECHECK certificate establishes only that the named checker, at that time, in that environment, could run the supplied material and recreate the certified outputs. It does NOT establish correctness or scientific validity (the certificates state this themselves), does not cover outputs outside the certified scope, and does not establish that the code is free of bugs that produce plausible wrong outputs.",
    "boundary": [
-    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
    ],
    "falsification_tests": [
     "F-007-2: any presentation of a certificate as covering outputs outside its stated scope, or as establishing correctness/validity."
@@ -46,19 +60,33 @@
      "kind": "asserted",
      "ref": "specs/007-codecheck-adapter/spec.md",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "src/tekmerion/adapters/core.py (scope_claim_id on every run record; emission refused without it) + src/tekmerion/adapters/codecheck.py (the certificate's own standing disclaimer text recorded per ingestion, with per-certificate presence detection)",
+     "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_adapters_codecheck.py::test_ingest_partial_scope_by_default_and_replay (disclaimer text + present_in_certificate_material=false for the pre-template 2020-001 both on the replayed record) and Spec 006's ::test_scope_claim_attachment_is_mechanically_enforced (shared seam)",
+     "source_quality": "test"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the adapter test suite (seeded negatives through production paths; recorded real register material as fixtures); evidence is the author's own tests \u2014 checking, not settlement (DN-010 audit convention)."
   },
   {
    "id": "CLM-007-03",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "low",
    "source_ref": "specs/007-codecheck-adapter/spec.md",
    "text": "Scope honesty: where the certified scope is partial (a subset of the paper's outputs), the evidence item's mass is capped as partial-scope, and the uncertified outputs are named in the item.",
    "boundary": [
-    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
    ],
    "falsification_tests": [
     "F-007-3: a partial-scope certificate recorded without the cap or without naming the uncertified outputs."
@@ -69,19 +97,33 @@
      "kind": "asserted",
      "ref": "specs/007-codecheck-adapter/spec.md",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "src/tekmerion/adapters/codecheck.py (scope assessment: certified scope = manifest; uncertified outputs named when the study supplies the full list; partial-scope cap by default when it does not)",
+     "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_adapters_codecheck.py::test_ingest_with_study_output_list_names_uncertified, ::test_ingest_partial_scope_by_default_and_replay (real partial-scope certificate 2020-001 capped at 0.40), ::test_ingest_full_scope_when_manifest_covers_output_list (0.70 only when the manifest covers the supplied list)",
+     "source_quality": "test"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the adapter test suite (seeded negatives through production paths; recorded real register material as fixtures); evidence is the author's own tests \u2014 checking, not settlement (DN-010 audit convention)."
   },
   {
    "id": "CLM-007-04",
    "kind": "requirement",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "low",
    "source_ref": "specs/007-codecheck-adapter/spec.md",
    "text": "Lane separation: the codechecker is a named human performing lane-1 re-execution; the adapter records the certificate as lane-1 evidence and never as explanation, acceptance, or digestion of the work.",
    "boundary": [
-    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
    ],
    "falsification_tests": [
     "F-007-4: a study record presenting a CODECHECK certificate as lane-2 progress (explained/accepted/digested)."
@@ -92,8 +134,23 @@
      "kind": "asserted",
      "ref": "specs/007-codecheck-adapter/spec.md",
      "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "src/tekmerion/adapters/codecheck.py (every run record states lane=lane-1 and lane2_effect='none \u2014 never explanation, acceptance, or digestion'; the adapter package exposes no digestion/acceptance function)",
+     "source_quality": "artifact"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_adapters_codecheck.py::test_ingest_partial_scope_by_default_and_replay (lane2_effect asserted on the replayed ledger record)",
+     "source_quality": "test"
     }
-   ]
+   ],
+   "lifecycle_stage": "checked",
+   "stage_basis": "Built and exercised by the adapter test suite (seeded negatives through production paths; recorded real register material as fixtures); evidence is the author's own tests \u2014 checking, not settlement (DN-010 audit convention)."
   }
- ]
+ ],
+ "build_note": "2026-10-12 build (owner shortlist gate passed): claims moved only on shipped-test evidence; lifecycle stages per the DN-010 audit convention (the author's own seeded-defect tests are checking, not settlement)."
 }

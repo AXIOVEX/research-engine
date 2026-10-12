@@ -1,6 +1,6 @@
 # Spec 006 — checkCIF Adapter (P2: automated validation suite)
 
-- **Date:** 2026-10-12 · **Status:** Draft (claims first; assessed before code) · **Build: NOT started — gated on the owner's shortlist approval.**
+- **Date:** 2026-10-12 · **Status:** Built 2026-10-12 (claims first; assessed before code; owner shortlist gate passed 2026-10-12). Live-PLATON verification remains open (tasks T4): the adapter runs a local PLATON binary where one is installed under its license terms, and otherwise ingests recorded checkCIF/PLATON outputs or records `not_runnable_here`.
 - **Pattern:** P2 (automated validation suite on structured artifacts). **Survey record:** docs/surveys/2026-10-12-domain-evidence-adapters.md §3/P2.
 - **Adapter triple:** artifact = CIF + structure-factor file (FCF) · independent checker = IUCr checkCIF service / PLATON check.def suite · scope claim = CLM-006-02 (blind spots).
 - **Function:** run checkCIF on a deposited CIF; map graded alerts (A serious / B / C / G, per category) onto an evidence item for the claim the structure supports; record checker identity + PLATON/check.def version + the CIF's SHA-256 in every output. Ingestion: web service (no public REST API — adapter must drive the service or a local PLATON install, `platon -u`); PLATON is author-distributed, not OSI-licensed — redistribution terms are a build-time gate.
