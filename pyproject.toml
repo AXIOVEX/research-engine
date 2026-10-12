@@ -12,9 +12,19 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
+mcp = ["mcp>=2,<3"]
+
+[project.scripts]
+tekmerion-mcp = "tekmerion.mcp.server:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+# tekmerion.ui.server reads style.css at import time; without this
+# the wheel ships a package that cannot be imported (found by the
+# Spec 009 clean-room acceptance, 2026-10-12).
+[tool.setuptools.package-data]
+"tekmerion.ui" = ["style.css"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
