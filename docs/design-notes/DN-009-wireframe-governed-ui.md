@@ -1,7 +1,8 @@
 # Design Note 009 — Wireframe-Governed UI (owner ruling, 2026-10-12)
 
-**Date:** 2026-10-12 · **Status:** Proposed — takes effect on the owner's approval of the Phase 6 wireframe package.
+**Date:** 2026-10-12 · **Status:** Adopted — ratified by the owner's approval of the rendered Phase 6 wireframe package, 2026-10-12.
 **Decision source:** Owner ruling during Spec 002 Phase 6: *"wireframes first, and the wireframes are constitutional. No changes to the actual UI without first updating the wireframes AND getting his approval on the RENDERED wireframes."*
+**Ratified:** 2026-10-12 — the owner approved the rendered wireframe package ("Approve the wireframes — begin UI implementation", Glossa-Lab chat, ~08:25 EDT). Article XIV (constitution v1.2.0) is in force; gate T219-WF is cleared and T219 is unblocked.
 
 ## Decision
 
