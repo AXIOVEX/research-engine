@@ -198,9 +198,18 @@ class OpenAlexConnector:
         return [self._item(w) for w in data.get("results", [])]
 
     def resolve(self, openalex_id: str) -> Optional[RetrievedItem]:
-        wid = openalex_id.rsplit("/", 1)[-1]
+        # Accepts a W-id, an OpenAlex URL, or a DOI (bare or doi.org URL):
+        # OpenAlex resolves DOIs at /works/doi:<doi> — a plain suffix is
+        # not enough (caught in live verification, 2026-10-11).
+        raw = openalex_id.strip()
+        if "doi.org/" in raw:
+            raw = raw.split("doi.org/", 1)[-1]
+        if raw.startswith("10.") and "/" in raw:
+            path = f"/works/doi:{urllib.parse.quote(raw, safe='/')}"
+        else:
+            path = f"/works/{raw.rsplit('/', 1)[-1]}"
         try:
-            data = self._get(f"/works/{wid}", "get")
+            data = self._get(path, "get")
         except Exception:
             return None
         return self._item(data)

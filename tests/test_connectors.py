@@ -83,6 +83,14 @@ def test_openalex_filter_search_and_abstract_rebuild():
     assert budget.spent == budget.cost_filter and budget.reserved == 0
 
 
+def test_openalex_resolve_by_doi_uses_doi_route():
+    http = FakeHttp(OPENALEX_WORK)
+    conn = OpenAlexConnector(http=http, api_key="k", budget=CreditBudget(limit=10))
+    item = conn.resolve("https://doi.org/10.1000/xyz123")
+    assert "/works/doi:10.1000/xyz123" in http.urls[0]  # not /works/xyz123 (live-caught bug)
+    assert item.title == "A Study of X"
+
+
 def test_budget_exhaustion_is_a_stop_not_an_overrun():
     budget = CreditBudget(limit=5)
     budget.reserve("filter")

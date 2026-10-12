@@ -25,7 +25,7 @@
 
 - [x] T206 Connector contract implemented (`tekmerion.connectors`): `RetrievedItem` + `run_query` logs every query into the study's Axiomere ledger before results are used.
 - [x] T207 Crossref connector done (polite pool w/ mailto; resolution source of record) — **verified live** 2026-10-11 (search + DOI resolve roundtrip against api.crossref.org).
-- [x] T208 OpenAlex connector done: key auth (env `OPENALEX_API_KEY`), filter-first (~10× cheaper than search), `CreditBudget` reserve/settle with exhaustion as a stop (RT2-2). Fixture-verified; live run awaits the owner's free OpenAlex key (G4-authorized, signup is his one action).
+- [x] T208 OpenAlex connector done: key auth (env `OPENALEX_API_KEY`), filter-first (~10× cheaper than search), `CreditBudget` reserve/settle with exhaustion as a stop (RT2-2). **Verified live 2026-10-11** with the owner's key (registered earlier the same day under his "approve it all"; stored in `~/workspace/glossa-run/research-api-keys.env`, never in the repo): filter search + resolve by DOI and by W-id all return real records; a DOI-routing bug in `resolve` was caught by that live run and fixed with a pinning test.
 - [x] T209 `license_basis` captured per record on both connectors; abstracts dropped when no licence is asserted (Crossref abstracts are not CC0); NC-licensed items flagged `hosted_ok=False` (rights per deployment shape, RT2-1).
 
 ## Phase 3 — Claims, freeze, verdicts
