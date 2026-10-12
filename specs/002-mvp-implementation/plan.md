@@ -37,3 +37,4 @@ Each phase ends with its seeded-defect tests green *and able to fail* (a test th
 ## Phase records
 
 - 2026-10-11 — Phase 0/1 complete (record service live, 8/8 tests, CI green). **DN-005 adopted** (absolute append-only; redaction removed). **DN-006:** framework renamed **Tekmerion**. **DN-007:** record layer is **Axiomere** (AXIOVEX/axiomere + axiomere-python); Phase 1 EventStore is the prototype/reference, `tekmerion.store.StudyStore` is the live surface. Phase 2 begins on Axiomere.
+- 2026-10-11 — Phase 2 connectors landed: Crossref live-verified; OpenAlex fixture-verified behind its key gate (owner signup is the one external action). 17/17 tests green locally.

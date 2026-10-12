@@ -23,10 +23,10 @@
 
 ## Phase 2 — Connectors
 
-- [ ] T206 Connector contract implementation + query log events.
-- [ ] T207 Crossref connector (polite pool, resolution source of record).
-- [ ] T208 OpenAlex connector (key auth, credit budget + freeze-time reservation).
-- [ ] T209 `license_basis` capture + rights-per-deployment-shape enforcement.
+- [x] T206 Connector contract implemented (`tekmerion.connectors`): `RetrievedItem` + `run_query` logs every query into the study's Axiomere ledger before results are used.
+- [x] T207 Crossref connector done (polite pool w/ mailto; resolution source of record) — **verified live** 2026-10-11 (search + DOI resolve roundtrip against api.crossref.org).
+- [x] T208 OpenAlex connector done: key auth (env `OPENALEX_API_KEY`), filter-first (~10× cheaper than search), `CreditBudget` reserve/settle with exhaustion as a stop (RT2-2). Fixture-verified; live run awaits the owner's free OpenAlex key (G4-authorized, signup is his one action).
+- [x] T209 `license_basis` captured per record on both connectors; abstracts dropped when no licence is asserted (Crossref abstracts are not CC0); NC-licensed items flagged `hosted_ok=False` (rights per deployment shape, RT2-1).
 
 ## Phase 3 — Claims, freeze, verdicts
 
