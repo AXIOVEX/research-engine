@@ -25,7 +25,7 @@
 - [x] T013 Red-team pass over the full architecture set; findings logged.
 - [x] T014 Revision pass resolving critical red-team findings.
 - [ ] T015 AEE assessment of spec 001 claims (`aee-claims.json`) recorded.
-- [ ] T019 RED-TEAM pass 02 after WS1/WS6 research finalization.
+- [x] T019 RED-TEAM pass 02 after WS1/WS6 research finalization — 4 findings (BASE eligibility per deployment shape; freeze-time budget reservation; support-check coverage reporting; retraction surveillance promoted to requirement candidate). SC-1 satisfied.
 - [ ] T020 (Gate on any implementation spec, per RED-TEAM-01 AR-1) At least one external hash anchor implemented (deposit or institutional timestamp) before any institutional pilot.
 
 ## Owner gates (one at a time, never bundled)

@@ -4,7 +4,7 @@
 
 ## 1. Citation verification — the non-negotiable pipeline
 
-Fabricated references are the signature failure of AI research tools, so verification is a pipeline stage, not a model instruction:
+Fabricated references are the signature failure of AI research tools, so verification is a pipeline stage, not a model instruction. A citation can pass three different tests — **(1) existence** (the paper is real), **(2) metadata** (authors/title/DOI correct), **(3) support** (the source actually says what the citing sentence claims). Incumbent tools verify (1) at best; the documented failures concentrate at (2) and (3) — real paper, wrong claim attached (WS6 appendix). The three stages below map one-to-one onto those tests:
 
 1. **Resolution.** Every citation must resolve against a source of record: DOI → Crossref/DataCite metadata; no DOI → source-native record (WS1 connector) matched on title + authors + venue + year. Resolution produces a *retrieved metadata record*, stored as provenance.
 2. **Agreement check.** The fields the study relies on (title, authorship, year, venue, and — where the claim depends on it — the specific result) are compared between the citing context and the resolved record. Material mismatch → the item is quarantined and the run cannot proceed to verdicts until an adjudicator resolves it.
@@ -15,7 +15,7 @@ No stage is prompt-based. "The model was told not to hallucinate citations" is n
 ## 2. Uncertainty surfacing
 
 - Every verdict displays its interval and the origin-group basis (WS3 §6); a SUPPORTED verdict resting on one group looks different from one resting on twelve, and the UI/API must make that visible without drilling down.
-- Ignorance is a shown quantity, not a hidden residue: the proportion of a claim's potential evidence space that is `metadata-only`, paywalled, or unretrieved is reported as part of the verdict record.
+- Ignorance is a shown quantity, not a hidden residue: the proportion of a claim's potential evidence space that is `metadata-only`, paywalled, or unretrieved is reported as part of the verdict record. The bundle additionally reports **support-check coverage per claim** (RED-TEAM-02 RT2-3): full-text access differs by field, so verdict strength can correlate with a discipline's publishing economics — adjudicators must see that coverage number, not infer it from per-item flags.
 - Abstention is a designed outcome (INCONCLUSIVE), presented as a result with a reason code — insufficient groups, conflicting groups, margin straddle — never as an error state and never silently converted to a weak SUPPORTED.
 
 ## 3. Human adjudication points (Article IX)
@@ -46,5 +46,5 @@ Per-source rights are recorded in the WS1 registry with three separate answers p
 
 ## 6. Open questions
 
-- OQ-5.1 Retraction watching: when a source is retracted after a verdict, the revisit loop (WS2/WS3) flags dependent claims — but who is *notified*, and is a post-publication flag an engine duty or an institutional one? Needs an owner/institution-policy decision before MVP.
+- OQ-5.1 Retraction watching — **promoted by RED-TEAM-02 RT2-4** from open question to a recorded post-MVP requirement candidate: delivered bundles register their evidence DOIs for periodic re-check against Crossref/retraction signals; a hit appends a `verdict.flagged` event and notifies the adjudicator of record. No verdict changes automatically. (No incumbent offers this for delivered work — WS6 appendix.) Notification *policy* (who, how fast) remains an institution decision at deployment.
 - OQ-5.2 Student data: graduate-program use may involve unpublished student work as evidence. Storage terms for user-supplied corpora need a dedicated decision in WS6 deployment shapes.

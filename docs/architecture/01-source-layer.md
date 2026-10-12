@@ -28,7 +28,7 @@ Cross-connector rules: deduplication is by DOI first, then source-native IDs cro
 | **OpenAlex** | Citation graph, concept/works discovery, crosswalks | OpenAlex ID + DOI | Free API; graph used for origin tracing and dependency discovery |
 | **Semantic Scholar** | Discovery + TLDR/embedding-assisted screening support | S2 ID + DOI | API + bulk datasets; screening support only — never evidence by itself |
 | **CORE** | Full-text aggregation where rights permit | CORE ID + DOI | Content channel for WS5 §1.3 content checks |
-| **BASE** (Bielefeld) | Broad academic index, strong non-English coverage | BASE ID | Discovery breadth, esp. repositories/theses |
+| **BASE** (Bielefeld) | Broad academic index, strong non-English coverage — **CONDITIONAL (RED-TEAM-02 RT2-1):** access is framed for non-commercial projects; excluded from the hosted (commercial) connector set until commercial terms are confirmed in writing. Registry rights entries are recorded *per deployment shape*, not per source alone | BASE ID | Discovery breadth, esp. repositories/theses |
 | **Internet Archive Scholar** | Preservation copies; fatcat-linked records | IA Scholar ID | Fallback content channel; preservation anchor |
 | **HathiTrust** | Book/scan corpus, bibliographic records | HathiTrust ID | Bibliographic + limited full text per rights |
 | **DSAL** (Digital South Asia Library, UChicago) | Domain depth: South Asia reference corpora | DSAL record ID | First domain-depth connector; pattern for regional libraries |
@@ -76,7 +76,7 @@ Verification pass against provider documentation. UNVERIFIED = not confirmable f
 
 ### Design flags carried into the design
 
-1. **Connector economics are real:** OpenAlex is credit-metered — the connector prefers filter/list calls over search calls (≈10× cheaper) and budgets credits per run, recorded in the query log. Crossref pool selection (always send `mailto`) is a connector requirement, not a courtesy.
+1. **Connector economics are real:** OpenAlex is credit-metered — the connector prefers filter/list calls over search calls (≈10× cheaper) and budgets credits per run, recorded in the query log. Crossref pool selection (always send `mailto`) is a connector requirement, not a courtesy. **Budget reservation (RED-TEAM-02 RT2-2):** the freeze check (WS3 §3) reserves the estimated connector cost of the registered query plan; a run hitting a hard budget ceiling aborts to INVALID (`budget-exhausted`) instead of completing on silently partial evidence, unless the registration pre-declared a degraded-source contingency (affected claims then cap at INCONCLUSIVE per §5).
 2. **Licence capture is a schema field** (see WS2 amendment): `license_basis` is populated per evidence item at ingest from the source record; there is no global default licence anywhere in the system.
 3. **Not every registry entry is a connector:** tDAR and ADS have no public API — they enter as *discovery references* (ADS via DataCite metadata) with manual/partner access, and the registry records that honestly rather than pretending a connector exists.
 
