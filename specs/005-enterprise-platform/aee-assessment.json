@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
   "methodology_version": "1.0",
-  "project": "tekmerion",
+  "project": "project",
   "phase": "after_implement",
   "outcome": "gather_evidence",
-  "summary": "Assessed 31 claim(s); found 136 failure mode(s); 14 claim(s) below the 0.70 confidence threshold.",
-  "created_at": "2026-10-12T13:05:59.306816Z",
+  "summary": "Assessed 31 claim(s); found 136 failure mode(s); 13 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T13:45:46.820073Z",
   "claims": [
     {
       "id": "CLM-005-01",
@@ -173,6 +173,39 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e2_saml.py (37 tests): SP- and IdP-initiated logins vs the in-repo Shibboleth-class mock IdP (tests/e2_world.py, real XML-DSig over in-repo exclusive C14N); the F-005-02 refusal battery \u2014 unsigned assertion, response-signature-cannot-rescue-unsigned, wrong signing key, KeyInfo naming an unconfigured cert, tampered content (digest mismatch), expired / not-yet-valid, wrong audience, wrong recipient, wrong issuer, InResponseTo mismatch, replayed assertion, non-success status, encrypted assertion refused by name, DOCTYPE refused \u2014 each refused AND recorded as an auth.login_failed event in the tenant ledger before the raise",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_e2_saml.py: per-tenant metadata import + validation (expired validUntil, expired certs, missing signing cert refused at configuration; cert material by reference \u2014 fingerprints in the idp.configured event, no cert bytes in any ledger); attribute mapping incl. eduPersonPrincipalName (OID form) as subject under subject_source=eppn and eduPersonScopedAffiliation to affiliation; cross-tenant seeded case (tenant B's validly-signed assertion refused at tenant A's ACS; B's flow state refused at A's ACS)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "CI run 38257747324 (PR #4, enterprise/e2-saml) success; full suite 210 passed locally (173 prior + 37 new), Spec 002 battery unchanged",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -184,8 +217,8 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-02-IRREDUCIBILITY-CHALLENGE",
@@ -1607,6 +1640,17 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "E2 (tests/test_e2_saml.py): SAML IdP configuration events (idp.configured/idp.updated, protocol=saml, cert fingerprints) and every SAML authentication success/failure incl. the full refusal battery are recorded in the tenant platform ledger; chains verify after the battery (test_refusal_battery_leaves_chains_verifiable)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -2877,6 +2921,17 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "E2 (tests/test_e2_saml.py): SAML MFA parity \u2014 a session whose AuthnContext evidences no MFA (PasswordProtectedTransport) is refused at the append gate; SAML step-up requires an MFA-evidencing fresh assertion (REFEDS MFA context requested with ForceAuthn) and a no-MFA step-up assertion is refused",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -3222,19 +3277,17 @@
     },
     "CLM-005-02": {
       "claim_id": "CLM-005-02",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-03": {
       "claim_id": "CLM-005-03",

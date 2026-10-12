@@ -64,6 +64,29 @@ class IdPConfig:
 
 
 @dataclass
+class SamlIdPConfig:
+    """Per-tenant SAML 2.0 IdP configuration (E2, T513). Built from
+    imported IdP metadata. The signing certificates themselves live
+    in the secrets store under `signing_cert_refs` (T502 discipline:
+    references in config, material in the store); their SHA-256
+    fingerprints are safe to record anywhere, including ledgers."""
+    tenant_id: str
+    idp_entity_id: str
+    sp_entity_id: str                        # this tenant's SP entity ID
+    acs_url: str                             # this tenant's assertion consumer URL
+    sso_redirect_url: Optional[str] = None
+    sso_post_url: Optional[str] = None
+    signing_cert_refs: tuple[str, ...] = ()
+    signing_cert_fingerprints: tuple[str, ...] = ()
+    attribute_map: dict = field(default_factory=lambda: {
+        "display_name": "displayName", "email": "mail",
+        "affiliation": "eduPersonScopedAffiliation",
+    })
+    subject_source: str = "nameid"           # "nameid" | "eppn"
+    allow_idp_initiated: bool = True
+
+
+@dataclass
 class Identity:
     """An internal identity: (tenant, issuer, subject) + mapped
     attributes (§2). Downstream of the protocol boundary, nothing
@@ -77,7 +100,7 @@ class Identity:
     email: str = ""
     affiliation: str = ""
     active: bool = True
-    created_via: str = "oidc"                # "oidc" | "admin" | "bootstrap"
+    created_via: str = "oidc"                # "oidc" | "saml" | "admin" | "bootstrap"
 
 
 @dataclass
@@ -151,10 +174,12 @@ class Directory:
     def __init__(self) -> None:
         self.tenants: dict[str, Tenant] = {}
         self.idps: dict[tuple[str, str], IdPConfig] = {}       # (tenant_id, issuer)
+        self.saml_idps: dict[tuple[str, str], SamlIdPConfig] = {}  # (tenant_id, IdP entity ID)
         self.identities: dict[str, Identity] = {}              # identity_id
         self._identity_by_triple: dict[tuple[str, str, str], str] = {}
         self.sessions: dict[str, Session] = {}
         self.api_keys: dict[str, ApiKeyRecord] = {}            # key_id
+        self._saml_consumed: dict[str, float] = {}             # assertion/response ID -> expiry
 
     # -- tenants / IdPs ---------------------------------------------------
 
@@ -180,6 +205,32 @@ class Directory:
 
     def idps_for_tenant(self, tenant_id: str) -> list[IdPConfig]:
         return [c for (t, _), c in self.idps.items() if t == tenant_id]
+
+    # -- SAML IdPs -----------------------------------------------------------
+
+    def add_saml_idp(self, config: SamlIdPConfig) -> SamlIdPConfig:
+        self.saml_idps[(config.tenant_id, config.idp_entity_id)] = config
+        return config
+
+    def saml_idp(self, tenant_id: str, idp_entity_id: str) -> SamlIdPConfig:
+        c = self.saml_idps.get((tenant_id, idp_entity_id))
+        if c is None:
+            raise ConfigurationError(
+                f"no SAML IdP configured for tenant {tenant_id} entity {idp_entity_id}")
+        return c
+
+    def consume_saml_id(self, message_id: str, expires_at: float, now: float) -> bool:
+        """Replay register (E2): returns True the first time an ID is
+        presented, False on any re-presentation before its expiry.
+        IDs are held until the assertion's own expiry (+skew handled
+        by the caller folding it into `expires_at`)."""
+        stale = [k for k, exp in self._saml_consumed.items() if exp <= now]
+        for k in stale:
+            del self._saml_consumed[k]
+        if message_id in self._saml_consumed:
+            return False
+        self._saml_consumed[message_id] = expires_at
+        return True
 
     # -- identities ---------------------------------------------------------
 
