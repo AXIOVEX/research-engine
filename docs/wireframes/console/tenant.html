@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tenant detail — Tekmerion console wireframe (3)</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Admin console</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Scope</div>
+      <div class="study-name">Deployment — all tenants</div>
+      <span class="chip" style="background:#274B74;border-color:#4A6E99;color:#DCE6F2">Platform plane</span>
+    </div>
+    <nav class="nav">
+      <a href="tenants.html" class="active">Tenants <span class="count">2</span></a>
+      <a href="audit.html">Audit ledger</a>
+      <a href="compliance.html">Compliance</a>
+      <a href="status.html">System status</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">Root Operator</div>
+      <div class="role-switch"><span class="on">Platform admin</span></div>
+      <p class="micro" style="color:#9FB6CE">Identity arrives via the deployment IdP.
+        A platform admin holds no study role and cannot sign study appends (CLM-005-09).
+        Every action is appended under this name.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="plane-strip platform"><span class="plane-name">Platform plane</span><span>Deployment scope — you are administering a tenant from outside it. Tenant-plane sessions never see this view of another tenant.</span></div>
+      <div class="crumb">Tenants · uni-a</div>
+      <h1>University A</h1>
+      <p class="page-sub">Tenant record and identity configuration. Changes here are
+        appended events (<span class="mono">tenant.updated</span>,
+        <span class="mono">idp.configured</span>, <span class="mono">idp.updated</span>) —
+        there is no silent edit path, and the console has no mutation path of its own (Spec 005 §7).</p>
+
+      <div class="card">
+        <dl class="kv">
+          <dt>Tenant ID</dt><dd><span class="mono">uni-a</span></dd>
+          <dt>Shape</dt><dd>hosted (multi-tenant) — one codebase, one authorization model (CLM-005-12)</dd>
+          <dt>Residency pin</dt><dd>region <span class="mono">us-east</span>, recorded at creation. Changing a pin is a migration — export, anchor the pre-migration state, move, record the event <span class="phase-chip">E6 · T541</span></dd>
+          <dt>State</dt><dd><span class="chip supported">active</span></dd>
+          <dt>Created</dt><dd>2026-10-12 · <span class="mono">tenant.created</span>, deployment ledger seq 12 (specimen)</dd>
+        </dl>
+      </div>
+
+      <h2>Identity providers</h2>
+      <div class="grid2">
+        <div class="card">
+          <h3>OIDC <span class="chip supported">configured · E1</span></h3>
+          <dl class="kv" style="grid-template-columns:118px 1fr">
+            <dt>Issuer</dt><dd><span class="mono">https://idp-a.test</span></dd>
+            <dt>Client ID</dt><dd><span class="mono">tekmerion-uni-a</span></dd>
+            <dt>Client secret</dt><dd>held in the secrets store — <strong>reference only; the value is never displayed</strong> (Spec 005 §9)</dd>
+            <dt>Flow</dt><dd>authorization code + PKCE, S256 required</dd>
+            <dt>Discovery</dt><dd><span style="color:var(--ok)">reachable</span> · JWKS last rotated 2026-10-11 (specimen)</dd>
+          </dl>
+          <div class="row-actions"><a class="btn" href="tenant.html">Edit OIDC configuration</a></div>
+          <p class="small muted">Edits append <span class="mono">idp.updated</span> with the
+            validation outcome; an invalid configuration is refused, never repaired silently.</p>
+        </div>
+        <div class="card">
+          <h3>SAML 2.0 <span class="chip supported">configured · E2</span></h3>
+          <dl class="kv" style="grid-template-columns:118px 1fr">
+            <dt>Entity ID</dt><dd><span class="mono">https://idp-a.test/shibboleth</span></dd>
+            <dt>SSO endpoint</dt><dd><span class="mono">https://idp-a.test/saml/sso</span></dd>
+            <dt>Signing cert</dt><dd><span class="mono">b5fdc324…ede3fe</span> (SHA-256 fingerprint) — certificate held <strong>by reference</strong>; fingerprints are what ledgers and screens carry</dd>
+            <dt>Attributes</dt><dd><span class="mono">eduPersonPrincipalName</span> → subject (<span class="mono">subject_source=eppn</span>) · <span class="mono">eduPersonScopedAffiliation</span> → affiliation</dd>
+            <dt>Assertions</dt><dd>signed only — an unsigned or wrongly-signed assertion is rejected, never repaired</dd>
+          </dl>
+          <div class="row-actions"><a class="btn" href="tenant.html">Edit SAML configuration</a></div>
+          <p class="small muted">Metadata import is validated at configuration time
+            (expired <span class="mono">validUntil</span>, missing signing cert, or non-IdP
+            metadata are refused by name — E2, T513).</p>
+        </div>
+      </div>
+
+      <h2>Provisioning</h2>
+      <div class="grid2">
+        <div class="card">
+          <h3>SCIM 2.0 <span class="chip">not configured</span> <span class="phase-chip">E3</span></h3>
+          <p class="muted">Where configured, SCIM is the tenant's lifecycle source of truth:
+            Users create/update/deactivate; Groups map to role grants only through
+            tenant-admin-approved mapping records — a group membership never silently
+            becomes an adjudicator grant (Spec 005 §4).</p>
+          <p class="small muted">The SCIM surface itself is E3 work, in flight separately.
+            This card's state vocabulary — configured / not configured / last-sync
+            outcome — is what this wireframe approves.</p>
+        </div>
+        <div class="card">
+          <h3>Just-in-time provisioning <span class="phase-chip">E3 · CLM-005-07</span></h3>
+          <p class="muted">For tenants without SCIM: the first assertion creates the identity
+            <strong>in the asserting tenant only</strong>, holding <strong>no study role</strong>
+            until a recorded grant. JIT state will show here as: enabled, identities
+            created this period, identities still role-less.</p>
+        </div>
+      </div>
+
+      <h2>Tenant policy (recorded defaults, Spec 005 §§2–3, 9)</h2>
+      <div class="card">
+        <dl class="kv">
+          <dt>MFA</dt><dd>required at the IdP, enforced platform-side (CLM-005-27) — a session without MFA evidence cannot mutate or step up</dd>
+          <dt>Step-up freshness</dt><dd>600 s for verdict-signing and admin-plane actions</dd>
+          <dt>Session lifetimes</dt><dd>idle 30 min · absolute 12 h (tenant-configurable downward only)</dd>
+          <dt>Key custody</dt><dd>self-custody and delegated custody both permitted for this tenant; the mode is recorded on every append, never blurred</dd>
+        </dl>
+      </div>
+
+      <div class="screen-note">Console wireframe 3 of 10 — tenant detail, platform plane (gate T534-WF).
+        Specimen data modeled on the E1/E2 test fixtures (issuer and SAML entity IDs are the
+        fixtures' own). Tenant-admin variant: the same IdP and policy sections under the
+        tenant-plane shell, for the admin's own tenant only (T536) — see README mapping.
+        Secrets and certificates appear by reference/fingerprint only, on every screen, without exception.</div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

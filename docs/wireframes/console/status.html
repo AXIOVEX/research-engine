@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System status — Tekmerion console wireframe (10)</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Admin console</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Scope</div>
+      <div class="study-name">Deployment — all tenants</div>
+      <span class="chip" style="background:#274B74;border-color:#4A6E99;color:#DCE6F2">Platform plane</span>
+    </div>
+    <nav class="nav">
+      <a href="tenants.html">Tenants <span class="count">2</span></a>
+      <a href="audit.html">Audit ledger</a>
+      <a href="compliance.html">Compliance</a>
+      <a href="status.html" class="active">System status</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">Root Operator</div>
+      <div class="role-switch"><span class="on">Platform admin</span></div>
+      <p class="micro" style="color:#9FB6CE">Identity arrives via the deployment IdP.
+        A platform admin holds no study role and cannot sign study appends (CLM-005-09).
+        Every action is appended under this name.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="plane-strip platform"><span class="plane-name">Platform plane</span><span>Deployment scope — platform health as the record states it. A state the platform cannot yet produce is shown as not-yet-built, never as a green guess.</span></div>
+      <h1>System status</h1>
+      <p class="page-sub">Each row names its source: a verification the platform ran, a
+        recorded configuration value, or a phase chip where the producing machinery has
+        not landed.</p>
+
+      <h2>Ledger verification</h2>
+      <div class="card flush">
+        <table>
+          <thead>
+            <tr><th style="width:26%">Ledger</th><th style="width:16%">Chain state</th><th style="width:14%">Events</th><th style="width:22%">Latest checkpoint</th><th style="width:22%">External anchor</th></tr>
+          </thead>
+          <tbody>
+            <tr><td data-h="Ledger">Deployment ledger</td><td data-h="Chain state"><span class="chip supported">intact</span></td><td data-h="Events">128</td><td data-h="Latest checkpoint"><span class="mono">679ca4f2…44b27</span></td><td data-h="External anchor">none recorded <span class="phase-chip">E6 · T543</span></td></tr>
+            <tr><td data-h="Ledger">Tenant ledger · uni-a</td><td data-h="Chain state"><span class="chip supported">intact</span></td><td data-h="Events">214</td><td data-h="Latest checkpoint"><span class="mono">0263aedc…2a449d</span></td><td data-h="External anchor">none recorded <span class="phase-chip">E6 · T543</span></td></tr>
+            <tr><td data-h="Ledger">Tenant ledger · uni-b</td><td data-h="Chain state"><span class="chip supported">intact</span></td><td data-h="Events">57</td><td data-h="Latest checkpoint"><span class="mono">9be01d77…c3e5</span></td><td data-h="External anchor">none recorded <span class="phase-chip">E6 · T543</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small muted">A chain that fails verification renders here in the INVALID
+        treatment with the verifier's reason — the status screen does not soften a broken
+        chain into a warning, and an audit-verification failure is itself a security event
+        (egress class, E4 · T554).</p>
+
+      <h2>Session &amp; transport baseline (Spec 005 §9)</h2>
+      <div class="card">
+        <dl class="kv">
+          <dt>Session lifetimes</dt><dd>idle 30 min · absolute 12 h (recorded defaults; tenants may configure downward)</dd>
+          <dt>Cookies</dt><dd>Secure + HttpOnly + SameSite · server-side session records</dd>
+          <dt>Step-up freshness</dt><dd>600 s for verdict-signing and admin-plane actions</dd>
+          <dt>Header set</dt><dd>HSTS · Content-Security-Policy · X-Content-Type-Options · Referrer-Policy · frame-ancestors — on every response <span class="phase-chip">battery · E4 · T530</span></dd>
+          <dt>Rate limits</dt><dd>per-tenant and per-identity, answering 429; exhaustion is a recorded stop <span class="phase-chip">E4 · T530</span></dd>
+          <dt>TLS</dt><dd>HTTP refused or redirected to TLS; termination point is deployment-owned — <strong>no claim</strong> (crypto inventory row 11)</dd>
+        </dl>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>Identity providers</h3>
+          <dl class="kv" style="grid-template-columns:118px 1fr">
+            <dt>Configured</dt><dd>3 (uni-a OIDC + SAML · uni-b OIDC)</dd>
+            <dt>JWKS</dt><dd>rotation per issuer metadata; last specimen rotation 2026-10-11</dd>
+            <dt>MFA posture</dt><dd>required at the IdP for all configured tenants (CLM-005-27)</dd>
+          </dl>
+        </div>
+        <div class="card">
+          <h3>Event egress (webhooks)</h3>
+          <p class="muted" style="margin:0">Signed webhook egress — HMAC-SHA256 or Ed25519,
+            replay window, delivery-logged — is E4 work <span class="phase-chip">E4 · T531</span>.
+            It carries the incident-response event classes (authentication-failure bursts,
+            break-glass use, revocation storms, audit-verification failures)
+            <span class="phase-chip">E4 · T554</span>. State today: <strong>not built — no
+            deliveries have been made or claimed</strong>.</p>
+        </div>
+      </div>
+
+      <div class="screen-note">Console wireframe 10 of 10 — system status, platform plane (gate T534-WF).
+        Counts and checkpoints are specimens; the row-source discipline (verified state /
+        recorded value / phase chip) is the requirement. Deployment-shaped facts that belong
+        to the operator (TLS termination, network controls) are shown as no-claim, matching
+        the responsibility matrix's Supports/Organizational rows.</div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

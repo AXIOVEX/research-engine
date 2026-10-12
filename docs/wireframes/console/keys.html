@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keys &amp; bindings — Tekmerion console wireframe (5)</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side tenant">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Admin console</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Tenant</div>
+      <div class="study-name">University A</div>
+      <span class="tenant-chip">Tenant plane · uni-a</span>
+    </div>
+    <nav class="nav">
+      <a href="users.html">Users &amp; roles <span class="count">4</span></a>
+      <a href="keys.html" class="active">Keys &amp; bindings</a>
+      <a href="events.html">Lifecycle events</a>
+      <a href="break-glass.html">Break-glass</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">Alice Researcher</div>
+      <div class="role-switch"><span class="on">Tenant admin</span></div>
+      <p class="micro">Identity arrives via University A's IdP. Tenant admin powers are
+        disjoint from study roles — an admin grant signs no verdicts (CLM-005-09).
+        Every action is appended under this name.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="plane-strip tenant"><span class="plane-name">Tenant plane</span><span>University A only — this session can reach no other tenant's records, and no control here affects one.</span></div>
+      <h1>Keys &amp; bindings</h1>
+      <p class="page-sub">Every append the service accepts is signed by an Ed25519 key
+        enrolled to an IdP-authenticated identity (CLM-005-03). This screen shows
+        <strong>fingerprints only</strong> — key material never appears on any screen,
+        in any ledger, or in any export. Enrollment proves possession by signing a
+        server nonce; recovery is re-enrollment, never key retrieval (Spec 005 §3).</p>
+
+      <div class="card flush">
+        <table>
+          <thead>
+            <tr><th style="width:22%">Fingerprint (SHA-256)</th><th style="width:20%">Identity</th><th style="width:12%">Custody</th><th style="width:12%">Status</th><th style="width:10%">Enrolled</th><th style="width:24%">Lineage</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-h="Fingerprint" class="mono">04260af3…5db15</td>
+              <td data-h="Identity">Alice Researcher<br><span class="mono">actor 7f3a…c21e</span></td>
+              <td data-h="Custody"><span class="chip custody">self</span></td>
+              <td data-h="Status"><span class="chip supported">enrolled</span></td>
+              <td data-h="Enrolled">seq 204</td>
+              <td data-h="Lineage">replaces <span class="mono">fdb763e6…9b81</span> (rotation)</td>
+            </tr>
+            <tr>
+              <td data-h="Fingerprint" class="mono">fdb763e6…9b81</td>
+              <td data-h="Identity">Alice Researcher<br><span class="mono">actor 7f3a…c21e</span></td>
+              <td data-h="Custody"><span class="chip custody">self</span></td>
+              <td data-h="Status"><span class="chip brand">rotated</span></td>
+              <td data-h="Enrolled">seq 155</td>
+              <td data-h="Lineage">replaced by <span class="mono">04260af3…5db15</span> — no longer accepted for new appends; its historical signatures keep verifying</td>
+            </tr>
+            <tr>
+              <td data-h="Fingerprint" class="mono">bf0ab5f7…4bdfb</td>
+              <td data-h="Identity">Bob Reviewer<br><span class="mono">actor 91bd…04aa</span></td>
+              <td data-h="Custody"><span class="chip custody">delegated</span></td>
+              <td data-h="Status"><span class="chip supported">enrolled</span></td>
+              <td data-h="Enrolled">seq 198</td>
+              <td data-h="Lineage">—</td>
+            </tr>
+            <tr>
+              <td data-h="Fingerprint" class="mono">115fbc17…59e</td>
+              <td data-h="Identity">Mallory<br><span class="mono">actor c550…9d77</span></td>
+              <td data-h="Custody"><span class="chip custody">self</span></td>
+              <td data-h="Status"><span class="chip contradicted">revoked</span></td>
+              <td data-h="Enrolled">seq 176</td>
+              <td data-h="Lineage">revoked seq 209 — reason recorded: <em>“device lost”</em> (specimen)</td>
+            </tr>
+            <tr class="dead-row">
+              <td data-h="Fingerprint" class="mono">8d41c2e0…77a0</td>
+              <td data-h="Identity">Carol Fellow<br><span class="mono">actor 3e08…b6f0</span></td>
+              <td data-h="Custody"><span class="chip custody">self</span></td>
+              <td data-h="Status"><span class="chip dead">closed</span></td>
+              <td data-h="Enrolled">seq 149</td>
+              <td data-h="Lineage">closed at identity deactivation (<span class="mono">key.closed</span>, seq 214)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>Custody is labeled, never blurred</h3>
+        <p class="muted" style="margin:0">Delegated custody in the current build signs with a
+          <strong>labeled software development signer</strong> — it stands in for a KMS/HSM and
+          is not one (E1 exit record). Wherever a delegated key appears, its appends carry
+          <span class="mono">custody: delegated</span> plus the authorizing session: the
+          signature attests exactly what is true, never more (Spec 005 §3).</p>
+      </div>
+
+      <div class="row-actions">
+        <a class="btn primary" href="keys.html">Enroll a key</a>
+        <a class="btn" href="keys.html">Rotate key</a>
+        <a class="btn danger" href="keys.html">Revoke key</a>
+        <span class="muted small">Each issues its ledger event (T538). Adjudicator
+          re-enrollment after revocation additionally requires a tenant-admin
+          countersign event. Revocation is effective at the next request.</span>
+      </div>
+
+      <h2>API keys &amp; service accounts</h2>
+      <div class="card flush">
+        <table>
+          <thead>
+            <tr><th style="width:22%">Key</th><th style="width:20%">Principal</th><th style="width:22%">Scopes</th><th style="width:12%">Expires</th><th style="width:12%">Last used</th><th style="width:12%">State</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-h="Key" class="mono">tk_live_9f2c…</td>
+              <td data-h="Principal">adapter-runner (System)</td>
+              <td data-h="Scopes">append · inspect (subset of the WS6 matrix)</td>
+              <td data-h="Expires">2027-06-30</td>
+              <td data-h="Last used">2026-10-12 08:14</td>
+              <td data-h="State"><span class="chip supported">active</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small muted">Keys are stored hashed with an identifying prefix, expire within
+        one year, and revoke immediately; a key can never hold a power its role class denies
+        a human. Every service-account action is attributed and ledgered like a human's (CLM-005-18).</p>
+
+      <div class="screen-note">Console wireframe 5 of 10 — keys &amp; bindings, tenant plane (gate T534-WF).
+        Fingerprints are specimen values in the record's real format (SHA-256 hex, shortened
+        with an ellipsis in tables per WIREFRAMES.md §5; shown in full in the audit inspector
+        where verifiability is the point). No key material exists in this package.</div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

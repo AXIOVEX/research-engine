@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audit ledger — Tekmerion console wireframe (7)</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Admin console</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Scope</div>
+      <div class="study-name">Deployment — all tenants</div>
+      <span class="chip" style="background:#274B74;border-color:#4A6E99;color:#DCE6F2">Platform plane</span>
+    </div>
+    <nav class="nav">
+      <a href="tenants.html">Tenants <span class="count">2</span></a>
+      <a href="audit.html" class="active">Audit ledger</a>
+      <a href="compliance.html">Compliance</a>
+      <a href="status.html">System status</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">Root Operator</div>
+      <div class="role-switch"><span class="on">Platform admin</span></div>
+      <p class="micro" style="color:#9FB6CE">Identity arrives via the deployment IdP.
+        A platform admin holds no study role and cannot sign study appends (CLM-005-09).
+        Every action is appended under this name.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="plane-strip platform"><span class="plane-name">Platform plane</span><span>Deployment scope — the inspector below reads the deployment ledger. Tenant admins get this same inspector fixed to their own tenant's ledger; the deployment segment does not exist in their view.</span></div>
+      <h1>Audit ledger inspector</h1>
+      <p class="page-sub">Administrative actions are append-only, Ed25519-signed, hash-chained
+        events (Spec 005 §8). Two scopes: one deployment ledger for platform-plane events,
+        one ledger per tenant — so a tenant's complete admin record exports without
+        disclosing another tenant's.</p>
+
+      <div class="row-actions" style="margin-top:0">
+        <span class="seg"><span class="on">Deployment ledger</span><span>Tenant ledger · uni-a</span><span>Tenant ledger · uni-b</span></span>
+      </div>
+
+      <div class="card">
+        <div class="verify-line">
+          <span class="chip supported">chain verification: intact</span>
+          <span class="small muted">128 events · verified 2026-10-12 09:40 (specimen)</span>
+        </div>
+        <dl class="kv" style="margin-top:12px">
+          <dt>Checkpoint root</dt><dd><span class="mono">679ca4f23448004e13e350d5b3b2ceab003c0c030f29b46785f68a7631544b27</span></dd>
+          <dt>Ledger scope</dt><dd>deployment — signed by the deployment ledger key; the signature attests the platform recorded each event, the payload names the acting identity</dd>
+          <dt>External anchor</dt><dd><strong>none recorded for this checkpoint</strong> — the anchored demonstration of a platform audit export is E6 work <span class="phase-chip">E6 · T543</span>. The screen states the absence; it does not imply an anchor.</dd>
+          <dt>Platform ↔ study join</dt><dd>an actor's platform events and study appends join on the identity↔key binding <span class="phase-chip">E4 · CLM-005-22</span></dd>
+        </dl>
+      </div>
+
+      <div class="card flush">
+        <table>
+          <thead>
+            <tr><th style="width:7%">Seq</th><th style="width:14%">When</th><th style="width:19%">Event</th><th style="width:20%">Actor</th><th style="width:24%">Target</th><th style="width:16%">Outcome · signature</th></tr>
+          </thead>
+          <tbody>
+            <tr><td data-h="Seq" class="mono">128</td><td data-h="When">2026-10-12 09:02</td><td data-h="Event" class="evt">role.granted</td><td data-h="Actor"><span class="mono">actor 51c9…0d3b</span></td><td data-h="Target">tenant admin grant, uni-a</td><td data-h="Outcome · signature">recorded · <span style="color:var(--ok)">verified</span></td></tr>
+            <tr><td data-h="Seq" class="mono">121</td><td data-h="When">2026-10-12 08:57</td><td data-h="Event" class="evt">apikey.issued</td><td data-h="Actor"><span class="mono">actor 51c9…0d3b</span></td><td data-h="Target">service key, platform scope</td><td data-h="Outcome · signature">recorded · <span style="color:var(--ok)">verified</span></td></tr>
+            <tr><td data-h="Seq" class="mono">117</td><td data-h="When">2026-10-12 08:44</td><td data-h="Event" class="evt">authz.decision_denied</td><td data-h="Actor"><span class="mono">actor 77aa…e190</span></td><td data-h="Target">tenant.create attempted by a tenant admin</td><td data-h="Outcome · signature">denied · <span style="color:var(--ok)">verified</span></td></tr>
+            <tr><td data-h="Seq" class="mono">112</td><td data-h="When">2026-10-12 08:39</td><td data-h="Event" class="evt">idp.configured</td><td data-h="Actor"><span class="mono">actor 51c9…0d3b</span></td><td data-h="Target">SAML IdP, uni-a (cert fingerprint <span class="mono">b5fdc324…</span>)</td><td data-h="Outcome · signature">recorded · <span style="color:var(--ok)">verified</span></td></tr>
+            <tr><td data-h="Seq" class="mono">104</td><td data-h="When">2026-10-12 08:31</td><td data-h="Event" class="evt">tenant.created</td><td data-h="Actor"><span class="mono">actor 51c9…0d3b</span></td><td data-h="Target">uni-b, self-hosted</td><td data-h="Outcome · signature">recorded · <span style="color:var(--ok)">verified</span></td></tr>
+            <tr><td data-h="Seq" class="mono">96</td><td data-h="When">2026-10-12 08:22</td><td data-h="Event" class="evt">tenant.created</td><td data-h="Actor"><span class="mono">actor 51c9…0d3b</span></td><td data-h="Target">uni-a, hosted</td><td data-h="Outcome · signature">recorded · <span style="color:var(--ok)">verified</span></td></tr>
+            <tr><td data-h="Seq" class="mono">1</td><td data-h="When">2026-10-12 08:15</td><td data-h="Event" class="evt">platform.bootstrapped</td><td data-h="Actor"><span class="mono">actor 51c9…0d3b</span></td><td data-h="Target">deployment ledger opened</td><td data-h="Outcome · signature">recorded · <span style="color:var(--ok)">verified</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="small muted">Payloads carry actor IDs, never names or emails (Spec 005 §4) —
+        the inspector shows the record as it is; resolving an actor ID to a person is a
+        directory lookup, displayed in the tenant plane, not written into the chain.</p>
+
+      <h2>Export</h2>
+      <div class="card">
+        <p style="margin-top:0">Export follows the Phase 5 audit-bundle pattern: manifest,
+          per-file hashes, standalone verification — a tenant or external auditor verifies
+          the platform-plane record offline, and a tampered export fails (CLM-005-15).</p>
+        <div class="row-actions" style="margin-bottom:0">
+          <a class="btn primary" href="audit.html">Export this ledger</a>
+          <span class="phase-chip">export machinery · E6 · T542</span>
+          <span class="muted small">The button is the E5 surface (T539); the export machinery
+            behind it lands in E6. Until then this control is specified, not functional —
+            the phase chip says so on the screen, not only in this package's notes.</span>
+        </div>
+      </div>
+
+      <div class="screen-note">Console wireframe 7 of 10 — audit-ledger inspector, platform plane (gate T534-WF).
+        Checkpoint root is a specimen value in the record's real format, shown in full because
+        this screen is where verifiability is the point. Chain state is displayed as the
+        verifier reports it; a failed verification renders in the INVALID treatment, never as a warning.</div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

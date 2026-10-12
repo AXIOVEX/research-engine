@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tenants — Tekmerion console wireframe (2)</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Admin console</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Scope</div>
+      <div class="study-name">Deployment — all tenants</div>
+      <span class="chip" style="background:#274B74;border-color:#4A6E99;color:#DCE6F2">Platform plane</span>
+    </div>
+    <nav class="nav">
+      <a href="tenants.html" class="active">Tenants <span class="count">2</span></a>
+      <a href="audit.html">Audit ledger</a>
+      <a href="compliance.html">Compliance</a>
+      <a href="status.html">System status</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">Root Operator</div>
+      <div class="role-switch"><span class="on">Platform admin</span></div>
+      <p class="micro" style="color:#9FB6CE">Identity arrives via the deployment IdP.
+        A platform admin holds no study role and cannot sign study appends (CLM-005-09).
+        Every action is appended under this name.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="plane-strip platform"><span class="plane-name">Platform plane</span><span>Deployment scope — every tenant below is administered from here; study content is not visible in this plane.</span></div>
+      <h1>Tenants</h1>
+      <p class="page-sub">Organization = tenant (Spec 005 §6). Every study, identity, and
+        platform record is tenant-scoped; tenant context comes from the authenticated
+        session, never from request parameters.</p>
+
+      <div class="stats">
+        <div class="stat"><div class="num">2</div><div class="lab">Tenants</div></div>
+        <div class="stat"><div class="num">7</div><div class="lab">Identities (all tenants)</div></div>
+        <div class="stat"><div class="num">5</div><div class="lab">Keys enrolled</div></div>
+        <div class="stat"><div class="num">128</div><div class="lab">Deployment-ledger events</div></div>
+      </div>
+
+      <div class="card flush">
+        <table>
+          <thead>
+            <tr><th style="width:24%">Tenant</th><th style="width:16%">Shape · region</th><th style="width:22%">Identity providers</th><th style="width:10%">Identities</th><th style="width:8%">Keys</th><th style="width:10%">SCIM</th><th style="width:10%">State</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-h="Tenant"><a href="tenant.html"><strong>University A</strong></a><br><span class="mono">uni-a</span></td>
+              <td data-h="Shape · region">hosted<br><span class="muted">us-east</span></td>
+              <td data-h="Identity providers">OIDC <span class="chip supported">configured</span><br>SAML <span class="chip supported">configured</span></td>
+              <td data-h="Identities">4</td>
+              <td data-h="Keys">3</td>
+              <td data-h="SCIM"><span class="chip">not configured</span> <span class="phase-chip">E3</span></td>
+              <td data-h="State"><span class="chip supported">active</span></td>
+            </tr>
+            <tr>
+              <td data-h="Tenant"><strong>University B</strong><br><span class="mono">uni-b</span></td>
+              <td data-h="Shape · region">self-hosted<br><span class="muted">institution site</span></td>
+              <td data-h="Identity providers">OIDC <span class="chip supported">configured</span><br>SAML <span class="chip">not configured</span></td>
+              <td data-h="Identities">3</td>
+              <td data-h="Keys">2</td>
+              <td data-h="SCIM"><span class="chip">not configured</span> <span class="phase-chip">E3</span></td>
+              <td data-h="State"><span class="chip supported">active</span></td>
+            </tr>
+            <tr class="dead-row">
+              <td data-h="Tenant"><strong>Platform</strong><br><span class="mono">__platform__</span></td>
+              <td data-h="Shape · region">system tenant</td>
+              <td data-h="Identity providers">deployment IdP</td>
+              <td data-h="Identities">1</td>
+              <td data-h="Keys">—</td>
+              <td data-h="SCIM">—</td>
+              <td data-h="State"><span class="chip dead">system</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="row-actions">
+        <a class="btn primary" href="tenant.html">Create tenant</a>
+        <span class="muted small">Tenant creation is a platform-admin act — v1 has no
+          tenant self-signup (Spec 005 §11). Creation appends
+          <span class="mono">tenant.created</span> to the deployment ledger.</span>
+      </div>
+
+      <div class="screen-note">Console wireframe 2 of 10 — tenant list, platform plane (gate T534-WF).
+        Specimen data modeled on the E1/E2 test fixtures (tenants uni-a / uni-b, the
+        <span class="mono">__platform__</span> system tenant). Counts are specimens; the layout,
+        the plane strip, and the honest SCIM state are the requirements.</div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

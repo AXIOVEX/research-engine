@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Break-glass — Tekmerion console wireframe (8)</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side tenant">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Admin console</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Tenant</div>
+      <div class="study-name">University A</div>
+      <span class="tenant-chip">Tenant plane · uni-a</span>
+    </div>
+    <nav class="nav">
+      <a href="users.html">Users &amp; roles <span class="count">4</span></a>
+      <a href="keys.html">Keys &amp; bindings</a>
+      <a href="events.html">Lifecycle events</a>
+      <a href="break-glass.html" class="active">Break-glass</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">Alice Researcher</div>
+      <div class="role-switch"><span class="on">Tenant admin</span></div>
+      <p class="micro">Identity arrives via University A's IdP. Tenant admin powers are
+        disjoint from study roles — an admin grant signs no verdicts (CLM-005-09).
+        Every action is appended under this name.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="plane-strip tenant"><span class="plane-name">Tenant plane</span><span>University A only — break-glass policy is declared per tenant; the platform-plane variant lists every tenant's policy state and session log.</span></div>
+      <h1>Break-glass</h1>
+      <p class="page-sub">Break-glass exists only as a named mechanism (CLM-005-10): pre-declared
+        per tenant, dually authorized, time-boxed, alarmed, and every action under the session
+        marked in the audit record. It mints a <em>session</em>, never a credential.
+        <strong>There is no standing backdoor.</strong></p>
+
+      <h2>Policy — University A</h2>
+      <div class="card">
+        <div class="verify-line">
+          <span class="chip inconclusive">no policy declared</span>
+          <span class="phase-chip">mechanism · E4 · T529</span>
+        </div>
+        <p class="muted" style="margin-bottom:0">This tenant has declared no break-glass policy,
+          so break-glass <strong>cannot be invoked</strong> for University A — by construction,
+          not by an administrator's restraint. The mechanism itself lands in E4; until a policy
+          is declared and recorded, this screen's honest state is this one.</p>
+      </div>
+
+      <div class="card">
+        <h3>The shape of a declaration <span class="chip">specimen</span></h3>
+        <dl class="kv">
+          <dt>Invoker roles</dt><dd>named roles permitted to request a session (declared per tenant)</dd>
+          <dt>Second authorizer</dt><dd>a platform admin or a tenant admin, per the tenant's declaration — never the invoker</dd>
+          <dt>Time box</dt><dd>≤ 4 h by default; configurable down, never up silently</dd>
+          <dt>Alarm</dt><dd>immediate, to tenant admins and the platform security log; use is also an incident-response egress event <span class="phase-chip">E4 · T554</span></dd>
+          <dt>After use</dt><dd>a post-use review item is created automatically; every action under the session stays marked break-glass in the audit record</dd>
+        </dl>
+        <p class="small muted" style="margin-bottom:0">Specimen — the fields a declaration must
+          carry (Spec 005 §5). This tenant has not declared one; nothing above is in force.</p>
+      </div>
+
+      <h2>Session log</h2>
+      <div class="card empty">No break-glass sessions — for this tenant, none have occurred.
+        When one does, it appears here as it happens: invoker, second authorizer, time box,
+        alarm state, and the marked audit trail, closing with its post-use review item.</div>
+
+      <div class="screen-note">Console wireframe 8 of 10 — break-glass policy &amp; session log, tenant plane
+        (gate T534-WF). The undeclared state is the requirement being approved: the console must
+        be able to say “this cannot be invoked” as plainly as it would list a session.
+        CLM-005-14's residue names break-glass events as outstanding until E4 lands them.</div>
+    </div>
+  </main>
+</div>
+</body>
+</html>
