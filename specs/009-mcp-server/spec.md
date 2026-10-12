@@ -92,7 +92,7 @@ Adapter honesty states (`run_by_us` / `recorded_output` / `not_runnable_here`) p
 
 ## 5. Error shapes
 
-- **Engine refusal** (RegistrationError, FreezeError, ExportError, DepositError, AdapterEvidenceError, IngestionError, verification/adjudication errors): MCP error result, message = `str(exc)` **verbatim**. Nothing is appended by a refused call (registration validates before append by construction; freeze/deposit fail closed).
+- **Engine refusal** (RegistrationError, FreezeError, ExportError, DepositError, AdapterEvidenceError, IngestionError, verification/adjudication errors): MCP error result carrying `str(exc)` **verbatim**. Nothing is appended by a refused call (registration validates before append by construction; freeze/deposit fail closed). Wire mechanism, verified against SDK 2.3.0 during the build: the SDK masks non-`ToolError` exceptions by design (a client would see only "Error executing tool <name>"), so the shell converts every handler exception to a `ToolError` carrying `str(exc)` — the SDK's channel for deliberate, client-facing errors — and the client receives `Error executing tool <name>: <verbatim engine text>`.
 - **Surface refusal** (role denial, unconfigured deposit transport, unknown study): MCP error result in the surface's own words, naming the action, the configured role, and what is required — the same information the UI's refusal banner shows.
 - **Malformed input** (missing required argument, bad enum): MCP error result naming the argument. The server never guesses a falsifier, a margin, or an approver.
 
