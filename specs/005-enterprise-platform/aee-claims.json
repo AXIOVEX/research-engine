@@ -1,0 +1,697 @@
+{
+  "spec": "specs/005-enterprise-platform/spec.md",
+  "version": "0.1.0",
+  "date": "2026-10-12",
+  "claims": [
+    {
+      "id": "CLM-005-01",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Human users authenticate only through a tenant-configured external IdP over OpenID Connect (authorization code flow with PKCE); the platform keeps no local password store and offers no local credential login.",
+      "boundary": [
+        "Scope: interactive human sign-in, hosted and self-hosted shapes (E1)",
+        "Excludes service accounts / API keys (CLM-005-18) and the standalone bundle verifier, which needs no account (WS6 §2)"
+      ],
+      "falsification_tests": [
+        "F-005-01: any code path, schema, or admin function that creates, stores, or verifies a local password credential; or an OIDC flow completing without PKCE (S256) proof."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) §1",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Constitution Articles IV, XII, XIII (tekmerion .specify/memory/constitution.md)",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "docs/wireframes/WIREFRAMES.md §4 — actor block: identity arrives via the SSO hook",
+          "source_quality": "artifact"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-02",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "The platform acts as a SAML 2.0 service provider with per-tenant IdP configuration (entity ID, metadata, attribute mapping), so Shibboleth / InCommon-class federated IdPs authenticate their tenants; unsigned or untrusted assertions are never accepted.",
+      "boundary": [
+        "Scope: SAML 2.0 Web Browser SSO profile, SP-initiated and IdP-initiated (E2)",
+        "Excludes SAML artifact binding and federation-metadata aggregate automation in v1 (manual per-tenant metadata, refreshed on a schedule)"
+      ],
+      "falsification_tests": [
+        "F-005-02: an authentication succeeding on an unsigned assertion, an assertion from an IdP not configured for that tenant, or a SAML login for a tenant with no SAML IdP configured."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) §1 — federation institutions speak SAML; one-protocol excludes them",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS6 §1 role matrix (docs/architecture/06-product-shape.md)",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-03",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Every append the service accepts is signed by an Ed25519 key enrolled to an IdP identity (issuer + subject) through a recorded enrollment event; appends signed by unenrolled, expired-binding, or revoked keys are rejected at the service layer.",
+      "boundary": [
+        "Scope: all study-ledger appends made through the platform service (E1)",
+        "Excludes offline bundle verification, which verifies historical signatures against enrollment-era records without live service state"
+      ],
+      "falsification_tests": [
+        "F-005-03: a service-accepted append whose signing key has no enrollment event binding it to the authenticated actor's IdP identity; or acceptance of an append signed by a revoked key."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Constitution Articles IV, XII, XIII (tekmerion .specify/memory/constitution.md) — Article XIII: every append is signed with its actor's key",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/store.py — every mutating call takes a named actor and appends via Axiomere",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) §2",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-04",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "low",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Key enrollment, rotation, and revocation are appended, timestamped events in the platform record; rotation supersedes a binding without editing it, and signatures made before a revocation continue to verify after it.",
+      "boundary": [
+        "Scope: the identity/key registry (platform plane), E1 with lifecycle completion in E3",
+        "Excludes the DN-005 break-glass erasure certificate, which governs payload keys, not actor signing keys"
+      ],
+      "falsification_tests": [
+        "F-005-04: a rotation or revocation that mutates an earlier enrollment event; or a pre-revocation signature failing verification solely because of the later revocation."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) §2",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-005 — change happens only by appending new snapshots; lineage stays readable",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-05",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Deprovisioning an identity ends its ability to append and to read — effective at the next authenticated request after the deactivation event — while every historical append, signature, and attribution by that identity remains intact and verifiable.",
+      "boundary": [
+        "Scope: deprovisioning via SCIM deactivate, tenant-admin action, or IdP-driven lifecycle (E3)",
+        "Excludes erasure of off-ledger directory PII under legal duty, which follows ordinary data controls and never touches ledger content"
+      ],
+      "falsification_tests": [
+        "F-005-05: a deprovisioned identity's key completing an append after deactivation; or deprovisioning altering, masking, or deleting any historical event or signature."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) §3",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Constitution Article IV — no delete operation in any API, UI, or admin path",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-06",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "medium",
+      "uncertainty": "low",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "SCIM 2.0 provisioning from the tenant's IdP (create, update, deactivate) is honored as the tenant's lifecycle source of truth, and a SCIM deactivate produces exactly CLM-005-05 deprovisioning semantics.",
+      "boundary": [
+        "Scope: SCIM 2.0 Users resource (E3); Groups map to role grants only via recorded tenant-admin-approved mappings",
+        "Excludes SCIM as an authentication mechanism — SCIM provisions, IdPs authenticate"
+      ],
+      "falsification_tests": [
+        "F-005-06: a SCIM deactivate that deletes the user's history, leaves append capability live, or a SCIM create that grants a study role without a recorded mapping/grant."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) §3",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS6 §1 role matrix (docs/architecture/06-product-shape.md)",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-07",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "medium",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Just-in-time provisioning creates an identity only in the tenant whose IdP asserted it, with no study role by default (least privilege); a role exists only after a recorded grant.",
+      "boundary": [
+        "Scope: first-login provisioning for OIDC and SAML tenants without SCIM (E3)",
+        "Excludes platform-admin bootstrap for a brand-new tenant, which is a named, audited platform event"
+      ],
+      "falsification_tests": [
+        "F-005-07: a JIT-created identity holding any study role before a grant event; or an identity created in a tenant other than the asserting IdP's tenant."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) §3, §5",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS6 §1 role matrix (docs/architecture/06-product-shape.md)",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-08",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "low",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Authorization for every read and mutation is enforced in the service layer against the WS6 §1 role matrix (researcher / reviewer / adjudicator / integrity officer); no endpoint relies on the UI hiding an affordance.",
+      "boundary": [
+        "Scope: all platform API surfaces serving study or admin data (E1, hardened E4)",
+        "Excludes the deliberately public standalone bundle-verification endpoint, which serves only what a bundle already contains"
+      ],
+      "falsification_tests": [
+        "F-005-08: a direct API call with a valid session but an insufficient role succeeding at a matrix-forbidden action — e.g., a researcher approving a freeze, a reviewer altering a frozen registration, a non-adjudicator signing a verdict set."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS6 §1 role matrix (docs/architecture/06-product-shape.md)",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Constitution Article IX — a named human adjudicator signs every verdict set",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/store.py — every mutating call takes a named actor and appends via Axiomere",
+          "source_quality": "artifact"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-09",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Platform-admin, tenant-admin, and study roles are disjoint planes: no plane's authority implies another's — a platform admin cannot sign study verdicts, and a tenant admin can reach nothing outside their tenant.",
+      "boundary": [
+        "Scope: authorization model across hosted and self-hosted shapes (E1 model, E4 test battery)",
+        "Excludes break-glass, which is a separate named mechanism (CLM-005-10), not a plane"
+      ],
+      "falsification_tests": [
+        "F-005-09: a platform-admin credential issuing or signing a study verdict; or a tenant-admin session reading or mutating any resource of another tenant."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) §5",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS6 §1 role matrix (docs/architecture/06-product-shape.md)",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-10",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Break-glass access exists only as a named mechanism: pre-declared per tenant, dual-authorized, time-boxed, alarmed on use, and every use appended to the platform audit record; there is no standing or silent backdoor credential.",
+      "boundary": [
+        "Scope: emergency access to tenant data/administration in the hosted shape (E4); in the self-hosted shape the institution's own operators hold infrastructure access outside this mechanism, stated honestly",
+        "Excludes DN-005's erasure certificate — a legal-compulsion protocol, not an access path"
+      ],
+      "falsification_tests": [
+        "F-005-10: any break-glass session whose use leaves no platform audit event; a break-glass credential that works without the second authorization or outside its time box."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) §5",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-005 — the program's only other break-glass is owner-signed, on the record, legal compulsion only",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-11",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Tenant isolation holds by construction: every study, identity binding, and platform record carries a tenant scope enforced at the data-access layer, and the E4 isolation battery's canonical test — tenant A's credential presented against tenant B's study at every endpoint class — returns no tenant-B data.",
+      "boundary": [
+        "Scope: hosted multi-tenant shape (E4); the self-hosted shape is single-tenant by deployment",
+        "Excludes information disclosure via shared *public* artifacts (anchored bundles a tenant chose to deposit publicly)"
+      ],
+      "falsification_tests": [
+        "F-005-11: any response in the isolation battery containing another tenant's study data, metadata, or existence signal beyond a uniform not-found."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) §4",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-003 — custody of the record is a hard architectural boundary, not a deployment afterthought",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-12",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Hosted multi-tenant and self-hosted single-tenant are one codebase and one role/authorization model; each tenant's residency pin (deployment shape, region) is recorded configuration, and a self-hosted tenant's study data never transits or rests in the hosted plane.",
+      "boundary": [
+        "Scope: deployment shapes (E6 productizes self-hosted); hybrid per DN-003 remains an architectural target",
+        "Excludes connector traffic (Crossref/OpenAlex queries), which leaves any shape by design and is ledgered per study"
+      ],
+      "falsification_tests": [
+        "F-005-12: a behavioral or authorization difference between shapes not traceable to recorded configuration; or self-hosted study payloads found in hosted-plane storage, logs, or backups."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-003 — hybrid ratified; hosted-first pilot; bundle export is the exit guarantee",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) §4",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-13",
+      "kind": "compliance",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "low",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "No admin-console screen ships before its rendered wireframes are added to docs/wireframes/ and approved by the owner; Spec 005 scopes the console functionally (tenant, IdP, user, role, key, audit management) and designs no screens.",
+      "boundary": [
+        "Scope: the E5 admin console and any later console surface",
+        "Excludes the Spec 002 study UI (Phase 6), which carries its own wireframe package and gate"
+      ],
+      "falsification_tests": [
+        "F-005-13: a console screen present in any build or release whose rendered-wireframe approval is absent from docs/wireframes/ and the project record."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Constitution Article XIV (drafted per DN-009; wireframe package approved by the owner 2026-10-12)",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "docs/wireframes/WIREFRAMES.md §1 — the wireframes are the requirements; approval is of rendered screens",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "The Article XIV process operating: owner approved the rendered Phase 6 wireframe package 2026-10-12, discharging gate T219-WF — the same gate E5 inherits",
+          "source_quality": "human"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-14",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Every platform-plane administrative action — IdP configuration change, role grant or revocation, key enrollment/rotation/revocation, SCIM sync outcome, break-glass use — is recorded as an append-only, signed, hash-chained event in the platform audit ledger.",
+      "boundary": [
+        "Scope: platform audit ledger, distinct from study ledgers (E1 core, complete by E4)",
+        "Excludes study-internal events, which live in study ledgers under Spec 002"
+      ],
+      "falsification_tests": [
+        "F-005-14: an administrative action with no corresponding platform audit event; or an audit event that can be altered without breaking the ledger's verification."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Constitution Article XIII — signed, checkpointed, anchored records",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS6 §1 — integrity officer: inspection access is itself logged",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-22",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "An actor's platform-plane audit events and study-ledger appends are joinable on the identity↔key binding, so an auditor can walk from an administrative action to everything that identity signed, and back.",
+      "boundary": [
+        "Scope: the reconciliation path between the platform audit ledger and study ledgers (E4)",
+        "Excludes actors whose binding was established before this spec in single-tenant prototype use (actor strings in Phase 1–5 ledgers), which join by recorded assertion, not by binding"
+      ],
+      "falsification_tests": [
+        "F-005-22: a legitimately bound actor whose platform events and study appends cannot be joined; or a join that pairs records of two different identities."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "CLM-005-03 (identity↔key binding) + CLM-005-14 (platform audit ledger)",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) §2",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-15",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "low",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "The platform audit record exports in the Phase 5 audit-bundle pattern — manifest, per-file hashes, standalone verification, optional external anchor — so a tenant or an external auditor can verify the platform-plane record offline, and tampering with an export fails that verification.",
+      "boundary": [
+        "Scope: platform-plane export (E6), reusing tekmerion.export/deposit machinery",
+        "Excludes study bundles, already shipped in Spec 002 Phase 5"
+      ],
+      "falsification_tests": [
+        "F-005-15: a platform audit export with an altered event (including an attacker-rehashed manifest) passing standalone verification."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "Spec 002 Phase 5: bundle + standalone verifier + live Zenodo anchor (CI run 38214358137, 68/68 tests) — DN-008 evidence",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) — audit & compliance evidence direction",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-16",
+      "kind": "compliance",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "low",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "The product claims SOC 2 readiness and evidence mapping only — never certification; FERPA and GDPR appear only as design constraints, never as compliance certifications; and every SOC 2 mapping entry points at machinery that exists or is specced in Spec 005, not at aspirations.",
+      "boundary": [
+        "Scope: all product surfaces, spec text, and sales-facing descriptions of the enterprise platform",
+        "Excludes a future, separately-gated audit engagement, whose outcome would be recorded as its own decision"
+      ],
+      "falsification_tests": [
+        "F-005-16: any product or spec text claiming a certification not held; or a mapping entry whose named machinery cannot be located in the codebase or this spec."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) — 'What enterprise will NOT claim in v1'",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Constitution Article X — statuses are claims; only verified states are stated",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "The discipline operating: the Phase 5 Zenodo record's description was corrected in place when it overstated the run's outcome (DN-008, recorded caveat 1)",
+          "source_quality": "artifact"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-17",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "low",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Retention and legal hold are implemented as export + anchor + access-restriction markers only; no retention feature deletes or masks ledger content, and the sole erasure path for chain content anywhere in the platform is DN-005's break-glass erasure certificate under documented legal compulsion.",
+      "boundary": [
+        "Scope: study ledgers and the platform audit ledger (E6)",
+        "Excludes off-ledger data (identity-directory PII, session stores), which follows ordinary data controls and minimization"
+      ],
+      "falsification_tests": [
+        "F-005-17: a retention or hold operation that removes, masks, or renders unverifiable any ledger event outside the certificate protocol."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-005 — no delete operation; the erasure certificate is the single exception, owner-signed, on the record",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Constitution Article IV",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-18",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "medium",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Programmatic access uses scoped, expiring, revocable API keys / service accounts whose scopes cannot exceed the WS6 role matrix; every service-account action is attributed to the account and ledgered like a human actor's.",
+      "boundary": [
+        "Scope: API access for integrations and automation (E1 keys core; egress signing completes the baseline in E4)",
+        "Excludes connector credentials (Crossref/OpenAlex), which are the operator's, not tenants'"
+      ],
+      "falsification_tests": [
+        "F-005-18: an unscoped, non-expiring, or irrevocable key; a scope granting a power the role matrix denies the equivalent human role; or a service-account append with no attributable identity in the record."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS6 §1 role matrix (docs/architecture/06-product-shape.md) (API-first shape, §2)",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) §5",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-19",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "medium",
+      "uncertainty": "low",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "The session and transport baseline holds, in enumerable terms: HTTP requests are refused or redirected to TLS; session cookies carry Secure, HttpOnly, and SameSite attributes; sessions die at a configured idle lifetime and a configured absolute lifetime; per-tenant rate limits answer excess requests with 429; responses carry HSTS, a Content-Security-Policy, X-Content-Type-Options, Referrer-Policy, and frame-ancestors restrictions.",
+      "boundary": [
+        "Scope: hosted shape in full; self-hosted inherits the same defaults behind the institution's TLS termination (E4)",
+        "Excludes penetration-test attestation, which is an E6 evidence item, not a design claim"
+      ],
+      "falsification_tests": [
+        "F-005-19: a session cookie missing any named attribute; a session accepted after its absolute lifetime; an endpoint class with no rate-limit response under the battery's load pattern; a response missing any named header."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) — platform security baseline direction",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS5 §5 — abuse and failure cases designed for (docs/architecture/05-trust-safety.md)",
+          "source_quality": "artifact"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-21",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "medium",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Webhook and event-egress payloads are signed (HMAC-SHA256 with the tenant's egress secret, or Ed25519), and the reference receiver rejects unsigned, badly signed, and replayed (outside the stated timestamp window) deliveries.",
+      "boundary": [
+        "Scope: platform event egress to tenant-registered endpoints (E4)",
+        "Excludes inbound webhooks from IdPs, which follow the IdP's own protocol security (SAML/OIDC)"
+      ],
+      "falsification_tests": [
+        "F-005-21: a delivery accepted by the reference receiver with a missing/invalid signature or a timestamp outside the replay window."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) — platform security baseline direction",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Constitution Article XIII — the platform's records are signed; its egress is held to the same standard",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-20",
+      "kind": "prediction",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "The enterprise build does not weaken any Spec 002 guarantee: the full Spec 002 test battery (including seeded-defect tests) passes unchanged against the multi-tenant service build, and no enterprise feature adds a mutation or deletion path to study records.",
+      "boundary": [
+        "Scope: regression obligation at every enterprise phase exit, E1–E6",
+        "Excludes performance characteristics, which get their own thresholds at the evaluation freeze (OD-5 pattern)"
+      ],
+      "falsification_tests": [
+        "F-005-20: any Spec 002 test failing for an enterprise-caused reason at a phase exit; or any enterprise endpoint capable of mutating or deleting a study-ledger event."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "Spec 002 battery: 68/68 tests green at Phase 5 (CI run 38214358137), incl. rehashed-manifest tamper defects",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Constitution Article IV",
+          "source_quality": "primary"
+        }
+      ]
+    }
+  ]
+}
