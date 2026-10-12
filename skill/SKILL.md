@@ -79,6 +79,18 @@ actor and role).
   shape, not a workaround: WS6 role separation is what gives the
   record its meaning, and the swap control needs early ledger
   events from different actors to bite.
+- **The server needs network egress, in its own environment.**
+  `attach_citation` performs **live** resolution (Crossref /
+  OpenAlex) inside the server process. A stdio server inherits
+  its **client's** environment, not your shell's — on a machine
+  behind a proxy, the proxy variables (and any connector API
+  keys your configuration uses) must be present in the
+  environment the client launches the server with, or
+  resolution fails even though the same lookup works from your
+  shell. A citation quarantined with reason `resolution
+  failed` means resolution could not be performed — check the
+  server's network environment before adjudicating it as a bad
+  citation.
 
 ## Playbook A — an evidence-question study, end to end
 
@@ -138,7 +150,65 @@ actor and role).
    carries a `fixture` — `{"claim": {…claim fields…}, "groups":
    [{origin_group, support_mass, contradiction_mass,
    could_falsify, falsifier_observation, …}]}`; without fixtures
-   only the swap control executes. A FreezeError lists **every**
+   only the swap control executes. Control fixtures are scored
+   by the **same verdict machinery** as study claims, so a
+   control must genuinely be able to reach its expected verdict:
+   independent origin mass is what carries a verdict across the
+   margin, and a **single origin group will typically verdict
+   inconclusive** — the positive control then fails and the run
+   is INVALID. That is the machinery working, not a bug. A
+   minimal working `controls` argument (adapt the ids,
+   statements, and rationales; keep the shapes and the two
+   independent groups per fixture):
+
+   ```json
+   [
+     {"kind": "positive",
+      "failure_mode": "engine fails to support a claim backed by strong agreeing evidence",
+      "expected": "supported",
+      "representative_rationale": "same domain and difficulty class as the study claims",
+      "fixture": {"claim": {"claim_id": "CTRL-POS",
+                            "statement": "known-true fixture claim",
+                            "falsifier": "observing the fixture evidence contradict it",
+                            "kind": "data", "dependencies": [],
+                            "margin": 0.1, "sufficiency_floor": 2,
+                            "supersedes": null, "status": "proposed"},
+                  "groups": [
+                    {"origin_group": "G1", "support_mass": 0.9,
+                     "contradiction_mass": 0.0, "could_falsify": true,
+                     "falsifier_observation": false,
+                     "verified": true, "items": 1},
+                    {"origin_group": "G2", "support_mass": 0.9,
+                     "contradiction_mass": 0.0, "could_falsify": true,
+                     "falsifier_observation": false,
+                     "verified": true, "items": 1}]}},
+     {"kind": "negative",
+      "failure_mode": "engine fails to contradict a claim whose evidence contradicts it",
+      "expected": "contradicted",
+      "representative_rationale": "",
+      "fixture": {"claim": {"claim_id": "CTRL-NEG",
+                            "statement": "fixture claim its own evidence contradicts",
+                            "falsifier": "observing the fixture evidence contradict it",
+                            "kind": "data", "dependencies": [],
+                            "margin": 0.1, "sufficiency_floor": 2,
+                            "supersedes": null, "status": "proposed"},
+                  "groups": [
+                    {"origin_group": "G9", "support_mass": 0.0,
+                     "contradiction_mass": 0.9, "could_falsify": true,
+                     "falsifier_observation": true,
+                     "verified": true, "items": 1},
+                    {"origin_group": "G8", "support_mass": 0.0,
+                     "contradiction_mass": 0.9, "could_falsify": true,
+                     "falsifier_observation": true,
+                     "verified": true, "items": 1}]}},
+     {"kind": "swap",
+      "failure_mode": "provenance swap between early ledger lines goes undetected",
+      "expected": null, "representative_rationale": "",
+      "fixture": null}
+   ]
+   ```
+
+   A FreezeError lists **every**
    failed check — fix them on the record (register the margin,
    decide the queue), never by editing files.
 7. `run_evaluation(study_id)` — adjudicator instance. The study

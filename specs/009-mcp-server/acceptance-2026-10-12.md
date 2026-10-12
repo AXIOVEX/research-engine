@@ -244,3 +244,86 @@ citation was quarantined and excluded — the machinery recording
 a failed resolution honestly. Chain verified ok throughout; both
 claims' INCONCLUSIVE ("no evidence groups") verdicts were
 consistent with both citations excluded.
+
+## Addendum (2026-10-12) — coordinator's skill-only re-run: F1/F2/F3 verified on the wire; gaps G1–G2 in the skill text
+
+The coordinator re-ran the skill-only exercise against a
+server built from the fixed branch (transcript:
+`~/workspace/tekmerion-skill-exercise/transcript2.jsonl`,
+study `skill-ex-002`). Outcome, fairly stated:
+
+- **Verified on the wire:** F1's wall — a run on the unfrozen
+  study returned INVALID with the WS3 §4 wall reason ("no
+  study.frozen event in the ledger") and issued nothing
+  (`get_verdicts`: state `none`, issued false). F2's freeze —
+  with `controls` passed explicitly, the freeze succeeded
+  (registration hash `6f055311…`, frozen at event seq 9). F3's
+  schema shape — an omitted `falsifier` was refused by
+  argument validation (`Field required`) before the engine,
+  nothing appended. The deposit gate refused (no transport
+  configured). Export + standalone verification passed
+  (`verify_bundle` ok; the bundle's ledger verified over its
+  10 events), and the chain verified ok throughout.
+- **The run was INVALID for exactly one reason:** "positive
+  control failed (engine fails to support a claim backed by
+  strong agreeing evidence): expected supported, got
+  inconclusive." The coordinator's positive-control fixture —
+  built from the skill's documented field shape — carried a
+  **single** origin group (support 0.9, floor 1, margin 0.1),
+  and one origin group cannot carry a verdict to `supported`.
+  No claim verdicts were issued, correctly (rule 3).
+- **Both citations again resolved `not_found` / "resolution
+  failed"** — including the real Einstein 1905 DOI
+  (CIT-Y-101) — were quarantined, and were adjudicated
+  `exclude`. Traced afterwards to the coordinator's own
+  launches: the exercise started the stdio servers with a
+  stripped environment (no proxy variables), while `curl`
+  from a full shell resolved the same DOI fine. As in the
+  first exercise, the ledger recorded the failed resolutions
+  honestly; the cause is the operator's server environment,
+  not the engine.
+
+### G1 — step 6 documented the fixture's shape but no working values (skill text fixed)
+
+Step 6 named the fixture fields but never said control
+fixtures are scored by the **same verdict machinery** as
+study claims, where independent origin mass carries a
+verdict across the margin. An operator following the shape
+alone can — and the coordinator did — build a positive
+control that cannot pass. Step 6 now states the machinery
+point plainly (a single origin group will typically verdict
+inconclusive; the control then fails and the run is
+INVALID; that is the machinery working, not a bug) and
+carries a complete worked `controls` example with passing
+values, adapted from this acceptance driver's own controls:
+positive and negative fixtures with **two independent origin
+groups each** (support 0.9 ×2 toward `supported`;
+contradiction 0.9 ×2 toward `contradicted`; fixture claims
+at `sufficiency_floor` 2), and the swap control without a
+fixture. The example was verified to parse as JSON and to
+match the driver's shapes exactly.
+
+### G2 — Configuration never mentioned server-side egress (skill text fixed)
+
+The Configuration section said nothing about
+`attach_citation` performing **live** resolution (Crossref /
+OpenAlex) inside the server process, so nothing warned the
+operator that the launched server needs working network
+egress in **its own** environment: a stdio server inherits
+its client's environment, not the operator's shell, so on
+proxied machines the proxy variables (and any connector API
+keys) must be in the client's launch environment. The
+coordinator's stripped-environment launches are the G2
+instance: same DOI, `curl` resolved it, the server recorded
+"resolution failed". Configuration now carries that note,
+including the operator rule: a citation quarantined with
+reason `resolution failed` means resolution could not be
+performed — check the server's network environment before
+adjudicating it as a bad citation.
+
+Both amendments are text-only, applied to `skill/SKILL.md`
+and the installed copy (`~/workspace/skills/tekmerion/SKILL.md`);
+the two copies are byte-identical after the change (diff
+clean). No code was touched. **CLM-009-09 is not moved by
+this addendum** — the coordinator's third run, against the
+amended skill, decides it.
