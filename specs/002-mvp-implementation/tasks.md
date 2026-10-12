@@ -30,10 +30,10 @@
 
 ## Phase 3 — Claims, freeze, verdicts
 
-- [ ] T210 Claim register (schema per WS2) + dependency graph + cycle check.
-- [ ] T211 Freeze workflow + freeze checks (falsifiers, margins, controls, budget).
-- [ ] T212 Verdict service: taxonomy mechanics, intervals, sufficiency floors.
-- [ ] T213 Controls via production verification path (RT-1); exploratory/confirmation wall + disclosure (RT-3).
+- [x] T210 Claim register done (`tekmerion.claims`): WS2 schema, falsifier mandatory (Article II), statement immutability + supersede links, dependency DAG with cycle detection (circular support rejected), evidence folded to origin groups (Article V).
+- [x] T211 Freeze workflow done (`tekmerion.freeze`): automated freeze check fails closed (falsifiers, acyclicity, margins, floors, control failure modes + RT-6 rationales, hosted-shape rights, RT-3 disclosure); freeze commits the registration hash as a `study.frozen` event + Axiomere Merkle checkpoint.
+- [x] T212 Verdict service done (`tekmerion.verdicts`): WS3 taxonomy mechanically — INVALID attaches to the run and issues no claim verdicts; SUPPORTED requires a capable falsifier test + interval clearing the margin; interval-valued masses per WS3 §6; sufficiency floors enforced.
+- [x] T213 Controls + wall done: positive/negative controls evaluate through the same `evaluate_claim` production path; the swap control tampers a copy of the study ledger and requires the production Axiomere verifier to catch it (RT-1). Confirmation mode without a frozen registration is INVALID; linked-exploratory disclosure is a freeze-check requirement (RT-3).
 
 ## Phase 4 — Verification
 
