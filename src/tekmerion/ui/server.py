@@ -197,7 +197,13 @@ class App:
                 continue
             item = queue_by_seq.get(cit_id)
             if item is not None and item in queue["decided"]:
-                disp = (f'{views.chip("decision: " + item["decision"].replace("_", " "))} '
+                label, cls = {
+                    "exclude": ("excluded", "contradicted"),
+                    "variant": ("variant", "brand"),
+                    "same_origin": ("same origin", "brand"),
+                    "separate_origin": ("separate origin", "brand"),
+                }.get(item["decision"], (item["decision"], "brand"))
+                disp = (f'{views.chip(label, cls)} '
                         f'<a href="/studies/{sid}/queue">adjudicated · {item["queue_id"]}</a>')
             elif cit_id in pending_cits:
                 disp = (f'<span class="chip invalid">quarantined · pending</span> '
@@ -257,6 +263,7 @@ class App:
                 "mode": p.get("mode"), "actor": c["frozen_event"]["actor"],
                 "claims": p.get("claims", []),
                 "linked": p.get("linked_exploratory", []),
+                "seq": c["frozen_event"]["seq"],
             }
         sidecar = self.ws.read_sidecar(sid, "freeze.json", {}) or {}
         ctx = {
@@ -277,36 +284,54 @@ class App:
         c = self.study_ctx(sid)
         exports = st.export_events(c["store"])
         held = {p.name: p for p in st.held_bundles(self.ws, sid)}
+        manifests = {name: _read_manifest(p) for name, p in held.items()}
         current = None
         if exports:
             latest = exports[-1]
             name = None
             manifest = None
-            for p in held.values():
-                m = _read_manifest(p)
+            for n, m in manifests.items():
                 if m and m.get("bundle_hash") == latest.get("bundle_hash"):
-                    name, manifest = p.name, m
+                    name, manifest = n, m
                     break
             verification = None
             if name is not None:
                 v = export_mod.verify_bundle(str(held[name]))
                 verification = {"ok": v.ok, "failures": v.failures}
+            retrieved_sidecar = self.ws.read_sidecar(
+                sid, "retrieved.json", {}) or {}
             current = {
                 "name": name or "bundle (exported)",
+                "format": (manifest or {}).get("format"),
+                "files": len((manifest or {}).get("files", [])),
                 "bundle_hash": latest.get("bundle_hash"),
                 "event_count": latest.get("event_count"),
                 "head_root": latest.get("checkpoint_root"),
                 "actor": latest.get("_actor"), "seq": latest.get("_seq"),
+                "post_anchor": any(a["_seq"] < latest.get("_seq", 0)
+                                    for a in c["anchors"]),
+                "not_included": [cid for cid, rec in retrieved_sidecar.items()
+                                 if rec.get("content_included") is False],
                 "verification": verification,
             }
         public_checks: dict[int, dict] = {}
         public_record = self.ws.read_sidecar(sid, "public-record.json")
         if public_record:
             for receipt in c["anchors"]:
-                for p in held.values():
-                    m = _read_manifest(p)
-                    if m and m.get("bundle_hash") == receipt.get("bundle_hash"):
-                        v = export_mod.verify_anchor(str(p), public_record)
+                # The public record must be THIS receipt's record, and
+                # the bundle used must be one that carries the receipt
+                # (a later export — the anchored bundle predates it).
+                if public_record.get("doi") != receipt.get("doi"):
+                    continue
+                for n in sorted(held, reverse=True):
+                    m = manifests[n]
+                    if not m:
+                        continue
+                    carried = any(
+                        a.get("bundle_hash") == receipt.get("bundle_hash")
+                        for a in m.get("anchors", []))
+                    if carried:
+                        v = export_mod.verify_anchor(str(held[n]), public_record)
                         public_checks[receipt["_seq"]] = {
                             "ok": v.ok, "failures": v.failures}
                         break
@@ -557,10 +582,22 @@ def _int_or_none(value: Optional[str]) -> Optional[int]:
 
 
 def resolve_identity(headers: Any, query: dict) -> dict:
+    """Identity precedence: SSO header > explicit query > the cookie
+    the query set on first contact > local defaults. The cookie keeps
+    the browser stand-in's identity across form POSTs, the way the
+    SSO header carries it in deployment."""
+    from urllib.parse import unquote
+    cookies = {}
+    for part in (headers.get("Cookie") or "").split(";"):
+        if "=" in part:
+            k, v = part.strip().split("=", 1)
+            cookies[k] = unquote(v)
     actor = (headers.get("X-Tekmerion-Actor")
-             or _first(query.get("actor")) or "local-operator")
+             or _first(query.get("actor"))
+             or cookies.get("tekmerion_actor") or "local-operator")
     role = (headers.get("X-Tekmerion-Role")
-            or _first(query.get("role")) or "researcher").strip().lower()
+            or _first(query.get("role"))
+            or cookies.get("tekmerion_role") or "researcher").strip().lower()
     if role not in st.ROLES:
         role = "researcher"
     return {"actor": actor.strip(), "role": role}
@@ -591,8 +628,23 @@ def make_handler(app: App):
             self.send_header("Content-Length", str(len(body)))
             for k, v in (headers or {}).items():
                 self.send_header(k, v)
+            for cookie in getattr(self, "_pending_cookies", []):
+                self.send_header("Set-Cookie", cookie)
             self.end_headers()
             self.wfile.write(body)
+
+        def _remember_identity(self, query: dict) -> None:
+            """Persist an explicitly supplied identity (the browser
+            stand-in for the SSO header) so later form POSTs, which
+            carry no query, keep acting under it."""
+            cookies = []
+            actor = _first(query.get("actor"))
+            role = _first(query.get("role"))
+            if actor:
+                cookies.append(f"tekmerion_actor={quote(actor, safe='')}; Path=/")
+            if role:
+                cookies.append(f"tekmerion_role={quote(role, safe='')}; Path=/")
+            self._pending_cookies = cookies
 
         def _html(self, text: str, status: int = 200) -> None:
             self._send(status, text.encode("utf-8"))
@@ -613,6 +665,7 @@ def make_handler(app: App):
             parsed = urlparse(self.path)
             query = parse_qs(parsed.query)
             ident = self._identity(query)
+            self._remember_identity(query)
             path = parsed.path
             try:
                 if path == "/static/style.css":
@@ -640,7 +693,9 @@ def make_handler(app: App):
 
         def do_POST(self) -> None:
             parsed = urlparse(self.path)
-            ident = self._identity(parse_qs(parsed.query))
+            query = parse_qs(parsed.query)
+            ident = self._identity(query)
+            self._remember_identity(query)
             form = self._form()
             path = parsed.path
             with _LOCK:

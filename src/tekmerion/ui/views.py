@@ -855,32 +855,40 @@ def _fmt_interval(interval: Any) -> str:
     return f"[{interval[0]:.2f}, {interval[1]:.2f}]"
 
 
-def _controls_cards(fields: list[dict[str, Any]], *, doc_present: bool) -> str:
-    cards = ""
-    for f in fields:
-        expected = f.get("expected")
-        expected_txt = (f'designed to be judged <strong>{e(expected.upper())}</strong>'
-                        if expected else
-                        "must be <strong>detected</strong> by production verification")
-        has_fixture = "fixture" in f
-        cards += f"""
+def _controls_card(fields: list[dict[str, Any]], *, frozen: bool) -> str:
+    """The wireframe (e) controls card: one card, one kv row per
+    control — failure mode, then its expected outcome and registered
+    rationale as a small second line."""
+    if not fields:
+        note = ("The workspace holds no copy of the frozen registration document "
+                "for this study, so its registered controls cannot be listed here. "
+                "The engine still enforces the frozen document by hash at export; "
+                "the swap control still runs."
+                if frozen else
+                "No controls registered yet — the freeze form registers them.")
+        return f"""
       <div class="card">
-        <h3>{chip(f.get('kind', ''))} {e(f.get('failure_mode', ''))}</h3>
-        <p class="muted" style="margin:0 0 10px">{e(_CONTROL_KIND_HELP.get(f.get('kind', ''), ''))} This control is {expected_txt}.</p>
-        <dl class="kv">
-          <dt>Rationale (registered)</dt><dd class="serif">“{e(f.get('representative_rationale', ''))}”</dd>
-          <dt>Run fixture</dt><dd>{'held by the workspace — the run executes this control' if has_fixture else 'none held — the run executes the swap control and any fixture-backed control only'}</dd>
+        <h3>Controls — each named by the failure it exists to catch</h3>
+        <p class="empty" style="margin:0">{note}</p>
+      </div>"""
+    rows = ""
+    for f in fields:
+        kind = f.get("kind", "")
+        if kind == "swap":
+            sub = "tampers a copy of this ledger; the production verifier must catch it"
+        else:
+            sub = f"expected: {e(f.get('expected') or '—')}"
+            if f.get("representative_rationale"):
+                sub += f" · rationale: {e(f['representative_rationale'])}"
+        rows += f"""
+          <dt>{e(kind.capitalize())}</dt>
+          <dd>{e(f.get('failure_mode', ''))}<br><span class="small muted">{sub}</span></dd>"""
+    return f"""
+      <div class="card">
+        <h3>Controls — each named by the failure it exists to catch</h3>
+        <dl class="kv">{rows}
         </dl>
       </div>"""
-    if not fields:
-        cards = ('<div class="card empty">The workspace holds no copy of the frozen '
-                 "registration document for this study, so its registered controls "
-                 "cannot be listed here. The engine still enforces the frozen "
-                 "document by hash at export; the swap control still runs.</div>"
-                 if doc_present else
-                 '<div class="card empty">No controls registered yet — the freeze '
-                 "form below registers them.</div>")
-    return cards
 
 
 def _verdict_rows(ctx: dict[str, Any]) -> str:
@@ -894,8 +902,12 @@ def _verdict_rows(ctx: dict[str, Any]) -> str:
               <td data-h="Interval" class="mono">{e(_fmt_interval(v.get('interval')))}</td>
             </tr>"""
     if not rows:
-        rows = ('<tr><td colspan="4" class="empty">No claim verdicts — if the latest '
-                "run was INVALID, none can exist for it (WS3 §1).</td></tr>")
+        if ctx["run"]["state"] == "invalid":
+            text = ("No claim verdicts — an INVALID run issues none (WS3 §1). "
+                    "Verdicts are never reconstructed or softened after the fact.")
+        else:
+            text = "No claim verdicts — no valid run has issued any yet."
+        rows = f'<tr><td colspan="4" class="empty">{text}</td></tr>'
     return rows
 
 
@@ -909,7 +921,16 @@ def render_freeze(ctx: dict[str, Any]) -> str:
         invalid_block = f"""
       <div class="run-invalid">
         <div class="run-head">RUN VERDICT: INVALID</div>
-        <p style="margin:0">The run-level checks returned these failure reasons from the engine: <span class="mono">{e(reasons)}</span>. By the verdict taxonomy (Article VI), a failed run-level check voids the run — no claim verdicts are issued from it, and no claim inherits a verdict it did not earn. The correct response is to fix the cause, re-freeze if the registration must change, and re-run; never to read verdicts off a failed run.</p>
+        <div class="run-body">
+          <p style="margin:0 0 8px"><strong>Why:</strong> <span class="mono">{e(reasons)}</span>.</p>
+          <p style="margin:0" class="small">A failed run-level check voids the run (Article VI): no claim verdicts are issued from it, and no claim inherits a verdict it did not earn. The correct response is to fix the cause, re-freeze if the registration must change, and re-run — never to read verdicts off a failed run.</p>
+        </div>
+      </div>"""
+    valid_block = ""
+    if run["state"] == "valid":
+        valid_block = """
+      <div class="banner-valid">
+        <strong>Latest run: valid.</strong> Claim verdicts were issued and are recorded below and in the register.
       </div>"""
     run_btn = ""
     if ctx["can_run"] and ctx["frozen"] and run["state"] in ("not-run", "invalid"):
@@ -926,18 +947,24 @@ def render_freeze(ctx: dict[str, Any]) -> str:
         fe = ctx["frozen"]
         linked = fe["linked"]
         linked_txt = (", ".join(linked) if linked
-                      else "none — <strong>empty discloses none, explicitly</strong> (FR-011)")
+                      else "none — disclosed explicitly (RT-3)")
+        mode_txt = e(fe["mode"]) + (f" · {e(ctx['deployment_shape'])}"
+                                    if ctx.get("deployment_shape") else "")
+        claims_txt = f"{len(fe['claims'])} ({', '.join(fe['claims'])})"
         reg_card = f"""
+      <div class="grid2">
       <div class="card">
-        <h3>Registration (frozen)</h3>
+        <h3>Registration {chip('frozen', 'brand')}</h3>
         <dl class="kv">
-          <dt>Registration hash</dt><dd class="mono">{e(fe['registration_hash'])}</dd>
-          <dt>Mode</dt><dd>{e(fe['mode'])}{(' · ' + e(ctx['deployment_shape'])) if ctx.get('deployment_shape') else ''}</dd>
-          <dt>Frozen by</dt><dd>{e(fe['actor'])}</dd>
-          <dt>Claims in registration</dt><dd class="mono">{e(', '.join(fe['claims']))}</dd>
-          <dt>Linked exploratory</dt><dd>{linked_txt}</dd>
-          <dt>Merkle checkpoint at freeze</dt><dd class="mono">{e(ctx['freeze_root'] or '—')}</dd>
+          <dt>Mode</dt><dd>{mode_txt}</dd>
+          <dt>Claims</dt><dd>{e(claims_txt)}</dd>
+          <dt>Linked exploratory</dt><dd>{e(linked_txt)}</dd>
+          <dt>Registration hash</dt><dd class="mono" style="word-break:break-all">{e(fe['registration_hash'])}</dd>
+          <dt>Frozen event</dt><dd><span class="mono">study.frozen</span> · seq {e(fe.get('seq', '—'))}</dd>
+          <dt>Checkpoint root</dt><dd class="mono" style="word-break:break-all">{e(ctx['freeze_root'] or '—')}</dd>
         </dl>
+      </div>
+      {_controls_card(ctx['control_fields'], frozen=True)}
       </div>"""
     elif ctx["can_freeze"]:
         control_fieldsets = ""
@@ -999,18 +1026,25 @@ def render_freeze(ctx: dict[str, Any]) -> str:
         reg_card = ('<div class="card empty">This study is not frozen. Freezing is an '
                     "adjudicator action (WS6 §1); this view offers no freeze form.</div>")
 
+    page_sub = ("The registration was frozen before outcomes were known (Article III). "
+                "What is frozen cannot be edited — an amendment is a new registration."
+                if ctx["frozen"] else
+                "The freeze seals the registration before outcomes are read. Verdicts "
+                "are computed only from frozen registrations, and only from valid runs.")
+    taxonomy = " ".join(
+        f'<span style="margin-right:2px">{verdict_chip(v)}</span>'
+        for v in ("supported", "inconclusive", "contradicted"))
     body = f"""
       <div class="crumb">Study · {e(sid)}</div>
       <h1>Freeze &amp; verdicts</h1>
-      <p class="page-sub">The freeze seals the registration before outcomes are read. Verdicts are computed only from frozen registrations, and only from valid runs.</p>
+      <p class="page-sub">{e(page_sub)}</p>
       {banner_refusal('Freeze refused.', ctx['refusal']) if ctx.get('refusal') else ''}
       {reg_card}
       {freeze_form}
-      <h2>Registered run controls</h2>
-      {_controls_cards(ctx['control_fields'], doc_present=bool(ctx['control_fields']))}
+      <h2>Evaluation run</h2>
       {invalid_block}
+      {valid_block}
       {run_btn}
-      <h2>Claim verdicts</h2>
       <div class="card flush">
         <table>
           <thead>
@@ -1020,7 +1054,7 @@ def render_freeze(ctx: dict[str, Any]) -> str:
           </tbody>
         </table>
       </div>
-      <p class="muted small">Taxonomy: <strong>SUPPORTED</strong> and <strong>CONTRADICTED</strong> require the registered falsifier to have been genuinely at risk — a capable falsifier test that could have observed the refuting outcome (Article VI). <strong>INCONCLUSIVE</strong> is a verdict, not an embarrassment: it is what the evidence honestly buys.</p>"""
+      <p class="muted small">Verdict taxonomy, when a valid run issues them: {taxonomy} — assigned claim-by-claim by the verdict service from the frozen registration, the evidence groups, and the falsifier test. INVALID attaches to runs, never to claims.</p>"""
     return shell(page_title="Freeze & verdicts", study=study, active="freeze",
                  actor=ctx["actor"], role=ctx["role"], links=ctx["links"], body=body,
                  actor_note=ctx["actor_note"], pending_count=ctx["pending_count"])
@@ -1034,34 +1068,56 @@ _MECHANISM_LABELS = {
 }
 
 
-def _anchor_card(receipt: dict[str, Any], *, public_check: Optional[dict] = None) -> str:
+def _fmt_ts(value: Optional[str]) -> str:
+    if not value:
+        return "—"
+    try:
+        from datetime import datetime
+        return datetime.fromisoformat(value).strftime("%Y-%m-%d %H:%M:%S UTC")
+    except ValueError:
+        return value
+
+
+def _anchor_card(receipt: dict[str, Any], *, public_check: Optional[dict] = None,
+                 newer_export: bool = False) -> str:
     mech = receipt.get("mechanism", "")
     label = _MECHANISM_LABELS.get(mech, mech)
     f = receipt.get("file") or {}
-    locator = receipt.get("doi") or receipt.get("locator") or ""
-    locator_txt = f'<a href="https://doi.org/{e(locator)}">{e(locator)}</a>' if receipt.get("doi") else e(locator)
-    verify_row = ""
+    doi = receipt.get("doi")
+    locator = receipt.get("locator") or (f"https://doi.org/{doi}" if doi else "")
+    rows = f"""
+          <dt>Mechanism</dt><dd>{e(label)}</dd>"""
+    if doi:
+        rows += f"""
+          <dt>DOI</dt><dd><a href="https://doi.org/{e(doi)}">{e(doi)}</a></dd>
+          <dt>Locator</dt><dd class="mono">{e(locator)}</dd>"""
+    elif locator:
+        rows += f"""
+          <dt>Locator</dt><dd class="mono">{e(locator)}</dd>"""
+    rows += f"""
+          <dt>Anchored root</dt><dd class="mono" style="word-break:break-all">{e(receipt.get('root', ''))}</dd>
+          <dt>Anchored bundle hash</dt><dd class="mono" style="word-break:break-all">{e(receipt.get('bundle_hash', ''))}</dd>"""
+    if newer_export:
+        rows += """
+          <dd class="muted small" style="grid-column:2">The current export re-exports the same record with this receipt appended — anchoring changes the record, so the export that proves it cannot be the export that was anchored.</dd>"""
+    rows += f"""
+          <dt>Anchored at</dt><dd>{e(_fmt_ts(receipt.get('anchored_at')))}</dd>
+          <dt>Approved by</dt><dd>{e(receipt.get('approved_by', ''))}</dd>
+          <dt>Deposited file</dt><dd>{e(f.get('name', ''))} · {f.get('bytes', 0):,} bytes · MD5 <span class="mono">{e(f.get('md5', ''))}</span></dd>
+          <dt>Receipt in record</dt><dd><span class="mono">anchor.recorded</span> · seq {receipt.get('_seq')}</dd>"""
     if public_check is not None:
         if public_check["ok"]:
-            verify_row = (f'<dt>Verified against the public record</dt><dd>'
-                          f'<span class="chip stage-ok">verified</span> · bundle verifies; '
-                          f"root and bundle hash match the deposit record; "
-                          f"file MD5 matches</dd>")
+            rows += ("""
+          <dt>Verify vs public record</dt><dd><span class="chip stage-ok">PASS</span> """
+                     """root + bundle hash stated in the public record match the anchored bundle; the deposited file's MD5 matches the local package</dd>""")
         else:
-            verify_row = (f'<dt>Verified against the public record</dt><dd>'
-                          f'<span class="chip invalid">FAILED</span> '
-                          f'<span class="mono">{e("; ".join(public_check["failures"]))}</span></dd>')
+            rows += (f"""
+          <dt>Verify vs public record</dt><dd><span class="chip invalid">FAILED</span> """
+                     f"""<span class="mono">{e("; ".join(public_check["failures"]))}</span></dd>""")
     return f"""
       <div class="card">
-        <h3>{e(label)} · <span class="mono">{locator_txt}</span></h3>
-        <dl class="kv">
-          <dt>Anchored checkpoint root</dt><dd class="mono">{e(receipt.get('root', ''))}</dd>
-          <dt>Bundle hash</dt><dd class="mono">{e(receipt.get('bundle_hash', ''))}</dd>
-          <dt>Anchored at</dt><dd>{e((receipt.get('anchored_at') or '').replace('T', ' ').rstrip('Z'))} UTC</dd>
-          <dt>Deposited file</dt><dd>{e(f.get('name', ''))} · {f.get('bytes', 0):,} bytes · MD5 <span class="mono">{e(f.get('md5', ''))}</span></dd>
-          <dt>Approved by</dt><dd>{e(receipt.get('approved_by', ''))}</dd>
-          <dt>Receipt in record</dt><dd><span class="mono">anchor.recorded</span> · seq {receipt.get('_seq')}</dd>
-          {verify_row}
+        <h3>Anchor record</h3>
+        <dl class="kv">{rows}
         </dl>
       </div>"""
 
@@ -1070,42 +1126,56 @@ def render_export(ctx: dict[str, Any]) -> str:
     study = ctx["study"]
     sid = study["id"]
     current = ctx["current_export"]
+    export_btn = ""
+    if ctx["can_export"]:
+        export_btn = f"""
+        <form method="post" action="/studies/{e(sid)}/export" style="display:inline">
+          <button class="btn primary" type="submit">Export bundle</button>
+        </form>
+        <a class="btn" href="#verify-bundle">Verify a bundle…</a>
+        <p class="muted small" style="margin:10px 0 0">Export fails closed: an unfrozen study, a mismatched registration, or a broken chain produces no bundle — the refusal is shown, with the engine's reason.</p>"""
     if current is None:
-        current_card = ('<div class="card empty">No bundle has been exported from '
-                        "this workspace yet. Export packages the whole record — "
-                        "ledger byte-for-byte — and verifies before it reports.</div>")
+        current_card = f"""
+      <div class="card">
+        <h3>Audit bundle — no export yet</h3>
+        <p class="empty" style="margin:0 0 12px">No bundle has been exported from this workspace yet. Export packages the whole record — ledger byte-for-byte — and verifies before it reports.</p>
+        {export_btn}
+      </div>"""
     else:
         ver = current["verification"]
         if ver is None:
             ver_dd = ('bundle produced by another workspace path — not held here, '
                       "so it is not shown verified")
         elif ver["ok"]:
-            ver_dd = ('<span class="chip stage-ok">verified</span> · from the bundle '
-                      "alone, no live ledger consulted")
+            ver_dd = ('<span class="chip stage-ok">PASS</span> manifest hashes · hash '
+                      "chain + signatures (production Axiomere verifier) · "
+                      "checkpoint-root match · registration binding · projection "
+                      "cross-checks — from the bundle alone, no live store")
         else:
             ver_dd = (f'<span class="chip invalid">FAILED</span> '
                       f'<span class="mono">{e("; ".join(ver["failures"]))}</span>')
+        retrieved_row = ""
+        if current["not_included"]:
+            ids = ", ".join(current["not_included"])
+            retrieved_row = f"""
+          <dt>Retrieved content</dt><dd>{e(ids)}'s source content is not in the bundle — its licence permits no redistribution (WS5 §4); the record states the licence basis instead</dd>"""
+        fmt_chip = f' {chip(current["format"])}' if current.get("format") else ""
+        post = " (post-anchor)" if current.get("post_anchor") else ""
         current_card = f"""
       <div class="card">
-        <h3>{e(current['name'])}</h3>
+        <h3>Audit bundle — current export ({e(current['name'])}){fmt_chip}</h3>
         <dl class="kv">
-          <dt>Bundle hash</dt><dd class="mono">{e(current['bundle_hash'])}</dd>
-          <dt>Ledger events</dt><dd>{current['event_count']} · head checkpoint root <span class="mono">{e(short_hash(current['head_root']))}</span></dd>
-          <dt>Exported by</dt><dd>{e(current['actor'])} · <span class="mono">export.generated</span> · seq {current['seq']}</dd>
-          <dt>Standalone verification</dt><dd>{ver_dd}</dd>
+          <dt>Bundle hash (SHA-256)</dt><dd class="mono" style="word-break:break-all">{e(current['bundle_hash'])}</dd>
+          <dt>Contents</dt><dd>{current['files']} files — ledger copied byte-for-byte, registration, claims, evidence, coverage, verification, verdicts, adjudication, queries, anchors, manifest, HUMAN-README</dd>
+          <dt>Ledger events</dt><dd>{current['event_count']} · head checkpoint root <span class="mono">{e(short_hash(current['head_root']))}</span>{post}</dd>
+          <dt>Standalone verification</dt><dd>{ver_dd}</dd>{retrieved_row}
         </dl>
+        {export_btn}
       </div>"""
-    export_btn = ""
-    if ctx["can_export"]:
-        export_btn = f"""
-        <form method="post" action="/studies/{e(sid)}/export">
-          <div class="row-actions">
-            <button class="btn primary" type="submit">Export audit bundle</button>
-            <span class="muted small">The engine refuses an export of an unfrozen study, or one whose registration hash does not match the freeze — the refusal is shown, not hidden.</span>
-          </div>
-        </form>"""
+    latest_seq = (current or {}).get("seq") or 0
     anchor_cards = "".join(
-        _anchor_card(r, public_check=ctx["public_checks"].get(r.get("_seq")))
+        _anchor_card(r, public_check=ctx["public_checks"].get(r.get("_seq")),
+                     newer_export=latest_seq > (r.get("_seq") or 0))
         for r in reversed(ctx["anchors"]))
     if not ctx["anchors"]:
         anchor_cards = ('<div class="card empty">No anchor receipt in this record. '
@@ -1113,7 +1183,7 @@ def render_export(ctx: dict[str, Any]) -> str:
                         "timestamped public record (Article VII) — deposits appear "
                         "here as receipts.</div>")
     verify_form = f"""
-      <div class="card">
+      <div class="card" id="verify-bundle">
         <h3>Verify a bundle</h3>
         <form method="post" action="/studies/{e(sid)}/verify-bundle">
           <div class="field">
@@ -1133,17 +1203,17 @@ def render_export(ctx: dict[str, Any]) -> str:
         if dep.get("request"):
             deposit_card = f"""
       <div class="card">
-        <h3>Deposit for anchoring</h3>
-        <p class="muted" style="margin:0 0 12px">A deposit needs an adjudicator's approval, and the approval is recorded with the deposit itself — three separate ledger events, three separate names possible. This view cannot approve one.</p>
+        <h3>Deposit a new anchor</h3>
+        <p class="muted" style="margin:0 0 12px">A deposit runs only with a named adjudicator's approval recorded first, and only for a bundle that verifies. This view cannot approve one.</p>
         <div class="row-actions" style="margin:0">
-          <a class="btn primary" href="{e(dep['link'])}">Request deposit approval</a>
-          <span class="muted small">Opens this page in the adjudicator view, where approval and deposit happen.</span>
+          <a class="btn" href="{e(dep['link'])}">Request deposit approval</a>
+          <span class="muted small">Shown in the adjudicator view as an approval action; approval, deposit, and receipt are three separate ledger events.</span>
         </div>
       </div>"""
         elif dep["available"]:
             deposit_card = f"""
       <div class="card">
-        <h3>Deposit for anchoring</h3>
+        <h3>Deposit a new anchor</h3>
         <p class="muted" style="margin-top:0">Deposit requires an adjudicator's approval, recorded in the anchor receipt itself. The deposit on this workspace runs through: <strong>{e(dep['transport_label'])}</strong>{' — a test transport; receipts from it are labelled as such, never presented as a public anchor' if dep['transport_is_test'] else ''}.</p>
         <form method="post" action="/studies/{e(sid)}/deposit">
           <div class="field">
@@ -1159,21 +1229,17 @@ def render_export(ctx: dict[str, Any]) -> str:
         else:
             deposit_card = f"""
       <div class="card">
-        <h3>Deposit for anchoring</h3>
+        <h3>Deposit a new anchor</h3>
         <p class="muted" style="margin:0">{e(dep['reason'])}</p>
       </div>"""
     body = f"""
       <div class="crumb">Study · {e(sid)}</div>
       <h1>Export &amp; anchor</h1>
-      <p class="page-sub">The audit bundle is the whole record, exportable and verifiable by anyone. Anchoring commits its Merkle root beyond this ledger.</p>
+      <p class="page-sub">The audit bundle is the exit guarantee: a complete, hash-verifiable record the institution can take elsewhere (DN-003). Anchoring puts the bundle's checkpoint root where the operator cannot rewrite it.</p>
       {banner_refusal('Refused.', ctx['refusal']) if ctx.get('refusal') else ''}
-      <h2>Current bundle</h2>
       {current_card}
-      {export_btn}
-      <h2>Anchoring receipt</h2>
       {anchor_cards}
       {deposit_card}
-      <h2>Standalone verification</h2>
       {verify_form}"""
     return shell(page_title="Export & anchor", study=study, active="export",
                  actor=ctx["actor"], role=ctx["role"], links=ctx["links"], body=body,

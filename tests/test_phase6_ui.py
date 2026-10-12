@@ -361,7 +361,7 @@ def test_integrity_view_offers_no_mutating_control_and_posts_are_refused(ui):
         _, _, body = client.get(path, role="integrity", actor="op-audit")
         for marker in ("Register claim", "Check citation", "Withdraw claim",
                        'name="decision"', "Freeze registration", "Run evaluation",
-                       "Export audit bundle"):
+                       "Export bundle"):
             assert marker not in body, (path, marker)
     before = len(ledger(ws, "s1").events())
     status, _, body = client.post(
@@ -400,7 +400,7 @@ def test_export_refusals_and_truthful_verification(ui):
     assert client.post("/studies/s1/export", {}, role="researcher",
                        actor="op-one")[0] == 303
     _, _, body = client.get("/studies/s1/export", role="researcher", actor="op-one")
-    assert "verified" in body  # standalone verification of the held bundle
+    assert "PASS" in body  # standalone verification of the held bundle
     # Tamper with the bundle: the verifier must say so, by name.
     bundle = ws / "studies" / "s1" / "exports" / "bundle-001"
     claims_file = bundle / "claims.json"
