@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Freeze &amp; verdicts — Tekmerion wireframe (e)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Defensible research records</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Study</div>
+      <div class="study-name">AR-1 demonstration — the 1905 electrodynamics paper</div>
+      <span class="chip" style="background:#274B74;border-color:#4A6E99;color:#DCE6F2">Frozen</span>
+      <span class="chip" style="background:#274B74;border-color:#4A6E99;color:#DCE6F2">Anchored · Zenodo</span>
+    </div>
+    <nav class="nav">
+      <a href="register.html">Claim register</a>
+      <a href="queue.html">Adjudication queue <span class="count">0 pending</span></a>
+      <a href="freeze-verdicts.html" class="active">Freeze &amp; verdicts</a>
+      <a href="export-anchor.html">Export &amp; anchor</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">adjudicator</div>
+      <div class="role-switch"><span>Researcher</span><span>Reviewer</span><span class="on">Adjudicator</span><span>Integrity</span></div>
+      <p class="micro" style="color:#9FB6CE">Freezes are approved by an adjudicator; the freeze itself is a Merkle checkpoint in the ledger.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="crumb">Study · ar1-demo-1905</div>
+      <h1>Freeze &amp; verdicts</h1>
+      <p class="page-sub">The registration was frozen before outcomes were known (Article III). What is frozen cannot be edited — an amendment is a new registration.</p>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>Registration <span class="chip brand">frozen</span></h3>
+          <dl class="kv">
+            <dt>Mode</dt><dd>confirmation</dd>
+            <dt>Claims</dt><dd>1 (CLM-D-001)</dd>
+            <dt>Linked exploratory</dt><dd>none — disclosed explicitly (RT-3)</dd>
+            <dt>Registration hash</dt><dd class="mono">238b1eb802de495016f0d71b03a398574b7a70540d7119c5991688a15b3950ff</dd>
+            <dt>Frozen event</dt><dd class="mono">study.frozen · seq 10</dd>
+            <dt>Checkpoint root</dt><dd class="mono">7434209696ea39ba8e97a33b5caa0ae08928269ea81c7d6407f423191e86e317</dd>
+          </dl>
+        </div>
+
+        <div class="card">
+          <h3>Controls <span class="muted small">— each named by the failure it exists to catch</span></h3>
+          <dl class="kv">
+            <dt>Positive</dt><dd>retrieval broken: known-true claim not supported<br><span class="small muted">expected: supported · rationale: known-answer control in the study's own domain</span></dd>
+            <dt>Negative</dt><dd>verification decorative: fabricated citation accepted<br><span class="small muted">expected: contradicted</span></dd>
+            <dt>Swap</dt><dd>integrity machinery decorative: provenance swap undetected<br><span class="small muted">tampers a copy of this ledger; the production verifier must catch it</span></dd>
+          </dl>
+        </div>
+      </div>
+
+      <h2>Evaluation run</h2>
+      <div class="run-invalid">
+        <div class="run-head">RUN VERDICT: INVALID</div>
+        <div class="run-body">
+          <p style="margin:0 0 8px"><strong>Why:</strong> swap control failed: provenance swap NOT detected by production verification.</p>
+          <p style="margin:0" class="small">In this study both swapped ledger events carry the same actor, so the tamper changed nothing and the verifier — correctly — saw an intact chain. A control that cannot fail cannot certify a run (Article VI). The defect is the control's fixed event selection; it is recorded in the study's assessment and scheduled as evaluation preparation. It is not hidden, and it is not worked around here.</p>
+        </div>
+      </div>
+
+      <div class="card flush">
+        <table>
+          <thead><tr><th>Claim</th><th>Verdict</th><th>Reason</th><th>Interval</th></tr></thead>
+          <tbody>
+            <tr><td colspan="4" class="empty" style="border:none">No claim verdicts — an INVALID run issues none (WS3 §1). Verdicts are never reconstructed or softened after the fact.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="muted small">Verdict taxonomy, when a valid run issues them:
+        <span class="chip supported">SUPPORTED</span>
+        <span class="chip inconclusive">INCONCLUSIVE</span>
+        <span class="chip contradicted">CONTRADICTED</span>
+        — assigned claim-by-claim by the verdict service from the frozen registration, the evidence groups, and the falsifier test. INVALID attaches to runs, never to claims.</p>
+
+      <p class="screen-note">Wireframe (e) — freeze &amp; verdicts, showing the demo study's real INVALID run. The taxonomy chips above are a legend for the verdict column, not results.</p>
+    </div>
+  </main>
+</div>
+</body>
+</html>

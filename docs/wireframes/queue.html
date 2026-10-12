@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adjudication queue — Tekmerion wireframe (d)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Defensible research records</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Study</div>
+      <div class="study-name">AR-1 demonstration — the 1905 electrodynamics paper</div>
+      <span class="chip" style="background:#274B74;border-color:#4A6E99;color:#DCE6F2">Frozen</span>
+      <span class="chip" style="background:#274B74;border-color:#4A6E99;color:#DCE6F2">Anchored · Zenodo</span>
+    </div>
+    <nav class="nav">
+      <a href="register.html">Claim register</a>
+      <a href="queue.html" class="active">Adjudication queue <span class="count">0 pending</span></a>
+      <a href="freeze-verdicts.html">Freeze &amp; verdicts</a>
+      <a href="export-anchor.html">Export &amp; anchor</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">adjudicator</div>
+      <div class="role-switch"><span>Researcher</span><span>Reviewer</span><span class="on">Adjudicator</span><span>Integrity</span></div>
+      <p class="micro" style="color:#9FB6CE">Decisions are appended events under the decider's name — never edits to the queued item.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="crumb">Study · ar1-demo-1905</div>
+      <h1>Adjudication queue</h1>
+      <p class="page-sub">Quarantined citations and grouping suspects wait here for a named human decision. Quarantined items contribute no evidence until decided.</p>
+
+      <div class="stats">
+        <div class="stat"><div class="num">0</div><div class="lab">Pending</div></div>
+        <div class="stat"><div class="num">2</div><div class="lab">Decided</div></div>
+        <div class="stat"><div class="num">1</div><div class="lab">Second reviews (RT-4)</div></div>
+        <div class="stat"><div class="num">0</div><div class="lab">Disagreements</div></div>
+      </div>
+
+      <h2>Pending</h2>
+      <div class="card empty">
+        No pending items. New quarantines (unresolved or disagreeing citations) and grouping suspects will appear here.
+      </div>
+
+      <h2>Decided</h2>
+
+      <div class="card">
+        <h3><span class="mono">ADQ-001</span> <span class="chip inconclusive">quarantine</span> <span class="chip brand">decision: variant</span> <span class="chip stage-ok">2nd review: agreed</span></h3>
+        <dl class="kv">
+          <dt>Reason queued</dt><dd>metadata disagreement: title</dd>
+          <dt>Citation</dt><dd><span class="mono">CIT-1</span> · claim <a href="claim.html">CLM-D-001</a></dd>
+          <dt>Stage outcomes</dt><dd>resolution <strong>resolved</strong> · agreement <strong>disagree</strong> (title) · content <span class="chip metaonly">metadata-only</span></dd>
+          <dt>Decided by</dt><dd>adjudicator</dd>
+          <dt>Rationale</dt><dd class="serif">“Crossref carries the German title; the citation's English title is the standard translation — same paper, legitimate variant.”</dd>
+          <dt>Second review</dt><dd>sampled under RT-4 · reviewer <strong>second-reviewer</strong> · <strong>agrees</strong></dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h3><span class="mono">ADQ-002</span> <span class="chip inconclusive">quarantine</span> <span class="chip contradicted">decision: exclude</span></h3>
+        <dl class="kv">
+          <dt>Reason queued</dt><dd>resolution failed</dd>
+          <dt>Citation</dt><dd><span class="mono">CIT-2</span> · claim <a href="claim.html">CLM-D-001</a></dd>
+          <dt>Stage outcomes</dt><dd>resolution <strong>not found</strong> · agreement — · content —</dd>
+          <dt>Decided by</dt><dd>adjudicator</dd>
+          <dt>Rationale</dt><dd class="serif">“DOI does not resolve at the source of record — fabricated; excluded.”</dd>
+          <dt>Second review</dt><dd class="muted">not sampled</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h3>Second-review sampling (RT-4)</h3>
+        <p style="margin:0" class="muted">Decisions are sampled deterministically (registered fraction 10%, seeded) for independent second review. Current window: <strong>1 review, 0 disagreements</strong>. A reviewed window of 5+ with zero disagreements is flagged as a rubber-stamp anomaly — a queue that never disagrees is treated like a control that never fails. <strong>Anomaly: none</strong> (window below the minimum of 5).</p>
+      </div>
+
+      <p class="screen-note">Wireframe (d) — adjudication queue. Both items are the demo study's real decisions, with their recorded rationales. The pending-decision form (actions on an undecided item) is specified in components.html — it appears only on pending items, only in the adjudicator view.</p>
+    </div>
+  </main>
+</div>
+</body>
+</html>

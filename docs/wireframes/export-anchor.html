@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Export &amp; anchor — Tekmerion wireframe (f)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Defensible research records</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Study</div>
+      <div class="study-name">AR-1 demonstration — the 1905 electrodynamics paper</div>
+      <span class="chip" style="background:#274B74;border-color:#4A6E99;color:#DCE6F2">Frozen</span>
+      <span class="chip" style="background:#274B74;border-color:#4A6E99;color:#DCE6F2">Anchored · Zenodo</span>
+    </div>
+    <nav class="nav">
+      <a href="register.html">Claim register</a>
+      <a href="queue.html">Adjudication queue <span class="count">0 pending</span></a>
+      <a href="freeze-verdicts.html">Freeze &amp; verdicts</a>
+      <a href="export-anchor.html" class="active">Export &amp; anchor</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">researcher</div>
+      <div class="role-switch"><span class="on">Researcher</span><span>Reviewer</span><span>Adjudicator</span><span>Integrity</span></div>
+      <p class="micro" style="color:#9FB6CE">Deposits require a named adjudicator's approval, recorded in the ledger before the deposit runs.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="crumb">Study · ar1-demo-1905</div>
+      <h1>Export &amp; anchor</h1>
+      <p class="page-sub">The audit bundle is the exit guarantee: a complete, hash-verifiable record the institution can take elsewhere (DN-003). Anchoring puts the bundle's checkpoint root where the operator cannot rewrite it.</p>
+
+      <div class="card">
+        <h3>Audit bundle — current export (v2) <span class="chip brand">tekmerion-audit-bundle/1</span></h3>
+        <dl class="kv">
+          <dt>Bundle hash (SHA-256)</dt><dd class="mono">65fca91221d274a65ca6e663faec229e3caf9bc7725c316e7bbd43dda3f4e1e6</dd>
+          <dt>Contents</dt><dd>13 files — ledger copied byte-for-byte, registration, claims, evidence, coverage, verification, verdicts, adjudication, queries, anchors, manifest, HUMAN-README</dd>
+          <dt>Ledger events</dt><dd>14 · head checkpoint root <span class="mono">dab67b1c…becce5</span> (post-anchor)</dd>
+          <dt>Standalone verification</dt><dd><span class="chip stage-ok">PASS</span> <span class="muted small">manifest hashes · hash chain + signatures (production Axiomere verifier) · checkpoint-root match · registration binding · projection cross-checks — from the bundle alone, no live store</span></dd>
+          <dt>Retrieved content</dt><dd>CIT-1's source content is not in the bundle — its licence (Wiley VOR terms) permits no redistribution (WS5 §4); the record states the licence basis instead</dd>
+        </dl>
+        <div class="row-actions">
+          <button class="btn primary" type="button">Export bundle</button>
+          <button class="btn" type="button">Verify a bundle…</button>
+          <span class="muted small">Export fails closed: an unfrozen study, a mismatched registration, or a broken chain produces no bundle — the refusal is shown, with the engine's reason.</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Anchor record <span class="chip brand">AR-1 · gate G2 evidence</span></h3>
+        <dl class="kv">
+          <dt>Mechanism</dt><dd>Zenodo deposit (DOI)</dd>
+          <dt>DOI</dt><dd><a class="mono" href="#" onclick="return false">10.5281/zenodo.23311479</a></dd>
+          <dt>Locator</dt><dd class="mono">https://doi.org/10.5281/zenodo.23311479</dd>
+          <dt>Anchored root</dt><dd class="mono">7434209696ea39ba8e97a33b5caa0ae08928269ea81c7d6407f423191e86e317</dd>
+          <dt>Anchored bundle hash</dt><dd class="mono">92093186dcd717eaa823d04e5f93d99b41a35ec31f4e7085da273891b6b7fc54</dd><dd class="muted small" style="grid-column:2">The deposited bundle was v1 (12 files). The current export (v2, above) re-exports the same record with this receipt appended — anchoring changes the record, so the export that proves it cannot be the export that was anchored.</dd>
+          <dt>Anchored at</dt><dd>2026-10-12 06:46:48 UTC</dd>
+          <dt>Approved by</dt><dd>Tristen Pierson (owner; Phase 5 go-order, 2026-10-12)</dd>
+          <dt>Deposited file</dt><dd><span class="mono">bundle-v1.zip</span> · 8,693 bytes · MD5 <span class="mono">7b014e9ac42546d39f0ea45d581d34c7</span></dd>
+          <dt>Receipt in record</dt><dd><span class="mono">anchor.recorded</span><div class="muted small" style="margin-top:4px">The receipt is an event in this study's ledger; this panel reads it from the record, not from deposit-side state.</div></dd>
+          <dt>Verify vs public record</dt><dd><span class="chip stage-ok">PASS</span> <span class="muted small">root + bundle hash stated in the public record match the anchored bundle (v1); the deposited file's MD5 matches the local package</span></dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h3>Deposit a new anchor</h3>
+        <p class="muted" style="margin:0 0 10px">A deposit runs only with a named adjudicator's approval recorded first, and only for a bundle that verifies. OSF is deposit-ready (metadata + component mapping); the executable transport is Zenodo, the DOI AR-1 names.</p>
+        <div class="row-actions">
+          <button class="btn" type="button">Request deposit approval</button>
+          <span class="muted small">Shown in the adjudicator view as an approval action; approval, deposit, and receipt are three separate ledger events.</span>
+        </div>
+      </div>
+
+      <p class="screen-note">Wireframe (f) — export &amp; anchor. The DOI, roots, and hashes are the live Phase 5 anchor record (DN-008). The bundle shown is v2 — exported after the anchor receipt was appended, which is why its head root differs from the anchored (freeze) root.</p>
+    </div>
+  </main>
+</div>
+</body>
+</html>

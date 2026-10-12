@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Component specimens — Tekmerion wireframes</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Defensible research records</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Wireframe package</div>
+      <div class="study-name">Component specimens</div>
+    </div>
+    <nav class="nav">
+      <a href="register.html">Claim register</a>
+      <a href="queue.html">Adjudication queue</a>
+      <a href="freeze-verdicts.html">Freeze &amp; verdicts</a>
+      <a href="export-anchor.html">Export &amp; anchor</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">About this page</div>
+      <p class="micro" style="color:#C9D8E8">States the demo study's record does not contain (a dead claim, a pending adjudication, verdict badges on claims) are specified here as specimens — clearly not study data.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <h1>Component specimens</h1>
+      <p class="page-sub">Design specimens — component states, <strong>not study data</strong>. Everything on the other wireframe screens is the Phase 5 demo study's real record; the states below exist in the machinery but not in that study, so they are specified here rather than fabricated there.</p>
+
+      <h2>Verdict badges (claim-level, from a valid run)</h2>
+      <div class="card">
+        <p style="margin:0 0 8px"><span class="chip supported">SUPPORTED</span> falsifier test ran, did not fire; interval clears the registered margin.</p>
+        <p style="margin:0 0 8px"><span class="chip inconclusive">INCONCLUSIVE</span> untested, below the sufficiency floor, interval straddles the margin — or the metadata-only cap (RT-5) binds.</p>
+        <p style="margin:0"><span class="chip contradicted">CONTRADICTED</span> the falsifier test fired, or the interval clears the margin in the contradicting direction.</p>
+      </div>
+
+      <h2>Dead claim row (register treatment)</h2>
+      <div class="card flush">
+        <table>
+          <thead><tr><th>Claim</th><th>Statement</th><th>Status</th><th>Score</th></tr></thead>
+          <tbody>
+            <tr class="dead-row">
+              <td data-h="Claim" class="mono">CLM-X-000 <span class="chip dead">DEAD</span></td>
+              <td data-h="Statement" class="statement"><span class="dead-statement">Specimen statement — a withdrawn claim remains readable in the register.</span></td>
+              <td data-h="Status">dead · reason: “withdrawn by the researcher: the question was superseded by a corrected registration”</td>
+              <td data-h="Score" class="mono">0.0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted small">Rule: a dead claim is never omitted and never shown as live. It renders muted, with the DEAD chip, the recorded reason verbatim, and score 0.0 (DN-005 dead semantics).</p>
+
+      <h2>Pending adjudication item (decision form)</h2>
+      <div class="card">
+        <h3><span class="mono">ADQ-000</span> <span class="chip inconclusive">quarantine</span> <span class="chip invalid">PENDING</span></h3>
+        <p class="muted" style="margin:0 0 10px">Specimen. Reason queued: metadata disagreement: year. Stage outcomes: resolution <strong>resolved</strong> · agreement <strong>disagree</strong> (year) · content <span class="chip metaonly">metadata-only</span>. Shown only on pending items, only in the adjudicator view.</p>
+        <div class="field">
+          <label>Decision</label>
+          <div class="row-actions" style="margin:0">
+            <button class="btn" type="button">Exclude</button>
+            <button class="btn" type="button">Variant</button>
+            <button class="btn" type="button">Same origin</button>
+            <button class="btn" type="button">Separate origin</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Rationale</label>
+          <textarea rows="2" placeholder="Why — recorded verbatim with the decision, under your name…"></textarea>
+          <div class="help">A decision is an appended event. Deciding twice is refused by the engine: a changed decision is a new adjudication, not an edit.</div>
+        </div>
+      </div>
+
+      <h2>Run banner — valid run (contrast with the INVALID banner)</h2>
+      <div class="banner-valid"><strong>Latest run: valid.</strong> Claim verdicts were issued and are recorded in the register. Controls passed through the production paths.</div>
+
+      <h2>Coverage meter (partial)</h2>
+      <div class="card">
+        <p style="margin:0">Specimen at 40%: <span class="meter"><span style="width:40%"></span></span> 2 of 5 origin groups content-checked. The meter never rounds up: the numeric fraction is always printed beside it.</p>
+      </div>
+
+      <h2>Role affordances (summary)</h2>
+      <div class="card flush">
+        <table>
+          <thead><tr><th>Action</th><th>Researcher</th><th>Reviewer</th><th>Adjudicator</th><th>Integrity</th></tr></thead>
+          <tbody>
+            <tr><td data-h="Action">View register / queue / bundles</td><td data-h="Researcher">✓</td><td data-h="Reviewer">✓</td><td data-h="Adjudicator">✓</td><td data-h="Integrity">✓ (read-only)</td></tr>
+            <tr><td data-h="Action">Register claims, attach citations</td><td data-h="Researcher">✓</td><td data-h="Reviewer">—</td><td data-h="Adjudicator">✓</td><td data-h="Integrity">—</td></tr>
+            <tr><td data-h="Action">Second review</td><td data-h="Researcher">—</td><td data-h="Reviewer">✓</td><td data-h="Adjudicator">✓</td><td data-h="Integrity">—</td></tr>
+            <tr><td data-h="Action">Adjudication decisions</td><td data-h="Researcher">—</td><td data-h="Reviewer">—</td><td data-h="Adjudicator">✓</td><td data-h="Integrity">—</td></tr>
+            <tr><td data-h="Action">Approve freeze / sign verdicts / approve deposits</td><td data-h="Researcher">—</td><td data-h="Reviewer">—</td><td data-h="Adjudicator">✓</td><td data-h="Integrity">—</td></tr>
+            <tr><td data-h="Action">Export bundle</td><td data-h="Researcher">✓</td><td data-h="Reviewer">✓</td><td data-h="Adjudicator">✓</td><td data-h="Integrity">— (verifies only)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted small">Per WS6 §1. The integrity view offers no mutating control at all — not disabled buttons: absent ones.</p>
+
+      <p class="screen-note">Wireframe (g) — component specimens. Companion to WIREFRAMES.md §§4–5.</p>
+    </div>
+  </main>
+</div>
+</body>
+</html>

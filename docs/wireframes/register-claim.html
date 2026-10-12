@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Register a claim — Tekmerion wireframe (b)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Defensible research records</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Study</div>
+      <div class="study-name">AR-1 demonstration — the 1905 electrodynamics paper</div>
+      <span class="chip" style="background:#274B74;border-color:#4A6E99;color:#DCE6F2">Frozen</span>
+      <span class="chip" style="background:#274B74;border-color:#4A6E99;color:#DCE6F2">Anchored · Zenodo</span>
+    </div>
+    <nav class="nav">
+      <a href="register.html" class="active">Claim register</a>
+      <a href="queue.html">Adjudication queue <span class="count">0 pending</span></a>
+      <a href="freeze-verdicts.html">Freeze &amp; verdicts</a>
+      <a href="export-anchor.html">Export &amp; anchor</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">researcher</div>
+      <div class="role-switch"><span class="on">Researcher</span><span>Reviewer</span><span>Adjudicator</span><span>Integrity</span></div>
+      <p class="micro" style="color:#9FB6CE">Identity arrives via the SSO hook (actor header). Every action is appended under this name.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="crumb"><a href="register.html">Claim register</a> · New claim</div>
+      <h1>Register a claim</h1>
+      <p class="page-sub">A registration is a signed snapshot appended to the study ledger. The statement is immutable from this moment; a change is a new claim that supersedes this one.</p>
+
+      <div class="banner-refusal">
+        <strong>Registration refused.</strong> <span class="mono">CLM-D-002: no falsifier — not registered (Article II)</span>
+        <div class="small" style="margin-top:4px">The engine refused this submission and nothing was written to the ledger. The state shown below is that refusal: the form exactly as submitted, the falsifier still empty.</div>
+      </div>
+
+      <div class="card">
+        <form>
+          <div class="grid2">
+            <div class="field">
+              <label for="cid">Claim ID</label>
+              <input id="cid" type="text" value="CLM-D-002">
+              <div class="help">CLM-&lt;study&gt;-&lt;number&gt;. Assigned once, never reused.</div>
+            </div>
+            <div class="field">
+              <label for="kind">Kind</label>
+              <select id="kind"><option>data</option><option>interpretation</option></select>
+              <div class="help">Kind decides how evidence origins are grouped (WS2 §2).</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="stmt">Statement</label>
+            <textarea id="stmt" rows="3" placeholder="The claim, stated so that evidence could in principle refute it…"></textarea>
+          </div>
+
+          <div class="field required-missing">
+            <label for="fals">Falsifier <span class="req-chip">Required · Article II</span></label>
+            <textarea id="fals" rows="2" placeholder="The observation that would refute this claim…"></textarea>
+            <div class="help"><strong>No falsifier, no registration.</strong> State what the source of record would have to show for this claim to be wrong. The register enforces this itself — this form cannot waive it, and neither can an adjudicator.</div>
+          </div>
+
+          <div class="grid2">
+            <div class="field">
+              <label for="margin">Margin</label>
+              <input id="margin" type="text" placeholder="e.g. 0.1">
+              <div class="help">The verdict test's registered margin (WS3). Required before freeze.</div>
+            </div>
+            <div class="field">
+              <label for="floor">Sufficiency floor</label>
+              <input id="floor" type="text" placeholder="e.g. 1">
+              <div class="help">Minimum independent origin groups. Required before freeze.</div>
+            </div>
+          </div>
+
+          <div class="grid2">
+            <div class="field">
+              <label for="deps">Dependencies</label>
+              <input id="deps" type="text" placeholder="CLM-… , EVG-…">
+              <div class="help">Claims or evidence groups this claim rests on. Circular support is rejected.</div>
+            </div>
+            <div class="field">
+              <label for="sup">Supersedes</label>
+              <input id="sup" type="text" placeholder="—">
+              <div class="help">If this claim replaces an earlier one, name it; the link is recorded both ways.</div>
+            </div>
+          </div>
+
+          <div class="row-actions">
+            <button class="btn primary" type="button">Register claim</button>
+            <a class="btn" href="register.html">Cancel</a>
+            <span class="muted small">Submitting appends the claim under your name: <strong>researcher</strong>.</span>
+          </div>
+        </form>
+      </div>
+
+      <p class="screen-note">Wireframe (b) — claim registration, shown in its refused state (falsifier empty). The refusal banner carries the engine's own message; the falsifier field's required treatment is part of the requirements, not decoration.</p>
+    </div>
+  </main>
+</div>
+</body>
+</html>

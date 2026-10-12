@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claim register — Tekmerion wireframe (a)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Defensible research records</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Study</div>
+      <div class="study-name">AR-1 demonstration — the 1905 electrodynamics paper</div>
+      <span class="chip" style="background:#274B74;border-color:#4A6E99;color:#DCE6F2">Frozen</span>
+      <span class="chip" style="background:#274B74;border-color:#4A6E99;color:#DCE6F2">Anchored · Zenodo</span>
+    </div>
+    <nav class="nav">
+      <a href="register.html" class="active">Claim register</a>
+      <a href="queue.html">Adjudication queue <span class="count">0 pending</span></a>
+      <a href="freeze-verdicts.html">Freeze &amp; verdicts</a>
+      <a href="export-anchor.html">Export &amp; anchor</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">researcher</div>
+      <div class="role-switch"><span class="on">Researcher</span><span>Reviewer</span><span>Adjudicator</span><span>Integrity</span></div>
+      <p class="micro" style="color:#9FB6CE">Identity arrives via the SSO hook (actor header). Every action is appended under this name.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="crumb">Study · ar1-demo-1905</div>
+      <h1>Claim register</h1>
+      <p class="page-sub">The register is the study. Registration hash
+        <span class="mono">238b1eb8…950ff</span> · freeze checkpoint root
+        <span class="mono">74342096…6e317</span> · ledger verification: <strong style="color:var(--ok)">intact</strong></p>
+
+      <div class="banner-invalid">
+        <strong>Latest run: INVALID.</strong> No claim verdicts were issued for this run.
+        <span class="why">A run the controls cannot certify issues no verdicts (WS3 §1) — the register shows that, not a softened version of it.</span>
+        <a href="freeze-verdicts.html">See the run →</a>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="num">1</div><div class="lab">Claims registered</div></div>
+        <div class="stat"><div class="num">2</div><div class="lab">Citations checked</div></div>
+        <div class="stat"><div class="num">1 / 2</div><div class="lab">Citations resolved</div></div>
+        <div class="stat"><div class="num">0%</div><div class="lab">Evidence content-checked</div></div>
+      </div>
+
+      <div class="card flush">
+        <table>
+          <thead>
+            <tr><th style="width:11%">Claim</th><th style="width:31%">Statement</th><th style="width:26%">Falsifier</th><th style="width:11%">Status</th><th style="width:12%">Evidence</th><th style="width:9%">Verdict</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-h="Claim" class="mono"><a href="claim.html">CLM-D-001</a></td>
+              <td data-h="Statement" class="statement">Einstein's electrodynamics paper appeared in Annalen der Physik in 1905, authored by Albert Einstein</td>
+              <td data-h="Falsifier" class="muted">The source of record holds no such paper, or names a different author, venue, or year</td>
+              <td data-h="Status"><span class="chip brand">Registered · frozen</span></td>
+              <td data-h="Evidence">1 origin group<br><span class="chip metaonly">metadata-only</span></td>
+              <td data-h="Verdict" class="muted">— none<br><span class="small">run invalid</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="row-actions">
+        <a class="btn primary" href="register-claim.html">Register a claim</a>
+        <span class="muted small">Registration is an append. There is no edit and no delete — a changed statement is a new claim that supersedes the old one.</span>
+      </div>
+
+      <p class="screen-note">Wireframe (a) — register home. Sample data: the Phase 5 AR-1 demonstration study (real record). Verdict cell is empty because the run was INVALID; see WIREFRAMES.md.</p>
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -48,7 +48,8 @@
 
 ## Phase 6 — UI
 
-- [ ] T219 Register-first study workspace; role views (researcher/reviewer/adjudicator/integrity).
+- [!] T219-WF **Wireframe approval gate (owner)** — added 2026-10-12 by owner ruling: wireframes first, and the wireframes are constitutional (DN-009; constitution Article XIV drafted for v1.2.0, taking effect on the same approval). The package in `docs/wireframes/` — screens (a)–(f) + component specimens, rendered at desktop + mobile — must be approved by the owner on the rendered screenshots before any UI implementation. **T219 does not start until this gate clears.**
+- [ ] T219 Register-first study workspace; role views (researcher/reviewer/adjudicator/integrity). *(Blocked on T219-WF.)*
 
 ## Phase 7 — Evaluation
 

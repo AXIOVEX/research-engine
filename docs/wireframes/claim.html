@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLM-D-001 — Tekmerion wireframe (c)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Defensible research records</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Study</div>
+      <div class="study-name">AR-1 demonstration — the 1905 electrodynamics paper</div>
+      <span class="chip" style="background:#274B74;border-color:#4A6E99;color:#DCE6F2">Frozen</span>
+      <span class="chip" style="background:#274B74;border-color:#4A6E99;color:#DCE6F2">Anchored · Zenodo</span>
+    </div>
+    <nav class="nav">
+      <a href="register.html" class="active">Claim register</a>
+      <a href="queue.html">Adjudication queue <span class="count">0 pending</span></a>
+      <a href="freeze-verdicts.html">Freeze &amp; verdicts</a>
+      <a href="export-anchor.html">Export &amp; anchor</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">researcher</div>
+      <div class="role-switch"><span class="on">Researcher</span><span>Reviewer</span><span>Adjudicator</span><span>Integrity</span></div>
+      <p class="micro" style="color:#9FB6CE">Identity arrives via the SSO hook (actor header). Every action is appended under this name.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="crumb"><a href="register.html">Claim register</a> · CLM-D-001</div>
+      <h1>CLM-D-001 <span class="chip brand">Registered · frozen</span> <span class="chip">kind: data</span></h1>
+      <p class="page-sub serif" style="font-size:17px;color:var(--ink)">“Einstein's electrodynamics paper appeared in Annalen der Physik in 1905, authored by Albert Einstein”</p>
+
+      <div class="card">
+        <h3>Falsifier</h3>
+        <p style="margin:0">The source of record holds no such paper, or names a different author, venue, or year.</p>
+        <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+        <dl class="kv">
+          <dt>Margin</dt><dd>0.1</dd>
+          <dt>Sufficiency floor</dt><dd>1 independent origin group</dd>
+          <dt>Dependencies</dt><dd>none</dd>
+          <dt>Registration hash</dt><dd class="mono">238b1eb802de495016f0d71b03a398574b7a70540d7119c5991688a15b3950ff</dd>
+          <dt>Verdict</dt><dd class="muted">none — the study's run was INVALID and issued no claim verdicts</dd>
+        </dl>
+      </div>
+
+      <h2>Evidence — origin groups</h2>
+      <div class="card">
+        <h3>EVG-001 <span class="chip metaonly">metadata-only</span></h3>
+        <p class="muted" style="margin:0 0 10px">1 item · stance: contextual. This group's content was never checked — its licence permits no content check — so it contributes <strong>no support mass and no falsifier exposure</strong> (RT-5). A claim resting only on metadata-only groups is capped at INCONCLUSIVE.</p>
+        <dl class="kv">
+          <dt>Support mass</dt><dd>0.00 (folded)</dd>
+          <dt>Contradiction mass</dt><dd>0.00 (folded)</dd>
+          <dt>Content coverage</dt><dd><span class="meter"><span style="width:0%"></span></span> 0 of 1 groups content-checked (0%)</dd>
+        </dl>
+      </div>
+
+      <h2>Citations — pipeline outcomes</h2>
+      <div class="card flush">
+        <table>
+          <thead>
+            <tr><th>Citation</th><th>Stage 1 · Resolution</th><th>Stage 2 · Agreement</th><th>Stage 3 · Content</th><th>Group</th><th>Disposition</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-h="Citation"><span class="mono">CIT-1</span><br><span class="small muted">cited as “On the Electrodynamics of Moving Bodies”, Einstein, 1905</span></td>
+              <td data-h="Stage 1 · Resolution"><span class="chip stage-ok">resolved</span><br><span class="small muted">crossref · 10.1002/andp.19053221004</span></td>
+              <td data-h="Stage 2 · Agreement"><span class="chip stage-bad">disagree</span><br><span class="small muted">mismatch: title</span></td>
+              <td data-h="Stage 3 · Content"><span class="chip metaonly">metadata-only</span></td>
+              <td data-h="Group" class="mono" style="white-space:nowrap">EVG-001</td>
+              <td data-h="Disposition"><span class="chip brand">variant</span><br><span class="small muted">adjudicated · <a href="queue.html">ADQ-001</a></span></td>
+            </tr>
+            <tr>
+              <td data-h="Citation"><span class="mono">CIT-2</span><br><span class="small muted">cited as “…Centenary Reprint”, Einstein, 2005</span></td>
+              <td data-h="Stage 1 · Resolution"><span class="chip stage-bad">not found</span><br><span class="small muted">10.1002/andp.19053229999</span></td>
+              <td data-h="Stage 2 · Agreement" class="muted">—</td>
+              <td data-h="Stage 3 · Content" class="muted">—</td>
+              <td data-h="Group" class="mono" style="white-space:nowrap">EVG-002</td>
+              <td data-h="Disposition"><span class="chip contradicted">excluded</span><br><span class="small muted">adjudicated · <a href="queue.html">ADQ-002</a></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>Retrieved record — CIT-1 (Crossref, source of record)</h3>
+        <dl class="kv">
+          <dt>Title</dt><dd class="serif">Zur Elektrodynamik bewegter Körper</dd>
+          <dt>Author / venue / year</dt><dd>A. Einstein · Annalen der Physik · 1905</dd>
+          <dt>Licence basis</dt><dd class="mono">http://onlinelibrary.wiley.com/termsAndConditions#vor</dd>
+          <dt>Content in bundle</dt><dd>not included — licence permits no redistribution (WS5 §4); the retrieved record above states the licence basis instead</dd>
+          <dt>Extractor</dt><dd class="mono">tekmerion.keyword-stance/1</dd>
+        </dl>
+      </div>
+
+      <div class="row-actions">
+        <button class="btn" type="button">Attach a citation</button>
+        <button class="btn danger" type="button">Withdraw claim (marks it dead)</button>
+        <span class="muted small">Withdrawal is a dead snapshot with a mandatory reason — the claim stays in the register, shown dead. There is no delete.</span>
+      </div>
+
+      <p class="screen-note">Wireframe (c) — claim detail. All values are the demo study's real record: CIT-1 resolved but title-disagreeing (German title at Crossref) and metadata-only; CIT-2 fabricated and excluded.</p>
+    </div>
+  </main>
+</div>
+</body>
+</html>
