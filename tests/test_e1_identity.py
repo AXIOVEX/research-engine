@@ -390,6 +390,53 @@ def test_au_event_class_completeness_sweep(world):
     svc.revoke_scim_token(admin2_session, tenant_id=world.tenant_id,
                           credential_id=cred.credential_id)
     svc.erase_directory_pii(admin2_session, identity_id=mallory.identity_id)
+    # E4 surface: the AU vocabulary grew again (break-glass lifecycle,
+    # webhook subscriptions, security-event emission, rate-limit
+    # trips), so the sweep grows with it — the E3 rule above.
+    from tekmerion.platform.errors import RateLimited
+    svc.register_webhook(admin2_session, tenant_id=world.tenant_id,
+                         url="https://hooks.uni-a.test/egress",
+                         signing="hmac-sha256", event_classes=["security.*"])
+    bg_sub, _ = svc.register_webhook(
+        admin2_session, tenant_id=world.tenant_id,
+        url="https://hooks.uni-a.test/disposable",
+        signing="hmac-sha256", event_classes=["webhook.test"])
+    svc.revoke_webhook(admin2_session, tenant_id=world.tenant_id,
+                       subscription_id=bg_sub.subscription_id)
+    svc.declare_break_glass_policy(
+        admin2_session, tenant_id=world.tenant_id,
+        invoker_roles=[authz.PLATFORM_ADMIN],
+        second_authorizer_plane="tenant_admin",
+        max_duration_seconds=3600,
+        scopes=[authz.TENANT_AUDIT_EXPORT])
+    alice_session, _alice = login_user(world, "alice", role=authz.RESEARCHER)
+    with pytest.raises(GateDenied):
+        svc.invoke_break_glass(alice_session, tenant_id=world.tenant_id,
+                               reason="sweep", duration_seconds=600)
+    bg = svc.invoke_break_glass(world.root_session, tenant_id=world.tenant_id,
+                                reason="sweep", duration_seconds=600)
+    with pytest.raises(GateDenied):
+        svc.authorize_break_glass(world.root_session,
+                                  bg_session_id=bg.bg_session_id)
+    svc.authorize_break_glass(admin2_session, bg_session_id=bg.bg_session_id)
+    svc.break_glass_act(bg.bg_session_id, action=authz.TENANT_AUDIT_EXPORT)
+    with pytest.raises(GateDenied):
+        svc.break_glass_act(bg.bg_session_id, action=authz.TENANT_MEMBER_MANAGE,
+                            identity_id=_alice.identity_id)
+    svc.close_break_glass(world.root_session, bg_session_id=bg.bg_session_id)
+    svc.record_break_glass_review(admin2_session, tenant_id=world.tenant_id,
+                                  bg_session_id=bg.bg_session_id,
+                                  disposition="sweep-reviewed")
+    svc.revoke_break_glass_policy(admin2_session, tenant_id=world.tenant_id)
+    # Rate-limit trip (recorded stop) — last: advance past the rate
+    # window so this test's own earlier traffic ages out, set the
+    # tenant's budget to 2/min, and the third login begin trips it.
+    world.clock_box[0] += 120
+    svc.directory.tenant(world.tenant_id).policy.rate_limit_per_minute = 2
+    svc.begin_login(world.tenant_id, world.issuer_a)
+    svc.begin_login(world.tenant_id, world.issuer_a)
+    with pytest.raises(RateLimited):
+        svc.begin_login(world.tenant_id, world.issuer_a)
 
     recorded = set(tenant_types(world)) | set(svc.deployment_ledger.event_types())
     for cls, types in AU_EVENT_CLASSES.items():

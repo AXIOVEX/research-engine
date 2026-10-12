@@ -48,15 +48,15 @@
 
 ## Phase E4 — Tenancy hardening + isolation battery
 
-- [ ] T526 Tenant scoping at the data-access layer: every entity tenant-bound; tenant context never taken from request parameters.
-- [ ] T527 Isolation battery: tenant A credential vs tenant B resources across every endpoint class — uniform not-found, zero B bytes (F-005-11).
-- [ ] T528 Cross-plane battery: platform-admin cannot sign study verdicts; tenant-admin cannot cross tenants (F-005-09).
-- [ ] T529 Break-glass: per-tenant declared policy, dual authorization, time box, alarm to tenant admins + security log, session-marked audit events, automatic post-use review item (F-005-10). [CMMC: break-glass use is an IR egress event class (T554).]
-- [ ] T530 Session/transport baseline: cookie attributes, idle/absolute lifetimes, TLS-only, header set, per-tenant 429 limits — battery per F-005-19's enumeration.
-- [ ] T531 Webhook egress: signed deliveries (HMAC-SHA256 or Ed25519), replay window, retry/backoff, delivery audit events; reference receiver + rejection tests (F-005-21). [CMMC: carries the IR security-event classes of T554.]
-- [ ] T532 Reconciliation join: platform events ↔ study appends on the identity↔key binding; auditor walk + no-cross-identity test (F-005-22).
-- [ ] T554 [CMMC] IR security-event classes (E4): authentication-failure bursts, break-glass use, revocation storms, audit-verification failures are first-class signed egress events over the T531 channel (CLM-005-30, IR half).
-- [ ] T533 Phase exit: re-assessment + Spec 002 battery. **Pilot gate (G2 analog) is evaluated here:** isolation battery green + platform audit export demonstration scheduled in E6.
+- [x] T526 Tenant scoping at the data-access layer: every entity tenant-bound; tenant context never taken from request parameters.
+- [x] T527 Isolation battery: tenant A credential vs tenant B resources across every endpoint class — uniform not-found, zero B bytes (F-005-11).
+- [x] T528 Cross-plane battery: platform-admin cannot sign study verdicts; tenant-admin cannot cross tenants (F-005-09).
+- [x] T529 Break-glass: per-tenant declared policy, dual authorization, time box, alarm to tenant admins + security log, session-marked audit events, automatic post-use review item (F-005-10). [CMMC: break-glass use is an IR egress event class (T554).]
+- [x] T530 Session/transport baseline: cookie attributes, idle/absolute lifetimes, TLS-only, header set, per-tenant 429 limits — battery per F-005-19's enumeration.
+- [x] T531 Webhook egress: signed deliveries (HMAC-SHA256 or Ed25519), replay window, retry/backoff, delivery audit events; reference receiver + rejection tests (F-005-21). [CMMC: carries the IR security-event classes of T554.]
+- [x] T532 Reconciliation join: platform events ↔ study appends on the identity↔key binding; auditor walk + no-cross-identity test (F-005-22).
+- [x] T554 [CMMC] IR security-event classes (E4): authentication-failure bursts, break-glass use, revocation storms, audit-verification failures are first-class signed egress events over the T531 channel (CLM-005-30, IR half).
+- [x] T533 Phase exit: re-assessment + Spec 002 battery. **Pilot gate (G2 analog) is evaluated here:** isolation battery green + platform audit export demonstration scheduled in E6.
 
 ## Phase E5 — Admin console (wireframe-gated)
 

@@ -36,6 +36,15 @@ class TenantPolicy:
     stepup_freshness_seconds: float = 600   # verdict/admin step-up must be this fresh
     session_idle_seconds: float = 1800      # §9 default 30 min
     session_absolute_seconds: float = 43200  # §9 default 12 h
+    # E4 (T530/T554): per-tenant rate limit per endpoint class, and the
+    # security-event detector thresholds (§6 tenant budgets; §13.7 IR
+    # hooks). Defaults are operational headroom, not a posture claim —
+    # tenants configure them down (and the battery proves 429s at low
+    # settings); there is no setting that disables the limit.
+    rate_limit_per_minute: int = 600        # per tenant, per endpoint class
+    auth_failure_burst_threshold: int = 10  # failures inside the window fire one IR event
+    security_window_seconds: float = 300
+    revocation_storm_threshold: int = 5     # revocations inside the window fire one IR event
 
 
 @dataclass
@@ -180,6 +189,12 @@ class Directory:
         self.sessions: dict[str, Session] = {}
         self.api_keys: dict[str, ApiKeyRecord] = {}            # key_id
         self._saml_consumed: dict[str, float] = {}             # assertion/response ID -> expiry
+        # E4 state: break-glass policies/sessions (breakglass.py shapes)
+        # and webhook subscriptions (webhooks.py shapes). Working state
+        # only — every transition is a ledger event first.
+        self.break_glass_policies: dict[str, object] = {}      # tenant_id -> BreakGlassPolicy
+        self.break_glass_sessions: dict[str, object] = {}      # bg_session_id -> BreakGlassSession
+        self.webhook_subscriptions: dict[str, object] = {}     # subscription_id -> WebhookSubscription
 
     # -- tenants / IdPs ---------------------------------------------------
 

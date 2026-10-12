@@ -30,3 +30,17 @@ class GateDenied(PlatformError):
 class AuthorizationDenied(PlatformError):
     """The authorization service denied an action for an authenticated
     principal (admin-plane and service operations)."""
+
+
+class RateLimited(PlatformError):
+    """The per-tenant rate limit for an endpoint class is exhausted
+    (Spec 005 §6/§9, E4/T530). Carries the HTTP semantics an adapter
+    answers with: 429 + a retry delay. The trip is recorded in the
+    tenant's audit ledger before this is raised — exhaustion is a
+    recorded stop, never a surprise (§6)."""
+
+    http_status = 429
+
+    def __init__(self, message: str, *, retry_after_seconds: float = 60.0) -> None:
+        super().__init__(message)
+        self.retry_after_seconds = retry_after_seconds

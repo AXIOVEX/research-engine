@@ -22,8 +22,11 @@ its status on evidence.
 | 10 | Session tokens, enrollment nonces, API secrets (generation) | Platform service layer | CSPRNG output | Python `secrets` (OS entropy) | Not a module-validation question; listed for completeness |
 | 11 | TLS to IdP endpoints | Platform runtime | TLS 1.2+ | Python `urllib`/OpenSSL as deployed | Deployment-dependent; **no claim** |
 | 12 | SAML assertion/response signature verification (E2) | Platform service layer (`platform/saml.py`, `platform/xmlc14n.py`, `platform/x509.py`) | XML-DSig: RSA PKCS#1 v1.5 + SHA-256 (verify-only), SHA-256 reference digests, exclusive C14N | Pure-Python in this repo — the RS256 verifier is #6's; the canonicalizer and X.509 key extraction are new in E2, prototype-grade | **No** |
+| 13 | Webhook egress payload signing (E4) | Platform service layer (`platform/webhooks.py`) | HMAC-SHA256 over `timestamp + "." + body` | Python `hmac`/`hashlib` (OpenSSL-backed, not in FIPS mode) | **No** |
 
 **E3 note (2026-10-12):** E3 adds SCIM provisioning credentials (per-tenant Bearer secrets). Their generation uses the row-10 CSPRNG and their at-rest hashing is row 8’s operation (SHA-256 via the existing `hash_api_secret`, the same function that hashes API-key secrets) — no new algorithm, implementation, or operation class was introduced, so no new row is added. Credential IDs and secret hashes are what ledgers record; secret material never appears in a ledger, config, or SCIM resource.
+
+**E4 note (2026-10-12):** E4 adds webhook egress signing, which gains row 13 (HMAC-SHA256). The Ed25519 egress signing mode is row 4's implementation (same module, `platform/ed25519.py`) and gains no row. Break-glass, rate limiting, and the T554 detectors introduce no new cryptographic operation: session ids and delivery ids are row-10 CSPRNG output, egress-secret generation is row 10, and subscription records carry row 9 fingerprints — secret material never appears in a ledger, config, or delivery record.
 
 ## Reading this table
 

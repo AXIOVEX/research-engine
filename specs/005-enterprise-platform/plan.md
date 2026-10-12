@@ -180,3 +180,73 @@ understood at this exit: live SCIM-client interoperability (no
 Entra/Okta tenant exercised — fixtures only), SCIM↔login account
 linking (unspecced; the dual-door fact now has a third door), and
 provisioning behavior at institutional directory volumes.
+
+**E4 — Tenancy hardening + break-glass: EXITED 2026-10-12** (branch
+`enterprise/e4-tenancy`; PR opened for CI; merging is the
+coordinator's). Delivered: tenant scoping audited and enforced at
+every service surface — tenant context is taken from the resolved
+session / addressed resource, never from a caller's tenant parameter
+(T526); the isolation battery across OIDC, SAML, SCIM, keys, API
+keys, lifecycle, break-glass, webhooks, and audit reads — every
+cross-tenant attempt refused with zero of the other tenant's bytes,
+target state unmoved, both chains verifying afterwards (T527,
+F-005-11); the cross-plane battery in both directions (T528,
+F-005-09); break-glass as the declared mechanism of §5 — per-tenant
+declaration (tenant-admin act naming invoker roles, a
+second-authorizer plane, scopes restricted to what the mechanism
+can exercise, and a time box under the hard 4h ceiling), dual
+authorization (never the invoker), every step a marked event in
+BOTH the tenant ledger and the deployment security log, expiry that
+closes the session and auto-creates the post-use review item, no
+extension path (T529, F-005-10); the session/transport baseline —
+real idle/absolute session-lifetime enforcement, the header/cookie/
+TLS contract as asserted data, per-tenant per-endpoint-class rate
+limits answering 429 with the trip ledgered (T530, F-005-19);
+webhook egress — HMAC-SHA256 or Ed25519 signed deliveries, 300s
+replay window, retry/backoff with every attempt a platform audit
+event, and the reference receiver rejecting unsigned, badly-signed,
+stale, and replayed deliveries by name (T531, F-005-21); the T554
+IR security-event classes as first-class signed egress (auth-failure
+bursts, revocation storms, break-glass use, audit-verification
+failures) (T554, CLM-005-30 IR half); audit read + chain-verification
+surfaces and the reconciliation join on the identity↔key binding
+(T532, F-005-22). Tests: 318 passed, 2 skipped locally (288 prior +
+30 new); the E1 AU completeness sweep was extended a third time to
+exercise the E4 vocabulary. Claims at exit (bundle v0.6.0,
+re-assessed `after_implement`, outcome `gather_evidence` — 4 claims
+remain below threshold, all E6 scope or the standing DFARS flag:
+005-12, 17, 28, 31): supported — CLM-005-09† (cross-plane battery),
+10 (break-glass), 11 (isolation), 14† (audit enumeration complete,
+incl. break-glass use), 19 (baseline), 21 (egress), 22
+(reconciliation), 26† (review half: audit reads, honest
+verification, the join; retention is the ledger's append-only
+construction); partially_supported — CLM-005-30 (IR half delivered
+at E4 per tasks.md — one phase earlier than the claim's boundary
+text contemplated; the POA&M register half is E6/T553). CMMC
+maintenance: the responsibility matrix was reviewed — no
+classification changes (rows 3.3.4/3.3.5/3.6.1/3.6.2 already name
+T554/CLM-005-22 mechanisms as their basis; E4 makes the basis
+true); the crypto inventory gains row 13 (webhook HMAC-SHA256, not
+FIPS-validated — the §3.13.11 gap is unchanged under the owner's
+recorded FIPS timing decision). Pilot gate (T533): the isolation
+battery is green; the platform audit export demonstration remains
+scheduled in E6 (T542/T543) — the gate's second half is an E6
+deliverable, recorded here as evaluated-not-yet-discharged. Two
+defects were caught by the batteries and fixed in-phase: a
+break-glass record helper collided a caller-named target with the
+ledger record's own target field (found by the extended AU sweep),
+and the AU sweep itself initially tripped the new rate limiter on
+the test's own earlier traffic (battery construction, fixed by
+window hygiene). One behavior the tamper battery exposed and the
+record states plainly: effective roles replay from the tenant
+ledger (the ledger is the record of truth), so tampering with a
+role.granted event changes what the replay computes — detection is
+the verification surface's job, and it fires (hash-mismatch,
+security event, signed egress). What remains not understood at this
+exit: no live external webhook receiver or IdP/SCIM client has been
+exercised (the receiver is the shipped reference implementation;
+customer receivers will differ); rate-limit and detector behavior
+at institutional event volumes; break-glass under a real incident's
+human process (the mechanism is built and batteried; the drill is
+an E6/pilot activity); SCIM↔login account linking remains
+unspecced (carried from E3).
