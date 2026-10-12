@@ -177,7 +177,15 @@ def test_baseline_headers_and_cookie_contract(serve, app, world):
     assert headers["Strict-Transport-Security"].startswith("max-age=63072000")
     assert headers["X-Content-Type-Options"] == "nosniff"
     assert headers["X-Frame-Options"] == "DENY"
-    assert "frame-ancestors 'none'" in headers["Content-Security-Policy"]
+    csp = headers["Content-Security-Policy"]
+    assert "frame-ancestors 'none'" in csp
+    # Console-local CSP (see CONSOLE_CSP in server.py): the approved
+    # design system's inline styles are admitted; scripts are not —
+    # default-src 'self' still governs script-src, and no
+    # 'unsafe-inline' appears outside the style-src clause.
+    assert csp.startswith("default-src 'self'; style-src 'self' "
+                          "'unsafe-inline';")
+    assert "script-src" not in csp
 
 
 # ------------------------------------------------- sign-in (CLM-005-01)

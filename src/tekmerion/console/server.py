@@ -54,6 +54,22 @@ from .build import BUILD_ID
 _LOCK = threading.Lock()
 _SESSION_COOKIE = baseline.SESSION_COOKIE_NAME
 
+#: The §9 baseline CSP is `default-src 'self'` — correct for an API
+#: adapter, but the approved wireframe design system (like the Phase
+#: 6 study UI before it) carries data-driven INLINE styles: meter
+#: widths, stat-grid column counts, the sidebar actor chip, the
+#: standalone pages' brand color. Served under the unmodified
+#: baseline CSP those attributes are inert and the console does NOT
+#: render as approved (verified by screenshot: the sign-in brand
+#: rendered white-on-paper). The console therefore serves the
+#: baseline headers with one bounded adjustment: style-src gains
+#: 'unsafe-inline'. Script posture is unchanged — default-src
+#: 'self' still governs script-src, and the console emits no inline
+#: script anywhere. baseline.py itself is untouched; this is a
+#: console-local serving decision, recorded in the E5 exit record.
+CONSOLE_CSP = ("default-src 'self'; style-src 'self' 'unsafe-inline'; "
+               "frame-ancestors 'none'")
+
 
 # ------------------------------------------------------------ data helpers
 
@@ -1039,6 +1055,12 @@ class ConsoleApp:
                 "first_seen": first_seen.get(ident.identity_id),
                 "roles": roles})
         names = _actor_names(directory, tenant_id)
+        # Grantors may sit in another scope (a platform admin's grants
+        # land in this tenant's ledger): resolve names directory-wide,
+        # falling back to the tenant-scoped map.
+        for ident in directory.identities.values():
+            names.setdefault(ident.actor_id,
+                             ident.display_name or ident.subject)
         grant_events = []
         for ev in reversed(events):
             if ev.get("type") in ("role.granted", "role.revoked"):
@@ -1325,6 +1347,8 @@ def create_server(app: Optional[ConsoleApp], host: str = "127.0.0.1",
                 method, parsed.path, query, form, cookies)  # type: ignore[attr-defined]
             self.send_response(status)
             for k, v in baseline.security_headers().items():
+                if k == "Content-Security-Policy":
+                    v = CONSOLE_CSP  # see the note at CONSOLE_CSP
                 self.send_header(k, v)
             for k, v in headers:
                 self.send_header(k, v)

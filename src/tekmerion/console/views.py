@@ -116,7 +116,8 @@ def _actor_utilities(ctx: dict) -> str:
         step = '<span class="micro">Step-up: fresh MFA on this session.</span>'
     else:
         step = ('<a href="/auth/step-up">Step up (fresh MFA)</a> — '
-                "verdict-class and admin-plane actions require it.")
+                "adjudicator key actions require it; the window is "
+                "recorded session policy.")
     return (f'<p class="micro">{step}</p>'
             '<form method="post" action="/auth/logout" style="margin:0">'
             '<button class="btn" type="submit">Sign out</button></form>')
@@ -766,8 +767,7 @@ def render_users(ctx: dict) -> str:
       <p class="small muted">Every grant and revocation names grantor and grantee in the
         tenant ledger itself (<span class="mono">role.granted</span> /
         <span class="mono">role.revoked</span>) — this table is a projection of the ledger,
-        not a separate record. Platform powers are granted only from the platform plane,
-        under a fresh platform step-up.</p>
+        not a separate record. Platform powers are granted only from the platform plane.</p>
 
       <h2>Create an identity record</h2>
       <form method="post" action="/tenant/users/create">
