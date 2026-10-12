@@ -5,9 +5,9 @@ taxonomy:
 
 | Verdict | Meaning |
 |---|---|
-| **Supported** | The evidence interval clears the claim's registered margin, on at least the registered sufficiency floor of independent origin groups. |
-| **Contradicted** | The evidence interval clears the margin in the negative direction — or the claim's falsifier was observed. |
-| **Inconclusive** | The evidence does not clear the margin either way: too little of it, too diluted (e.g. metadata-only records priced as ignorance), or below the sufficiency floor. A result, not a failure. |
+| **Supported** | The range of values the evidence supports sits entirely above the line the claim fixed in advance (its margin), and at least the required number of independent origin groups (its sufficiency floor) back it. |
+| **Contradicted** | That range sits entirely below the line, in the negative direction — or the claim's falsifier was observed. |
+| **Inconclusive** | The range straddles the line either way: too little evidence, evidence spread too thin (catalogue records with no full text to check count as not knowing, not as support), or too few independent origin groups. A result, not a failure. |
 | **Contested** | (Theorem claims) a load-bearing sub-claim — classically attribution — is under a live, evidenced dispute. The parent cannot stand above it. |
 | **Invalid** | Not a claim verdict: the *run itself* was defective (a control failed, the chain broke, adjudication items were left undecided, no frozen registration). An invalid run issues no claim verdicts at all. |
 
@@ -16,8 +16,9 @@ taxonomy:
 A verdict exists only if a `verdict.issued` event exists in the study
 ledger, produced by the production verdict machinery against a frozen
 registration. "The evidence looks strong" is not a verdict. Verdicts
-are claim-by-claim, each with its interval and margin — never a single
-blended score that hides a weak link.
+are claim-by-claim, each with the range its evidence supports and the
+line it fixed in advance — never a single blended score that hides a
+weak link.
 
 ## Controls that can fail
 
@@ -31,8 +32,9 @@ named failure mode:
 - **Swap** — a provenance swap between early ledger lines must be
   detected by the verifier.
 
-A check that cannot differentially fail marks the run **invalid**
-rather than passing it. This is not hypothetical: the project's own
+A control that would pass whether or not the failure it watches for
+had happened proves nothing — it marks the run **invalid** rather
+than passing it. This is not hypothetical: the project's own
 Phase 5 demonstration run was INVALID because its swap control was a
 no-op on a single-actor ledger (see
 [the demo study](../evidence/demo-study.md)).

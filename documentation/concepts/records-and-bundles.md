@@ -4,12 +4,13 @@
 
 Every study is a ledger in
 [Axiomere](https://github.com/AXIOVEX/axiomere) (the record layer,
-documented in its own repositories): a single `.axmr` file of hash-chained,
-Ed25519-signed events — SHA-256 chain over canonical event encodings,
-content-addressed snapshots, signed Merkle checkpoints. There is no
+documented in its own repositories): a single `.axmr` file of
+hash-chained, Ed25519-signed events — each event written in one fixed
+format (its canonical encoding), chained with SHA-256 hashes,
+with content-addressed snapshots and signed Merkle checkpoints. There is no
 update and no delete, in the API or beneath it; a ledger that fails
-verification refuses to open for appends. Tekmerion's service layer
-adds a whole-second-timestamp discipline on its platform ledgers.
+verification refuses to open for appends. On its platform ledgers,
+Tekmerion's service layer records timestamps to whole seconds only.
 
 Corrections — to claims, citations, verdicts' inputs — are appends:
 a superseding claim, an adjudication decision, a withdrawal with a
@@ -29,20 +30,23 @@ checks the projections against the ledger's events payload-for-payload
 
 ## External anchors
 
-A bundle that only its operator can check is a sole-copy claim, so
-bundles are anchored where the operator does not control the record:
+If only the operator can check a bundle, everyone else has to take
+the operator's word for it — so bundles are anchored where the
+operator does not control the record:
 
 - **Zenodo** deposits (DOIs) for study bundles — the worked study,
   the Phase 7 evaluation, and the demonstration are all deposited.
 - **OSF** registration (Spec 010): the demonstration study is
   publicly registered at [osf.io/84dk7](https://osf.io/84dk7/)
-  (DOI 10.17605/OSF.IO/84DK7), with the deposit transport built to
-  the same refusal discipline (provider errors verbatim, rate limits
-  are a stop, never a retry storm).
+  (DOI 10.17605/OSF.IO/84DK7). The deposit code follows the same
+  rules as the engine: a provider's error is passed through word for
+  word, and a rate limit is a full stop, never something to push
+  against with retries.
 
 `verify_anchor` checks a bundle's carried receipt and registration
 against the independently fetched public record. One precision the
 records insist on: the anchor binds the deposited bundle version and
 the freeze checkpoint root; a re-exported bundle carrying the receipt
 is verifiable in contents and registration, but its own hash is
-anchored nowhere — self-attested as an artifact, and stated as such.
+anchored nowhere: as a file it vouches for itself, and the record
+says exactly that.

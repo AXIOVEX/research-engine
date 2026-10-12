@@ -38,8 +38,8 @@ institution named here has been contacted.
 - **Capability baseline used (Spec 005, main @ 17e01c4, 2026-10-12).** OIDC sign-in:
   supported (CLM-005-01). **SAML 2.0 service provider with per-tenant IdP configuration:
   supported (CLM-005-02 — E2 has landed since DESIGN.md was written).** IdP-bound Ed25519
-  key enrollment: supported (CLM-005-03). MFA required at the tenant IdP, enforced
-  platform-side: supported (CLM-005-27). SCIM provisioning: **draft** (CLM-005-06; E3 in
+  key enrollment: supported (CLM-005-03). Multi-factor authentication (MFA) required at
+  the tenant IdP, enforced platform-side: supported (CLM-005-27). SCIM provisioning: **draft** (CLM-005-06; E3 in
   flight separately — not claimed anywhere in this document). Deprovisioning: draft
   (CLM-005-05). SOC 2: readiness and evidence mapping only, never certification (DESIGN §6;
   CLM-005-16) — the evidence pack cannot satisfy a hard SOC 2 requirement today.
@@ -67,8 +67,8 @@ are in the queue and that most reviews require 12 to 18 months to complete.
 | # | Verdict | Evidence (page read → what it shows) |
 |---|---------|------|
 | F1 | EVIDENCED | https://mclibrary.duke.edu/news/evidence-synthesis-service → standing service with a queue of concurrent reviews, 1–2 week average search development, 12–18 month typical review completion; https://guides.mclibrary.duke.edu/sysreview/service → formal intake form and two-tier service model |
-| F2 | PARTIAL | https://guides.mclibrary.duke.edu/sysreview/service → policy requires a named Duke Health faculty member or trainee as project leader and primary contact, and librarian co-authorship per ICMJE; whether named individuals can fill the adjudicator + reviewer roles for a pilot window is conversation-only |
-| F3 | EVIDENCED (SAML) | https://security.duke.edu/vendor-risk-assessment/ → Duke's own vendor process requires vendors to return a **Shibboleth Readiness Profile** alongside the HECVAT, i.e. Duke's vendor SSO expectation is Shibboleth/SAML — within Spec 005 E2's supported shape |
+| F2 | PARTIAL | https://guides.mclibrary.duke.edu/sysreview/service → policy requires a named Duke Health faculty member or trainee as project leader and primary contact, and librarian co-authorship per ICMJE (the medical editors' authorship rules); whether named individuals can fill the adjudicator + reviewer roles for a pilot window is conversation-only |
+| F3 | EVIDENCED (SAML) | https://security.duke.edu/vendor-risk-assessment/ → Duke's own vendor process requires vendors to return a **Shibboleth Readiness Profile** alongside the HECVAT (the higher-education vendor security questionnaire), i.e. Duke's vendor SSO expectation is Shibboleth/SAML — within Spec 005 E2's supported shape |
 | F4 | EVIDENCED | https://mclibrary.duke.edu/news/evidence-synthesis-service → the service's evidence base is the published literature, searched across multiple bibliographic databases with documented strategies — the Crossref/OpenAlex-reachable class DESIGN §2.2 names |
 | F5 | UNKNOWN | Agreement-only criterion (see §1); no public page can evidence it |
 | F6 | UNKNOWN | Agreement-only criterion (see §1) |
@@ -77,7 +77,8 @@ are in the queue and that most reviews require 12 to 18 months to complete.
 - **Hard, published vendor gate.** https://security.duke.edu/vendor-risk-assessment/ → a
   completed HECVAT is a stated non-negotiable requirement, scored by the IT Security
   Office; the vendor contractually warrants conformity with its HECVAT answers. Whether
-  the HECVAT review treats absence of SOC 2 as disqualifying for a no-PHI hosted pilot is
+  the HECVAT review treats absence of SOC 2 as disqualifying for a hosted pilot holding
+  no PHI (protected health information) is
   **not stated on the page — the single largest UNKNOWN in this shortlist (§5)**.
 - **Retention anchor for the F5 conversation.** The service policy states the Library
   maintains records related to a systematic review for 7 years
@@ -189,7 +190,8 @@ teaches an SR-searching curriculum used by other institutions.
 | F6 | UNKNOWN | Agreement-only (see §1) |
 
 **§8 flags.**
-- Public university in Alberta: provincial FOIP / records-retention exposure is the §8
+- Public university in Alberta: provincial FOIP (freedom-of-information and privacy
+  law) / records-retention exposure is the §8
   append-only conversation — category flagged, no institution-specific page read.
 - Evidence currency: the service's public footprint in this pass is scholarly literature
   rather than a current service page; F1/F2 should be re-verified against a live service
@@ -222,8 +224,9 @@ also co-developed SR data-management-planning teaching used across institutions.
   in a low data class — plausible, not evidenced; the classification conversation is a
   discovery item.
 - **Coordination scale.** InCommon's case study describes ~650,000 active accounts in
-  U-M's identity population — a large-institution IAM change process should be assumed
-  until discovery says otherwise. (Not a defect; a timeline input.)
+  U-M's identity population — a large-institution identity and access management (IAM)
+  change process should be assumed until discovery says otherwise. (Not a defect; a
+  timeline input.)
 - Public university: Michigan FOIA / retention exposure is the §8 conversation — category
   flagged, no institution-specific page read.
 
@@ -298,8 +301,8 @@ significantly over several years, are first-come-first-served, and may be waitli
 - **Capacity / calendar risk is published, not hypothetical.** First-come-first-served with
   waitlists and a three-update cap signal a saturated service — directly relevant to
   DESIGN §8's adjudicator-availability question and the P-K3 two-hour audit budget.
-- Public university in Ontario: FIPPA / retention exposure is the §8 conversation —
-  category flagged, no institution-specific page read.
+- Public university in Ontario: FIPPA (Ontario's privacy law) / retention exposure is
+  the §8 conversation — category flagged, no institution-specific page read.
 
 ---
 

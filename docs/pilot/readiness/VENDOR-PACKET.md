@@ -25,7 +25,7 @@ against criteria registered before the partner was named (§7 of this packet).
 ## 2. The pilot — what it is and is not
 
 **Shape.** Hosted by Axiovex (multi-tenant platform; the partner is a tenant with
-its own IdP configuration). One real evidence question from the partner's pipeline,
+its own IdP configuration — IdP, the institution's sign-in service). One real evidence question from the partner's pipeline,
 scoped small enough to audit completely. The partner's adjudicator personally
 performs the freeze approval and the deposit approval; Axiovex staff assist but do
 not drive. A pilot only we can operate demonstrates a consultancy, not a product —
@@ -37,7 +37,8 @@ recorded separately before use); partner-authored claim statements, falsifiers, 
 adjudication rationales; partner reviewer identities in the platform directory
 (never in ledger payloads).
 
-**Out of scope, by design:** CUI; PHI and human-subjects raw data; unpublished or
+**Out of scope, by design:** controlled unclassified information (CUI); protected
+health information (PHI) and human-subjects raw data; unpublished or
 access-restricted corpora; any content whose licence basis cannot be recorded.
 Partner data never enters a public bundle or registry deposit without a recorded
 licence basis; partner deposits default to the least-public anchored form until the
@@ -47,7 +48,9 @@ partner directs otherwise in writing.
 
 Built and claim-supported today (Spec 005, bundle v0.4.0, assessed 2026-10-12):
 
-- **OIDC sign-in** through the tenant's own IdP (authorization code + PKCE S256) —
+- **OIDC sign-in** (the modern sign-in standard) through the tenant's own IdP, using
+  the flow where the app proves itself with a one-time code challenge
+  (authorization code + PKCE, S256 variant) —
   supported. There are no local passwords.
 - **SAML 2.0 service provider** with per-tenant IdP configuration (metadata import,
   attribute mapping incl. eduPersonPrincipalName and scoped affiliation) —
@@ -58,7 +61,8 @@ Built and claim-supported today (Spec 005, bundle v0.4.0, assessed 2026-10-12):
 - **Authorization:** a role matrix (researcher / reviewer / adjudicator / integrity)
   enforced in the service layer, deny-by-default; platform-admin, tenant-admin, and
   study planes are disjoint.
-- **MFA:** required at the tenant IdP and enforced platform-side (the platform
+- **Multi-factor authentication (MFA):** required at the tenant IdP and enforced
+  platform-side (the platform
   requires MFA evidence and refuses step-up actions without it).
 
 Specified, **not yet built, and not claimed**: SCIM provisioning and automated
@@ -110,7 +114,8 @@ of §5: an owner/legal decision, not an engineering phase.
 - **FIPS — open gap, stated plainly.** No cryptographic operation in the platform
   uses a FIPS 140-3 validated module today (§3.13.11: Supports — OPEN GAP). A
   twelve-operation cryptographic inventory is maintained; the gap is the seeded
-  item in our POA&M planning; the validated-module migration is a recorded owner
+  item in our POA&M planning (POA&M — plan of action and milestones, the formal
+  gap register); the validated-module migration is a recorded owner
   decision awaiting a named CUI requirement. **Correction (2026-10-12):** the
   inventory now carries **thirteen** operations — row 13 (webhook egress payload
   signing, HMAC-SHA256) was added when signed incident-response event egress
@@ -118,7 +123,8 @@ of §5: an owner/legal decision, not an engineering phase.
   POA&M item now exists as register item POAM-0001 (E6). The sentence above is
   retained as written, with this note, per the correction discipline.
   CUI is out of pilot scope for this
-  reason. The hosted shape's DFARS 252.204-7012 FedRAMP-equivalency question is a
+  reason. The hosted shape's DFARS 252.204-7012 question — whether it needs
+  equivalency with FedRAMP (the federal cloud-security authorization program) — is a
   recorded open owner/legal decision; the self-hosted shape inside an existing
   compliant boundary is the capable CUI path meanwhile.
 - **SOC 2.** We hold **no SOC 2 report**. Our claim is readiness and evidence
@@ -151,10 +157,11 @@ summary of it.
 run).** Five evidence questions; ten citations including a seeded fabricated DOI, a
 seeded corrupted citation, a duplicate, and a shared-dataset pair. The run was
 **VALID**; verdicts as issued: **supported, supported, inconclusive, contradicted,
-inconclusive** — each by a distinct pre-registered mechanism, all five matching the
-pre-freeze predictions. Kill criteria measured: **K1 citation reality — pass** (the
-fabricated DOI was caught, quarantined, and excluded; zero fabricated citations in
-the evidence basis); **K2 replay integrity — pass** (bundle-alone replay reproduces
+inconclusive** — each by a distinct mechanism fixed in advance (pre-registered), all
+five matching the pre-freeze predictions. Kill criteria measured: **K1 citation
+reality — pass** (the
+fabricated DOI was caught, set aside (quarantined), and excluded; zero fabricated
+citations in the evidence basis); **K2 replay integrity — pass** (bundle-alone replay reproduces
 the verdicts exactly; tamper cases detected — including one the evaluation itself
 found in our verifier and that was fixed in-phase, disclosed in the report);
 **K3 audit burden — pass** (a fresh-context auditor retraced all five verdicts from

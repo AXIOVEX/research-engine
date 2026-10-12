@@ -22,9 +22,10 @@ Validates CIF structure files against IUCr checkCIF reports and PLATON
 
 **Stated limit:** live PLATON verification has never been performed in
 this environment. PLATON is author-distributed under its own terms and
-no binary is installed; the adapter runs on recorded real outputs
-(provenance-pinned fixtures) or via the IUCr service output, and
-records `not_runnable_here` with the reason when neither exists.
+no binary is installed; the adapter runs on recorded real outputs,
+kept unchanged (provenance-pinned fixtures), or via the IUCr service
+output, and records `not_runnable_here` with the reason when neither
+exists.
 
 ## CODECHECK — computational reproducibility (Spec 007)
 
@@ -32,15 +33,17 @@ Ingests certificates from the CODECHECK register: a certificate
 attests that an independent codechecker re-executed named outputs of a
 computational artifact. The evidence is **capped by the certificate's
 own stated scope** — exercised in the build: the register's real
-certificate 2020-001 is partial on its own text, so its evidence caps
-at 0.40 with the uncertified outputs named. A certificate never
-certifies correctness; it attests scoped re-execution.
+certificate 2020-001 covers only some outputs, on its own text, so
+its evidence counts at reduced strength — capped at 0.40, well under
+full weight — with the uncertified outputs named. A
+certificate never certifies correctness; it attests that the named
+outputs were re-run (scoped re-execution).
 
 ## statcheck / GRIM — statistical reporting (Spec 008)
 
 - **GRIM/GRIMMER** (native, exact rational arithmetic): tests whether
-  reported means/SDs are arithmetically possible for integer data at
-  the reported *n*. A GRIM impossibility is a contradiction with a
+  reported means and standard deviations (SDs) are arithmetically
+  possible for integer data at the reported *n* (the sample size). A GRIM impossibility is a contradiction with a
   falsifier observation — against a *reporting-consistency* claim
   ("the reported means are arithmetically possible"), never a claim
   that a paper is fraudulent. Validated against the scrutiny manual's
@@ -49,7 +52,8 @@ certifies correctness; it attests scoped re-execution.
   inapplicable, the run records `not_applicable` and emits no
   evidence.
 - **statcheck**: recalculates p-values from reported test statistics.
-  Extraction coverage is recorded on every run — "no statistics
+  How much of a paper's statistics the tool could extract at all
+  (extraction coverage) is recorded on every run — "no statistics
   extracted" is a number in the record, not a clean bill.
 
 **Stated limit:** live statcheck verification has never been performed

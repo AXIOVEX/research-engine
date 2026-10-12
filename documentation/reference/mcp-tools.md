@@ -2,11 +2,12 @@
 
 The `tekmerion-mcp` server exposes **29 tools**, generated 1:1 from the
 production engine services: the server is a surface over the engine and
-has no semantics of its own. This page is generated from the tool
+adds no rules of its own. This page is generated from the tool
 definitions in `src/tekmerion/mcp/server.py` (Spec 009); the docstring
 under each signature is the server's own.
 
-One server instance runs as **one actor with one WS6 role**
+One server instance runs as **one actor with one role from the
+platform's role matrix (WS6)**
 (`TEKMERION_ACTOR`, `TEKMERION_ROLE` — see
 [Installation](../guide/installation.md)). Role denials are part of the record:
 a tool called by the wrong role is refused, and the refusal is returned

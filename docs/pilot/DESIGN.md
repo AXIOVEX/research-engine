@@ -43,7 +43,7 @@ pilot.
 | # | Criterion | Why it is a criterion |
 |---|-----------|------------------------|
 | F1 | Runs systematic reviews / evidence syntheses recurrently (order: dozens of questions in flight or per year) | The pilot study is one question; the partner must have a second question waiting, or the pilot proves a demo, not a workflow. |
-| F2 | Can name at least one adjudicator and one reviewer for the pilot window | WS6 roles are people, not settings; the K3 burden measure (§3) is taken on the partner's adjudicator, not ours. |
+| F2 | Can name at least one adjudicator and one reviewer for the pilot window | WS6 (the platform's role matrix) roles are people, not settings; the K3 burden measure (§3) is taken on the partner's adjudicator, not ours. |
 | F3 | IdP is Microsoft Entra ID or Google Workspace (OIDC), **or** the partner accepts that SSO completes when Spec 005 E2 (SAML) lands | E1 (OIDC + key enrollment) is built; SAML is in flight, not shipped (DN-011, DN-012 caveat 1). A Shibboleth-only partner is a *later* pilot, not a failed one. **Correction (2026-10-12): E2 SAML has landed and is claim-supported (CLM-005-02, merged 2026-10-12); the shortlist pass found the archetype Shibboleth-first, so F3 no longer defers Shibboleth partners and DN-012 caveat 1 is retired.** |
 | F4 | The pilot question's evidence base is published literature reachable via Crossref/OpenAlex | The MVP connectors are Crossref + OpenAlex (OD-1). Questions whose sources live elsewhere are out of the MVP slice by decision, not by defect. **Correction (2026-10-12): the connector set is now Crossref + OpenAlex + CORE, per the owner's directive of 2026-10-12 ("Add CORE, this is still needed") and Spec 012 — CORE joins as the full-text content channel (third in resolution order, content enrichment only where the earlier connectors serve no licence-permitted content). F4's reachability test should now be read as Crossref/OpenAlex/CORE.** |
 | F5 | Partner accepts the append-only record posture, including no-delete, before any data moves | DN-005 is constitutional. A partner whose data-governance office requires deletion-on-demand is a policy conversation that must happen before onboarding, not during it (§8). |
@@ -62,8 +62,9 @@ identities in the platform directory (never in ledger payloads — DN-005 ingest
   alignment language).
 - **PHI / patient-level data and human-subjects raw data** — the MVP workflow is literature
   evidence, not primary data; nothing in the pilot needs it.
-- **Unpublished or access-restricted corpora** (e.g. keyset-gated collections) — institution-local
-  shapes for those exist in the architecture (DN-003) but are not the hosted pilot.
+- **Unpublished or access-restricted corpora** (e.g. collections gated behind access keys —
+  keyset-gated collections) — institution-local shapes for those exist in the architecture
+  (DN-003) but are not the hosted pilot.
 - **Any content whose licence basis cannot be recorded** — WS5's rule is mechanical: unknown
   rights answer = stub-only until researched and recorded. The pilot inherits it unchanged.
 
@@ -87,8 +88,8 @@ A pilot that only Axiovex staff can operate has demonstrated a consultancy, not 
 ### 3.2 Success criteria (all must hold)
 
 - **S1 — Full loop completed.** The study reaches anchored bundle + OSF registration with
-  verdicts issued by a **valid** run (controls capable of firing and not fired adversely;
-  an INVALID run salvaged by narrative is a failure, not a result).
+  verdicts issued by a **valid** run (the pass/fail controls were able to fire and did not
+  fire against the run; an INVALID run explained away in prose is a failure, not a result).
 - **S2 — Partner-operated.** The partner's adjudicator personally performs the freeze approval
   and the deposit approval through the production UI/services; Axiovex staff assist but do not
   drive.
@@ -142,7 +143,8 @@ deposit in `tekmerion.deposit` targets Zenodo only.
 ### 4.2 What building it entails
 
 1. **OSF transport** — a deposit transport alongside the Zenodo transport, same discipline:
-   deterministic packaging; the mechanical adjudicator-approval gate applies identically
+   packaging that produces the same bundle every time (deterministic packaging); the
+   mechanical adjudicator-approval gate applies identically
    (no named approver or an unverifiable bundle → refused, DepositError — approval is a
    property of the action, not of the destination). API access uses the owner's OSF account
    token (free key on an owner account — within standing G4 authorization, Spec 002).
@@ -227,8 +229,8 @@ appended; the DN-003 text above stands as originally written.
 ### 5.3 Support model (honest at MVP scale)
 
 One named Axiovex contact; business-hours response; issues logged into the pilot record.
-**No SLA numbers are promised** — none can be evidenced at MVP scale, and Article X forbids
-claiming a service level we have not operated. What is promised is narrower and true: every
+**No SLA numbers (service-level agreement figures) are promised** — none can be evidenced
+at MVP scale, and Article X forbids claiming a service level we have not operated. What is promised is narrower and true: every
 pilot incident that touches the record (integrity, availability of the ledger, deposit
 failures) is disclosed to the partner with its evidence, whether or not it flatters us.
 Uptime, response-time, and support-coverage commitments are commercial terms for a later,
@@ -307,7 +309,8 @@ assumptions baked into the design:
   measured figure for our archetype, and whether the review starts before or after a pilot
   agreement is unknown.
 - **SOC 2 / HECVAT expectations.** Whether the archetype's security review requires SOC 2, a
-  HECVAT, or accepts an evidence-based review of the kind §6 offers (DN-012 caveat 2).
+  completed HECVAT (the higher-education vendor security questionnaire), or accepts an
+  evidence-based review of the kind §6 offers (DN-012 caveat 2).
 - **OSF: requirement or preference?** §4 builds OSF because it is the community's registry and
   the owner decided it — but whether partners treat OSF registration as a hard requirement, a
   nice-to-have beside the Zenodo DOI, or irrelevant is unlearned. Discovery answers it; the

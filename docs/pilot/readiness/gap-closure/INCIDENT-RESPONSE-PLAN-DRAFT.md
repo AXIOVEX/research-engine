@@ -30,7 +30,8 @@ incident:
 - **Disclosure with evidence.** Every incident that touches the record — integrity,
   availability of the ledger, deposit failures — is disclosed to the affected
   partner with its evidence, whether or not it flatters us (DESIGN §5.3). No SLA
-  numbers are promised anywhere in this plan: none can be evidenced at this scale.
+  numbers (service-level agreement figures) are promised anywhere in this plan:
+  none can be evidenced at this scale.
 - **Append-only correction.** Incident findings and remediations are appended
   records. Nothing in any ledger is edited or deleted in the course of an incident;
   a correction is a new record that supersedes, exactly like any other correction
@@ -73,7 +74,8 @@ Listed by what is real, with the specified-but-not-built parts named as such:
   export of these events is available today.
 - **Signed IR event egress (specified, NOT built).** Spec 005 T554 specifies
   security-significant events (auth-failure bursts, break-glass use, revocation
-  storms, audit-verification failures) as first-class signed webhook egress (E4).
+  storms — bursts of key revocations — audit-verification failures) as
+  first-class signed outbound messages (webhook egress, E4).
   Until E4 lands, detection of those patterns is by ledger review/export, and this
   plan does not pretend otherwise.
 - **Verification machinery (built).** Standalone bundle/ledger verification runs
