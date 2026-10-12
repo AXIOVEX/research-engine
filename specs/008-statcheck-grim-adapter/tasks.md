@@ -1,5 +1,6 @@
 # Spec 008 — statcheck + GRIM-family Adapter (P7: reporting-consistency) — tasks
 
 - [x] T1 Spec + claims bundle v0.1.0 + assessor run at after_specify.
-- [ ] T2 Build (GATED: owner shortlist approval).
-- [ ] T3 Seeded-defect tests (each claim's falsifier exercised by a fixture that must fail the naive implementation).
+- [x] T2 Build (GATED: owner shortlist approval — PASSED 2026-10-12). Built 2026-10-12: `src/tekmerion/adapters/statconsistency.py` — GRIM + GRIMMER core implemented natively in exact rational arithmetic (the published method is the checker); statcheck via live R seam where an R runtime exists, recorded-output ingestion here (no R in this environment), extraction + coverage as the adapter's own ingestion.
+- [x] T3 Seeded-defect tests (each claim's falsifier exercised by a fixture that must fail the naive implementation): tests/test_adapters_statcheck_grim.py — 14 tests, incl. published GRIM examples, a brute-force enumeration of >1000 achieved integer datasets (zero false falsifiers tolerated), an all-not-applicable run emitting no evidence (F-008-4), and a recorded statcheck output (classifications asserted by the statcheck project's own test suite) mapping 12 decision errors to partial contradiction and 6 inconsistencies to context (F-008-3).
+- [ ] T4 (OPEN, operator) Live statcheck verification: run the adapter's R seam in an environment with R + the statcheck package installed and record one `run_by_us` run. The seam is implemented; no R runtime exists in the build environment and none was installed (recorded-output path carries the build, per the spec's honesty states).

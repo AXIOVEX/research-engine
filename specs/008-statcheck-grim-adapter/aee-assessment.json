@@ -2,16 +2,16 @@
   "schema_version": "1.0",
   "methodology_version": "1.0",
   "project": "tekmerion",
-  "phase": "after_specify",
+  "phase": "after_implement",
   "outcome": "iterate",
-  "summary": "Assessed 4 claim(s); found 7 failure mode(s); 4 claim(s) below the 0.70 confidence threshold.",
-  "created_at": "2026-10-12T12:43:18.465994Z",
+  "summary": "Assessed 4 claim(s); found 7 failure mode(s); 0 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T13:07:31.496001Z",
   "claims": [
     {
       "id": "CLM-008-01",
       "text": "The adapter's evidence item records the checker + version, the extraction coverage (how many results were extractable vs present), and every flagged result with its recomputed values; an item without the coverage record is not evidence.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
       ],
@@ -28,6 +28,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/adapters/statconsistency.py::extraction_coverage + run_statcheck (coverage recorded on every run, live, recorded, and unavailable alike; recorded outputs without the computed-p/classification columns are refused as unverifiable)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_adapters_statcheck_grim.py::test_extraction_and_coverage_on_fixture_manuscript (19 extracted / 19 present, per-type counts), ::test_extraction_silence_is_visible_in_coverage (0 extracted / 1 present \u2014 the gap is the record), ::test_statcheck_unavailable_is_honest_state (coverage lands even when the checker cannot run)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -39,8 +61,8 @@
       "severity": "high",
       "source_ref": "specs/008-statcheck-grim-adapter/spec.md",
       "domain": "",
-      "confidence": 0.480625,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-008-01-IRREDUCIBILITY-CHALLENGE",
@@ -59,7 +81,7 @@
       "id": "CLM-008-02",
       "text": "BLIND SPOT (scope claim): these checkers establish internal arithmetic consistency of reported statistics only. They do NOT establish that the underlying data exist, that the analysis was appropriate, or that conclusions follow. statcheck is silent on everything it cannot parse (non-APA formats, tables, model-based/Bayesian results) \u2014 no flags is not a clean paper. A GRIM fail proves inconsistency, not its cause (typo, wrong N, exclusions all produce fails). SPRITE reconstructions are candidate datasets, never the real data.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
       ],
@@ -76,6 +98,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/adapters/core.py (scope_claim_id on every run record; emission refused without it) + src/tekmerion/adapters/statconsistency.py module docstring (blind spots stated: consistency only, statcheck silence, GRIM proves inconsistency not cause, SPRITE not implemented)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_adapters_statcheck_grim.py::test_statcheck_recorded_run_maps_findings_and_replays (a fully consistent extracted set earns capped 0.50 support for the reporting-consistency sub-claim only, with coverage attached) and Spec 006's ::test_scope_claim_attachment_is_mechanically_enforced (shared seam)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -87,8 +131,8 @@
       "severity": "high",
       "source_ref": "specs/008-statcheck-grim-adapter/spec.md",
       "domain": "",
-      "confidence": 0.480625,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-008-02-PRECISION-CHALLENGE",
@@ -137,7 +181,7 @@
       "id": "CLM-008-03",
       "text": "A GRIM/GRIMMER impossibility (a mathematical impossibility given the reported N and granularity) attaches contradiction mass to the reporting-consistency sub-claim with falsifier_observation set \u2014 it is the registered falsifying observation for that sub-claim \u2014 while a statcheck decision_error attaches partial contradiction, and mere inconsistencies attach context.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
       ],
@@ -154,6 +198,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/adapters/statconsistency.py (registered mapping: GRIM/GRIMMER impossibility -> contradiction 1.00 + falsifier_observation; statcheck decision error -> 0.50 partial; inconsistency -> context)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_adapters_statcheck_grim.py::test_grim_run_impossibility_is_falsifier_observation, ::test_grimmer_hand_verified_cases, ::test_statcheck_recorded_run_maps_findings_and_replays (12 decision errors -> 0.50, falsifier_observation false; 6 inconsistencies -> context)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -165,8 +231,8 @@
       "severity": "high",
       "source_ref": "specs/008-statcheck-grim-adapter/spec.md",
       "domain": "",
-      "confidence": 0.480625,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-008-03-IRREDUCIBILITY-CHALLENGE",
@@ -185,7 +251,7 @@
       "id": "CLM-008-04",
       "text": "Applicability is checked before mass is assigned: GRIM-family checks run only where data are integer-granular and N/decimals give the test power; where the test is uninformative (large N, continuous data), the adapter records not_applicable rather than a pass.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
       ],
@@ -202,6 +268,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "src/tekmerion/adapters/statconsistency.py::grim_applicability (integer-granularity + power regime checked before any mass; not_applicable recorded per case)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_adapters_statcheck_grim.py::test_applicability_regimes (n=150 at 2dp uninformative; same n at 3dp informative; continuous data inapplicable), ::test_grim_run_all_not_applicable_emits_no_evidence (no pass is manufactured from an uninformative regime)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -213,8 +301,8 @@
       "severity": "high",
       "source_ref": "specs/008-statcheck-grim-adapter/spec.md",
       "domain": "",
-      "confidence": 0.480625,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-008-04-IRREDUCIBILITY-CHALLENGE",
@@ -233,71 +321,59 @@
   "scores": {
     "CLM-008-01": {
       "claim_id": "CLM-008-01",
-      "direct_score": 0.480625,
-      "propagated_score": 0.480625,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.2375,
-        "independence": 0.5,
+        "evidence": 1.0,
+        "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence",
-        "Fewer than two independent supporting sources"
-      ]
+      "notes": []
     },
     "CLM-008-02": {
       "claim_id": "CLM-008-02",
-      "direct_score": 0.480625,
-      "propagated_score": 0.480625,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.2375,
-        "independence": 0.5,
+        "evidence": 1.0,
+        "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence",
-        "Fewer than two independent supporting sources"
-      ]
+      "notes": []
     },
     "CLM-008-03": {
       "claim_id": "CLM-008-03",
-      "direct_score": 0.480625,
-      "propagated_score": 0.480625,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.2375,
-        "independence": 0.5,
+        "evidence": 1.0,
+        "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence",
-        "Fewer than two independent supporting sources"
-      ]
+      "notes": []
     },
     "CLM-008-04": {
       "claim_id": "CLM-008-04",
-      "direct_score": 0.480625,
-      "propagated_score": 0.480625,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.2375,
-        "independence": 0.5,
+        "evidence": 1.0,
+        "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence",
-        "Fewer than two independent supporting sources"
-      ]
+      "notes": []
     }
   },
   "recoveries": [
