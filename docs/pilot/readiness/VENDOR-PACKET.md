@@ -68,6 +68,20 @@ the compliance-evidence phase. A draft HECVAT self-assessment accompanies this
 packet in our readiness file and states our position item by item, including its
 own gaps.
 
+**Correction (2026-10-12, appended the same day):** the list above and this
+section's bundle reference (v0.4.0) predate three landings. Spec 005 phases E3,
+E4, and E6 have since merged, and the bundle now stands at **v0.7.0 — 29 of 31
+claims supported**. Of the items listed above as not yet built: **SCIM
+provisioning and automated deprovisioning** are built and claim-supported (E3;
+CLM-005-05, CLM-005-06, CLM-005-07); the **break-glass mechanism** and the
+**tenancy-hardening phase** are built and claim-supported (E4; CLM-005-10,
+CLM-005-11); and the **compliance-evidence phase** is built (E6; SPRS self-score
+machinery CLM-005-29, POA&M register and incident-response support CLM-005-30).
+The **admin console** alone remains unbuilt and unclaimed: its wireframes are
+delivered and awaiting owner approval — the gate described above — and
+CLM-005-13 stands draft. The one other open claim, CLM-005-31, is the DFARS flag
+of §5: an owner/legal decision, not an engineering phase.
+
 ## 4. Record integrity
 
 - **Append-only ledgers** (Axiomere): hash-chained, Ed25519-signed, with Merkle
@@ -97,7 +111,13 @@ own gaps.
   uses a FIPS 140-3 validated module today (§3.13.11: Supports — OPEN GAP). A
   twelve-operation cryptographic inventory is maintained; the gap is the seeded
   item in our POA&M planning; the validated-module migration is a recorded owner
-  decision awaiting a named CUI requirement. CUI is out of pilot scope for this
+  decision awaiting a named CUI requirement. **Correction (2026-10-12):** the
+  inventory now carries **thirteen** operations — row 13 (webhook egress payload
+  signing, HMAC-SHA256) was added when signed incident-response event egress
+  landed at Spec 005 E4. The §3.13.11 gap itself is unchanged, and the seeded
+  POA&M item now exists as register item POAM-0001 (E6). The sentence above is
+  retained as written, with this note, per the correction discipline.
+  CUI is out of pilot scope for this
   reason. The hosted shape's DFARS 252.204-7012 FedRAMP-equivalency question is a
   recorded open owner/legal decision; the self-hosted shape inside an existing
   compliant boundary is the capable CUI path meanwhile.
@@ -105,6 +125,12 @@ own gaps.
   mapping only — never certification — and the readiness-evidence build is
   specified, not yet built. The same honesty applies to FERPA and GDPR, which
   appear in product language only as design constraints, never as certifications.
+  **Correction (2026-10-12):** the readiness-evidence build has since landed
+  (Spec 005 E6, task T544): the SOC 2 readiness mapping
+  (`specs/005-enterprise-platform/soc2-readiness-mapping.md`), the SPRS
+  self-score machinery, and the POA&M register now exist as built artifacts.
+  What has not changed: no SOC 2 report exists, and the claim remains readiness
+  and evidence mapping only — never certification.
 
 ## 6. Public anchors — check these yourself
 
@@ -176,8 +202,18 @@ would be the first); and any count of verdicts presented as a quality score. Our
 doctrine forbids volume tallies standing in for understanding; every verdict we
 issue states what remains not understood.
 
+**Correction (2026-10-12):** one item in the list above has changed state since
+this packet was assembled. **SCIM and automated deprovisioning** landed at Spec
+005 E3 and are claim-supported (CLM-005-05, CLM-005-06, CLM-005-07); they are no
+longer non-claims, and §3 as corrected states them as built. **Admin-console
+availability** remains a true non-claim (unbuilt; owner wireframe gate).
+Everything else in this section stands as written.
+
 ---
 
 *Assembled 2026-10-12 from DESIGN §6 and the records it cites, updated to the
 claims state of the same date (Spec 005 E2 SAML has landed since §6's identity row
 was drafted; this packet follows the claims records). DRAFT — not sent anywhere.*
+*Corrections appended 2026-10-12 after the Spec 005 E3/E4/E6 and Spec 012
+landings (§3, §5, §9); the original statements are preserved in place with their
+corrections, per this program's append-only correction discipline.*

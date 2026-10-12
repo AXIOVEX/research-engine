@@ -262,12 +262,18 @@ themselves; none requires trusting Axiovex's summary of it.
 | Phase 6 UI | The register-first product surface a partner's staff would actually use | Built; wireframe-governed (Article XIV) |
 | **Phase 7 evaluation verdicts** | K1–K5 measured on the frozen evaluation corpus — incl. negatives, published by design | **Filled (2026-10-12): verdicts as issued — supported, supported, inconclusive, contradicted, inconclusive; K1–K5 all pass (K2 after the in-phase verifier fix the evaluation caught); run VALID; bundle anchored at Zenodo DOI [10.5281/zenodo.23319126](https://doi.org/10.5281/zenodo.23319126); full record in `specs/002-mvp-implementation/evaluation/EVALUATION-REPORT.md`** |
 | OSF registration of the Phase 7 study (Spec 010, T-P4) | The registry-side anchor for the same evaluation bundle: OSF project [dvrew](https://osf.io/dvrew/), registration [84dk7](https://osf.io/84dk7/), DOI [10.17605/OSF.IO/84DK7](https://doi.org/10.17605/OSF.IO/84DK7) — the registration record states the bundle's anchor values; receipt + passed public verification in `specs/010-osf-registration/records/` (`demo-receipt.json`, `demo-verification.json`) | Live |
-| Spec 005 E1 + E2 | OIDC + SAML identity, key enrollment, RBAC, platform audit ledger | Built and claim-supported (CLM-005-01, CLM-005-02); E3 (SCIM) in flight; E4–E6 specified, not claimed *(row corrected 2026-10-12 — as written it predated E2's landing)* |
+| Spec 005 E1 + E2 | OIDC + SAML identity, key enrollment, RBAC, platform audit ledger | Built and claim-supported (CLM-005-01, CLM-005-02); E3 (SCIM) in flight; E4–E6 specified, not claimed *(row corrected 2026-10-12 — as written it predated E2's landing)* *(second correction, 2026-10-12: E3 (SCIM provisioning + lifecycle), E4 (tenancy hardening, break-glass, signed incident-response egress), and E6 (compliance evidence — SPRS self-score machinery, POA&M register, SOC 2 readiness mapping, CUI marking, audit-export demonstration) have all since merged and are claim-supported; the bundle stands at v0.7.0 with 29 of 31 claims supported, and the T533 pilot gate is discharged. Still open, both by design: the E5 admin console (CLM-005-13, draft — unbuilt, gated on owner approval of the wireframes in PR #11) and CLM-005-31 (the DFARS owner/legal flag). The row's item text still names E1 + E2; read it as the enterprise build E1–E4 + E6)* |
 
 Explicitly **not** in the pack, and not claimed anywhere in pilot material: SOC 2 certification,
 CMMC compliance (DN-011 language governs), SAML/SCIM/admin-console availability, SLA figures,
 customer references, and any count of verdicts presented as a quality score (DN-010: no volume
 tallies standing in for understanding).
+
+*Correction (2026-10-12): SAML (E2) and SCIM (E3) have landed and are claim-supported, so
+their availability no longer belongs in the not-claimed list above — the Spec 005 row carries
+them. Admin-console availability remains not claimed (E5 unbuilt; owner wireframe gate).
+SOC 2 certification and CMMC compliance are not claimed, as written; neither are
+SLA figures, customer references, or verdict tallies.*
 
 ## 7. Sequencing and gates
 
