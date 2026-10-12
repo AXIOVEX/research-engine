@@ -48,8 +48,8 @@
 
 ## Phase 6 — UI
 
-- [!] T219-WF **Wireframe approval gate (owner)** — added 2026-10-12 by owner ruling: wireframes first, and the wireframes are constitutional (DN-009; constitution Article XIV drafted for v1.2.0, taking effect on the same approval). The package in `docs/wireframes/` — screens (a)–(f) + component specimens, rendered at desktop + mobile — must be approved by the owner on the rendered screenshots before any UI implementation. **T219 does not start until this gate clears.**
-- [ ] T219 Register-first study workspace; role views (researcher/reviewer/adjudicator/integrity). *(Blocked on T219-WF.)*
+- [x] T219-WF **Wireframe approval gate (owner)** — CLEARED 2026-10-12: the owner approved the rendered package in this chat ("Approve the wireframes — begin UI implementation"); DN-009 ratified and constitution Article XIV / v1.2.0 in force (landed on branch phase-6-ui, commits bbc944b/a6967ec, merged to main 542ff40).
+- [x] T219 Register-first study workspace; role views (researcher/reviewer/adjudicator/integrity). **Done 2026-10-12** (branch phase-6-ui, merged 542ff40): stdlib-only server-rendered UI over the production machinery, wireframe stylesheet byte-identical, 15 behavioral tests through the real HTTP surface (suite 97 passed), branch CI 38251598137 success, per-screen Playwright conformance in phase6-conformance.md. CLM-002-31…40 → supported/checked (bundle v0.8.0).
 
 ## Phase 7 — Evaluation
 

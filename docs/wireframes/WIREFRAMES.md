@@ -1,8 +1,8 @@
 # Tekmerion — Wireframes (the UI requirements)
 
-**Status:** Phase 6 wireframe package, 2026-10-12 — **awaiting owner approval.**
+**Status:** Phase 6 wireframe package, 2026-10-12 — **APPROVED by the owner 2026-10-12; implemented as T219** (merged to main 542ff40; conformance record in `specs/002-mvp-implementation/phase6-conformance.md`). Any change to the shipped UI's appearance requires updating these wireframes and a fresh owner approval of renders first (Article XIV).
 **Governs:** Spec 002 Phase 6 (T219) and every later UI change.
-**Companion draft:** constitution Article XIV (v1.2.0) — takes effect on the owner's approval of this package.
+**Companion draft:** constitution Article XIV (v1.2.0) — **in force** as of the owner's approval (DN-009 ratified).
 
 ## 1. Governance (the rule)
 
