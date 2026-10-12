@@ -82,3 +82,37 @@ forwarded OSF failure email):
   email-link channel (or the approval window lapsing); the deposit
   completes only when the record is final and a resume re-run issues
   the receipt. Until then 84dk7 must not be cited as an anchor.
+
+Finalize observation, 2026-10-12 (T-P4b completion):
+
+- Admin approval completed through OSF's email-link channel (the
+  coordinator's browser approval, ~11:35 EDT). The registration was
+  re-fetched through the transport and finality read from the record
+  itself (`records/demo-registration-final.json`): `reviews_state:
+  "accepted"`, `revision_state: "approved"`, `public: true`,
+  `pending_registration_approval: false`, `withdrawn: false`,
+  `date_registered: 2026-10-12T15:21:45Z`, registered from project
+  `dvrew`. Registration DOI: **10.17605/OSF.IO/84DK7**
+  (https://osf.io/84dk7/).
+- The deposit resume/finalize re-ran against this state file: it
+  resumed against the existing registration (`already_existed:
+  true` — no second registration, no new project, no re-upload) and
+  issued the receipt, now embedded in this state file at stage
+  `complete` and saved standalone as `records/demo-receipt.json`
+  (mechanism `osf`; root `7c277327…`; bundle hash `a325a09a…`;
+  registration hash `977c1db1…`; anchored_at
+  `2026-10-12T15:21:45.605580`; approver "Tristen Pierson (owner
+  authorization DN-012)"; embargoed false).
+- Public verification (`verify_osf_anchor`, unauthenticated fetch)
+  **passed** (`records/demo-verification.json`): the registration
+  record states the bundle's anchor values; the project structure
+  matches the component mapping exactly (five components, the 13
+  mapped files per component); the contributor (Tristen Pierson)
+  matches the mapping's creator. One earlier verify attempt failed
+  on a sandbox-egress HTTP 502 (proxy error page, not an OSF
+  response); the re-run passed — the transient is recorded here,
+  not edited away.
+- The Phase 7 study directory remains byte-identical (30 files;
+  `records/study-dir-hashes-finalize.json` equals the before/after
+  sets). 84dk7 is now final and may be cited as the demonstration's
+  OSF anchor.

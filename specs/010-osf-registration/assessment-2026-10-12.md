@@ -45,3 +45,66 @@ registration create fields as the provider's validation names them;
 subjects required on the draft (caller-named, resolved by exact
 text); embargo requires `lift_embargo` as a datetime; pending
 records are resumable non-final states, never anchors.
+
+## T-P4b finalize (claims bundle v0.3.0) — the demonstration completes
+
+The narrative, in order (full detail:
+`records/demo-deposit-observation.md`):
+
+1. **h94bf died at the provider.** The build exit left the demo
+   registration (`h94bf`) reading HTTP 410 with no explanation. The
+   owner's forwarded OSF failure email supplied the cause from the
+   provider itself: OSF's registration archive/copy step errored
+   ("errors copying files to the registration. Our development team
+   is investigating"). The project `dvrew`, its five components, and
+   the 13 uploaded files were never harmed — only the registration
+   object died.
+2. **84dk7 replaced it by resume, not by a new deposit.** A resume
+   run against the recorded state treated the 410 as a dead
+   registration and submitted a fresh registration from the intact
+   project: **84dk7**, stage `submitted`,
+   `pending_registration_approval: true`.
+3. **Approval completed 2026-10-12 via OSF's email-link channel**
+   (the coordinator's browser approval, ~11:35 EDT; the token API
+   cannot perform it — 409/403 at build). The record then read
+   final: `reviews_state: "accepted"`, `revision_state: "approved"`,
+   public, `date_registered: 2026-10-12T15:21:45Z`. Registration
+   **DOI 10.17605/OSF.IO/84DK7** — https://osf.io/84dk7/.
+4. **Receipt issued.** The finalize re-run (T-P4b, this record)
+   re-fetched 84dk7, read finality from the fetched record
+   (`records/demo-registration-final.json`), resumed against the
+   existing registration (`already_existed: true` — no second
+   registration), and issued the receipt:
+   `records/demo-receipt.json` (mechanism `osf`; root `7c277327…`;
+   bundle hash `a325a09a…`; registration hash `977c1db1…`;
+   anchored_at `2026-10-12T15:21:45.605580`; approver "Tristen
+   Pierson (owner authorization DN-012)"; embargoed false). The
+   deposit state is at stage `complete`.
+5. **Public verification passed.** `verify_osf_anchor` on an
+   unauthenticated fetch returned `ok: true`
+   (`records/demo-verification.json`): anchor values stated in the
+   registration record; component structure and per-component file
+   sets match the mapping exactly; contributor matches the mapping
+   creator. (One earlier attempt failed on a sandbox-egress HTTP
+   502 — a proxy error page, not an OSF response; recorded in the
+   observation record, re-run passed.)
+6. **The frozen study is untouched.** The Phase 7 study directory
+   hashes after finalize equal the before/after sets (30 files;
+   `records/study-dir-hashes-finalize.json`).
+
+Claim movement (bundle v0.2.0 → v0.3.0): **CLM-010-05
+partially_supported → supported** — its build-exit contradicting
+residue (no live receipt; public verification outstanding; h94bf's
+fate unresolved) is retained in the bundle as explicitly superseded
+evidence, replaced by the issued receipt and the passed public
+verification. One factual correction rides along in CLM-010-03's
+evidence (the demo state now names 84dk7, not the dead h94bf); its
+status and basis are unchanged. **CLM-010-07 remains
+partially_supported**: the embargo test registration `kcysa` still
+awaits its own admin approval through OSF's channel — untouched by
+this finalize, by design. Re-assessed with AEE engine 1.0.4, phase
+`after_implement`, threshold 0.70: **outcome `clarify`** (one claim
+below threshold: CLM-010-07) — seven claims at 0.98–1.00 /
+supported; **CLM-010-05 at 1.00 / supported**; CLM-010-07 at 0.25 /
+partially_supported. Full assessor output: `aee-assessment.json`
+(regenerated).

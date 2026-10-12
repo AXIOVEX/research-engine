@@ -1,0 +1,29 @@
+{
+ "absent_mapped_paths": [
+  "evidence/content/"
+ ],
+ "already_existed": true,
+ "anchored_at": "2026-10-12T15:21:45.605580",
+ "approved_by": "Tristen Pierson (owner authorization DN-012)",
+ "bundle_hash": "a325a09a8bb47f52d7c6e895e057484c12f6c11220c01480832a9be703ed06c6",
+ "components": {
+  "evidence": "g3a4e",
+  "record": "6vwhq",
+  "registration": "rfu23",
+  "verdicts": "cz82m",
+  "verification": "nhzky"
+ },
+ "doi": "10.17605/OSF.IO/84DK7",
+ "embargo_end_date": null,
+ "embargoed": false,
+ "locator": "https://osf.io/84dk7/",
+ "mechanism": "osf",
+ "project_guid": "dvrew",
+ "record_id": "84dk7",
+ "registration_guid": "84dk7",
+ "registration_hash": "977c1db162e9ba06b3e34c633a5bbae96fe4779aa49c43356b564cc8c3b9ac9b",
+ "registration_url": "https://osf.io/84dk7/",
+ "reviews_state": "accepted",
+ "root": "7c277327a93b029503df91107a036d03aaf0e33e87e488a3fcf6c12d4abb88da",
+ "schema": "Open-Ended Registration"
+}

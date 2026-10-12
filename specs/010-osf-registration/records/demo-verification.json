@@ -1,0 +1,46 @@
+{
+ "fetched_via": "verify_osf_anchor, unauthenticated public fetch (OSF API v2), 2026-10-12 \u2014 T-P4b",
+ "result": {
+  "checks": {
+   "anchor_values": "stated in registration record",
+   "components": [
+    "evidence",
+    "record",
+    "registration",
+    "verdicts",
+    "verification"
+   ],
+   "contributors": [
+    "Tristen Pierson"
+   ],
+   "embargoed": false,
+   "files:evidence": [
+    "coverage.json",
+    "groups.json",
+    "items.json"
+   ],
+   "files:record": [
+    "HUMAN-README.md",
+    "ledger/study.axmr",
+    "manifest.json"
+   ],
+   "files:registration": [
+    "claims.json",
+    "controls.json",
+    "registration.json"
+   ],
+   "files:verdicts": [
+    "adjudication.json",
+    "verdicts.json"
+   ],
+   "files:verification": [
+    "queries.json",
+    "verification.json"
+   ],
+   "project_guid": "dvrew",
+   "reviews_state": "accepted"
+  },
+  "failures": [],
+  "ok": true
+ }
+}

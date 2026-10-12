@@ -261,6 +261,7 @@ themselves; none requires trusting Axiovex's summary of it.
 | Tao realignment audit (`docs/audits/2026-10-12-tao-realignment-audit.md`) | Every prior claim re-staged honestly (checked vs accepted vs digested), nonconformances named | In repo |
 | Phase 6 UI | The register-first product surface a partner's staff would actually use | Built; wireframe-governed (Article XIV) |
 | **Phase 7 evaluation verdicts** | K1–K5 measured on the frozen evaluation corpus — incl. negatives, published by design | **Slot reserved — lands in parallel; the pack is not final until this row is filled with the verdicts as issued** |
+| OSF registration of the Phase 7 study (Spec 010, T-P4) | The registry-side anchor for the same evaluation bundle: OSF project [dvrew](https://osf.io/dvrew/), registration [84dk7](https://osf.io/84dk7/), DOI [10.17605/OSF.IO/84DK7](https://doi.org/10.17605/OSF.IO/84DK7) — the registration record states the bundle's anchor values; receipt + passed public verification in `specs/010-osf-registration/records/` (`demo-receipt.json`, `demo-verification.json`) | Live |
 | Spec 005 E1 | OIDC identity, key enrollment, RBAC, platform audit ledger | Built; E2–E6 specified, not claimed |
 
 Explicitly **not** in the pack, and not claimed anywhere in pilot material: SOC 2 certification,
