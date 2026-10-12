@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Break-glass — post-use review — Tekmerion console wireframe (8e)</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side tenant">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Admin console</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Tenant</div>
+      <div class="study-name">University A</div>
+      <span class="tenant-chip">Tenant plane · uni-a</span>
+    </div>
+    <nav class="nav">
+      <a href="users.html">Users &amp; roles <span class="count">4</span></a>
+      <a href="keys.html">Keys &amp; bindings</a>
+      <a href="events.html">Lifecycle events</a>
+      <a href="break-glass.html" class="active">Break-glass</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">Alice Researcher</div>
+      <div class="role-switch"><span class="on">Tenant admin</span></div>
+      <p class="micro">Identity arrives via University A's IdP. Tenant admin powers are
+        disjoint from study roles — an admin grant signs no verdicts (CLM-005-09).
+        Every action is appended under this name.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="plane-strip tenant"><span class="plane-name">Tenant plane</span><span>University A only — break-glass policy is declared per tenant; the platform-plane variant lists every tenant's policy state and session log.</span></div>
+      <h1>Break-glass — post-use review</h1>
+      <p class="page-sub">Every closed or expired session leaves a review item, created
+        automatically at close (Spec 005 §5). The disposition is a tenant admin's recorded act —
+        it appends <span class="mono">breakglass.review_completed</span>; it never edits the
+        session's record, and an item is completable exactly once.</p>
+
+      <div class="card">
+        <div class="verify-line">
+          <span class="chip inconclusive">review outstanding</span>
+          <span class="mono">bgr_8c1e05aa93f2</span>
+          <span class="small muted">for session <span class="mono">bg_4f1d9a77c2e84b10</span></span>
+        </div>
+        <dl class="kv" style="margin-top:12px">
+          <dt>Invoker</dt><dd>Alice Researcher (tenant admin), authorized by Root Operator (platform admin)</dd>
+          <dt>Reason</dt><dd>IdP signing-certificate rotation — emergency membership repair</dd>
+          <dt>Box</dt><dd>authorized 2026-10-12 09:17 · expired 11:17 (time box exhausted) · 1 action taken</dd>
+          <dt>Marked actions</dt><dd><span class="mono">tenant.audit_export</span> · tenant ledger · uni-a — each recorded as <span class="mono">breakglass.action</span> in both ledgers, marked <span class="mono">break_glass=true</span></dd>
+          <dt>Alarm</dt><dd><span class="mono">security.break_glass_use</span> egressed at authorization (incident-response class, T554)</dd>
+        </dl>
+        <div class="field">
+          <label for="bg-disposition">Disposition</label>
+          <select id="bg-disposition">
+            <option>reviewed — actions appropriate to the stated reason</option>
+            <option>reviewed — concerns noted (say what, in the note)</option>
+            <option>escalated — referred to platform security</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="bg-note">Note (recorded with the disposition)</label>
+          <input id="bg-note" type="text" value="">
+        </div>
+        <div class="row-actions" style="margin-bottom:0">
+          <a class="btn primary" href="break-glass-review.html">Record disposition</a>
+          <span class="muted small">Recording is final for this item — a second disposition is refused and the refusal is recorded.</span>
+        </div>
+      </div>
+
+      <h2>Completed reviews</h2>
+      <div class="card flush">
+        <table>
+          <thead>
+            <tr><th style="width:20%">Review item</th><th style="width:20%">Session</th><th style="width:28%">Disposition</th><th style="width:32%">Recorded</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-h="Review item" class="mono">bgr_3fa901c7…</td>
+              <td data-h="Session" class="mono">bg_01be77c2…</td>
+              <td data-h="Disposition">reviewed — actions appropriate to the stated reason</td>
+              <td data-h="Recorded">by a tenant admin · 2026-10-12 08:47 · <span class="mono">breakglass.review_completed</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="screen-note">Console wireframe 8e of 10 — break-glass POST-USE REVIEW state,
+        tenant plane (E5 extension, drawn 2026-10-12 from the as-built E4 mechanism:
+        <span class="mono">record_break_glass_review</span> — the item must exist, belongs to the
+        tenant, and completes exactly once). Specimen values throughout.</div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

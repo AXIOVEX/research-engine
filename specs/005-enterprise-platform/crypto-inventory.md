@@ -30,6 +30,8 @@ its status on evidence.
 
 **E6 note (2026-10-12):** E6 adds no new cryptographic operation and no new row. The audit export's manifest/file hashing and the SPRS seed-set hash are row 9's operation (SHA-256 via Python `hashlib`); the checkpoints an export binds are produced by the ledger's existing machinery (rows 1–3); the export verifier introduces no cryptography of its own. Marking, holds, POA&M, and control-state machinery are record-keeping over existing operations. The §3.13.11 gap is unchanged — all 13 rows still report **No** — and it is now also carried as POA&M item POAM-0001 in the deployment register (T553).
 
+**E5 note (2026-10-12):** E5 adds no new cryptographic operation and no new row. The admin console performs no cryptography of its own: it is the first HTTP adapter over the platform services, binding the §9 baseline contract (headers, session cookie, rate surface) at its transport edge — the operations it exercises (OIDC/SAML assertion validation, session handling, key enrollment proofs, ledger hashing) are the existing rows' operations, performed by the service layer the console calls. The console's one transport-level judgment is recorded in the E5 exit record: it serves the baseline headers with `style-src 'self' 'unsafe-inline'` added to the CSP, because the approved design system's inline styles are inert under the unmodified baseline value; script posture is unchanged. The §3.13.11 gap is unchanged — all 13 rows still report **No** — and the console's compliance screen states that count (0 of 13) from this table at request time rather than asserting any validated-module position.
+
 ## Reading this table
 
 - Rows 1–3 are the **Axiomere dependency**: closing them is a
