@@ -137,7 +137,10 @@ Each item names what closes it. Until closed, the honest submission answer is th
 gap statement in the tables above — at Duke, that is a warranty we can keep.
 
 1. **Company profile facts** (headcount, founding, HQ, financials) — owner supplies.
-2. **Named security/privacy contacts** — owner names.
+   (A drafted entry exists below, 2026-10-12 — pending owner confirmation; until
+   confirmed, this item remains not yet answerable as stated.)
+2. **Named security/privacy contacts** — owner names. (A drafted entry exists
+   below, 2026-10-12 — pending owner confirmation.)
 3. **Hosting provider, regions, and host certifications** — deployment record.
 4. **Subprocessor inventory** (and change-notification process) — maintained list.
 5. **Backup schedule/retention and restore tests** for the hosted deployment.
@@ -149,6 +152,8 @@ gap statement in the tables above — at Duke, that is a warranty we can keep.
 10. **Incident-response plan with contractual notification timelines** (the
     disclosure commitment exists; timelines do not).
 11. **Personnel security program records** (screening, training) on the vendor side.
+    (A drafted entry exists below, 2026-10-12 — it records only what the repo
+    record supports and flags the program facts as an open gap.)
 12. **Accessibility conformance** (WCAG audit / VPAT) for the shipped UI.
 13. **Privacy notice and DPA template.**
 14. **AI commitments as contract terms** (no-training statement; AI governance
@@ -156,6 +161,40 @@ gap statement in the tables above — at Duke, that is a warranty we can keep.
 15. **SCIM provisioning / automated deprovisioning as capabilities** — draft
     claims, build in flight (E3); answerable only when the phase lands and the
     claims move on evidence.
+
+### Drafted entries for items 1, 2, and 11 (2026-10-12) — DRAFTED, pending owner confirmation
+
+The owner directed (2026-10-12) that these three items be drafted from what we
+have, with the gaps flagged. **Everything in this subsection is a coordinator
+draft, not an owner-supplied fact.** Each entry separates what this repo's
+records state (with the citation) from what they do not. Until the owner
+confirms or corrects an entry, items 1, 2, and 11 remain **NOT YET ANSWERABLE**
+in the tables above, and no line below may be quoted as the owner's statement.
+
+- **Item 1 — company profile (DRAFTED).** *From the record:* vendor legal name
+  **Axiovex Systems, LLC** (§1 table above; LICENSE, © 2026 Axiovex Systems,
+  LLC). Owner: **Tristen Pierson** (DN-001 founding record: "Owner: Tristen
+  Pierson, Axiovex Systems, LLC"). *Drafted — NOT in this repo's records, owner
+  to confirm or correct:* state of organization (drafted: Michigan), membership
+  (drafted: two-member LLC), officers (drafted: Tristen Pierson, President;
+  Rockson Arnold, Chief of Strategy). *Open gaps, not drafted:* headcount,
+  founding date, HQ address, financial-stability evidence — no record states
+  them; the owner supplies.
+- **Item 2 — named contacts (DRAFTED).** Security contact and privacy contact
+  are both drafted as **Tristen Pierson** — basis: DN-001 names him the owner,
+  and DESIGN §5.3 promises partners "one named Axiovex contact." *Pending owner
+  confirmation:* that he holds both roles for vendor-review purposes, and the
+  contact details (no email address or phone for this purpose exists in the
+  records; none is drafted).
+- **Item 11 — personnel security (DRAFTED, mostly a flagged gap).** *From the
+  record:* the CMMC responsibility matrix classifies the personnel families
+  (3.2, 3.9) as Organizational, and the platform's role records evidence who
+  held which role when (§2 table above). *Open gap, flagged:* **no record in
+  this repo states a personnel security program** — nothing on screening,
+  training, the vendor's membership/employment structure, or who holds
+  production access. This entry claims none of those things; the owner supplies
+  the program facts, and the DPA template's personnel section stays unfinalized
+  until they are true (gap-closure board, item 11).
 
 *Not on this list, deliberately:* SOC 2 (answered — none exists, readiness only) and
 FIPS validation (answered — none, gap disclosed with inventory and POA&M seed). A

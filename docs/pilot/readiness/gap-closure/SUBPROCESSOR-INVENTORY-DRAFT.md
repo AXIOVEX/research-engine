@@ -2,6 +2,11 @@
 
 **DRAFT — for owner review — not yet adopted.** This inventory is versioned; the
 change-notification process in §3 takes effect on adoption.
+**Adoption (2026-10-12):** adopted as an Axiovex working document by owner
+ratification, 2026-10-12 — the §3 change-notification process is therefore in
+effect as a working process from that date. **Counsel review is required before
+execution with any partner.** The header above stands as this document's
+drafting provenance; adoption changes nothing substantive in the text.
 **Date:** 2026-10-12 · **Version:** 0.1 (first inventory) ·
 **Closes:** HECVAT register item 4 · **Sources:** `src/tekmerion/connectors.py`,
 `src/tekmerion/deposit.py`, `src/tekmerion/osf_deposit.py`, `.github/workflows/ci.yml`,

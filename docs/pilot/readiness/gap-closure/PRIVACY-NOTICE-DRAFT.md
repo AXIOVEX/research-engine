@@ -2,6 +2,10 @@
 
 **DRAFT — for owner/counsel review — not yet adopted, not published, and not a
 commitment to any institution.**
+**Adoption (2026-10-12):** adopted as an Axiovex working document by owner
+ratification, 2026-10-12. **Counsel review is required before execution with any
+partner.** The header above stands as this document's drafting provenance;
+adoption changes nothing substantive in the text.
 **Date:** 2026-10-12 · **Prepared by:** a non-lawyer, from the program's own
 records · **Closes:** HECVAT register item 13 (with `DPA-TEMPLATE-DRAFT.md`) ·
 **Sources:** `docs/pilot/DESIGN.md` (§2.3, §5.4), `specs/005-enterprise-platform/spec.md`
