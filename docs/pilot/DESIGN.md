@@ -44,7 +44,7 @@ pilot.
 |---|-----------|------------------------|
 | F1 | Runs systematic reviews / evidence syntheses recurrently (order: dozens of questions in flight or per year) | The pilot study is one question; the partner must have a second question waiting, or the pilot proves a demo, not a workflow. |
 | F2 | Can name at least one adjudicator and one reviewer for the pilot window | WS6 roles are people, not settings; the K3 burden measure (§3) is taken on the partner's adjudicator, not ours. |
-| F3 | IdP is Microsoft Entra ID or Google Workspace (OIDC), **or** the partner accepts that SSO completes when Spec 005 E2 (SAML) lands | E1 (OIDC + key enrollment) is built; SAML is in flight, not shipped (DN-011, DN-012 caveat 1). A Shibboleth-only partner is a *later* pilot, not a failed one. |
+| F3 | IdP is Microsoft Entra ID or Google Workspace (OIDC), **or** the partner accepts that SSO completes when Spec 005 E2 (SAML) lands | E1 (OIDC + key enrollment) is built; SAML is in flight, not shipped (DN-011, DN-012 caveat 1). A Shibboleth-only partner is a *later* pilot, not a failed one. **Correction (2026-10-12): E2 SAML has landed and is claim-supported (CLM-005-02, merged 2026-10-12); the shortlist pass found the archetype Shibboleth-first, so F3 no longer defers Shibboleth partners and DN-012 caveat 1 is retired.** |
 | F4 | The pilot question's evidence base is published literature reachable via Crossref/OpenAlex | The MVP connectors are Crossref + OpenAlex (OD-1). Questions whose sources live elsewhere are out of the MVP slice by decision, not by defect. |
 | F5 | Partner accepts the append-only record posture, including no-delete, before any data moves | DN-005 is constitutional. A partner whose data-governance office requires deletion-on-demand is a policy conversation that must happen before onboarding, not during it (§8). |
 | F6 | Partner agrees the pilot is measured: criteria in §3 are shared with the partner in advance, and a fired kill criterion ends the pilot as a recorded failure | Pre-registration only disciplines us if the partner can see the registration. A partner who wants a sales demo instead is not a pilot partner. |
@@ -260,9 +260,9 @@ themselves; none requires trusting Axiovex's summary of it.
 | Spec 003 worked study, DOI [10.5281/zenodo.23317259](https://doi.org/10.5281/zenodo.23317259) | The five-sub-claim decomposition on real, contested public claims — incl. CONTESTED and INCONCLUSIVE verdicts, not only favorable ones | Live |
 | Tao realignment audit (`docs/audits/2026-10-12-tao-realignment-audit.md`) | Every prior claim re-staged honestly (checked vs accepted vs digested), nonconformances named | In repo |
 | Phase 6 UI | The register-first product surface a partner's staff would actually use | Built; wireframe-governed (Article XIV) |
-| **Phase 7 evaluation verdicts** | K1–K5 measured on the frozen evaluation corpus — incl. negatives, published by design | **Slot reserved — lands in parallel; the pack is not final until this row is filled with the verdicts as issued** |
+| **Phase 7 evaluation verdicts** | K1–K5 measured on the frozen evaluation corpus — incl. negatives, published by design | **Filled (2026-10-12): verdicts as issued — supported, supported, inconclusive, contradicted, inconclusive; K1–K5 all pass (K2 after the in-phase verifier fix the evaluation caught); run VALID; bundle anchored at Zenodo DOI [10.5281/zenodo.23319126](https://doi.org/10.5281/zenodo.23319126); full record in `specs/002-mvp-implementation/evaluation/EVALUATION-REPORT.md`** |
 | OSF registration of the Phase 7 study (Spec 010, T-P4) | The registry-side anchor for the same evaluation bundle: OSF project [dvrew](https://osf.io/dvrew/), registration [84dk7](https://osf.io/84dk7/), DOI [10.17605/OSF.IO/84DK7](https://doi.org/10.17605/OSF.IO/84DK7) — the registration record states the bundle's anchor values; receipt + passed public verification in `specs/010-osf-registration/records/` (`demo-receipt.json`, `demo-verification.json`) | Live |
-| Spec 005 E1 | OIDC identity, key enrollment, RBAC, platform audit ledger | Built; E2–E6 specified, not claimed |
+| Spec 005 E1 + E2 | OIDC + SAML identity, key enrollment, RBAC, platform audit ledger | Built and claim-supported (CLM-005-01, CLM-005-02); E3 (SCIM) in flight; E4–E6 specified, not claimed *(row corrected 2026-10-12 — as written it predated E2's landing)* |
 
 Explicitly **not** in the pack, and not claimed anywhere in pilot material: SOC 2 certification,
 CMMC compliance (DN-011 language governs), SAML/SCIM/admin-console availability, SLA figures,
@@ -297,6 +297,7 @@ assumptions baked into the design:
   build does not depend on the answer, but pilot messaging should.
 - **SAML at pilot start.** Whether the archetype's IdPs are Entra/Google in practice, or
   Shibboleth-first in a way that makes F3 exclude the best-fit partners until E2 lands.
+  *Resolved (2026-10-12): the shortlist pass answered this — the sample is Shibboleth-first (5 of 9 SAML-evidenced, none Entra/Google) — and E2 has landed, so the exclusion does not bite; see `SHORTLIST-DRAFT.md` §5.*
 - **Adjudicator availability.** P-K3 assumes a partner adjudicator can give the audit exercise
   two focused hours. Whether that time exists in a real evidence-synthesis service's week is
   an empirical question the pilot itself will answer — possibly by firing P-K3 for reasons
