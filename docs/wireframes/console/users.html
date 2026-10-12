@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Users &amp; roles — Tekmerion console wireframe (4)</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side tenant">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Admin console</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Tenant</div>
+      <div class="study-name">University A</div>
+      <span class="tenant-chip">Tenant plane · uni-a</span>
+    </div>
+    <nav class="nav">
+      <a href="users.html" class="active">Users &amp; roles <span class="count">4</span></a>
+      <a href="keys.html">Keys &amp; bindings</a>
+      <a href="events.html">Lifecycle events</a>
+      <a href="break-glass.html">Break-glass</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">Alice Researcher</div>
+      <div class="role-switch"><span class="on">Tenant admin</span></div>
+      <p class="micro">Identity arrives via University A's IdP. Tenant admin powers are
+        disjoint from study roles — an admin grant signs no verdicts (CLM-005-09).
+        Every action is appended under this name.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="plane-strip tenant"><span class="plane-name">Tenant plane</span><span>University A only — this session can reach no other tenant's records, and no control here affects one.</span></div>
+      <h1>Users &amp; roles</h1>
+      <p class="page-sub">Identities are projections of the record: lifecycle state and role
+        grants exist only as appended events. The directory (names, emails) lives
+        <strong>outside</strong> every ledger — ledgers carry actor IDs and key
+        fingerprints only (Spec 005 §4).</p>
+
+      <div class="stats">
+        <div class="stat"><div class="num">4</div><div class="lab">Identities</div></div>
+        <div class="stat"><div class="num">3</div><div class="lab">Active</div></div>
+        <div class="stat"><div class="num">1</div><div class="lab">Deactivated</div></div>
+        <div class="stat"><div class="num">5</div><div class="lab">Role grants in force</div></div>
+      </div>
+
+      <div class="card flush">
+        <table>
+          <thead>
+            <tr><th style="width:26%">Identity</th><th style="width:12%">Via</th><th style="width:18%">Affiliation</th><th style="width:28%">Roles (grants in force)</th><th style="width:16%">Lifecycle state</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-h="Identity"><strong>Alice Researcher</strong><br><span class="mono">actor 7f3a…c21e</span></td>
+              <td data-h="Via">OIDC</td>
+              <td data-h="Affiliation">University A</td>
+              <td data-h="Roles"><span class="chip brand">adjudicator</span> <span class="chip brand">tenant admin</span></td>
+              <td data-h="Lifecycle state"><span class="chip supported">active</span></td>
+            </tr>
+            <tr>
+              <td data-h="Identity"><strong>Bob Reviewer</strong><br><span class="mono">actor 91bd…04aa</span></td>
+              <td data-h="Via">SAML (eppn)</td>
+              <td data-h="Affiliation">University A</td>
+              <td data-h="Roles"><span class="chip brand">researcher</span> <span class="chip brand">reviewer</span></td>
+              <td data-h="Lifecycle state"><span class="chip supported">active</span></td>
+            </tr>
+            <tr>
+              <td data-h="Identity"><strong>Mallory</strong><br><span class="mono">actor c550…9d77</span></td>
+              <td data-h="Via">OIDC · JIT</td>
+              <td data-h="Affiliation">University A</td>
+              <td data-h="Roles"><span class="muted">no study role — none granted</span></td>
+              <td data-h="Lifecycle state"><span class="chip supported">active</span></td>
+            </tr>
+            <tr class="dead-row">
+              <td data-h="Identity"><strong>Carol Fellow</strong><br><span class="mono">actor 3e08…b6f0</span></td>
+              <td data-h="Via">OIDC</td>
+              <td data-h="Affiliation">University A</td>
+              <td data-h="Roles"><span class="muted">researcher (closed at deactivation)</span></td>
+              <td data-h="Lifecycle state"><span class="chip dead">deactivated</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="small muted">A deactivated identity cannot append or sign in, effective at the
+        next authenticated request — and its history is untouched: its appends, signatures,
+        and attributions remain readable and verifiable (Article IV; CLM-005-05, E3).
+        Deactivation is an event (<span class="mono">identity.deactivated</span>), never a deletion.</p>
+
+      <h2>Role grants</h2>
+      <div class="card flush">
+        <table>
+          <thead>
+            <tr><th style="width:8%">Seq</th><th style="width:14%">Event</th><th style="width:24%">Grantor</th><th style="width:24%">Grantee</th><th style="width:14%">Role</th><th style="width:16%">When</th></tr>
+          </thead>
+          <tbody>
+            <tr><td data-h="Seq" class="mono">187</td><td data-h="Event" class="evt">role.granted</td><td data-h="Grantor">Root Operator (platform admin)</td><td data-h="Grantee">Alice Researcher</td><td data-h="Role">tenant admin</td><td data-h="When">2026-10-12 09:02</td></tr>
+            <tr><td data-h="Seq" class="mono">191</td><td data-h="Event" class="evt">role.granted</td><td data-h="Grantor">Alice Researcher (tenant admin)</td><td data-h="Grantee">Alice Researcher</td><td data-h="Role">adjudicator</td><td data-h="When">2026-10-12 09:05</td></tr>
+            <tr><td data-h="Seq" class="mono">193</td><td data-h="Event" class="evt">role.granted</td><td data-h="Grantor">Alice Researcher (tenant admin)</td><td data-h="Grantee">Bob Reviewer</td><td data-h="Role">researcher</td><td data-h="When">2026-10-12 09:07</td></tr>
+            <tr><td data-h="Seq" class="mono">196</td><td data-h="Event" class="evt">role.granted</td><td data-h="Grantor">Alice Researcher (tenant admin)</td><td data-h="Grantee">Bob Reviewer</td><td data-h="Role">reviewer</td><td data-h="When">2026-10-12 09:07</td></tr>
+            <tr><td data-h="Seq" class="mono">201</td><td data-h="Event" class="evt">role.revoked</td><td data-h="Grantor">Alice Researcher (tenant admin)</td><td data-h="Grantee">Carol Fellow</td><td data-h="Role">researcher</td><td data-h="When">2026-10-12 09:31</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="row-actions">
+        <a class="btn primary" href="users.html">Grant a role</a>
+        <a class="btn" href="users.html">Deactivate identity</a>
+        <span class="muted small">Both issue events; neither edits this table in place.
+          A SCIM group membership never silently becomes a grant (Spec 005 §4) —
+          grants exist only as the events above.</span>
+      </div>
+
+      <div class="screen-note">Console wireframe 4 of 10 — users &amp; roles, tenant plane (gate T534-WF).
+        Specimen data modeled on the E1/E2 test fixtures (alice, mallory, the bootstrap
+        tenant-admin grant). The light sidebar + tenant plane strip are the plane-separation
+        requirement: this shell must never be confusable with the platform plane's.</div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

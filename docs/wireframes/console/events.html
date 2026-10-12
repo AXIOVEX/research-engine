@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lifecycle events — Tekmerion console wireframe (6)</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side tenant">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Admin console</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Tenant</div>
+      <div class="study-name">University A</div>
+      <span class="tenant-chip">Tenant plane · uni-a</span>
+    </div>
+    <nav class="nav">
+      <a href="users.html">Users &amp; roles <span class="count">4</span></a>
+      <a href="keys.html">Keys &amp; bindings</a>
+      <a href="events.html" class="active">Lifecycle events</a>
+      <a href="break-glass.html">Break-glass</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">Alice Researcher</div>
+      <div class="role-switch"><span class="on">Tenant admin</span></div>
+      <p class="micro">Identity arrives via University A's IdP. Tenant admin powers are
+        disjoint from study roles — an admin grant signs no verdicts (CLM-005-09).
+        Every action is appended under this name.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="plane-strip tenant"><span class="plane-name">Tenant plane</span><span>University A only — this session can reach no other tenant's records, and no control here affects one.</span></div>
+      <h1>Lifecycle events</h1>
+      <p class="page-sub">The tenant platform ledger's event stream — the same record the
+        audit inspector verifies. This view is a projection; the ledger is the record.
+        <strong>Failures and denials are events too</strong>: an administrative action with
+        no corresponding audit event is a defect (CLM-005-26, T550 sweep).</p>
+
+      <div class="row-actions" style="margin-top:0">
+        <span class="seg"><span class="on">All</span><span>Identity</span><span>Roles</span><span>Keys</span><span>Auth</span></span>
+        <span class="muted small">Filter specimen — filtering is a view over the record, never an omission from it.</span>
+      </div>
+
+      <div class="card flush">
+        <table>
+          <thead>
+            <tr><th style="width:7%">Seq</th><th style="width:15%">When</th><th style="width:20%">Event</th><th style="width:20%">Actor</th><th style="width:24%">Target</th><th style="width:14%">Outcome</th></tr>
+          </thead>
+          <tbody>
+            <tr><td data-h="Seq" class="mono">214</td><td data-h="When">2026-10-12 09:33</td><td data-h="Event" class="evt">key.closed</td><td data-h="Actor"><span class="mono">actor 7f3a…c21e</span></td><td data-h="Target">key <span class="mono">8d41c2e0…77a0</span></td><td data-h="Outcome"><span class="chip supported">recorded</span></td></tr>
+            <tr><td data-h="Seq" class="mono">213</td><td data-h="When">2026-10-12 09:33</td><td data-h="Event" class="evt">identity.deactivated</td><td data-h="Actor"><span class="mono">actor 7f3a…c21e</span></td><td data-h="Target">Carol Fellow</td><td data-h="Outcome"><span class="chip supported">recorded</span></td></tr>
+            <tr><td data-h="Seq" class="mono">209</td><td data-h="When">2026-10-12 09:12</td><td data-h="Event" class="evt">key.revoked</td><td data-h="Actor"><span class="mono">actor c550…9d77</span> (self)</td><td data-h="Target">key <span class="mono">115fbc17…59e</span></td><td data-h="Outcome"><span class="chip supported">recorded</span></td></tr>
+            <tr><td data-h="Seq" class="mono">207</td><td data-h="When">2026-10-12 09:09</td><td data-h="Event" class="evt">authz.decision_denied</td><td data-h="Actor"><span class="mono">actor c550…9d77</span></td><td data-h="Target">append attempt, no enrolled key</td><td data-h="Outcome"><span class="chip contradicted">denied</span></td></tr>
+            <tr><td data-h="Seq" class="mono">204</td><td data-h="When">2026-10-12 09:06</td><td data-h="Event" class="evt">key.enrolled</td><td data-h="Actor"><span class="mono">actor 7f3a…c21e</span></td><td data-h="Target">key <span class="mono">04260af3…5db15</span> (rotation)</td><td data-h="Outcome"><span class="chip supported">recorded</span></td></tr>
+            <tr><td data-h="Seq" class="mono">198</td><td data-h="When">2026-10-12 08:58</td><td data-h="Event" class="evt">key.enrolled</td><td data-h="Actor"><span class="mono">actor 91bd…04aa</span></td><td data-h="Target">key <span class="mono">bf0ab5f7…4bdfb</span> (delegated)</td><td data-h="Outcome"><span class="chip supported">recorded</span></td></tr>
+            <tr><td data-h="Seq" class="mono">188</td><td data-h="When">2026-10-12 08:41</td><td data-h="Event" class="evt">auth.login_failed</td><td data-h="Actor">— (no session)</td><td data-h="Target">SAML assertion, audience mismatch</td><td data-h="Outcome"><span class="chip contradicted">refused</span></td></tr>
+            <tr><td data-h="Seq" class="mono">186</td><td data-h="When">2026-10-12 08:40</td><td data-h="Event" class="evt">identity.created</td><td data-h="Actor">system (JIT assertion)</td><td data-h="Target">Mallory — no study role</td><td data-h="Outcome"><span class="chip supported">recorded</span></td></tr>
+            <tr><td data-h="Seq" class="mono">182</td><td data-h="When">2026-10-12 08:36</td><td data-h="Event" class="evt">auth.login_succeeded</td><td data-h="Actor"><span class="mono">actor 7f3a…c21e</span></td><td data-h="Target">session, MFA evidence present</td><td data-h="Outcome"><span class="chip supported">recorded</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="small muted">Event vocabulary is the ledger's own (Spec 005 §13.4 AU classes:
+        account creation/modification, authentication successes <em>and failures</em>,
+        authorization decisions including denials, administrative actions, the complete key
+        lifecycle, session lifecycle, API-key lifecycle). Provisioning outcomes from SCIM
+        will appear in this same stream when E3 lands <span class="phase-chip">E3</span> —
+        the stream's shape does not change.</p>
+
+      <div class="screen-note">Console wireframe 6 of 10 — lifecycle/provisioning event log, tenant plane
+        (gate T534-WF). Event names, outcome treatment, and the AU content set (actor, type,
+        timestamp, target, outcome) are the shipped E1/E2 vocabulary; rows are specimens.</div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

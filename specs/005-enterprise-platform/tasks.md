@@ -60,7 +60,7 @@
 
 ## Phase E5 — Admin console (wireframe-gated)
 
-- [!] T534-WF **Wireframe gate (owner):** console screens (tenant, IdP, user, role, key, audit, break-glass log) added to `docs/wireframes/` as full-fidelity renders; owner approves rendered screenshots at desktop + mobile (Article XIV). No T535+ work before this gate.
+- [!] T534-WF **Wireframe gate (owner):** console screens (tenant, IdP, user, role, key, audit, break-glass log) added to `docs/wireframes/` as full-fidelity renders; owner approves rendered screenshots at desktop + mobile (Article XIV). No T535+ work before this gate. — *Package delivered 2026-10-12: `docs/wireframes/console/` (10 screens, 20 rendered screenshots, README with screen→phase mapping + open questions Q1–Q8), branch `enterprise/e5-wireframes`. Gate NOT passed: owner approval of the renders is outstanding; the box stays unchecked until he approves.*
 - [ ] T535 Console shell + tenant management, as a client of the service APIs only.
 - [ ] T536 IdP configuration screens (OIDC + SAML) with metadata validation feedback.
 - [ ] T537 User, role-grant, and lifecycle screens (grant/revoke/deactivate as event-issuing actions).

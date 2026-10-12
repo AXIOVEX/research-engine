@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Console sign-in &amp; plane selection — Tekmerion console wireframe (1)</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="signin-wrap">
+  <div class="signin-head">
+    <div class="brand-name" style="color:var(--brand)">TEKMERION</div>
+    <div class="brand-tag" style="color:var(--ink-3)">Admin console</div>
+    <h1 style="margin-top:14px">Sign in to the admin console</h1>
+    <p class="page-sub">The console has two planes, and they are disjoint: a platform
+      sign-in holds no tenant powers, and a tenant sign-in reaches no other tenant
+      (Spec 005 §5, CLM-005-09). Choose the plane you mean to work in — you will
+      authenticate at that plane's identity provider.</p>
+  </div>
+
+  <div class="plane-cards">
+    <div class="plane-card platform">
+      <div class="scope">Platform plane · deployment scope</div>
+      <h2>Platform administration</h2>
+      <p class="muted">Tenant lifecycle, platform configuration, break-glass policy,
+        the deployment audit ledger. For the deployment's operators.</p>
+      <div class="row-actions">
+        <a class="btn primary" href="tenants.html">Continue to the deployment identity provider</a>
+      </div>
+      <p class="small muted">Sign-in completes at the deployment IdP. There is no
+        platform-plane password. Admin actions additionally require step-up:
+        MFA evidence at the IdP, fresh within 10 minutes (recorded policy default).</p>
+    </div>
+
+    <div class="plane-card tenant">
+      <div class="scope">Tenant plane · one tenant only</div>
+      <h2>Tenant administration</h2>
+      <p class="muted">Your institution's IdP configuration, membership, role grants,
+        keys, and audit record. A session here can see no other tenant's records.</p>
+      <div class="field">
+        <label for="tenant-pick">Your tenant</label>
+        <select id="tenant-pick">
+          <option>University A (uni-a)</option>
+          <option>University B (uni-b)</option>
+        </select>
+        <div class="help">The tenant comes from your authenticated session, never
+          from this picker alone — the picker only chooses which IdP you are sent to.</div>
+      </div>
+      <div class="row-actions">
+        <a class="btn primary" href="users.html">Continue to University A's identity provider</a>
+      </div>
+      <p class="small muted">Your tenant's IdP (OIDC or SAML 2.0) is the only
+        credential. There is no Tekmerion password — a screen asking for one is
+        not this product (CLM-005-01).</p>
+    </div>
+  </div>
+
+  <h2>How a refusal looks</h2>
+  <div class="banner-refusal">
+    <strong>Sign-in refused.</strong>
+    <span class="mono">auth.login_failed — SAML assertion audience mismatch
+    (tenant uni-a, IdP https://idp-a.test/shibboleth). No session was created.</span>
+    <div class="why" style="color:var(--ink-2);margin-top:6px">Refusals are stated as the service
+      states them, and the refusal itself is appended to the tenant's audit ledger
+      before it is shown (E2 discipline, T514). Specimen message — the shape is the requirement.</div>
+  </div>
+
+  <div class="screen-note">Console wireframe 1 of 10 — sign-in &amp; plane selection (gate T534-WF).
+    Specimen screen: no deployment exists yet; the two-plane structure, the absence of any
+    password field, and the refusal treatment are the requirements being approved.</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compliance evidence — Tekmerion console wireframe (9)</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div>
+      <div class="brand-name">TEKMERION</div>
+      <div class="brand-tag">Admin console</div>
+    </div>
+    <div class="study-block">
+      <div class="study-label">Scope</div>
+      <div class="study-name">Deployment — all tenants</div>
+      <span class="chip" style="background:#274B74;border-color:#4A6E99;color:#DCE6F2">Platform plane</span>
+    </div>
+    <nav class="nav">
+      <a href="tenants.html">Tenants <span class="count">2</span></a>
+      <a href="audit.html">Audit ledger</a>
+      <a href="compliance.html" class="active">Compliance</a>
+      <a href="status.html">System status</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actor-block">
+      <div class="study-label">Acting as</div>
+      <div class="who">Root Operator</div>
+      <div class="role-switch"><span class="on">Platform admin</span></div>
+      <p class="micro" style="color:#9FB6CE">Identity arrives via the deployment IdP.
+        A platform admin holds no study role and cannot sign study appends (CLM-005-09).
+        Every action is appended under this name.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="plane-strip platform"><span class="plane-name">Platform plane</span><span>Deployment scope — compliance evidence for the platform itself. Tenant-scoped evidence exports from the tenant's own audit ledger, not from here.</span></div>
+      <h1>Compliance evidence</h1>
+      <p class="page-sub">Readiness and alignment evidence — <strong>never certification</strong>
+        (CLM-005-16, CLM-005-23). CMMC (32 CFR Part 170) certifies organizations and
+        assessment boundaries, not products: this view maintains the platform's
+        <em>Level 2 alignment / compliance-support</em> inputs, and labels every state as
+        what it is — including the ones that are gaps.</p>
+
+      <h2>Control responsibility matrix — NIST SP 800-171 Rev 2</h2>
+      <div class="stats">
+        <div class="stat"><div class="num">110</div><div class="lab">Requirements classified</div></div>
+        <div class="stat"><div class="num">17</div><div class="lab">Platform</div></div>
+        <div class="stat"><div class="num">51</div><div class="lab">Supports</div></div>
+        <div class="stat"><div class="num">42</div><div class="lab">Organizational</div></div>
+      </div>
+      <div class="card flush">
+        <table>
+          <thead>
+            <tr><th style="width:34%">Family</th><th style="width:14%">Reqs</th><th style="width:17%">Platform</th><th style="width:17%">Supports</th><th style="width:18%">Organizational</th></tr>
+          </thead>
+          <tbody>
+            <tr><td data-h="Family">3.1 Access Control</td><td data-h="Reqs">22</td><td data-h="Platform">5</td><td data-h="Supports">9</td><td data-h="Organizational">8</td></tr>
+            <tr><td data-h="Family">3.2 Awareness &amp; Training</td><td data-h="Reqs">3</td><td data-h="Platform">0</td><td data-h="Supports">0</td><td data-h="Organizational">3</td></tr>
+            <tr><td data-h="Family">3.3 Audit &amp; Accountability</td><td data-h="Reqs">9</td><td data-h="Platform">4</td><td data-h="Supports">5</td><td data-h="Organizational">0</td></tr>
+            <tr><td data-h="Family">3.4 Configuration Management</td><td data-h="Reqs">9</td><td data-h="Platform">1</td><td data-h="Supports">6</td><td data-h="Organizational">2</td></tr>
+            <tr><td data-h="Family">3.5 Identification &amp; Authentication</td><td data-h="Reqs">11</td><td data-h="Platform">4</td><td data-h="Supports">7</td><td data-h="Organizational">0</td></tr>
+            <tr><td data-h="Family">3.6 Incident Response</td><td data-h="Reqs">3</td><td data-h="Platform">0</td><td data-h="Supports">2</td><td data-h="Organizational">1</td></tr>
+            <tr><td data-h="Family">3.7 Maintenance</td><td data-h="Reqs">6</td><td data-h="Platform">0</td><td data-h="Supports">1</td><td data-h="Organizational">5</td></tr>
+            <tr><td data-h="Family">3.8 Media Protection</td><td data-h="Reqs">9</td><td data-h="Platform">0</td><td data-h="Supports">2</td><td data-h="Organizational">7</td></tr>
+            <tr><td data-h="Family">3.9 Personnel Security</td><td data-h="Reqs">2</td><td data-h="Platform">0</td><td data-h="Supports">1</td><td data-h="Organizational">1</td></tr>
+            <tr><td data-h="Family">3.10 Physical Protection</td><td data-h="Reqs">6</td><td data-h="Platform">0</td><td data-h="Supports">0</td><td data-h="Organizational">6</td></tr>
+            <tr><td data-h="Family">3.11 Risk Assessment</td><td data-h="Reqs">3</td><td data-h="Platform">0</td><td data-h="Supports">2</td><td data-h="Organizational">1</td></tr>
+            <tr><td data-h="Family">3.12 Security Assessment</td><td data-h="Reqs">4</td><td data-h="Platform">0</td><td data-h="Supports">4</td><td data-h="Organizational">0</td></tr>
+            <tr><td data-h="Family">3.13 System &amp; Communications Protection</td><td data-h="Reqs">16</td><td data-h="Platform">3</td><td data-h="Supports">9</td><td data-h="Organizational">4</td></tr>
+            <tr><td data-h="Family">3.14 System &amp; Information Integrity</td><td data-h="Reqs">7</td><td data-h="Platform">0</td><td data-h="Supports">3</td><td data-h="Organizational">4</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small muted">Counts are the matrix's own, as classified in
+        <span class="mono">specs/005-enterprise-platform/cmmc-responsibility-matrix.md</span>
+        (Platform = satisfied by construction · Supports = platform provides mechanism or
+        evidence, the organization owns the rest · Organizational = outside product scope,
+        listed so no family is silently dropped; SP 800-171 Rev 2 has no SA family — recorded
+        in the matrix). The matrix is a living artifact: a phase exit that changes a
+        classification updates it in the same commit (CLM-005-24).</p>
+
+      <h2>SPRS self-assessment</h2>
+      <div class="card">
+        <div class="verify-line">
+          <span class="chip inconclusive">self-score: not computed</span>
+          <span class="phase-chip">machinery · E6 · T552</span>
+        </div>
+        <p class="muted" style="margin-bottom:0">CLM-005-29 is <strong>draft</strong>. No score is displayed,
+          because the machinery that would make a score real — control states maintained in
+          SPRS-input form (per-requirement state, DoD weighted deduction class, evidence link,
+          on the −203…110 scale) — does not exist until E6. When it lands, this panel shows
+          the computed inputs; the operator's score <em>submission</em> remains the operator's act.</p>
+      </div>
+
+      <h2>POA&amp;M register</h2>
+      <div class="card">
+        <p style="margin-top:0">The register itself — append-only items, milestones, and status
+          changes as events — lands in E6 <span class="phase-chip">E6 · T553</span>. It is
+          seeded with one item, which exists today as a spec record and is shown as such:</p>
+        <dl class="kv">
+          <dt>POA&amp;M-001</dt><dd><strong>§3.13.11 — FIPS-validated cryptography not in place.</strong>
+            Affected requirement: 3.13.11. Status: <span class="chip invalid">open</span></dd>
+          <dt>Milestone</dt><dd>Route decision is an owner decision on a named CUI/defense
+            requirement (recorded 2026-10-12: the migration waits for that trigger). No FIPS
+            work starts under Spec 005 until it exists.</dd>
+        </dl>
+      </div>
+
+      <div class="gap-card">
+        <div class="verify-line">
+          <span class="chip invalid">open gap — §3.13.11</span>
+          <span class="small muted">FIPS-validated cryptographic modules (SP 800-171 §3.13.11)</span>
+        </div>
+        <p style="margin-bottom:8px">The platform's cryptographic inventory
+          (<span class="mono">crypto-inventory.md</span>, T549) lists <strong>12 operations</strong> —
+          ledger hashing and signing, checkpoints, actor intent signatures, delegated-custody
+          signing, OIDC/SAML verification, PKCE, API-key hashing, fingerprints.
+          <strong>FIPS 140-3 validated: 0 of 12.</strong> Every implementation is capable and
+          none is a validated module.</p>
+        <p class="muted" style="margin:0">Consequence, stated plainly: a deployment that must
+          satisfy §3.13.11 for CUI today cannot point at any row of the inventory. The
+          self-hosted shape is the capable CUI path meanwhile; closing this gap is a
+          cross-repo (Axiomere) decision, not a console setting.</p>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>CUI marking in artifacts <span class="phase-chip">E6 · T551</span></h3>
+          <dl class="kv" style="grid-template-columns:118px 1fr">
+            <dt>Marking category</dt><dd class="muted">not recorded for this deployment (specimen empty state)</dd>
+            <dt>Controlling authority</dt><dd class="muted">not recorded</dd>
+            <dt>Dissemination</dt><dd class="muted">not recorded</dd>
+          </dl>
+          <p class="small muted" style="margin-bottom:0">Marking support is specced (CLM-005-28):
+            banner/footer fields in the bundle manifest and HUMAN-README, populated from
+            recorded fields. The platform <strong>records</strong> markings; it does not
+            adjudicate them. Export-side rendering lands in E6.</p>
+        </div>
+        <div class="card">
+          <h3>Hosted shape &amp; DFARS <span class="chip inconclusive">open decision</span></h3>
+          <p class="muted">DFARS 252.204-7012 expects a cloud provider handling CUI to meet
+            FedRAMP Moderate or equivalent. The hosted shape does not meet that expectation
+            today, and whether it will — or CUI tenants are self-hosted-only until it does —
+            is an <strong>open owner/legal decision</strong> (CLM-005-31). This flag stays
+            visible wherever CUI hosting is described.</p>
+          <h3 style="margin-top:14px">SOC 2</h3>
+          <p class="muted" style="margin-bottom:0">Readiness mapping only (CC6.1 → Spec 005
+            §§2–5 · CC6.6 → §6 · CC7.2 → audit ledger + break-glass alarming · CC7.3/7.4 →
+            bundle export + anchoring · CC8.1 → the constitution/spec/wireframe gate record
+            itself). The mapping document is E6 work <span class="phase-chip">E6 · T544</span>;
+            it is labeled readiness everywhere, never certification.</p>
+        </div>
+      </div>
+
+      <div class="screen-note">Console wireframe 9 of 10 — compliance evidence view, platform plane (gate T534-WF).
+        Matrix counts are real (computed from the responsibility matrix on main, 2026-10-12);
+        the SPRS, POA&amp;M, CUI-marking, and DFARS panels depict target states whose phase
+        chips name the work that makes each real. Nothing on this screen claims a state E6 has not landed.</div>
+    </div>
+  </main>
+</div>
+</body>
+</html>
