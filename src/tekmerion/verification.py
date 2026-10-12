@@ -44,7 +44,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
-from .claims import EvidenceItem
+from .claims import Claim, EvidenceItem
 from .connectors import RetrievedItem
 
 RESOLVED = "resolved"
@@ -420,13 +420,65 @@ def verify_citations(
                               second_review_fraction=second_review_fraction)
 
 
+def falsifier_names_record(claim: Claim, citation: Citation,
+                           result: CitationResult) -> bool:
+    """Whether the claim's registered falsifier names *this resolved
+    record* as the falsifying observation (Spec 011, closing Phase 7
+    finding §4.8). True only under the full conjunction:
+
+    - the citation resolved and stage 2 judged agreement — the
+      resolved record *is* the cited work (a quarantined citation
+      never carries the observation);
+    - the stage-3 content check judged the retrieved content to
+      contradict the proposition (the observation was checked, not
+      inferred);
+    - the falsifier text names the resolved record by one of the two
+      conventional citation forms: the citation's normalized DOI
+      appears in it, or the resolved record's **first-author surname
+      and year** both appear in it.
+
+    Identity is read only from the resolved record (and the cited
+    DOI) — never from the as-cited fields, which are precisely what
+    stage 2 exists to distrust. Everything else — a generic falsifier
+    naming no record, title-only naming, a missing resolved record —
+    leaves the observation unset: when in doubt, the field stays
+    unset, because the falsifier path bypasses the sufficiency floor
+    and a false firing is worse than an unset flag."""
+    if result.resolution != RESOLVED or result.agreement != AGREE:
+        return False
+    if result.content != CONTRADICTS:
+        return False
+    falsifier = (claim.falsifier or "").strip()
+    if not falsifier:
+        return False
+    text = falsifier.lower()
+    doi = _norm_doi(citation.doi)
+    if doi and doi in text:
+        return True
+    retrieved = result.retrieved
+    if retrieved is None or not retrieved.authors or retrieved.year is None:
+        return False
+    surname = _surname(retrieved.authors[0])
+    if not surname or surname not in set(_tokens(falsifier)):
+        return False
+    return str(retrieved.year) in set(re.findall(r"[0-9]+", falsifier))
+
+
 def to_evidence_item(citation: Citation, result: CitationResult, *,
                      support_mass: float = 0.8,
-                     contradiction_mass: float = 0.8) -> EvidenceItem:
+                     contradiction_mass: float = 0.8,
+                     claim: Optional[Claim] = None) -> EvidenceItem:
     """Convert a checked citation into register evidence. Quarantined
     citations convert as unverified (a run containing one is INVALID
     until adjudication — WS5 §1.2); metadata-only citations convert
-    as context with no mass (RT-5)."""
+    as context with no mass (RT-5).
+
+    When the claim is supplied, a contradicting conversion also
+    carries `falsifier_observation` exactly when the registered
+    falsifier names this resolved record (`falsifier_names_record`) —
+    the wiring that makes the verdict engine's falsifier path
+    reachable from real pipeline evidence (Spec 011). Without the
+    claim, the flag stays unset, as before."""
     base = {"item_id": citation.citation_id, "origin_group": result.origin_group,
             "hosted_ok": result.retrieved.hosted_ok if result.retrieved else True}
     if result.quarantined:
@@ -435,8 +487,13 @@ def to_evidence_item(citation: Citation, result: CitationResult, *,
         return EvidenceItem(stance=SUPPORTS, support_mass=support_mass,
                             could_falsify=True, **base)
     if result.content == CONTRADICTS:
-        return EvidenceItem(stance=CONTRADICTS, contradiction_mass=contradiction_mass,
-                            could_falsify=True, **base)
+        return EvidenceItem(
+            stance=CONTRADICTS, contradiction_mass=contradiction_mass,
+            could_falsify=True,
+            falsifier_observation=bool(
+                claim is not None
+                and falsifier_names_record(claim, citation, result)),
+            **base)
     if result.content == METADATA_ONLY:
         return EvidenceItem(stance=CONTEXTUAL, metadata_only=True, **base)
     return EvidenceItem(stance=CONTEXTUAL, could_falsify=True, **base)

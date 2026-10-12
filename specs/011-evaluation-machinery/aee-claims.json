@@ -1,0 +1,332 @@
+{
+ "build_note": "2026-10-12 build: all nine claims moved to supported / checked on the shipped test evidence (tests/test_spec011.py, 25 tests; full suite 274 passed, 2 skipped \u2014 the 249-test pre-change baseline plus the 25 new, no regressions). Backward compatibility was measured, not asserted: the eight frozen bundles were verified with the pre-change code first and their verdicts pinned, then re-verified under the new code. Stage is checked throughout (author's own tests; DN-010 convention) \u2014 no claim is explained or accepted, and none of the eight frozen artifacts was modified.",
+ "claims": [
+  {
+   "boundary": [
+    "Scope: bundles exported by tekmerion.export after this change, and RunResult objects returned by tekmerion.verdicts.evaluate_run. Pre-change bundles are CLM-011-08's scope, not this claim's."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/011-evaluation-machinery/spec.md (Fix 1 design)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/002-mvp-implementation/evaluation/EVALUATION-REPORT.md \u00a74.7 + \u00a72.3 friction (1) (the gap this claim closes)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_spec011.py::test_bundle_alone_audit (run_outcome.controls reconstructed from the bundle alone: 3 outcomes, observed verdicts, fixture claim id + hash, swap construction named)",
+     "source_quality": "test"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_spec011.py::test_evaluate_run_carries_control_outcomes + test_bundle_of_invalid_run_records_control_outcomes (RunResult carries the outcomes; an invalid run's projection records them too)",
+     "source_quality": "test"
+    }
+   ],
+   "falsification_tests": [
+    "F-011-1: an exported bundle of a study with registered controls whose run_outcome lacks a per-control entry for any registered control, or records an observed/passed value that a production-path execution of that control does not produce."
+   ],
+   "id": "CLM-011-01",
+   "kind": "requirement",
+   "lifecycle_stage": "checked",
+   "severity": "high",
+   "source_ref": "specs/011-evaluation-machinery/spec.md",
+   "status": "supported",
+   "text": "Every bundle exported after this change records, in verdicts.json's run_outcome, one outcome entry per registered control \u2014 kind, failure mode, expected, observed, pass/fail (or an explicit non-executed attestation with passed: null), and fixture identity \u2014 for valid, invalid, and not-run outcomes alike; the same outcomes are carried on the run's own RunResult for live consumers.",
+   "uncertainty": "medium"
+  },
+  {
+   "boundary": [
+    "Scope: tekmerion.verdicts.run_controls / run_controls_report behavioral parity. The report's additional structured fields are additive and outside the legacy contract."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/011-evaluation-machinery/spec.md (Fix 1: one execution, structured)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_spec011.py::test_run_controls_parity_on_passing_controls + test_run_controls_parity_failure_strings + test_run_controls_parity_swap_failures (failure strings pinned literally against the pre-change texts, incl. swap no-path and too-short-ledger)",
+     "source_quality": "test"
+    }
+   ],
+   "falsification_tests": [
+    "F-011-2: any control input (missing fixture, verdict mismatch, unknown kind, swap variants) whose failure list from run_controls differs in content or order from the pre-change implementation's."
+   ],
+   "id": "CLM-011-02",
+   "kind": "requirement",
+   "lifecycle_stage": "checked",
+   "severity": "high",
+   "source_ref": "specs/011-evaluation-machinery/spec.md",
+   "status": "supported",
+   "text": "run_controls' failure contract is preserved exactly \u2014 same failure strings, same order, same conditions \u2014 with the structured report and the legacy function executing one and the same control path (RT-1).",
+   "uncertainty": "low"
+  },
+  {
+   "boundary": [
+    "Scope: tekmerion.export.verify_bundle. Fixture controls' observed verdicts are attested by the export-time production-path execution and bound by the manifest hashes \u2014 not recomputable bundle-alone (fixtures are registration-external); the swap outcome is fully recomputed."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/011-evaluation-machinery/spec.md (Fix 1: verifier coverage i\u2013iii)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_spec011.py::test_tampered_control_outcome_is_detected + test_dropped_control_outcome_is_detected + test_misstated_swap_outcome_is_detected (each tamper rehashed; each detected)",
+     "source_quality": "test"
+    }
+   ],
+   "falsification_tests": [
+    "F-011-3: a bundle whose recorded control outcomes were altered (outcome flipped, control dropped, swap result misstated) and whose manifest was rehashed to match, passing verify_bundle."
+   ],
+   "id": "CLM-011-03",
+   "kind": "requirement",
+   "lifecycle_stage": "checked",
+   "severity": "high",
+   "source_ref": "specs/011-evaluation-machinery/spec.md",
+   "status": "supported",
+   "text": "The standalone verifier fails a bundle whose recorded control outcomes contradict the bundle's own committed registration, its stated run outcome, or the verifier's own swap-control replay on the bundle's ledger copy; bundles without recorded outcomes verify as before.",
+   "uncertainty": "medium"
+  },
+  {
+   "boundary": [
+    "Scope: tekmerion.verification.to_evidence_item with the claim supplied, and the shared register rebuild (ui/state.py::derive_evidence) that supplies it. Conversions without the claim keep the pre-change behavior."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/011-evaluation-machinery/spec.md (Fix 2: the mapping)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/002-mvp-implementation/evaluation/corpus.md (CLM-E-004's registered falsifier names the Wandel 2010 conclusion \u2014 the pattern this rule fires on)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_spec011.py::test_falsifier_fires_on_surname_and_year + test_falsifier_fires_on_doi_alone",
+     "source_quality": "test"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_spec011.py::test_workspace_derive_evidence_wires_the_flag (the shared UI/MCP rebuild path: flag set from ledger outcomes + cached record; verdict via the falsifier path)",
+     "source_quality": "test"
+    }
+   ],
+   "falsification_tests": [
+    "F-011-4: a fixture in which a claim's falsifier names a record by DOI or first-author surname + year, the record resolves, agrees, and content-contradicts, and the converted evidence (or the claim's verdict) does not carry the falsifier observation / does not verdict via the falsifier path."
+   ],
+   "id": "CLM-011-04",
+   "kind": "requirement",
+   "lifecycle_stage": "checked",
+   "severity": "high",
+   "source_ref": "specs/011-evaluation-machinery/spec.md",
+   "status": "supported",
+   "text": "Pipeline-converted evidence carries falsifier_observation=True exactly when the registered falsifier names the resolved record (by DOI, or by first-author surname + year) and that record resolved, agreed, and content-contradicts \u2014 so a claim whose falsifier is observed verdicts CONTRADICTED via the falsifier path, with the falsifier reason stated.",
+   "uncertainty": "medium"
+  },
+  {
+   "boundary": [
+    "Scope: the falsifier wiring's boundary. Precision over recall by design: the falsifier path bypasses the sufficiency floor, so a false firing is worse than an unset flag."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/011-evaluation-machinery/spec.md (Fix 2: the boundary)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_spec011.py::test_falsifier_silent_without_the_full_conjunction (generic falsifier, title-only naming, wrong year, wrong author, supports/metadata_only/quarantined/unresolved content, no claim, no resolved record \u2014 flag unset in every case)",
+     "source_quality": "test"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_spec011.py::test_falsifier_verdict_path_and_unchanged_math (identical group inputs produce identical interval/point with and without the wiring)",
+     "source_quality": "test"
+    }
+   ],
+   "falsification_tests": [
+    "F-011-5: any battery case outside the naming rule's conjunction whose converted evidence carries falsifier_observation=True; or any change in evaluate_claim's outputs (verdict, interval, point) for identical group inputs."
+   ],
+   "id": "CLM-011-05",
+   "kind": "requirement",
+   "lifecycle_stage": "checked",
+   "severity": "high",
+   "source_ref": "specs/011-evaluation-machinery/spec.md",
+   "status": "supported",
+   "text": "In every other case the flag stays unset \u2014 generic falsifiers, title-only naming, unresolved or disagreeing citations, metadata-only evidence, and conversions without the resolved record \u2014 and no verdict mathematics (intervals, points, floors, caps, thresholds) changes.",
+   "uncertainty": "medium"
+  },
+  {
+   "boundary": [
+    "Scope: exports whose caller presents citation inputs (the workspace exporter passes the study's citation sidecar by default). Exports without presented inputs carry no as_cited key \u2014 absence noted, not failed (CLM-011-08's convention)."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/011-evaluation-machinery/spec.md (Fix 3: as-cited forms)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/002-mvp-implementation/evaluation/EVALUATION-REPORT.md \u00a72.3 friction (5) (as-cited forms absent from the Phase 7 bundle)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_spec011.py::test_bundle_alone_audit (as_cited carries all three citations incl. the fabricated DOI) + test_tampered_as_cited_is_detected (claim relink and ghost entry both detected after rehash)",
+     "source_quality": "test"
+    }
+   ],
+   "falsification_tests": [
+    "F-011-6: a bundle exported with citation inputs presented whose verification.json lacks an as-cited form for any presented citation; or a bundle whose as-cited form was altered (claim linkage changed) and rehashed, passing verify_bundle."
+   ],
+   "id": "CLM-011-06",
+   "kind": "requirement",
+   "lifecycle_stage": "checked",
+   "severity": "medium",
+   "source_ref": "specs/011-evaluation-machinery/spec.md",
+   "status": "supported",
+   "text": "When citation inputs are presented at export, the bundle's verification.json carries every citation's as-cited form, and the standalone verifier fails a bundle whose as-cited form disagrees with the ledger (unknown citation, or a claim linkage different from its citation.checked outcome).",
+   "uncertainty": "low"
+  },
+  {
+   "boundary": [
+    "Scope: decided quarantine items with decision 'exclude'. Grouping decisions and variant rulings are not exclusions and mint no markers; undecided items mint none."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/011-evaluation-machinery/spec.md (Fix 3: excluded-citation markers)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/002-mvp-implementation/evaluation/EVALUATION-REPORT.md \u00a72.3 friction (6) (excluded citations vanish without a marker)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_spec011.py::test_bundle_alone_audit (exactly one marker: CIT-A-102 via ADQ-001 with its rationale; the citation absent from evidence/items.json) + test_tampered_exclusion_markers_are_detected (dropped and invented markers both detected after rehash)",
+     "source_quality": "test"
+    }
+   ],
+   "falsification_tests": [
+    "F-011-7: a bundle in which an adjudicated-excluded citation has no marker, a marker exists for a citation no decided quarantine item excluded, or a marker's rationale/queue item diverges from the ledger \u2014 passing verify_bundle after rehash."
+   ],
+   "id": "CLM-011-07",
+   "kind": "requirement",
+   "lifecycle_stage": "checked",
+   "severity": "medium",
+   "source_ref": "specs/011-evaluation-machinery/spec.md",
+   "status": "supported",
+   "text": "The bundle's adjudication.json carries an exclusion marker (citation, claim, queue item, decision, rationale) for exactly the citations a decided quarantine item excluded \u2014 no more, no fewer \u2014 the verifier re-derives the set from the ledger replay and fails on any divergence, and excluded citations remain absent from the evidence files.",
+   "uncertainty": "low"
+  },
+  {
+   "boundary": [
+    "Scope: verify_bundle over the eight named frozen bundles (verdicts pinned to the values recorded at baseline, before this change: demo bundles carry no issued verdicts; math CLM-M-110/210 contested, -310/-410 inconclusive, -510 inconclusive\u2192supported across its two verdict events; Phase 7 supported/supported/inconclusive/contradicted/inconclusive). Out-of-repo bundle sets are verified when present; the Phase 7 pair is in-repo."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/011-evaluation-machinery/spec.md (backward-compatibility constraint)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_spec011.py::test_frozen_bundles_still_verify_with_verdicts_unchanged (all eight frozen bundles: verify_bundle ok under the new code; verdicts equal the values pinned at the pre-change baseline read, 2026-10-12)",
+     "source_quality": "test"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_spec011.py::test_pre_spec011_shape_verifies_after_stripping_new_keys (absences land in checks as notes, never failures)",
+     "source_quality": "test"
+    }
+   ],
+   "falsification_tests": [
+    "F-011-8: any of the eight frozen bundles failing verify_bundle under the new code, or verifying with any issued verdict different from its recorded value; or a pre-change-shaped bundle (new keys stripped, manifest rehashed) failing on the absence of a new field."
+   ],
+   "id": "CLM-011-08",
+   "kind": "requirement",
+   "lifecycle_stage": "checked",
+   "severity": "high",
+   "source_ref": "specs/011-evaluation-machinery/spec.md",
+   "status": "supported",
+   "text": "Backward compatibility: all eight previously frozen bundles (Phase 5 demo v1\u2013v4, Spec 003 math study v1\u2013v2, Phase 7 evaluation v1\u2013v2) verify standalone under the new code with their issued verdicts byte-identical, and a bundle lacking any of the new fields verifies as before, with the absences noted in the verifier's checks rather than failed.",
+   "uncertainty": "low"
+  },
+  {
+   "boundary": [
+    "Scope: the README text of newly exported bundles. Frozen bundles' READMEs are frozen artifacts and are not rewritten."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/011-evaluation-machinery/spec.md (the one in-scope \u00a72.3 item)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/002-mvp-implementation/evaluation/EVALUATION-REPORT.md \u00a72.3 friction (6) (CIT-E-302 metadata_only vs contextual, no stated mapping)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "tests/test_spec011.py::test_bundle_alone_audit (HUMAN-README carries the 'How citation outcomes become evidence' table incl. the metadata_only and quarantined rows and the falsifier_observation note)",
+     "source_quality": "test"
+    }
+   ],
+   "falsification_tests": [
+    "F-011-9: a bundle exported after this change whose HUMAN-README does not state the conversion mapping; or a stated mapping that disagrees with to_evidence_item's actual conversion on any row."
+   ],
+   "id": "CLM-011-09",
+   "kind": "requirement",
+   "lifecycle_stage": "checked",
+   "severity": "low",
+   "source_ref": "specs/011-evaluation-machinery/spec.md",
+   "status": "supported",
+   "text": "The exported bundle's HUMAN-README states the pipeline's content-outcome \u2192 evidence conversion mapping (supports / contradicts / contextual / metadata_only / quarantined \u2192 stance, mass, and flags), so no bundle file's vocabulary is left unmapped against another's.",
+   "uncertainty": "low"
+  }
+ ],
+ "date": "2026-10-12",
+ "spec": "specs/011-evaluation-machinery/spec.md",
+ "version": "0.2.0"
+}
