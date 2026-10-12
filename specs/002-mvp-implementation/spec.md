@@ -1,6 +1,6 @@
 # Spec 002 — MVP Implementation (Draft)
 
-**Status:** DRAFT — awaiting owner go-ahead · **Date:** 2026-10-11 · **Constitution:** v1.0.0
+**Status:** G1 APPROVED by owner 2026-10-11 — implementation in progress (Phase 0/1 done) · **Date:** 2026-10-11 · **Constitution:** v1.0.0
 **Authority:** Spec 001 (ratified design) · DN-002 (OD-1: MVP slice) · DN-003 (OD-2: hybrid, hosted-first)
 **Scope:** build the smallest working engine that runs the ratified U2 workflow end-to-end and can host its own evaluation. Nothing beyond the slice.
 

@@ -1,0 +1,11 @@
+LICENSE
+README.md
+pyproject.toml
+src/research_engine/__init__.py
+src/research_engine/record.py
+src/research_engine.egg-info/PKG-INFO
+src/research_engine.egg-info/SOURCES.txt
+src/research_engine.egg-info/dependency_links.txt
+src/research_engine.egg-info/requires.txt
+src/research_engine.egg-info/top_level.txt
+tests/test_record.py

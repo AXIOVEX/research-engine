@@ -4,20 +4,20 @@
 
 ## Gates
 
-- [!] G1 Owner go-ahead on Spec 002 before any code.
+- [x] G1 Owner go-ahead on Spec 002 — given 2026-10-11.
 - [!] G3 OD-5 thresholds (K3 audit-time budget, K5 cost ceiling) recorded before the evaluation freeze.
 - [!] G4 Any spend — none planned; free API keys on owner accounts only.
 
 ## Phase 0 — Setup
 
-- [ ] T201 Record DN-004 (language/runtime/store decision with reasons).
-- [ ] T202 Repo engineering setup: CI, test harness supporting seeded-defect cases.
+- [x] T201 DN-004 recorded (Python 3.12 stdlib core, JSONL log, SHA-256 chain).
+- [x] T202 Repo setup done: pyproject, GitHub Actions CI, pytest harness with seeded-defect cases.
 
 ## Phase 1 — Record service
 
-- [ ] T203 Event store: append-only log, single sequencing point, hash chain.
-- [ ] T204 Projections + replay; divergence reporting.
-- [ ] T205 Standalone bundle verifier (skeleton → full in Phase 5).
+- [x] T203 Event store done: append-only JSONL, single sequencing point (lock + monotonic seq), SHA-256 hash chain, fsync appends.
+- [x] T204 Projections + replay done: invalid log replays INVALID with no verdicts surfaced.
+- [x] T205 Standalone verifier core done (`verify_log` needs only the log file); bundle-level manifest verification lands in Phase 5.
 
 ## Phase 2 — Connectors
 
