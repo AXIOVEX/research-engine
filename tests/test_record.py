@@ -92,15 +92,14 @@ def test_replay_of_tampered_log_is_invalid_and_silent(tmp_path):
     assert proj.claims == {} and proj.verdicts == {}  # defective run issues no verdicts
 
 
-# --- Redaction by tombstone (WS4 section 5)
+# --- No redaction, ever (DN-005): masking was a soft delete and is removed.
 
-def test_redaction_masks_export_but_preserves_history(tmp_path):
+def test_no_redaction_api_and_exports_are_faithful(tmp_path):
     store = make_store(tmp_path)
-    store.redact(target_seq=2, authority="DPO request 2026-10-11", reason="personal data", actor="adjudicator-1")
-    assert store.verify().ok  # the log itself, tombstone included, still verifies
+    assert not hasattr(store, "redact")  # the operation does not exist
     exported = export_events(store.path)
-    masked = [e for e in exported if e["seq"] == 2][0]
-    assert masked["payload"]["redacted"] is True
-    assert "statement" not in masked["payload"]
+    target = [e for e in exported if e["seq"] == 2][0]
+    assert target["payload"]["statement"]  # payload travels intact
     proj = replay(store.path)
-    assert proj.claims.get("CLM-EVAL-001", {}) == {}  # projection masks it too
+    assert proj.claims.get("CLM-EVAL-001")  # projection sees it too
+    assert store.verify().ok

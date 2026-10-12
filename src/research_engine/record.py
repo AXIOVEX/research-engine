@@ -7,9 +7,11 @@ Design rules implemented here, each traceable to the architecture:
 - Hash chain: every event carries ``prev_hash`` and ``hash`` =
   SHA-256(prev_hash + canonical JSON of the event body), so alteration,
   insertion, deletion, or reordering breaks verification at that point.
-- Redaction by tombstone: a ``record.redacted`` event marks a target
-  ``seq``; the raw log is untouched (it is history), but projections and
-  exports mask the target payload (WS4 §5).
+- No redaction, ever (DN-005, 2026-10-11): tombstone masking was a soft
+  delete and is removed. Withdrawal is expressed by appending new
+  snapshots marked dead (score 0.0, reason on the record) — in the
+  Axiomere record layer this store is being migrated to (DN-007).
+  Projections and exports here return events exactly as stored.
 - Replay: projections are rebuilt by folding events in order; a log that
   fails verification replays as INVALID, never as partial truth (WS3 §1).
 """
@@ -130,15 +132,6 @@ class EventStore:
             self._seq, self._head = ev["seq"], ev["hash"]
             return ev
 
-    def redact(self, target_seq: int, authority: str, reason: str, actor: str) -> dict[str, Any]:
-        """Append a tombstone for ``target_seq`` (WS4 §5). The original
-        event stays in the log; projections/exports mask its payload."""
-        return self.append(
-            "record.redacted",
-            {"target_seq": target_seq, "authority": authority, "reason": reason},
-            actor,
-        )
-
     def events(self) -> Iterator[dict[str, Any]]:
         if not self.path.exists():
             return
@@ -160,7 +153,6 @@ class StudyProjection:
     valid: bool
     claims: dict[str, dict[str, Any]] = field(default_factory=dict)
     verdicts: dict[str, dict[str, Any]] = field(default_factory=dict)
-    redactions: dict[int, dict[str, Any]] = field(default_factory=dict)
     event_count: int = 0
 
 
@@ -178,11 +170,8 @@ def replay(path: str | Path) -> StudyProjection:
             if line.strip():
                 store_events.append(json.loads(line))
     for ev in store_events:
-        if ev["type"] == "record.redacted":
-            proj.redactions[ev["payload"]["target_seq"]] = ev["payload"]
-    for ev in store_events:
         proj.event_count += 1
-        payload = {} if ev["seq"] in proj.redactions else ev["payload"]
+        payload = ev["payload"]
         if ev["type"] == "claim.registered":
             proj.claims[payload.get("claim_id", f"seq-{ev['seq']}")] = payload
         elif ev["type"] == "verdict.issued":
@@ -191,21 +180,12 @@ def replay(path: str | Path) -> StudyProjection:
 
 
 def export_events(path: str | Path) -> list[dict[str, Any]]:
-    """Events as they may leave the system: redacted payloads are masked,
-    with the tombstone itself visible (WS4 §5 — the record honestly shows
-    that something was removed, when, and under what authority)."""
-    proj_redactions: dict[int, dict[str, Any]] = {}
+    """Events as they may leave the system: exactly as stored (DN-005 —
+    exports never mask; a withdrawn record travels with its dead
+    snapshot and reason visible, not erased)."""
     raw: list[dict[str, Any]] = []
     with open(path, "r", encoding="utf-8") as f:
         for line in f:
             if line.strip():
                 raw.append(json.loads(line))
-    for ev in raw:
-        if ev["type"] == "record.redacted":
-            proj_redactions[ev["payload"]["target_seq"]] = ev["payload"]
-    out: list[dict[str, Any]] = []
-    for ev in raw:
-        if ev["seq"] in proj_redactions:
-            ev = {**ev, "payload": {"redacted": True, **proj_redactions[ev["seq"]]}}
-        out.append(ev)
-    return out
+    return raw

@@ -16,7 +16,7 @@ A claim is the atomic unit of the engine. Nothing is asserted by the system exce
 | `dependencies` | Claim IDs and evidence-group IDs this claim rests on | Forms the dependency graph (§4) |
 | `status` | Lifecycle state (below) | Transitions are appended events, never edits |
 
-**Lifecycle:** `proposed → registered (frozen) → under-review → verdicted → (superseded | revisited)`. A claim's *statement* never changes after registration; a changed statement is a new claim that supersedes the old one, with the link recorded both ways.
+**Lifecycle:** `proposed → registered (frozen) → under-review → verdicted → (superseded | revisited | dead)`. A claim's *statement* never changes after registration; a changed statement is a new claim that supersedes the old one, with the link recorded both ways. **Dead** (DN-005) is a terminal lifecycle state entered only by a new snapshot carrying `status: dead`, a reason code, and `score: 0.0` — the claim is never deleted, and its full history, including the death and its reason, stays in the record.
 
 *Rejected alternative:* claims as rows in a mutable table with a `current_verdict` column. Rejected because it destroys exactly what the product sells — the history of what was believed and why (Article IV).
 

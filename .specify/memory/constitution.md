@@ -1,6 +1,6 @@
 # Axiovex Research Engine — Project Constitution
 
-**Version:** 1.0.0 · **Ratified:** 2026-10-11 · **Owner:** Tristen Pierson, Axiovex Systems, LLC
+**Version:** 1.1.0 · **Ratified:** 2026-10-11 · **Amended:** 2026-10-11 (Article IV strengthened + Article XIII added, per DN-005) · **Owner:** Tristen Pierson, Axiovex Systems, LLC
 
 The constitution governs all work in this repository. Where a spec, plan, or implementation conflicts with an article here, the constitution wins and the conflict is recorded.
 
@@ -16,9 +16,9 @@ Every claim the system registers, and every claim this project makes about itsel
 
 Research designs — question, sources, inclusion criteria, verdict rules, controls, margins — are frozen and timestamped before evidence is gathered or outcomes are seen. Changes after freeze are amendments: new, dated, appended records that state what changed and why. The frozen original is never edited.
 
-## Article IV — Append-only records
+## Article IV — Append-only records: no deletions, ever
 
-Records are never mutated or deleted. Corrections are new records that supersede old ones, with the supersession explicit. Any store, export, or cache in the system must preserve this: derived views may be rebuilt, the underlying record may not be rewritten.
+Records are never mutated or deleted, and **there is no delete operation** — not in any API, UI, or admin path. Change happens only by appending new snapshots of older records: each snapshot is content-addressed, names its parent, and the full lineage stays readable. Withdrawal is a new snapshot with `status: dead`, a mandatory reason, and `score: 0.0` (DN-005). Derived views may be rebuilt; the underlying record may not be rewritten, masked, or hidden. The sole exception is the break-glass erasure certificate of DN-005, exercised only under documented legal compulsion, owner-signed, on the record.
 
 ## Article V — Evidence is counted by origin
 
@@ -51,6 +51,10 @@ Every external source enters through a connector that records its terms: what ma
 ## Article XII — Spec before code
 
 Work runs constitution → spec → plan → tasks, with AEE claims on each spec. No implementation before the governing spec and architecture have been iterated, including a red-team pass. Amendments follow Article III.
+
+## Article XIII — Signed, checkpointed, anchored
+
+Every append is signed with its actor's Ed25519 key. Event ranges are periodically closed under signed Merkle checkpoints. Checkpoint roots are anchored externally (deposit or timestamp authority the operator does not control) before any institutional reliance — a chain whose only copy the operator holds proves consistency, not history; anchoring is what makes rewriting detectable by anyone. (DN-005, layers 1–5.)
 
 ## Amendment
 

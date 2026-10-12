@@ -54,9 +54,13 @@ Formats are deliberately boring: JSON + Markdown, UTF-8, no proprietary envelope
 
 **Deposit paths:** OSF (project + registration components map naturally onto the bundle structure) and Zenodo (DOI-minted archival record; the bundle hash in the deposit metadata closes the anchoring loop in §2). Deposit is an explicit adjudicator-approved action, never automatic — what leaves the institution is a human decision (WS5).
 
-## 5. Retention and the privacy tension
+## 5. No deletions — withdrawal, ingest discipline, and the one exception (DN-005)
 
-Append-only collides with legitimate deletion duties (privacy law, embargoed or withdrawn sources). Resolution, adopted from the ledger's governance work: **redaction by tombstone** — the event stays, its payload is replaced by a redaction event citing the authority and reason, and hashes are maintained over the redacted form with the break explicitly marked. The record then honestly shows *that* something was removed, when, and under what authority — instead of silently rewriting history or refusing a lawful removal. A bundle exported after a redaction can never verify against pre-redaction hashes, and says so in its manifest.
+**Amended 2026-10-11 by DN-005 (Constitution v1.1, Article IV): there is no delete operation and no routine redaction.** An earlier draft of this section specified tombstone-redaction with payload masking in exports; DN-005 kills that design — masking is a soft delete. The rules now:
+
+- **Withdrawal** is a new snapshot: `status: dead`, mandatory reason code, `score: 0.0`. The record remains fully readable in history; the current view excludes it *as dead, visibly*, never as absent.
+- **Ingest discipline** keeps erasure pressure from existing: personal data and secrets never enter payloads (hash + external reference instead; the material lives outside the chain under ordinary data controls).
+- **The single exception** is DN-005's break-glass erasure certificate: documented legal compulsion, owner-signed certificate appended to the chain, and destruction of that one record's payload-encryption key. Event, hash, signature, and certificate remain; the chain still verifies; only the payload becomes unrecoverable. Payload encryption at ingest is Spec 002 task T223 — until it lands, the protocol is specified, not executable, and no document may imply otherwise.
 
 ## 6. Open questions
 
