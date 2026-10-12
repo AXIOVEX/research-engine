@@ -87,3 +87,31 @@ with build evidence; (b) the full Spec 002 battery re-run unchanged
 ## Composition (spec §10, summarized)
 
 Phase 6 UI's actor-header/SSO-hook seam is the E1 integration point; the study UI and its wireframes are untouched by this spec. Specs 003/004 are unaffected (their actors bind keys once E1 exists; historical ledgers join by assertion — CLM-005-22's boundary). Enterprise branch merges after `phase-6-ui`; the coordinator sequences merges, and no enterprise phase starts on an unmerged base.
+
+## Phase exits
+
+**E1 — identity core: EXITED 2026-10-12** (branch `enterprise/e1-identity`,
+commit `2c4afbd`; PR #2 opened for CI, run 38253126192 success; merging is the
+coordinator's). Delivered: internal identity model + per-tenant IdP
+configuration with secrets by reference (T501/T502); OIDC RP — discovery,
+authorization code + PKCE (S256 only), JWKS rotation, RS256 validation — with
+the no-local-credential audit test (T503); key enrollment with proof of
+possession, rotation, revocation, closure (T504/T505); both custody modes with
+the mode recorded on every append — delegated custody's signer is a labeled
+**software development signer**, not KMS/HSM (T506); the append gate (T507);
+WS6 authorization service + disjoint admin planes (T508/T509); the platform
+audit ledger in two scopes (T510); scoped API keys (T511); the crypto
+inventory (T549); the AU completeness sweep (T550). Tests: 122 passed locally
+and in CI (82 prior + 40 new), including every seeded negative in the phase
+brief. Claims at exit (bundle v0.3.0, re-assessed `after_implement`, outcome
+`gather_evidence` — 14 claims remain below threshold, all unbuilt E2–E6 scope):
+supported — CLM-005-01, 03, 08, 18, 25, 27; partially_supported — CLM-005-04
+(E3 completion), 09 (E4 battery), 14 (SCIM/break-glass events), 26 (E4
+review/retention half). Recorded finding for the record layer: high-precision
+float payload values can fail Axiomere hash verification on reopen; platform
+payloads carry whole-second timestamps only (see `platform/ledger.py`).
+What remains not understood at this exit: real-IdP interoperability (the E1
+evidence is an in-process mock IdP enforcing real PKCE/RS256 — no external
+IdP has been exercised), delegated-custody behavior under a real KMS/HSM
+(E2+ integration, interface only here), and platform-ledger behavior at
+institutional event volumes.
