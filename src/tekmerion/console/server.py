@@ -188,7 +188,7 @@ class ConsoleApp:
             with _LOCK:
                 return self._dispatch(method, path, query, form, cookies)
         except PlatformError as exc:
-            return self._refusal_page(cookies, str(exc), status=exc.http_status)
+            return self._refusal_page(cookies, str(exc))
         except Exception as exc:  # noqa: BLE001 — a console 500 states itself
             return 500, [("Content-Type", "text/plain; charset=utf-8")], \
                 f"console error: {type(exc).__name__}: {exc}".encode("utf-8")
@@ -283,7 +283,7 @@ class ConsoleApp:
             data = (Path(_ui_pkg.__file__).parent / "style.css").read_bytes()
         return 200, [("Content-Type", "text/css; charset=utf-8")], data
 
-    def _refusal_page(self, cookies, message: str, status: int = 400):
+    def _refusal_page(self, cookies, message: str):
         """A service refusal outside a screen's own rendering (auth
         completions): the sign-in screen carries it, in the
         wireframes' refusal treatment."""
@@ -320,12 +320,12 @@ class ConsoleApp:
             protocol = form.get("protocol", "oidc")
             tenant = svc.directory.tenant(tenant_id)  # raises, verbatim
             if protocol == "saml":
-                samls = svc._saml_idps(directory, tenant_id)
+                samls = _saml_idps(svc.directory, tenant_id)
                 if not samls:
                     raise PlatformError(
                         f"no SAML IdP is configured for tenant {tenant_id}")
-                html = svc.begin_saml_login(tenant_id, samls[0].idp_entity_id)
-                return self._html(html)
+                url = svc.begin_saml_login(tenant_id, samls[0].idp_entity_id)
+                return self._redirect(url)
             idps = svc.directory.idps_for_tenant(tenant_id)
             if not idps:
                 raise PlatformError(
@@ -396,7 +396,7 @@ class ConsoleApp:
         # SAML session: the service's own step-up flow; its response
         # lands on the tenant's ACS, where the pending record's
         # purpose routes it to complete_saml_step_up.
-        return self._html(svc.begin_saml_step_up(token))
+        return self._redirect(svc.begin_saml_step_up(token))
 
     def _step_up_oidc_callback(self, query, cookies):
         svc = self.service
