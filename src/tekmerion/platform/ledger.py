@@ -100,6 +100,30 @@ SECURITY_EVENT_EMITTED = "security.event_emitted"
 # Rate limiting (T530): a per-tenant limit tripped; §6's recorded stop.
 RATE_LIMIT_EXCEEDED = "ratelimit.exceeded"
 
+# -- E6 vocabulary (T541–T545, T551–T553): compliance evidence ------------
+# Residency-pin migration (T541): the pin changes only through the
+# export + anchor + migration flow; a refused attempt is an event.
+TENANT_RESIDENCY_MIGRATED = "tenant.residency_migrated"
+TENANT_RESIDENCY_CHANGE_REFUSED = "tenant.residency_change_refused"
+# CUI marking (T551): the tenant's recorded marking fields changed.
+TENANT_MARKING_UPDATED = "tenant.marking_updated"
+# Platform audit export (T542) and its anchor record (T543).
+AUDIT_EXPORTED = "audit.exported"
+AUDIT_EXPORT_ANCHORED = "audit.export_anchored"
+# SPRS-input control states (T552): one seed event, then state-sets.
+COMPLIANCE_STATES_SEEDED = "compliance.states_seeded"
+COMPLIANCE_STATE_SET = "compliance.state_set"
+COMPLIANCE_STATE_SET_REFUSED = "compliance.state_set_refused"
+# POA&M register (T553): items, milestones, status — events only.
+POAM_ITEM_CREATED = "poam.item_created"
+POAM_MILESTONE_ADDED = "poam.milestone_added"
+POAM_MILESTONE_COMPLETED = "poam.milestone_completed"
+POAM_STATUS_CHANGED = "poam.status_changed"
+# Retention & legal hold (T545): marker, release, and enforcement.
+LEGAL_HOLD_PLACED = "legal.hold_placed"
+LEGAL_HOLD_RELEASED = "legal.hold_released"
+LEGAL_HOLD_ENFORCED = "legal.hold_enforced"
+
 #: The §3.3.1/§3.3.2 event classes the CMMC amendment (T550) requires
 #: the ledger to be able to evidence. The T550 sweep test asserts each
 #: class is exercised by the E1 surface.

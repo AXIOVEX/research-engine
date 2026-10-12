@@ -1,0 +1,155 @@
+{
+  "events": [
+    {
+      "actor": "bf9137238c484c45bdc637a439cb1e9a",
+      "hash": "e92036a7374611832065eca2e1d55934a9000a9b0bf471c8adb99e5d0a0c25af",
+      "payload": {
+        "actor_id": "bf9137238c484c45bdc637a439cb1e9a",
+        "client_id": "tekmerion-uni-a",
+        "client_secret_ref": "secret:uni-a-idp",
+        "issuer": "https://idp-a.test",
+        "outcome": "ok",
+        "required_amr": [
+          "mfa"
+        ],
+        "target": "idp:https://idp-a.test",
+        "ts_utc": 1760000000,
+        "via": "provisioning"
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1,
+      "ts": 1791826534,
+      "type": "idp.configured"
+    },
+    {
+      "actor": "83ccb2ec29cc48aaba05491f112a53f8",
+      "hash": "c49e5424089d740623653874129cbed9b2cab17e6a3a9234606d721d952fb2f6",
+      "payload": {
+        "actor_id": "83ccb2ec29cc48aaba05491f112a53f8",
+        "identity_id": "11a12454ee124ee1a46756db09727371",
+        "outcome": "ok",
+        "provisioning": "jit",
+        "subject_actor_id": "83ccb2ec29cc48aaba05491f112a53f8",
+        "target": "identity:11a12454ee124ee1a46756db09727371",
+        "ts_utc": 1760000000,
+        "via": "oidc"
+      },
+      "prev_hash": "e92036a7374611832065eca2e1d55934a9000a9b0bf471c8adb99e5d0a0c25af",
+      "seq": 2,
+      "ts": 1791826534,
+      "type": "identity.created"
+    },
+    {
+      "actor": "83ccb2ec29cc48aaba05491f112a53f8",
+      "hash": "5b8322763432fd39764e1a792197408af57add8249dd076846e724735216fd55",
+      "payload": {
+        "actor_id": "83ccb2ec29cc48aaba05491f112a53f8",
+        "identity_id": "11a12454ee124ee1a46756db09727371",
+        "mfa": true,
+        "mfa_required": true,
+        "outcome": "ok",
+        "session_id": "tlbmtHV_RZtZ92YjOwBgdvkyX-FAnNXD2Xac2XIX48o",
+        "subject_actor_id": "83ccb2ec29cc48aaba05491f112a53f8",
+        "target": "identity:11a12454ee124ee1a46756db09727371",
+        "ts_utc": 1760000000
+      },
+      "prev_hash": "c49e5424089d740623653874129cbed9b2cab17e6a3a9234606d721d952fb2f6",
+      "seq": 3,
+      "ts": 1791826534,
+      "type": "auth.login_succeeded"
+    },
+    {
+      "actor": "bf9137238c484c45bdc637a439cb1e9a",
+      "hash": "391a913733d5281a9ebb56d2a3c358f7454849edba33cd9efffceb882a65338c",
+      "payload": {
+        "actor_id": "bf9137238c484c45bdc637a439cb1e9a",
+        "identity_id": "11a12454ee124ee1a46756db09727371",
+        "outcome": "ok",
+        "role": "tenant_admin",
+        "subject_actor_id": "83ccb2ec29cc48aaba05491f112a53f8",
+        "target": "identity:11a12454ee124ee1a46756db09727371",
+        "tenant_id": "uni-a",
+        "ts_utc": 1760000000
+      },
+      "prev_hash": "5b8322763432fd39764e1a792197408af57add8249dd076846e724735216fd55",
+      "seq": 4,
+      "ts": 1791826534,
+      "type": "role.granted"
+    },
+    {
+      "actor": "83ccb2ec29cc48aaba05491f112a53f8",
+      "hash": "56b224804d8530c5cc336cc00530a4f616baa6b984f12b988ad947c25328a639",
+      "payload": {
+        "actor_id": "83ccb2ec29cc48aaba05491f112a53f8",
+        "identity_id": "11a12454ee124ee1a46756db09727371",
+        "mfa": true,
+        "mfa_required": true,
+        "outcome": "ok",
+        "session_id": "cPxwjPPYJf7j5Qc9RdAOHsQThCDijn8siHLc0t6qwLg",
+        "subject_actor_id": "83ccb2ec29cc48aaba05491f112a53f8",
+        "target": "identity:11a12454ee124ee1a46756db09727371",
+        "ts_utc": 1760000000
+      },
+      "prev_hash": "391a913733d5281a9ebb56d2a3c358f7454849edba33cd9efffceb882a65338c",
+      "seq": 5,
+      "ts": 1791826534,
+      "type": "auth.login_succeeded"
+    },
+    {
+      "actor": "83ccb2ec29cc48aaba05491f112a53f8",
+      "hash": "c646092ef9c9ac4c0490f56f09d735caf586e3c80e0e1da8affaf67bfe238644",
+      "payload": {
+        "actor_id": "83ccb2ec29cc48aaba05491f112a53f8",
+        "methodology": "NIST SP 800-171 DoD Assessment Methodology, Version 1.2.1 (2020-06-24)",
+        "outcome": "ok",
+        "requirement_count": 110,
+        "seed_set_hash": "8720def48885009bca2c9e85b18d27124ea970bb589a01846937dfde2594be5e",
+        "seed_version": "e6-seed-1",
+        "target": "compliance:states",
+        "ts_utc": 1791826534
+      },
+      "prev_hash": "56b224804d8530c5cc336cc00530a4f616baa6b984f12b988ad947c25328a639",
+      "seq": 6,
+      "ts": 1791826534,
+      "type": "compliance.states_seeded"
+    },
+    {
+      "actor": "83ccb2ec29cc48aaba05491f112a53f8",
+      "hash": "ff80df4b4a3f9eba35dafcc80e550fd9743fce9c37b61ef2cfc2ef4cf1b7cedc",
+      "payload": {
+        "actor_id": "83ccb2ec29cc48aaba05491f112a53f8",
+        "affected_requirements": [
+          "3.5.2"
+        ],
+        "item_id": "POAM-0001",
+        "outcome": "ok",
+        "owner": "",
+        "source_ref": "demonstration/ssp-input",
+        "status": "open",
+        "target": "poam:POAM-0001",
+        "title": "Demonstration item — IdP certificate rotation",
+        "ts_utc": 1791826534,
+        "weakness": "Tenant IdP signing certificate expires within the demonstration window; rotation is an operator act."
+      },
+      "prev_hash": "c646092ef9c9ac4c0490f56f09d735caf586e3c80e0e1da8affaf67bfe238644",
+      "seq": 7,
+      "ts": 1791826534,
+      "type": "poam.item_created"
+    },
+    {
+      "actor": "83ccb2ec29cc48aaba05491f112a53f8",
+      "hash": "9adb45fd49616f139771dddd84f3bba2be15f19860d9b614e6c4ef4800a23f36",
+      "payload": {
+        "event_count": 7,
+        "merkle_root": "b4595425a06d83d508dfaed2a62957b1da755213100dbe65d7fe38e932509aba",
+        "upto_seq": 7
+      },
+      "prev_hash": "ff80df4b4a3f9eba35dafcc80e550fd9743fce9c37b61ef2cfc2ef4cf1b7cedc",
+      "seq": 8,
+      "ts": 1791826534,
+      "type": "checkpoint"
+    }
+  ],
+  "scope": "tenant",
+  "tenant_id": "uni-a"
+}

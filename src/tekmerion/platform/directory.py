@@ -55,6 +55,7 @@ class Tenant:
     region: Optional[str] = None             # residency pin (§6)
     active: bool = True
     policy: TenantPolicy = field(default_factory=TenantPolicy)
+    cui_marking: Optional[dict] = None       # recorded CUI marking fields (E6, T551)
 
 
 @dataclass

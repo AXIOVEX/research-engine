@@ -28,6 +28,8 @@ its status on evidence.
 
 **E4 note (2026-10-12):** E4 adds webhook egress signing, which gains row 13 (HMAC-SHA256). The Ed25519 egress signing mode is row 4's implementation (same module, `platform/ed25519.py`) and gains no row. Break-glass, rate limiting, and the T554 detectors introduce no new cryptographic operation: session ids and delivery ids are row-10 CSPRNG output, egress-secret generation is row 10, and subscription records carry row 9 fingerprints — secret material never appears in a ledger, config, or delivery record.
 
+**E6 note (2026-10-12):** E6 adds no new cryptographic operation and no new row. The audit export's manifest/file hashing and the SPRS seed-set hash are row 9's operation (SHA-256 via Python `hashlib`); the checkpoints an export binds are produced by the ledger's existing machinery (rows 1–3); the export verifier introduces no cryptography of its own. Marking, holds, POA&M, and control-state machinery are record-keeping over existing operations. The §3.13.11 gap is unchanged — all 13 rows still report **No** — and it is now also carried as POA&M item POAM-0001 in the deployment register (T553).
+
 ## Reading this table
 
 - Rows 1–3 are the **Axiomere dependency**: closing them is a

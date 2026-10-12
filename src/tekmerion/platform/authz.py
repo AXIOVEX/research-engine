@@ -52,6 +52,7 @@ TENANT_KEY_MANAGE = "tenant.key_manage"            # revoking/closing tenant mem
 TENANT_AUDIT_EXPORT = "tenant.audit_export"
 TENANT_POLICY_MANAGE = "tenant.policy_manage"
 TENANT_PROVISIONING_MANAGE = "tenant.provisioning_manage"  # SCIM tokens, group→role mappings (E3)
+TENANT_COMPLIANCE_MANAGE = "tenant.compliance_manage"      # SPRS states, POA&M, holds, marking (E6)
 
 PLATFORM_TENANT_CREATE = "platform.tenant_create"
 PLATFORM_TENANT_MANAGE = "platform.tenant_manage"
@@ -61,6 +62,7 @@ PLATFORM_ADMIN_GRANT = "platform.admin_grant"
 TENANT_ADMIN_ACTIONS = frozenset({
     TENANT_IDP_MANAGE, TENANT_MEMBER_MANAGE, TENANT_KEY_MANAGE,
     TENANT_AUDIT_EXPORT, TENANT_POLICY_MANAGE, TENANT_PROVISIONING_MANAGE,
+    TENANT_COMPLIANCE_MANAGE,
 })
 PLATFORM_ADMIN_ACTIONS = frozenset({
     PLATFORM_TENANT_CREATE, PLATFORM_TENANT_MANAGE, PLATFORM_CONFIG_MANAGE,

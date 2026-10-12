@@ -40,6 +40,7 @@ from typing import Any, Optional
 
 from .claims import Claim, ClaimRegister
 from .freeze import registration_document, registration_hash
+from .marking import banner_lines, normalize_marking
 from .verdicts import evaluate_run, run_controls_report, swap_control_report
 from .verification import queue_state, second_review_report
 
@@ -321,6 +322,7 @@ def export_bundle(
     study_label: Optional[str] = None,
     retrieved: Optional[dict[str, Any]] = None,
     citations: Optional[dict[str, Any]] = None,
+    marking: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     """Export the study at `store_path` as an audit bundle at
     `out_dir` and return the manifest. Fails closed: a broken chain,
@@ -475,6 +477,11 @@ def export_bundle(
         "complete": True,
         "content_substitutions": substitutions,
         "anchors": receipts,
+        # CUI marking (Spec 005 T551): always present — the recorded
+        # marking, or the explicit unmarked state. Populated from the
+        # caller's recorded fields; the platform records markings,
+        # it does not adjudicate them.
+        "cui_marking": normalize_marking(marking),
     }
     put("HUMAN-README.md", _human_readme(manifest_core, register, state,
                                          run_outcome).encode("utf-8"))
@@ -495,7 +502,11 @@ def _human_readme(manifest: dict[str, Any], register: ClaimRegister,
                   queue: dict[str, Any],
                   run_outcome: Optional[dict[str, Any]] = None) -> str:
     study = manifest["study"]
+    banner = banner_lines(manifest.get("cui_marking")
+                          or normalize_marking(None))
     lines = [
+        *banner,
+        "",
         f"# Audit bundle — {study['label']}",
         "",
         "This bundle is the complete, self-describing record of one Tekmerion",
@@ -615,6 +626,8 @@ def _human_readme(manifest: dict[str, Any], register: ClaimRegister,
         "not represented in the ledger is bound by the manifest hashes —",
         "and, once anchored, by the bundle hash stated in the public",
         "anchor record.",
+        "",
+        *banner,
         "",
     ]
     return "\n".join(lines)
@@ -789,6 +802,27 @@ def verify_bundle(bundle_dir: str) -> BundleVerification:
     verdicts = load_json("verdicts.json")
     if verdicts is not None and not projection_matches(verdicts.get("verdicts"), "verdict.issued", envelope=True):
         failures.append("verdicts.json does not match the ledger's verdict.issued events")
+
+    # -- CUI marking (Spec 005 T551): where the manifest carries a
+    # marking block, the HUMAN-README must carry its banner/footer —
+    # the marking a human sees is the marking the manifest records.
+    # Bundles exported before T551 carry no block; absence is noted,
+    # not failed (their manifests predate the field).
+    marking_block = manifest.get("cui_marking")
+    if marking_block is not None:
+        readme_path = root / "HUMAN-README.md"
+        if readme_path.exists():
+            readme_lines = [ln for ln in readme_path.read_text(
+                encoding="utf-8").splitlines() if ln.strip()]
+            expected = banner_lines(marking_block)
+            if not readme_lines or readme_lines[0] not in expected \
+                    or readme_lines[-1] not in expected:
+                failures.append(
+                    "HUMAN-README does not carry the manifest's CUI "
+                    "marking banner/footer (T551)")
+            checks["cui_marking"] = marking_block.get("status")
+    else:
+        checks["cui_marking"] = "absent (pre-T551 bundle)"
 
     # -- run-outcome projection (NC-6): cross-check what the bundle alone
     # can decide. Bundles exported before the projection existed carry

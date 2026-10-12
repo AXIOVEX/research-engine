@@ -1,0 +1,36 @@
+{
+  "export_id": "exp-7c58b02bf93b",
+  "bundle_hash": "7c58b02bf93b260c824572ada4ad4d34190157fb9564958ec01c9d833d703344",
+  "event_count": 8,
+  "checkpoint_root": "b4595425a06d83d508dfaed2a62957b1da755213100dbe65d7fe38e932509aba",
+  "head_hash": "9adb45fd49616f139771dddd84f3bba2be15f19860d9b614e6c4ef4800a23f36",
+  "marking": "unmarked",
+  "verify_ok": true,
+  "verify_failures": [],
+  "verify_checks": {
+    "format": "tekmerion-platform-audit-export/1",
+    "bundle_hash": "7c58b02bf93b260c824572ada4ad4d34190157fb9564958ec01c9d833d703344",
+    "files_listed": 5,
+    "ledger_verify": {
+      "ok": true,
+      "events": 8,
+      "reason": null
+    },
+    "checkpoint_root": "b4595425a06d83d508dfaed2a62957b1da755213100dbe65d7fe38e932509aba",
+    "events_projection": 8,
+    "sprs_score": -156,
+    "cui_marking": "unmarked"
+  },
+  "sprs_score": -156,
+  "sprs_total_deduction": 266,
+  "fips_deduction": 3,
+  "anchor_seq": 10,
+  "pin": {
+    "tenant_id": "uni-a",
+    "shape": "hosted",
+    "region": null,
+    "migrations": 0,
+    "last_migration_seq": null
+  },
+  "tenant_ledger_events_after": 10
+}
