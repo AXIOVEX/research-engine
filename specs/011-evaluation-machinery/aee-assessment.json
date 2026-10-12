@@ -1,0 +1,960 @@
+{
+  "schema_version": "1.0",
+  "methodology_version": "1.0",
+  "project": "tekmerion",
+  "phase": "after_specify",
+  "outcome": "iterate",
+  "summary": "Assessed 9 claim(s); found 22 failure mode(s); 9 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T16:18:06.254104Z",
+  "claims": [
+    {
+      "id": "CLM-011-01",
+      "text": "Every bundle exported after this change records, in verdicts.json's run_outcome, one outcome entry per registered control \u2014 kind, failure mode, expected, observed, pass/fail (or an explicit non-executed attestation with passed: null), and fixture identity \u2014 for valid, invalid, and not-run outcomes alike; the same outcomes are carried on the run's own RunResult for live consumers.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: bundles exported by tekmerion.export after this change, and RunResult objects returned by tekmerion.verdicts.evaluate_run. Pre-change bundles are CLM-011-08's scope, not this claim's."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/011-evaluation-machinery/spec.md (Fix 1 design)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/002-mvp-implementation/evaluation/EVALUATION-REPORT.md \u00a74.7 + \u00a72.3 friction (1) (the gap this claim closes)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-011-1: an exported bundle of a study with registered controls whose run_outcome lacks a per-control entry for any registered control, or records an observed/passed value that a production-path execution of that control does not produce."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/011-evaluation-machinery/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-011-01-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-011-01",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-011-01-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-011-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-011-01 may contradict CLM-011-02",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-011-01-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-011-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-011-01 may contradict CLM-011-03",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-011-01-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-011-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-011-01 may contradict CLM-011-04",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-011-01-NEGATION-CONFLICT-CHALLE-4",
+          "claim_id": "CLM-011-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-011-01 may contradict CLM-011-06",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-011-01-NEGATION-CONFLICT-CHALLE-5",
+          "claim_id": "CLM-011-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-011-01 may contradict CLM-011-08",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-011-02",
+      "text": "run_controls' failure contract is preserved exactly \u2014 same failure strings, same order, same conditions \u2014 with the structured report and the legacy function executing one and the same control path (RT-1).",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: tekmerion.verdicts.run_controls / run_controls_report behavioral parity. The report's additional structured fields are additive and outside the legacy contract."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/011-evaluation-machinery/spec.md (Fix 1: one execution, structured)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-011-2: any control input (missing fixture, verdict mismatch, unknown kind, swap variants) whose failure list from run_controls differs in content or order from the pre-change implementation's."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/011-evaluation-machinery/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-011-02-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-011-02",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-011-03",
+      "text": "The standalone verifier fails a bundle whose recorded control outcomes contradict the bundle's own committed registration, its stated run outcome, or the verifier's own swap-control replay on the bundle's ledger copy; bundles without recorded outcomes verify as before.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: tekmerion.export.verify_bundle. Fixture controls' observed verdicts are attested by the export-time production-path execution and bound by the manifest hashes \u2014 not recomputable bundle-alone (fixtures are registration-external); the swap outcome is fully recomputed."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/011-evaluation-machinery/spec.md (Fix 1: verifier coverage i\u2013iii)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-011-3: a bundle whose recorded control outcomes were altered (outcome flipped, control dropped, swap result misstated) and whose manifest was rehashed to match, passing verify_bundle."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/011-evaluation-machinery/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-011-03-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-011-03",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-011-03-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-011-03",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-011-03 may contradict CLM-011-07",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-011-03-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-011-03",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-011-03 may contradict CLM-011-09",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-011-04",
+      "text": "Pipeline-converted evidence carries falsifier_observation=True exactly when the registered falsifier names the resolved record (by DOI, or by first-author surname + year) and that record resolved, agreed, and content-contradicts \u2014 so a claim whose falsifier is observed verdicts CONTRADICTED via the falsifier path, with the falsifier reason stated.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: tekmerion.verification.to_evidence_item with the claim supplied, and the shared register rebuild (ui/state.py::derive_evidence) that supplies it. Conversions without the claim keep the pre-change behavior."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/011-evaluation-machinery/spec.md (Fix 2: the mapping)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/002-mvp-implementation/evaluation/corpus.md (CLM-E-004's registered falsifier names the Wandel 2010 conclusion \u2014 the pattern this rule fires on)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-011-4: a fixture in which a claim's falsifier names a record by DOI or first-author surname + year, the record resolves, agrees, and content-contradicts, and the converted evidence (or the claim's verdict) does not carry the falsifier observation / does not verdict via the falsifier path."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/011-evaluation-machinery/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-011-04-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-011-04",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-011-04-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-011-04",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-011-04 may contradict CLM-011-05",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-011-04-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-011-04",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-011-04 may contradict CLM-011-07",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-011-04-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-011-04",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-011-04 may contradict CLM-011-09",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-011-05",
+      "text": "In every other case the flag stays unset \u2014 generic falsifiers, title-only naming, unresolved or disagreeing citations, metadata-only evidence, and conversions without the resolved record \u2014 and no verdict mathematics (intervals, points, floors, caps, thresholds) changes.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: the falsifier wiring's boundary. Precision over recall by design: the falsifier path bypasses the sufficiency floor, so a false firing is worse than an unset flag."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/011-evaluation-machinery/spec.md (Fix 2: the boundary)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-011-5: any battery case outside the naming rule's conjunction whose converted evidence carries falsifier_observation=True; or any change in evaluate_claim's outputs (verdict, interval, point) for identical group inputs."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/011-evaluation-machinery/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-011-05-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-011-05",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-011-06",
+      "text": "When citation inputs are presented at export, the bundle's verification.json carries every citation's as-cited form, and the standalone verifier fails a bundle whose as-cited form disagrees with the ledger (unknown citation, or a claim linkage different from its citation.checked outcome).",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: exports whose caller presents citation inputs (the workspace exporter passes the study's citation sidecar by default). Exports without presented inputs carry no as_cited key \u2014 absence noted, not failed (CLM-011-08's convention)."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/011-evaluation-machinery/spec.md (Fix 3: as-cited forms)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/002-mvp-implementation/evaluation/EVALUATION-REPORT.md \u00a72.3 friction (5) (as-cited forms absent from the Phase 7 bundle)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-011-6: a bundle exported with citation inputs presented whose verification.json lacks an as-cited form for any presented citation; or a bundle whose as-cited form was altered (claim linkage changed) and rehashed, passing verify_bundle."
+      ],
+      "uncertainty": "low",
+      "severity": "medium",
+      "source_ref": "specs/011-evaluation-machinery/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-011-06-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-011-06",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-011-06-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-011-06",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-011-06 may contradict CLM-011-07",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-011-06-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-011-06",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-011-06 may contradict CLM-011-09",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-011-07",
+      "text": "The bundle's adjudication.json carries an exclusion marker (citation, claim, queue item, decision, rationale) for exactly the citations a decided quarantine item excluded \u2014 no more, no fewer \u2014 the verifier re-derives the set from the ledger replay and fails on any divergence, and excluded citations remain absent from the evidence files.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: decided quarantine items with decision 'exclude'. Grouping decisions and variant rulings are not exclusions and mint no markers; undecided items mint none."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/011-evaluation-machinery/spec.md (Fix 3: excluded-citation markers)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/002-mvp-implementation/evaluation/EVALUATION-REPORT.md \u00a72.3 friction (6) (excluded citations vanish without a marker)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-011-7: a bundle in which an adjudicated-excluded citation has no marker, a marker exists for a citation no decided quarantine item excluded, or a marker's rationale/queue item diverges from the ledger \u2014 passing verify_bundle after rehash."
+      ],
+      "uncertainty": "low",
+      "severity": "medium",
+      "source_ref": "specs/011-evaluation-machinery/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-011-07-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-011-07",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-011-07-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-011-07",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-011-07 may contradict CLM-011-08",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-011-08",
+      "text": "Backward compatibility: all eight previously frozen bundles (Phase 5 demo v1\u2013v4, Spec 003 math study v1\u2013v2, Phase 7 evaluation v1\u2013v2) verify standalone under the new code with their issued verdicts byte-identical, and a bundle lacking any of the new fields verifies as before, with the absences noted in the verifier's checks rather than failed.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: verify_bundle over the eight named frozen bundles (verdicts pinned to the values recorded at baseline, before this change: demo bundles carry no issued verdicts; math CLM-M-110/210 contested, -310/-410 inconclusive, -510 inconclusive\u2192supported across its two verdict events; Phase 7 supported/supported/inconclusive/contradicted/inconclusive). Out-of-repo bundle sets are verified when present; the Phase 7 pair is in-repo."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/011-evaluation-machinery/spec.md (backward-compatibility constraint)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-011-8: any of the eight frozen bundles failing verify_bundle under the new code, or verifying with any issued verdict different from its recorded value; or a pre-change-shaped bundle (new keys stripped, manifest rehashed) failing on the absence of a new field."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/011-evaluation-machinery/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-011-08-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-011-08",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-011-09",
+      "text": "The exported bundle's HUMAN-README states the pipeline's content-outcome \u2192 evidence conversion mapping (supports / contradicts / contextual / metadata_only / quarantined \u2192 stance, mass, and flags), so no bundle file's vocabulary is left unmapped against another's.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: the README text of newly exported bundles. Frozen bundles' READMEs are frozen artifacts and are not rewritten."
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/011-evaluation-machinery/spec.md (the one in-scope \u00a72.3 item)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "specs/002-mvp-implementation/evaluation/EVALUATION-REPORT.md \u00a72.3 friction (6) (CIT-E-302 metadata_only vs contextual, no stated mapping)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-011-9: a bundle exported after this change whose HUMAN-README does not state the conversion mapping; or a stated mapping that disagrees with to_evidence_item's actual conversion on any row."
+      ],
+      "uncertainty": "low",
+      "severity": "low",
+      "source_ref": "specs/011-evaluation-machinery/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-011-09-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-011-09",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    }
+  ],
+  "scores": {
+    "CLM-011-01": {
+      "claim_id": "CLM-011-01",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-011-02": {
+      "claim_id": "CLM-011-02",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-011-03": {
+      "claim_id": "CLM-011-03",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-011-04": {
+      "claim_id": "CLM-011-04",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-011-05": {
+      "claim_id": "CLM-011-05",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-011-06": {
+      "claim_id": "CLM-011-06",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-011-07": {
+      "claim_id": "CLM-011-07",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-011-08": {
+      "claim_id": "CLM-011-08",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-011-09": {
+      "claim_id": "CLM-011-09",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    }
+  },
+  "recoveries": [
+    {
+      "failure_id": "AEE-CLM-011-01-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-011-01",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-011-01-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-011-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-011-01-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-011-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-011-01-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-011-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-011-01-NEGATION-CONFLICT-CHALLE-4",
+      "claim_id": "CLM-011-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-011-01-NEGATION-CONFLICT-CHALLE-5",
+      "claim_id": "CLM-011-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-011-02-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-011-02",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-011-03-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-011-03",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-011-03-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-011-03",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-011-03-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-011-03",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-011-04-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-011-04",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-011-04-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-011-04",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-011-04-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-011-04",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-011-04-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-011-04",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-011-05-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-011-05",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-011-06-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-011-06",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-011-06-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-011-06",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-011-06-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-011-06",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-011-07-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-011-07",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-011-07-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-011-07",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-011-08-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-011-08",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-011-09-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-011-09",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    }
+  ],
+  "metadata": {
+    "threshold": 0.7,
+    "input": "specs/011-evaluation-machinery/aee-claims.json"
+  }
+}
