@@ -37,6 +37,6 @@ Evaluation corpus: a set of evidence questions with known-answer claims (positiv
 ## 5. Gates
 
 - **G1 (owner):** go-ahead on this spec before code.
-- **G2 (AR-1):** anchor implemented + demonstrated before any institutional pilot.
+- **G2 (AR-1):** anchor implemented + demonstrated before any institutional pilot. **RATIFIED 2026-10-12 (DN-008)** on the live Zenodo anchor evidence (DOI 10.5281/zenodo.23311479).
 - **G3 (OD-5):** K3/K5 thresholds recorded by amendment before the evaluation freeze.
 - **G4 (spend):** any paid infrastructure, API tier, or service returns to the owner as its own decision. Free keys on owner accounts (OpenAlex, OSF, Zenodo) are within standing authorization per the founding brief.
