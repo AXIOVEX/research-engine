@@ -49,3 +49,198 @@ Two build-side incidents, recorded for honesty: an early wheel-build status was 
 - No Zenodo deposit was attempted (boundary: refusal path only). The approved-deposit path is covered by unit tests against the local transport.
 - The skill's sufficiency (CLM-009-09) is **not** assessed by this run — its falsifier is a separate skill-only study run by the coordinator from the main environment, still to happen.
 - Live PLATON / live statcheck remain `not_runnable_here` in this environment (Specs 006/008 T4 items, unchanged).
+
+---
+
+## Addendum — 2026-10-12 (coordinator's skill-only exercise; follow-up fixes)
+
+The coordinator ran CLM-009-09's falsifier exercise personally,
+skill-only (installed skill + `list_tools` schemas, the clean-room
+acceptance venv, own driver; transcript at
+`~/workspace/tekmerion-skill-exercise/transcript.jsonl`). The run
+was **not flawless**. Three findings; CLM-009-09 is **not** moved
+by this addendum — the coordinator re-runs the exercise on the
+fixed skill + server and moves the claim (or not) on that
+evidence.
+
+### F1 — freeze/run/export inconsistency (engine defect; fixed)
+
+Wire sequence from the exercise: `freeze_study` refused (RT-6,
+positive control lacks a representative rationale) →
+`run_evaluation` returned `run_verdict: "valid"` and **issued
+verdicts** (`verdict.issued` at seq 9–10; `get_verdicts` state
+"valid", issued true; no `study.frozen` event in the 10-event
+chain) → `export_bundle` refused: "study is not frozen — bundles
+export frozen registrations (WS4 §4)".
+
+Diagnosis (from source):
+
+- `run_evaluation` never freezes and never checked for a freeze
+  event. `evaluate_workspace_run` (ui/state.py) derived the run
+  mode from the ledger: `mode = fe.payload.mode if fe else
+  "exploratory"`. A refused freeze appends nothing (freeze.py runs
+  the check before any append), so the absence of the event
+  silently re-moded the run to exploratory — and `evaluate_run`
+  (verdicts.py) requires a frozen registration **only** in
+  confirmation mode (the WS3 §4 wall, CLM-002-09), by design:
+  exploratory is a legitimate engine-level mode (WS3 §4).
+- `export_bundle` (export.py) scans the ledger for `study.frozen`
+  and refuses without one — correct against WS4 §4 and
+  CLM-002-24 (the bundle binds to the frozen commitment).
+- The wrong side is the run path's mode derivation. Evidence for
+  the codebase's intended design: neither workspace surface (UI
+  `act_run`, MCP `run_evaluation`) offers a run-mode choice and
+  both freeze in confirmation by default; WS3 §4 requires an
+  exploratory register to be *labeled* exploratory at every level,
+  and nothing shipped labels it (verdict payloads carry no mode,
+  projections report bare "valid", export has no exploratory
+  path); `run_projection` already treats an unfrozen study as
+  run-state "none"; every production flow (Phase 5 demo, Phase 7
+  driver, all UI/MCP flow tests) froze before running.
+
+Fix (shared service layer, so UI and MCP cannot drift):
+`evaluate_workspace_run` now returns an INVALID `RunResult` —
+"confirmation run without a frozen registration (WS3 §4 wall):
+no study.frozen event in the ledger — freeze the study before
+running; verdicts are issued only against a frozen registration"
+— when the ledger has no `study.frozen` event, and reads mode +
+linked-exploratory from the freeze event otherwise (fallback mode
+"confirmation", matching `freeze()`'s own default). A study
+frozen in exploratory mode still runs exploratory — against its
+recorded freeze, and exportable. Engine-level
+`evaluate_run(mode="exploratory")` is unchanged (it appends
+nothing; controls and Phase 3 tests use it directly).
+
+Regression tests (all three fail on the pre-fix code, pass after):
+`tests/test_mcp_server.py::test_run_after_failed_freeze_issues_nothing`
+(wire sequence: refused default-controls freeze → run INVALID,
+zero `verdict.issued` events, `get_verdicts` issued=false →
+export refuses "not frozen" → real freeze → valid run → export
+verifies) and `tests/test_workspace_run_wall.py` (service level:
+unfrozen `evaluate_workspace_run`/`action_run` INVALID and
+appending nothing; failed-freeze → run INVALID → freeze → valid
+run → `action_export` verifies).
+
+Because tool behavior changed (unfrozen runs now return INVALID
+instead of issuing exploratory verdicts), the clean-room
+acceptance driver was re-run from clean against a rebuilt wheel —
+see F4 and the re-run note at the end of this addendum.
+
+### F4 — the ToolError conversion was never committed (record defect; restored)
+
+Rebuilding the wheel from the committed branch for the F1 re-run
+exposed a worse discrepancy: the rebuilt server **masked refusal
+text on the wire** (clients saw only "Error executing tool
+<name>") at acceptance steps 4/8/18. Diffing the branch source
+against the originally accepted installed package showed exactly
+one delta in the whole package: the `reg` wrapper in
+`build_server` — the ToolError conversion described in spec §5,
+in flaw #2 above, and in the build assessment — existed only in
+the installed package and the (untracked) `dist/` wheel. Commit
+`0b3d957`, whose message names the conversion, in fact touched
+only `pyproject.toml` and `spec.md`; the conversion and its unit
+test `test_sdk_shell_carries_refusals_verbatim` were never
+committed, so the branch as committed did **not** satisfy
+CLM-009-02 on the wire despite the records saying it did. (The
+coordinator's exercise transcript shows the same masking in its
+step-2 probe shape.) Restored: the wrapper is now in
+`src/tekmerion/mcp/server.py` byte-identical to the accepted
+installed copy, and the missing test now exists in
+`tests/test_mcp_server.py` — it passes with the conversion and
+fails without it (verified by stash-revert). The acceptance
+verdicts of the original run stand (that run drove the converted
+server, which is the behavior now committed); what was wrong was
+the branch, not the run.
+
+### F2 — skill text wrong against shipped behavior (fixed)
+
+The skill is corrected in both copies (`skill/SKILL.md` in-repo
+and `~/workspace/skills/tekmerion/SKILL.md`, kept byte-identical):
+
+- **Playbook A step 6 (the F2 finding).** Before: "Controls: the
+  default set (positive/negative/swap, no fixtures) is fine for a
+  first study; a positive control with an evaluation fixture
+  needs a `representative_rationale`." In fact `_default_control_fields`
+  gives the positive control `representative_rationale: ""`, so
+  freezing with `controls` omitted is refused by RT-6 — the
+  exercise hit exactly this. After: controls "must be passed
+  explicitly", with the three kinds, the field dict shape
+  (`kind`, `failure_mode`, `expected`, fixture shape), the
+  positive control's non-empty rationale requirement, and the
+  rule that fixture-less positive/negative controls do not
+  execute at run time (only swap does). Step 6 also now states
+  the `linked_exploratory` truth: omitted over MCP, the tool
+  records the empty disclosure itself (the Session converts
+  `None` → `[]` before the engine's RT-3 check can fire) — the
+  earlier text claimed absence is a freeze failure, which is the
+  engine-level behavior the MCP surface does not expose.
+- **Step 3 outcome vocabulary.** Before: resolution "(resolved /
+  not_found / ambiguous)", content "(supports / contradicts /
+  no_content / metadata_only...)". Shipped (verification.py):
+  resolution ∈ {`resolved`, `not_found`, `error`}; agreement ∈
+  {`agree`, `disagree`}; content ∈ {`supports`, `contradicts`,
+  `contextual`, `metadata_only`}. `ambiguous` and `no_content`
+  do not exist. Corrected.
+- **Step 4 decision vocabulary.** Before: decisions listed as
+  `exclude`, `variant`, `agree`, `disagree_quarantine`. Shipped
+  `DECISIONS` (verification.py) is `exclude`, `variant`,
+  `same_origin`, `separate_origin` — `agree`/`disagree_quarantine`
+  would be refused as unknown decisions (agreement is the
+  second-review axis). Corrected, with quarantine vs grouping
+  items distinguished, and `study_id` restored to the
+  `decide_adjudication` / `record_second_review` /
+  `list_adjudication_queue` call shapes (all tools take it).
+- **Step 5.** Before: "Clear the queue before freezing." Freeze
+  does not check the queue; an undecided quarantined item stays
+  unverified and invalidates the **run**. Corrected to "decide
+  every pending item before you run."
+- **Step 7 + troubleshooting (consequence of F1).** Step 7 now
+  states the freeze-first invariant and the wall reason text;
+  new troubleshooting rows for the RT-6 freeze failure and the
+  WS3 §4 wall run refusal; rule 3's reason list gains "no frozen
+  registration".
+
+All other Playbook A steps were checked against the shipped
+signatures, the WS6 permission tuples imported from the UI matrix,
+and the engine error texts (role denials, `TEKMERION_ACTOR is not
+set`, the deposit gate) and matched.
+
+### F3 — falsifier-omission error shape (skill text fixed)
+
+Before, rule 2 + the troubleshooting table quoted only the
+engine shape. In fact: omitting the `falsifier` argument entirely
+is refused by the SDK's argument validation (Pydantic
+`falsifier … Field required`) before the engine is reached —
+that is the shape in the exercise transcript; passing it **empty**
+reaches the engine, whose refusal is verbatim
+(`{claim_id}: no falsifier — not registered (Article II)`,
+claims.py). Both append nothing. Rule 2 and the troubleshooting
+table now describe both shapes and name the invariant (no
+falsifier, no append) as the point.
+
+### Re-run note (2026-10-12, after F1 + F4)
+
+The clean-room acceptance driver was re-run from clean
+(`~/workspace/tekmerion-mcp-acceptance-rerun/`: fresh venv, fresh
+workspace, the two unchanged Axiomere wheels + a tekmerion wheel
+rebuilt from the branch, sha256 `80d773c1bdc2bbf5…`, content-
+asserted before the run to carry both the F1 wall and the
+restored ToolError conversion). **All 21 steps pass**, including
+the three verbatim wire refusals (steps 4/8/18), the deterministic
+freeze (registration hash `b52a28a9…181b`, identical to the
+original run), the valid run with the machinery's own verdicts
+(CLM-A-001 INCONCLUSIVE by the RT-5 metadata-only cap, CLM-A-002
+CONTRADICTED), export, and standalone bundle verification. A
+first re-run attempt against a wheel built before F4's restore
+failed steps 4/8/18 on masked refusal text — that failure is
+what exposed F4; it is recorded here rather than silently
+superseded.
+
+### Not a defect (recorded in the exercise, no action)
+
+The exercise ran during a VM egress stall: the real DOI's
+resolution returned `not_found` / "resolution failed" and the
+citation was quarantined and excluded — the machinery recording
+a failed resolution honestly. Chain verified ok throughout; both
+claims' INCONCLUSIVE ("no evidence groups") verdicts were
+consistent with both citations excluded.

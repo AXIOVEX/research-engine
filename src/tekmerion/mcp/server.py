@@ -630,7 +630,25 @@ def build_server(session: Session):
     )
 
     def reg(fn):
-        server.tool()(fn)
+        # SDK 2.x masks non-ToolError exceptions ("Error executing
+        # tool <name>" only). Engine refusals are deliberate,
+        # client-facing messages, so the shell converts every handler
+        # exception to a ToolError carrying str(exc) verbatim —
+        # that conversion is what makes CLM-009-02 true on the wire.
+        import functools
+
+        from mcp.server.mcpserver.exceptions import ToolError
+
+        @functools.wraps(fn)
+        def wrapped(*args, **kwargs):
+            try:
+                return fn(*args, **kwargs)
+            except ToolError:
+                raise
+            except Exception as exc:
+                raise ToolError(str(exc)) from exc
+
+        server.tool()(wrapped)
         return fn
 
     @reg

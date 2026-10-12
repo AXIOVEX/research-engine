@@ -9,6 +9,7 @@ passthrough (CLM-009-08), and the no-delete inventory (CLM-009-10).
 """
 
 import ast
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -20,6 +21,8 @@ pytest.importorskip("axiomere")
 from tekmerion.claims import RegistrationError
 from tekmerion.connectors import CrossrefConnector, HttpJson
 from tekmerion.deposit import DepositError
+from tekmerion.export import ExportError
+from tekmerion.freeze import FreezeError
 from tekmerion.mcp.server import (ConfigError, ServerConfig, Session,
                                   SurfaceRefusal, TOOL_ROLES)
 from tekmerion.ui.server import PERMISSIONS
@@ -281,6 +284,54 @@ def test_full_flow_two_instances(tmp_path):
     assert v["ok"] is True and v["failures"] == []
 
 
+def test_run_after_failed_freeze_issues_nothing(tmp_path):
+    """F1 regression (Spec 009 follow-up): the coordinator's skill
+    exercise sequence. A refused freeze appends nothing; a run
+    attempted afterwards must NOT silently re-mode to exploratory
+    and issue verdicts the export then disowns as unfrozen. The run
+    is INVALID with the wall reason, no verdict.issued events land,
+    and export agrees. After a real freeze the same study runs,
+    issues, and exports — issued verdicts are exportable."""
+    researcher = make_session(tmp_path, "ada", "researcher")
+    adjudicator = make_session(tmp_path, "grace", "adjudicator")
+    researcher.create_study("wall", "Wall study")
+    researcher.register_claim(
+        "wall", "CLM-T-001", PROP, "a powered trial finding no improvement",
+        margin=0.1, sufficiency_floor=1)
+    adjudicator.register_claim(
+        "wall", "CLM-T-002", "the fabricated source exists",
+        "the source of record holding no such work",
+        margin=0.1, sufficiency_floor=1)
+
+    # Default controls carry no representative rationale: the
+    # confirmation freeze is refused (RT-6) and appends nothing.
+    with pytest.raises(FreezeError, match="representative rationale"):
+        adjudicator.freeze_study("wall", linked_exploratory=[])
+    events = adjudicator.ws.open("wall").events()
+    assert not [e for e in events if e["type"] == "study.frozen"]
+
+    run = adjudicator.run_evaluation("wall")
+    assert run["run_verdict"] == "invalid", run
+    assert any("frozen registration" in r for r in run["invalid_reasons"])
+    assert run["claim_verdicts"] == []
+    events = adjudicator.ws.open("wall").events()
+    assert not [e for e in events if e["type"] == "verdict.issued"]
+    assert adjudicator.get_verdicts("wall")["issued"] is False
+
+    # Export agrees with the run: nothing issued, nothing exportable.
+    with pytest.raises(ExportError, match="not frozen"):
+        researcher.export_bundle("wall")
+
+    # A real freeze unblocks the chain end to end.
+    adjudicator.freeze_study("wall", linked_exploratory=[],
+                             controls=controls())
+    run = adjudicator.run_evaluation("wall")
+    assert run["run_verdict"] == "valid", run["invalid_reasons"]
+    assert run["claim_verdicts"]
+    exported = researcher.export_bundle("wall")
+    assert exported["verification"]["ok"] is True
+
+
 def test_deposit_gate_refuses_without_approver(tmp_path):
     researcher = make_session(tmp_path, "ada", "researcher",
                               deposit_root=str(tmp_path / "deposits"))
@@ -410,3 +461,38 @@ def test_sdk_shell_lists_every_tool():
             "deposit_bundle", "verify_bundle", "run_grim",
             "ingest_lean"} <= names
     assert not any("delete" in n for n in names)
+
+
+def test_sdk_shell_carries_refusals_verbatim(tmp_path):
+    """CLM-009-02 on the wire: SDK 2.x masks non-ToolError exceptions
+    ("Error executing tool <name>" only), so the shell converts every
+    handler exception to a ToolError carrying str(exc) — the client
+    must receive the engine's refusal text itself, and the refused
+    call must append nothing."""
+    pytest.importorskip("mcp")
+    import asyncio
+
+    from tekmerion.mcp.server import ServerConfig, Session, build_server
+
+    cfg = ServerConfig(workspace_root=str(tmp_path / "ws"), actor="ada",
+                       role="researcher")
+    session = Session(cfg, connector_factory=connectors)
+    server = build_server(session)
+
+    from mcp.server.mcpserver.exceptions import ToolError
+
+    async def probe():
+        await server.call_tool("create_study", {"study_id": "wire"})
+        with pytest.raises(ToolError) as ei:
+            await server.call_tool("register_claim", {
+                "study_id": "wire", "claim_id": "CLM-W-000",
+                "statement": "a claim with an empty falsifier",
+                "falsifier": "  ", "margin": 0.1, "sufficiency_floor": 1})
+        return str(ei.value)
+
+    text = asyncio.run(probe())
+    assert "no falsifier — not registered (Article II)" in text, text
+    events = session.ws.open("wire").events()
+    assert not [e for e in events
+                if "CLM-W-000" in json.dumps(e, default=str)]
+    assert session.list_claims("wire")["claims"] == []

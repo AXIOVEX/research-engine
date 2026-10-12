@@ -397,10 +397,32 @@ def evaluate_workspace_run(store: StudyStore, register: ClaimRegister,
     """The production run evaluation, driven from the record: frozen
     mode + linked-exploratory disclosure from the `study.frozen`
     event, chain state from the production verifier, controls as
-    above — all through `evaluate_run` itself (RT-1)."""
+    above — all through `evaluate_run` itself (RT-1).
+
+    The workspace run is the verdict-issuing run, and verdicts are
+    issued only against a frozen registration: with no `study.frozen`
+    event in the ledger the run is INVALID and issues nothing. The
+    mode is read from the freeze event, never inferred from its
+    absence — an earlier version defaulted an unfrozen study to
+    "exploratory" here, which silently re-moded a run whose
+    confirmation freeze had been refused and stranded the study
+    (verdicts issued, export refused as unfrozen). Exploratory
+    *evaluation* remains available at the engine level
+    (`evaluate_run(mode="exploratory")`, which appends nothing); a
+    study frozen in exploratory mode runs in that mode, against its
+    recorded freeze, and exports with the mode on its registration."""
     fe = frozen_event(store)
-    mode = fe["payload"].get("mode", "exploratory") if fe else "exploratory"
-    linked = fe["payload"].get("linked_exploratory", []) if fe else []
+    if fe is None:
+        return RunResult(
+            run_verdict="invalid",
+            invalid_reasons=[
+                "confirmation run without a frozen registration (WS3 §4 "
+                "wall): no study.frozen event in the ledger — freeze the "
+                "study before running; verdicts are issued only against "
+                "a frozen registration"],
+            mode="confirmation", disclosure=[])
+    mode = fe["payload"].get("mode", "confirmation")
+    linked = fe["payload"].get("linked_exploratory", [])
     return evaluate_run(
         register, mode=mode,
         controls=run_controls_for(store_path, control_fields),

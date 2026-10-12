@@ -21,14 +21,21 @@ semantics of its own, and neither do you when you use it.
    with `get_verdicts`. "The evidence looks strong" is not a
    verdict. INCONCLUSIVE is a result, not a failure of your work;
    report it as issued.
-2. **Write the falsifier first.** `register_claim` without a
-   falsifier is refused by the engine, verbatim, and nothing is
-   appended. If you cannot state what observation would falsify
-   the claim, the claim is not ready — say so instead of weakening
-   the falsifier until it fits.
+2. **Write the falsifier first.** `register_claim` cannot
+   register a claim without one, and nothing is appended either
+   way the omission happens: if the `falsifier` argument is left
+   out entirely, the tool's argument schema refuses the call
+   (`falsifier … Field required`) before the engine is reached;
+   if it is passed empty, the engine itself refuses, verbatim —
+   `…: no falsifier — not registered (Article II)`. The invariant
+   is the point: no falsifier, no append. If you cannot state
+   what observation would falsify the claim, the claim is not
+   ready — say so instead of weakening the falsifier until it
+   fits.
 3. **INVALID means stop.** An invalid run issues no claim verdicts.
    Report the run as INVALID with the engine's reasons (control
-   failures, broken chain, undecided adjudication items). Never
+   failures, broken chain, undecided adjudication items, no
+   frozen registration). Never
    salvage, paraphrase, or "interpret" verdicts from an invalid
    run, and never re-run hoping for a different answer without
    changing something real on the record.
@@ -87,34 +94,63 @@ actor and role).
 3. `attach_citation(study_id, citation_id, claim_id, proposition,
    doi, title, authors, year, venue)` per citation. Exactly one
    outcome is ledgered per citation. Read the result: `resolution`
-   (resolved / not_found / ambiguous), `agreement`, `content`
-   (supports / contradicts / no_content / metadata_only...).
+   (`resolved` / `not_found` / `error`), `agreement` (`agree` /
+   `disagree`, when resolution succeeded), `content` (`supports` /
+   `contradicts` / `contextual` / `metadata_only`, when content
+   was checked).
    Metadata-only evidence accumulates verdict mass of zero by
    design (WS5 §4) — a claim backed only by metadata can at best
    be inconclusive; that cap is the machinery working.
-4. Work the queue: `list_adjudication_queue`, then the
-   **adjudicator instance** calls `decide_adjudication(queue_id,
-   decision, rationale)` — decisions: `exclude` (fabricated,
-   wrong, or ineligible evidence leaves the basis), `variant`
-   (ruled a legitimate variant; it stands), `agree`,
-   `disagree_quarantine`. Decisions are appends; a decided item
-   cannot be re-decided. `record_second_review(queue_id, agrees)`
-   from a reviewer/adjudicator instance when the queue view shows
-   the item in the RT-4 sample.
-5. **Undecided queue items make the run INVALID.** Clear the queue
-   before freezing.
-6. `freeze_study(study_id, linked_exploratory, controls?)` —
-   adjudicator instance. For confirmation mode,
-   `linked_exploratory` must be a list (`[]` = "none" — the
-   disclosure is mandatory, its absence is a freeze failure).
-   Controls: the default set (positive/negative/swap, no fixtures)
-   is fine for a first study; a positive control with an evaluation
-   fixture needs a `representative_rationale`. A FreezeError lists
-   **every** failed check — fix them on the record (register the
-   margin, clear the queue), never by editing files.
-7. `run_evaluation(study_id)` — adjudicator instance. If the run
-   is INVALID, see rule 3. If valid, `verdict.issued` events now
-   exist; read them with `get_verdicts` and report exactly those.
+4. Work the queue: `list_adjudication_queue(study_id)`, then the
+   **adjudicator instance** calls `decide_adjudication(study_id,
+   queue_id, decision, rationale)`. The decision vocabulary is
+   fixed — anything else is refused as an unknown decision. For a
+   **quarantine** item: `exclude` (fabricated, wrong, or
+   ineligible evidence leaves the basis) or `variant` (a metadata
+   mismatch ruled a legitimate variant; the item stands). For a
+   **grouping** item: `same_origin` or `separate_origin` (whether
+   the pair counts as one origin group). Decisions are appends; a
+   decided item cannot be re-decided. Agreement is a separate
+   axis: `record_second_review(study_id, queue_id, agrees)` from
+   a reviewer/adjudicator instance when the queue view shows the
+   item in the RT-4 sample (`sampled_unreviewed`).
+5. **Undecided queue items make the run INVALID** — an undecided
+   quarantined item stays unverified, and a run containing it
+   issues nothing. Freeze does not check the queue; decide every
+   pending item before you run.
+6. `freeze_study(study_id, linked_exploratory, controls, mode?)` —
+   adjudicator instance; `mode` defaults to `"confirmation"`. For
+   confirmation mode, pass `linked_exploratory` as a list (`[]`
+   = "none"); if you omit it, the tool records that same empty
+   disclosure for you — the disclosure is on the record either
+   way (RT-3). **Controls must be passed explicitly.** If
+   `controls` is omitted, the tool substitutes a default set
+   whose positive control has an empty
+   `representative_rationale`, and the freeze is refused:
+   `freeze check failed: positive control lacks a representative
+   rationale (RT-6)`. Pass all three kinds — `positive`,
+   `negative`, `swap` — each a dict with `kind`, `failure_mode`
+   (the defect it exists to catch), `expected` (the verdict it
+   must produce; `null` for swap), and, **for the positive
+   control, a non-empty `representative_rationale`** stating why
+   its case represents the study claims' domain and difficulty. A
+   positive/negative control only *executes* at run time if it
+   carries a `fixture` — `{"claim": {…claim fields…}, "groups":
+   [{origin_group, support_mass, contradiction_mass,
+   could_falsify, falsifier_observation, …}]}`; without fixtures
+   only the swap control executes. A FreezeError lists **every**
+   failed check — fix them on the record (register the margin,
+   decide the queue), never by editing files.
+7. `run_evaluation(study_id)` — adjudicator instance. The study
+   must be frozen first: on an unfrozen study (never frozen, or
+   its freeze was refused — a refused freeze appends nothing) the
+   run returns INVALID with the WS3 §4 wall reason
+   (`confirmation run without a frozen registration …`) and
+   issues nothing. Verdicts exist only against a frozen
+   registration — which is also what makes them exportable in
+   step 8. If the run is INVALID, see rule 3. If valid,
+   `verdict.issued` events now exist; read them with
+   `get_verdicts` and report exactly those.
 8. `export_bundle(study_id)` — researcher/reviewer/adjudicator.
    Then `verify_bundle(bundle_dir)` — the verifier consumes only
    the bundle; a bundle that does not verify standalone is not
@@ -190,7 +226,10 @@ moves lane 2.
 
 | You see | What it means | What to do |
 |---|---|---|
-| `…: no falsifier — not registered (Article II)` | Registration refused before any append. | Write a real falsifier; re-register. Nothing was recorded. |
+| `…: no falsifier — not registered (Article II)` | Empty `falsifier`: the engine refused before any append. | Write a real falsifier; re-register. Nothing was recorded. |
+| `falsifier … Field required` (argument validation error) | The `falsifier` argument was omitted entirely; the tool schema refused the call before the engine was reached. | Pass a real falsifier. Nothing was recorded — the invariant is the same as the row above. |
+| `freeze check failed: positive control lacks a representative rationale (RT-6)` | The freeze's positive control (often the no-`controls` default) carries no rationale. | Pass `controls` explicitly with a non-empty `representative_rationale` on the positive control (Playbook A step 6). |
+| `run_verdict: invalid` + "confirmation run without a frozen registration (WS3 §4 wall)" | The study has no `study.frozen` event — never frozen, or its freeze was refused (a refused freeze appends nothing). | Freeze the study successfully first (step 6), then run. Nothing was issued. |
 | `role 'researcher' may not call freeze_study …` | The action belongs to another WS6 role. | Switch to the instance configured with that role. |
 | `freeze check failed: …` (FreezeError) | Fail-closed list of every blocker. | Fix each named item on the record; freeze again. |
 | `run_verdict: invalid` + reasons naming an undecided adjudication item | Quarantined evidence was never decided. | Decide it (adjudicator), then re-run. |
