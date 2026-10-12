@@ -58,3 +58,27 @@ final registration after the admin approval, the explanation holds;
 if it does not, the record here is wrong and must be revisited. No
 second registration has been created: the deposit state names h94bf,
 and any re-run resumes against it rather than duplicating it.
+
+Follow-on observation, 2026-10-12 (coordinator, on the owner's
+forwarded OSF failure email):
+
+- OSF's email ("Issue registering [/dvrew/]Tekmerion audit bundle —
+  spec002-phase7-evaluation … errors copying files to the
+  registration. Our development team is investigating") confirms the
+  cause server-side: registration **h94bf** died at the provider's
+  archive/copy step. Re-verified live at fix time: `GET
+  /v2/registrations/h94bf/` → HTTP 410 "no longer available"
+  (`flagged_content: false`); `GET /v2/nodes/dvrew/registrations/`
+  → empty. The project, its five components, and the 13 uploaded
+  files were never harmed — only the registration object died.
+- Fix executed by resume against the existing state (no second
+  project, no re-upload): the deposit correctly treated the 410 as a
+  dead registration, created a fresh submission from the intact
+  project, and recorded the replacement in
+  `demo-deposit-state.json`: **registration 84dk7**, stage
+  `submitted`, `reviews_state: "initial"`,
+  `pending_registration_approval: true` — the same honest non-final
+  state as the original run. Admin approval runs through OSF's
+  email-link channel (or the approval window lapsing); the deposit
+  completes only when the record is final and a resume re-run issues
+  the receipt. Until then 84dk7 must not be cited as an anchor.
