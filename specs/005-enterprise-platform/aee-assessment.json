@@ -2,16 +2,16 @@
   "schema_version": "1.0",
   "methodology_version": "1.0",
   "project": "tekmerion",
-  "phase": "after_specify",
+  "phase": "after_implement",
   "outcome": "gather_evidence",
-  "summary": "Assessed 31 claim(s); found 136 failure mode(s); 20 claim(s) below the 0.70 confidence threshold.",
-  "created_at": "2026-10-12T12:48:41.182189Z",
+  "summary": "Assessed 31 claim(s); found 136 failure mode(s); 14 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T13:05:59.306816Z",
   "claims": [
     {
       "id": "CLM-005-01",
       "text": "Human users authenticate only through a tenant-configured external IdP over OpenID Connect (authorization code flow with PKCE); the platform keeps no local password store and offers no local credential login.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: interactive human sign-in, hosted and self-hosted shapes (E1)",
         "Excludes service accounts / API keys (CLM-005-18) and the standalone bundle verifier, which needs no account (WS6 \u00a72)"
@@ -51,6 +51,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e1_identity.py: OIDC login against the in-process mock IdP (happy path, failed/forged/expired/nonce-mismatch logins recorded and refused) + test_no_local_password_path_exists_in_platform_package (AST audit: no password function anywhere in the platform package)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "CI run 38253126192 (PR #2, enterprise/e1-identity) success; full suite 122 passed locally",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -62,7 +84,7 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.752176,
+      "confidence": 1.0,
       "confidence_band": "high",
       "failures": [
         {
@@ -272,10 +294,11 @@
       "id": "CLM-005-03",
       "text": "Every append the service accepts is signed by an Ed25519 key enrolled to an IdP identity (issuer + subject) through a recorded enrollment event; appends signed by unenrolled, expired-binding, or revoked keys are rejected at the service layer.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: all study-ledger appends made through the platform service (E1)",
-        "Excludes offline bundle verification, which verifies historical signatures against enrollment-era records without live service state"
+        "Excludes offline bundle verification, which verifies historical signatures against enrollment-era records without live service state",
+        "Clarified at E1 exit (2026-10-12): service-account appends authenticate by API key under CLM-005-18 and are attributed, not key-signed; the signed-append rule governs identity appends"
       ],
       "depends_on": [],
       "conflicts_with": [],
@@ -312,6 +335,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e1_keys_gate.py: append gate on production paths \u2014 unenrolled key refused, tampered intent refused, cross-tenant session refused, revocation/supersession refused for new appends while historical signatures verify",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "CI run 38253126192 (PR #2, enterprise/e1-identity) success; full suite 122 passed locally",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -323,7 +368,7 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.752176,
+      "confidence": 1.0,
       "confidence_band": "high",
       "failures": [
         {
@@ -403,7 +448,7 @@
       "id": "CLM-005-04",
       "text": "Key enrollment, rotation, and revocation are appended, timestamped events in the platform record; rotation supersedes a binding without editing it, and signatures made before a revocation continue to verify after it.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "partially_supported",
       "boundary": [
         "Scope: the identity/key registry (platform plane), E1 with lifecycle completion in E3",
         "Excludes the DN-005 break-glass erasure certificate, which governs payload keys, not actor signing keys"
@@ -432,6 +477,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e1_keys_gate.py: enrollment (proof of possession, nonce replay refused), rotation supersedes with history verifying, revocation terminal for new appends \u2014 all as ledger events in the tenant platform ledger",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "E1 discharges the lifecycle core; SCIM-driven completion is E3 per this claim's boundary \u2014 status stays partially_supported until then",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -443,8 +510,8 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-04-IRREDUCIBILITY-CHALLENGE",
@@ -843,7 +910,7 @@
       "id": "CLM-005-08",
       "text": "Authorization for every read and mutation is enforced in the service layer against the WS6 \u00a71 role matrix (researcher / reviewer / adjudicator / integrity officer); no endpoint relies on the UI hiding an affordance.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: all platform API surfaces serving study or admin data (E1, hardened E4)",
         "Excludes the deliberately public standalone bundle-verification endpoint, which serves only what a bundle already contains"
@@ -883,6 +950,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e1_identity.py + test_e1_keys_gate.py: WS6 matrix enforced in the service layer with no UI present (researcher verdict attempt denied at the gate; non-admin grant attempt denied; denials recorded)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "CI run 38253126192 (PR #2, enterprise/e1-identity) success; full suite 122 passed locally",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -894,7 +983,7 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.752176,
+      "confidence": 1.0,
       "confidence_band": "high",
       "failures": [
         {
@@ -934,7 +1023,7 @@
       "id": "CLM-005-09",
       "text": "Platform-admin, tenant-admin, and study roles are disjoint planes: no plane's authority implies another's \u2014 a platform admin cannot sign study verdicts, and a tenant admin can reach nothing outside their tenant.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "partially_supported",
       "boundary": [
         "Scope: authorization model across hosted and self-hosted shapes (E1 model, E4 test battery)",
         "Excludes break-glass, which is a separate named mechanism (CLM-005-10), not a plane"
@@ -963,6 +1052,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e1_identity.py: tenant admin refused platform functions (denial recorded in the deployment ledger); platform admin refused tenant IdP administration; cross-tenant grant refused",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "E1 model + E1-surface tests shipped; the adversarial cross-plane battery is E4 per this claim's boundary \u2014 partially_supported until then",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -974,8 +1085,8 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-09-IRREDUCIBILITY-CHALLENGE",
@@ -1445,7 +1556,7 @@
       "id": "CLM-005-14",
       "text": "Every platform-plane administrative action \u2014 IdP configuration change, role grant or revocation, key enrollment/rotation/revocation, SCIM sync outcome, break-glass use \u2014 is recorded as an append-only, signed, hash-chained event in the platform audit ledger.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "partially_supported",
       "boundary": [
         "Scope: platform audit ledger, distinct from study ledgers (E1 core, complete by E4)",
         "Excludes study-internal events, which live in study ledgers under Spec 002"
@@ -1474,6 +1585,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e1_identity.py AU sweep: every E1 administrative action exercised is present as a signed hash-chained event in the deployment/tenant audit ledgers; both ledgers verify after the battery",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "SCIM sync outcomes (E3) and break-glass use (CLM-005-10) are not yet emittable events \u2014 partially_supported until E4 completion per this claim's boundary",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -1485,8 +1618,8 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-14-IRREDUCIBILITY-CHALLENGE",
@@ -1966,7 +2099,7 @@
       "id": "CLM-005-18",
       "text": "Programmatic access uses scoped, expiring, revocable API keys / service accounts whose scopes cannot exceed the WS6 role matrix; every service-account action is attributed to the account and ledgered like a human actor's.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: API access for integrations and automation (E1 keys core; egress signing completes the baseline in E4)",
         "Excludes connector credentials (Crossref/OpenAlex), which are the operator's, not tenants'"
@@ -1995,6 +2128,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e1_identity.py + test_e1_keys_gate.py: scope-subset enforced at issuance (excess scope unrepresentable), 1-year lifetime cap, revocation and expiry refuse appends, service appends attributed to the principal with custody 'api_key'",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "CI run 38253126192 (PR #2, enterprise/e1-identity) success; full suite 122 passed locally",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -2006,8 +2161,8 @@
       "severity": "medium",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-18-IRREDUCIBILITY-CHALLENGE",
@@ -2447,7 +2602,7 @@
       "id": "CLM-005-25",
       "text": "The platform makes no FIPS-validation claim it cannot evidence: every cryptographic operation in the platform plane is listed in the crypto inventory with its implementation and validation status; \u00a73.13.11 (FIPS-validated modules) is recorded as an open gap with recorded migration routes, a cross-repo dependency on the Axiomere roadmap, and an owner decision pending \u2014 never as satisfied.",
       "kind": "compliance",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: platform plane incl. the Axiomere record layer it embeds; tenant-side IdP/KMS cryptography is the tenant's inventory, not this claim's",
         "E1 delivers the inventory (T549); the validated-module migration itself is NOT an E1 deliverable and this claim must not be read as promising it"
@@ -2487,6 +2642,17 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "specs/005-enterprise-platform/crypto-inventory.md (T549): all 11 platform-plane cryptographic operations listed with implementation + validation status; every row 'No' on FIPS validation; \u00a73.13.11 matrix row recorded OPEN GAP with routes and the owner decision unmade",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -2498,7 +2664,7 @@
       "severity": "critical",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.968023,
+      "confidence": 0.996802,
       "confidence_band": "high",
       "failures": [
         {
@@ -2558,7 +2724,7 @@
       "id": "CLM-005-26",
       "text": "The platform audit ledger emits the SP 800-171 \u00a73.3.1/\u00a73.3.2 event classes from E1: account creation and modification, authentication successes and failures, authorization decisions on mutations including denials, administrative actions, the complete key lifecycle, session lifecycle, and API-key lifecycle \u2014 each event carrying actor identity, event type, timestamp, target, and outcome.",
       "kind": "requirement",
-      "status": "draft",
+      "status": "partially_supported",
       "boundary": [
         "Scope: platform plane (deployment + per-tenant audit ledgers); study-plane events remain Spec 002's vocabulary",
         "E1 delivers the emission; E4 completes review/retention semantics \u2014 this claim is discharged in halves and must be scored as such"
@@ -2587,6 +2753,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e1_identity.py::test_au_event_class_completeness_sweep: all eight AU event classes exercised by the E1 surface incl. failures; each event carries actor_id, type, ts_utc, target, outcome",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "E1 emission half discharged; E4 review/retention half outstanding per this claim's own boundary \u2014 scored as halves, as the boundary instructs",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -2598,8 +2786,8 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-26-IRREDUCIBILITY-CHALLENGE",
@@ -2638,7 +2826,7 @@
       "id": "CLM-005-27",
       "text": "Interactive platform access requires MFA at the tenant IdP, enforced platform-side: tenant IdP policy records the required acr/amr, a session whose assertion lacks MFA evidence cannot act beyond sign-in completion and cannot step up, and authenticator management is the \u00a73 key lifecycle (enrollment with proof of possession, rotation, revocation, closure).",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: interactive human access; service accounts authenticate under CLM-005-18, not this claim",
         "Password-family requirements (\u00a73.5.7\u20133.5.10) are not applicable by design \u2014 no local passwords exist (CLM-005-01) \u2014 and are recorded against the tenant IdP in the matrix, not silently skipped"
@@ -2667,6 +2855,28 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "tests/test_e1_identity.py: session without MFA evidence refused at the append gate (denial recorded); step-up with a non-MFA assertion refused; MFA step-up recorded",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "CI run 38253126192 (PR #2, enterprise/e1-identity) success; full suite 122 passed locally",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -2678,8 +2888,8 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.680227,
-      "confidence_band": "medium",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-005-27-IRREDUCIBILITY-CHALLENGE",
@@ -2998,19 +3208,17 @@
   "scores": {
     "CLM-005-01": {
       "claim_id": "CLM-005-01",
-      "direct_score": 0.752176,
-      "propagated_score": 0.752176,
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
       "band": "high",
       "components": {
-        "evidence": 0.54941,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-02": {
       "claim_id": "CLM-005-02",
@@ -3030,35 +3238,31 @@
     },
     "CLM-005-03": {
       "claim_id": "CLM-005-03",
-      "direct_score": 0.752176,
-      "propagated_score": 0.752176,
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
       "band": "high",
       "components": {
-        "evidence": 0.54941,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-04": {
       "claim_id": "CLM-005-04",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-05": {
       "claim_id": "CLM-005-05",
@@ -3110,35 +3314,31 @@
     },
     "CLM-005-08": {
       "claim_id": "CLM-005-08",
-      "direct_score": 0.752176,
-      "propagated_score": 0.752176,
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
       "band": "high",
       "components": {
-        "evidence": 0.54941,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-09": {
       "claim_id": "CLM-005-09",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-10": {
       "claim_id": "CLM-005-10",
@@ -3204,19 +3404,17 @@
     },
     "CLM-005-14": {
       "claim_id": "CLM-005-14",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-22": {
       "claim_id": "CLM-005-22",
@@ -3280,19 +3478,17 @@
     },
     "CLM-005-18": {
       "claim_id": "CLM-005-18",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-19": {
       "claim_id": "CLM-005-19",
@@ -3372,11 +3568,11 @@
     },
     "CLM-005-25": {
       "claim_id": "CLM-005-25",
-      "direct_score": 0.968023,
-      "propagated_score": 0.968023,
+      "direct_score": 0.996802,
+      "propagated_score": 0.996802,
       "band": "high",
       "components": {
-        "evidence": 0.941859,
+        "evidence": 0.994186,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
@@ -3386,35 +3582,31 @@
     },
     "CLM-005-26": {
       "claim_id": "CLM-005-26",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-27": {
       "claim_id": "CLM-005-27",
-      "direct_score": 0.680227,
-      "propagated_score": 0.680227,
-      "band": "medium",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
-        "evidence": 0.418594,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
         "contradiction_penalty": 0
       },
-      "notes": [
-        "No observed supporting evidence"
-      ]
+      "notes": []
     },
     "CLM-005-28": {
       "claim_id": "CLM-005-28",

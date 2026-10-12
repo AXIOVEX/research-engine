@@ -1,12 +1,12 @@
 {
   "spec": "specs/005-enterprise-platform/spec.md",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "date": "2026-10-12",
   "claims": [
     {
       "id": "CLM-005-01",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "severity": "high",
       "uncertainty": "medium",
       "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -36,6 +36,18 @@
           "kind": "asserted",
           "ref": "docs/wireframes/WIREFRAMES.md §4 — actor block: identity arrives via the SSO hook",
           "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_e1_identity.py: OIDC login against the in-process mock IdP (happy path, failed/forged/expired/nonce-mismatch logins recorded and refused) + test_no_local_password_path_exists_in_platform_package (AST audit: no password function anywhere in the platform package)",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "CI run 38253126192 (PR #2, enterprise/e1-identity) success; full suite 122 passed locally",
+          "source_quality": "test"
         }
       ]
     },
@@ -72,14 +84,15 @@
     {
       "id": "CLM-005-03",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "severity": "high",
       "uncertainty": "medium",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "text": "Every append the service accepts is signed by an Ed25519 key enrolled to an IdP identity (issuer + subject) through a recorded enrollment event; appends signed by unenrolled, expired-binding, or revoked keys are rejected at the service layer.",
       "boundary": [
         "Scope: all study-ledger appends made through the platform service (E1)",
-        "Excludes offline bundle verification, which verifies historical signatures against enrollment-era records without live service state"
+        "Excludes offline bundle verification, which verifies historical signatures against enrollment-era records without live service state",
+        "Clarified at E1 exit (2026-10-12): service-account appends authenticate by API key under CLM-005-18 and are attributed, not key-signed; the signed-append rule governs identity appends"
       ],
       "falsification_tests": [
         "F-005-03: a service-accepted append whose signing key has no enrollment event binding it to the authenticated actor's IdP identity; or acceptance of an append signed by a revoked key."
@@ -102,13 +115,25 @@
           "kind": "asserted",
           "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) §2",
           "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_e1_keys_gate.py: append gate on production paths — unenrolled key refused, tampered intent refused, cross-tenant session refused, revocation/supersession refused for new appends while historical signatures verify",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "CI run 38253126192 (PR #2, enterprise/e1-identity) success; full suite 122 passed locally",
+          "source_quality": "test"
         }
       ]
     },
     {
       "id": "CLM-005-04",
       "kind": "requirement",
-      "status": "draft",
+      "status": "partially_supported",
       "severity": "high",
       "uncertainty": "low",
       "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -131,6 +156,18 @@
           "direction": "supports",
           "kind": "asserted",
           "ref": "DN-005 — change happens only by appending new snapshots; lineage stays readable",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_e1_keys_gate.py: enrollment (proof of possession, nonce replay refused), rotation supersedes with history verifying, revocation terminal for new appends — all as ledger events in the tenant platform ledger",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "E1 discharges the lifecycle core; SCIM-driven completion is E3 per this claim's boundary — status stays partially_supported until then",
           "source_quality": "primary"
         }
       ]
@@ -228,7 +265,7 @@
     {
       "id": "CLM-005-08",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "severity": "high",
       "uncertainty": "low",
       "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -258,13 +295,25 @@
           "kind": "asserted",
           "ref": "src/tekmerion/store.py — every mutating call takes a named actor and appends via Axiomere",
           "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_e1_identity.py + test_e1_keys_gate.py: WS6 matrix enforced in the service layer with no UI present (researcher verdict attempt denied at the gate; non-admin grant attempt denied; denials recorded)",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "CI run 38253126192 (PR #2, enterprise/e1-identity) success; full suite 122 passed locally",
+          "source_quality": "test"
         }
       ]
     },
     {
       "id": "CLM-005-09",
       "kind": "requirement",
-      "status": "draft",
+      "status": "partially_supported",
       "severity": "high",
       "uncertainty": "medium",
       "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -287,6 +336,18 @@
           "direction": "supports",
           "kind": "asserted",
           "ref": "WS6 §1 role matrix (docs/architecture/06-product-shape.md)",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_e1_identity.py: tenant admin refused platform functions (denial recorded in the deployment ledger); platform admin refused tenant IdP administration; cross-tenant grant refused",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "E1 model + E1-surface tests shipped; the adversarial cross-plane battery is E4 per this claim's boundary — partially_supported until then",
           "source_quality": "primary"
         }
       ]
@@ -420,7 +481,7 @@
     {
       "id": "CLM-005-14",
       "kind": "requirement",
-      "status": "draft",
+      "status": "partially_supported",
       "severity": "high",
       "uncertainty": "medium",
       "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -443,6 +504,18 @@
           "direction": "supports",
           "kind": "asserted",
           "ref": "WS6 §1 — integrity officer: inspection access is itself logged",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_e1_identity.py AU sweep: every E1 administrative action exercised is present as a signed hash-chained event in the deployment/tenant audit ledgers; both ledgers verify after the battery",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "SCIM sync outcomes (E3) and break-glass use (CLM-005-10) are not yet emittable events — partially_supported until E4 completion per this claim's boundary",
           "source_quality": "primary"
         }
       ]
@@ -576,7 +649,7 @@
     {
       "id": "CLM-005-18",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "severity": "medium",
       "uncertainty": "medium",
       "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -600,6 +673,18 @@
           "kind": "asserted",
           "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12) §5",
           "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_e1_identity.py + test_e1_keys_gate.py: scope-subset enforced at issuance (excess scope unrepresentable), 1-year lifetime cap, revocation and expiry refuse appends, service appends attributed to the principal with custody 'api_key'",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "CI run 38253126192 (PR #2, enterprise/e1-identity) success; full suite 122 passed locally",
+          "source_quality": "test"
         }
       ]
     },
@@ -762,7 +847,7 @@
     {
       "id": "CLM-005-25",
       "kind": "compliance",
-      "status": "draft",
+      "status": "supported",
       "severity": "critical",
       "uncertainty": "medium",
       "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -792,13 +877,19 @@
           "kind": "asserted",
           "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12), CMMC posture section",
           "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "specs/005-enterprise-platform/crypto-inventory.md (T549): all 11 platform-plane cryptographic operations listed with implementation + validation status; every row 'No' on FIPS validation; §3.13.11 matrix row recorded OPEN GAP with routes and the owner decision unmade",
+          "source_quality": "artifact"
         }
       ]
     },
     {
       "id": "CLM-005-26",
       "kind": "requirement",
-      "status": "draft",
+      "status": "partially_supported",
       "severity": "high",
       "uncertainty": "medium",
       "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -822,13 +913,25 @@
           "kind": "asserted",
           "ref": "Spec 005 §8 (platform audit ledger) + T510/T550",
           "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_e1_identity.py::test_au_event_class_completeness_sweep: all eight AU event classes exercised by the E1 surface incl. failures; each event carries actor_id, type, ts_utc, target, outcome",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "E1 emission half discharged; E4 review/retention half outstanding per this claim's own boundary — scored as halves, as the boundary instructs",
+          "source_quality": "primary"
         }
       ]
     },
     {
       "id": "CLM-005-27",
       "kind": "requirement",
-      "status": "draft",
+      "status": "supported",
       "severity": "high",
       "uncertainty": "medium",
       "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -852,6 +955,18 @@
           "kind": "asserted",
           "ref": "Spec 005 §2 (step-up) + §3 (key lifecycle as authenticator management)",
           "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_e1_identity.py: session without MFA evidence refused at the append gate (denial recorded); step-up with a non-MFA assertion refused; MFA step-up recorded",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "CI run 38253126192 (PR #2, enterprise/e1-identity) success; full suite 122 passed locally",
+          "source_quality": "test"
         }
       ]
     },

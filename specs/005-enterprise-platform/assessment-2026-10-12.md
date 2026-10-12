@@ -67,3 +67,30 @@ The engine's challenges, dispositioned per house practice — recorded, answered
 | CLM-005-31 DFARS/FedRAMP hosted-shape flag | 0.68 | **draft** — standing flag; an open owner/legal decision engineering does not resolve |
 
 The original 22 claims' scores are unchanged by the amendment run (same evidence; the seven above-threshold claims stand as recorded in the first section). Tasks absorbed the deltas in place: [CMMC] flags on T503, T507, T510, T529, T531, T542, T544; new tasks T549 (crypto inventory, E1), T550 (AU completeness, E1), T551 (CUI marking, E6), T552 (SPRS support, E6), T553 (POA&M register, E6), T554 (IR event classes, E4). E6 is retitled "Compliance evidence (SOC 2 readiness + CMMC Level 2 support) + self-hosted shape" in plan and tasks.
+
+---
+
+## Phase exit — E1 identity core (2026-10-12)
+
+**Built:** branch `enterprise/e1-identity` @ `2c4afbd` (15 files: `src/tekmerion/platform/` — directory, oidc, keys, authz, gate, ledger, service, ed25519 — plus tests and the crypto inventory). CI: PR #2, run **38253126192, success**; local suite 122 passed (82 prior unchanged + 40 new E1 tests, incl. the brief's seeded negatives: unenrolled append refused; revoked key refused with history verifying; plane disjointness both directions; service-layer RBAC denial with no UI; deactivation effective at next request; the T550 AU sweep over every E1 path incl. failures).
+
+**Re-assessment** (`after_implement`, bundle v0.3.0): outcome **gather_evidence**; 14 of 31 claims remain below 0.70 — every one is unbuilt E2–E6 scope, which is the outcome working as intended. E1-moved claims (scores are the engine's index; the *status* carries the scoping):
+
+| Claim | Score | Status at exit | Mechanism / residue |
+|-------|-------|----------------|---------------------|
+| CLM-005-01 OIDC only, no local passwords | 1.00 | supported | Mock-IdP flow tests + AST audit (no password path exists in the package) |
+| CLM-005-03 key binding enforced at the gate | 1.00 | supported | Gate battery on production paths; boundary clarified: API-key appends are CLM-005-18's mode (attributed, not key-signed) |
+| CLM-005-04 key lifecycle as events | 1.00 | **partially_supported** | Lifecycle core tested (PoP, rotation, revocation, closure); SCIM-driven completion is E3 |
+| CLM-005-08 service-layer RBAC | 1.00 | supported | WS6 matrix as policy; denials enforced + recorded with the UI absent |
+| CLM-005-09 disjoint planes | 1.00 | **partially_supported** | E1 model + cross-plane denial tests; the adversarial battery is E4 |
+| CLM-005-14 platform audit ledger | 1.00 | **partially_supported** | E1 admin actions all ledgered (sweep-verified, chains verify); SCIM outcomes + break-glass events do not exist yet |
+| CLM-005-18 scoped API keys | 1.00 | supported | Scope-subset at construction, ≤1y expiry, revocation/expiry refusal, attributed appends |
+| CLM-005-25 FIPS position + inventory | 0.997 | supported | Inventory delivered (11 operations, all "No" on validation); §3.13.11 stays OPEN GAP — supported *as a position claim*, not as FIPS progress |
+| CLM-005-26 AU event-class completeness | 1.00 | **partially_supported** | E1 emission half discharged by the sweep; E4 review/retention half outstanding, per the claim's own boundary |
+| CLM-005-27 MFA platform-enforced | 1.00 | supported | No-MFA session refused at the gate; non-MFA step-up refused |
+
+**Custody honesty (repeated from the code, where it is also recorded):** delegated custody's signer is a software development signer holding seeds in process memory — the custody *plumbing* (mode on every append, session binding, step-up) is real and tested; it is not a KMS/HSM and is never described as one. The service-layer Ed25519 and RS256 verification are prototype-grade pure-Python (the CI environment is stdlib + Axiomere only); key derivation is cross-checked against the Rust core in tests.
+
+**Finding surfaced by E1 testing (record layer, cross-repo):** Axiomere events whose payloads carry certain high-precision floats (reproduced with `1791810119.6349843`) fail hash verification on reopen — Python/Rust float-serialization divergence, not tampering. Platform payloads now carry whole-second timestamps only (`platform/ledger.py` documents the discipline). The record-layer fix belongs to the Axiomere repo's own flow; it is reported here and in the E1 commit, not patched from this worktree.
+
+**What remains not understood:** real-IdP interoperability (no external IdP exercised — the mock enforces genuine PKCE/RS256 but is ours), KMS/HSM custody behavior, and audit-ledger behavior at institutional volumes. E2 (SAML) is the next phase; it starts on the coordinator's merge of this branch, not before.

@@ -12,20 +12,20 @@
 
 ## Phase E1 — Identity core (OIDC + key binding + service-layer RBAC)
 
-- [ ] T501 Internal identity model `(tenant, issuer, subject)` + attribute mapping; protocol-neutral downstream of the boundary.
-- [ ] T502 Per-tenant IdP configuration records (OIDC first) as platform-ledger events; secrets in the secrets store, never in config payloads.
-- [ ] T503 OIDC relying party: discovery, authorization code + PKCE (S256 required), JWKS rotation; F-005-01 audit — no local credential path exists. [CMMC §13.5: tenant IdP policy records required acr/amr (MFA); a session without MFA evidence cannot mutate or step up (CLM-005-27).]
-- [ ] T504 Key enrollment ceremony: authenticated session, proof of possession (nonce signature), enrollment event to the platform audit ledger.
-- [ ] T505 Key registry: rotation (superseding enrollment), revocation, multi-key per identity; pre-revocation signatures keep verifying (F-005-04).
-- [ ] T506 Custody modes: self-custody signing path + delegated (KMS/HSM) signing with `custody` recorded in append metadata; step-up required for verdict-class signing in both modes.
-- [ ] T507 Service-layer append gate: appends accepted only under an enrolled, unrevoked key bound to the session identity (F-005-03). [CMMC: gate refusals are audit events (T550).]
-- [ ] T508 Authorization service: WS6 §1 matrix as policy; deny-by-default; tenant context from session only; decision records for mutations.
-- [ ] T509 Admin planes: tenant-admin and platform-admin roles disjoint from study roles and each other (F-005-09 model tests).
-- [ ] T510 Platform audit ledger core (Axiomere): admin-action events — IdP config, grants, key lifecycle — signed, chained, checkpointable. [CMMC §13.4: the AU event classes of T550 are in scope from the first commit, not retrofitted.]
-- [ ] T511 API keys / service accounts: hashed storage, prefix IDs, scopes ⊆ WS6 matrix, expiry ≤ 1y, revocation; actions attributed + ledgered (F-005-18).
-- [ ] T549 [CMMC] Crypto inventory (E1): every cryptographic operation in the platform plane listed in `specs/005-enterprise-platform/crypto-inventory.md` with algorithm, implementation, and FIPS validation status; an unlisted operation is a defect (CLM-005-25). No FIPS claim anywhere it does not exist.
-- [ ] T550 [CMMC] AU event-class completeness (E1): the §3.3.1/§3.3.2 classes — account creation/modification, authentication successes AND failures, authorization decisions incl. denials, admin actions, key lifecycle, session lifecycle, API-key lifecycle — each with the AU content set (actor, type, timestamp, target, outcome); sweep test = every E1 mutation/auth path produces its event (CLM-005-26).
-- [ ] T512 Phase exit: phase claims re-assessed; Spec 002 battery green unchanged (CLM-005-20).
+- [x] T501 Internal identity model `(tenant, issuer, subject)` + attribute mapping; protocol-neutral downstream of the boundary.
+- [x] T502 Per-tenant IdP configuration records (OIDC first) as platform-ledger events; secrets in the secrets store, never in config payloads.
+- [x] T503 OIDC relying party: discovery, authorization code + PKCE (S256 required), JWKS rotation; F-005-01 audit — no local credential path exists. [CMMC §13.5: tenant IdP policy records required acr/amr (MFA); a session without MFA evidence cannot mutate or step up (CLM-005-27).]
+- [x] T504 Key enrollment ceremony: authenticated session, proof of possession (nonce signature), enrollment event to the platform audit ledger.
+- [x] T505 Key registry: rotation (superseding enrollment), revocation, multi-key per identity; pre-revocation signatures keep verifying (F-005-04).
+- [x] T506 Custody modes: self-custody signing path + delegated (KMS/HSM) signing with `custody` recorded in append metadata; step-up required for verdict-class signing in both modes.
+- [x] T507 Service-layer append gate: appends accepted only under an enrolled, unrevoked key bound to the session identity (F-005-03). [CMMC: gate refusals are audit events (T550).]
+- [x] T508 Authorization service: WS6 §1 matrix as policy; deny-by-default; tenant context from session only; decision records for mutations.
+- [x] T509 Admin planes: tenant-admin and platform-admin roles disjoint from study roles and each other (F-005-09 model tests).
+- [x] T510 Platform audit ledger core (Axiomere): admin-action events — IdP config, grants, key lifecycle — signed, chained, checkpointable. [CMMC §13.4: the AU event classes of T550 are in scope from the first commit, not retrofitted.]
+- [x] T511 API keys / service accounts: hashed storage, prefix IDs, scopes ⊆ WS6 matrix, expiry ≤ 1y, revocation; actions attributed + ledgered (F-005-18).
+- [x] T549 [CMMC] Crypto inventory (E1): every cryptographic operation in the platform plane listed in `specs/005-enterprise-platform/crypto-inventory.md` with algorithm, implementation, and FIPS validation status; an unlisted operation is a defect (CLM-005-25). No FIPS claim anywhere it does not exist.
+- [x] T550 [CMMC] AU event-class completeness (E1): the §3.3.1/§3.3.2 classes — account creation/modification, authentication successes AND failures, authorization decisions incl. denials, admin actions, key lifecycle, session lifecycle, API-key lifecycle — each with the AU content set (actor, type, timestamp, target, outcome); sweep test = every E1 mutation/auth path produces its event (CLM-005-26).
+- [x] T512 Phase exit: phase claims re-assessed; Spec 002 battery green unchanged (CLM-005-20).
 
 ## Phase E2 — SAML 2.0
 
