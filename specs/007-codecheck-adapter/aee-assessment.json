@@ -1,0 +1,365 @@
+{
+  "schema_version": "1.0",
+  "methodology_version": "1.0",
+  "project": "tekmerion",
+  "phase": "after_specify",
+  "outcome": "iterate",
+  "summary": "Assessed 4 claim(s); found 7 failure mode(s); 4 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T12:43:18.292865Z",
+  "claims": [
+    {
+      "id": "CLM-007-01",
+      "text": "The adapter's evidence item records the certificate's named codechecker, certificate date, register DOI, certified scope (outputs recreated), and the certified work's identifier; a certificate record missing any of these is context, not evidence.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/007-codecheck-adapter/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-007-1: an adapter evidence item lacking checker identity, date, DOI, or scope."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/007-codecheck-adapter/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-007-01-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-007-01",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-007-01-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-007-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-007-01 may contradict CLM-007-03",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-007-02",
+      "text": "BLIND SPOT (scope claim): a CODECHECK certificate establishes only that the named checker, at that time, in that environment, could run the supplied material and recreate the certified outputs. It does NOT establish correctness or scientific validity (the certificates state this themselves), does not cover outputs outside the certified scope, and does not establish that the code is free of bugs that produce plausible wrong outputs.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/007-codecheck-adapter/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-007-2: any presentation of a certificate as covering outputs outside its stated scope, or as establishing correctness/validity."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/007-codecheck-adapter/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-007-02-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-007-02",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-007-02-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-007-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-007-02 may contradict CLM-007-03",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-007-03",
+      "text": "Scope honesty: where the certified scope is partial (a subset of the paper's outputs), the evidence item's mass is capped as partial-scope, and the uncertified outputs are named in the item.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/007-codecheck-adapter/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-007-3: a partial-scope certificate recorded without the cap or without naming the uncertified outputs."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/007-codecheck-adapter/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-007-03-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-007-03",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-007-03-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-007-03",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-007-03 may contradict CLM-007-04",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-007-04",
+      "text": "Lane separation: the codechecker is a named human performing lane-1 re-execution; the adapter records the certificate as lane-1 evidence and never as explanation, acceptance, or digestion of the work.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/007-codecheck-adapter/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-007-4: a study record presenting a CODECHECK certificate as lane-2 progress (explained/accepted/digested)."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/007-codecheck-adapter/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-007-04-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-007-04",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    }
+  ],
+  "scores": {
+    "CLM-007-01": {
+      "claim_id": "CLM-007-01",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-007-02": {
+      "claim_id": "CLM-007-02",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-007-03": {
+      "claim_id": "CLM-007-03",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-007-04": {
+      "claim_id": "CLM-007-04",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    }
+  },
+  "recoveries": [
+    {
+      "failure_id": "AEE-CLM-007-01-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-007-01",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-007-01-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-007-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-007-02-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-007-02",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-007-02-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-007-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-007-03-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-007-03",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-007-03-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-007-03",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-007-04-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-007-04",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    }
+  ],
+  "metadata": {
+    "threshold": 0.7,
+    "input": "specs/007-codecheck-adapter/aee-claims.json"
+  }
+}

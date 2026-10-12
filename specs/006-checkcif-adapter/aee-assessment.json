@@ -1,0 +1,311 @@
+{
+  "schema_version": "1.0",
+  "methodology_version": "1.0",
+  "project": "tekmerion",
+  "phase": "after_specify",
+  "outcome": "iterate",
+  "summary": "Assessed 4 claim(s); found 4 failure mode(s); 4 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T12:43:17.460588Z",
+  "claims": [
+    {
+      "id": "CLM-006-01",
+      "text": "The adapter's evidence item records the CIF SHA-256, the checker (checkCIF service vs local PLATON), and the PLATON/check.def version for every run; an alert record without all three is not evidence.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/006-checkcif-adapter/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-006-1: an adapter evidence item missing the artifact hash, checker identity, or check.def version."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/006-checkcif-adapter/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-006-01-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-006-01",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-006-02",
+      "text": "BLIND SPOT (scope claim): a clean checkCIF result (no A/B alerts) establishes only that the CIF is internally consistent under the check.def suite. It does NOT establish that the structure is chemically correct, that the claimed chemistry is the chemistry in the crystal, or that the dataset is genuine \u2014 IUCr states in every report that the absence of alerts does not guarantee there are no aspects needing attention, and internally consistent fabricated datasets are known to pass.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/006-checkcif-adapter/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-006-2: any study presentation of a clean checkCIF result as establishing structure correctness, chemical identity, or dataset genuineness."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/006-checkcif-adapter/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-006-02-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-006-02",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-006-03",
+      "text": "Alert mapping is monotone and disclosed: A alerts attach contradiction mass to the supported claim's structure sub-claim; B alerts attach partial contradiction; C/G attach context only. The mapping table is part of this spec's record and may not be tuned per-study.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/006-checkcif-adapter/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-006-3: a study whose alert-to-mass mapping differs from the registered table, or an A alert recorded as context only."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/006-checkcif-adapter/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-006-03-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-006-03",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-006-04",
+      "text": "The adapter supplies lane-1 evidence only: it issues no verdicts, and a checkCIF pass can never be the sole evidence for a supported verdict on a structure claim.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/006-checkcif-adapter/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-006-4: a verdict of supported whose only evidence group is a checkCIF adapter item."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/006-checkcif-adapter/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-006-04-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-006-04",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    }
+  ],
+  "scores": {
+    "CLM-006-01": {
+      "claim_id": "CLM-006-01",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-006-02": {
+      "claim_id": "CLM-006-02",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-006-03": {
+      "claim_id": "CLM-006-03",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-006-04": {
+      "claim_id": "CLM-006-04",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    }
+  },
+  "recoveries": [
+    {
+      "failure_id": "AEE-CLM-006-01-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-006-01",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-006-02-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-006-02",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-006-03-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-006-03",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-006-04-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-006-04",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    }
+  ],
+  "metadata": {
+    "threshold": 0.7,
+    "input": "specs/006-checkcif-adapter/aee-claims.json"
+  }
+}

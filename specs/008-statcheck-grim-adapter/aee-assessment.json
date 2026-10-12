@@ -1,0 +1,365 @@
+{
+  "schema_version": "1.0",
+  "methodology_version": "1.0",
+  "project": "tekmerion",
+  "phase": "after_specify",
+  "outcome": "iterate",
+  "summary": "Assessed 4 claim(s); found 7 failure mode(s); 4 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T12:43:18.465994Z",
+  "claims": [
+    {
+      "id": "CLM-008-01",
+      "text": "The adapter's evidence item records the checker + version, the extraction coverage (how many results were extractable vs present), and every flagged result with its recomputed values; an item without the coverage record is not evidence.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/008-statcheck-grim-adapter/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-008-1: an adapter evidence item lacking checker version or extraction coverage."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/008-statcheck-grim-adapter/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-008-01-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-008-01",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-008-02",
+      "text": "BLIND SPOT (scope claim): these checkers establish internal arithmetic consistency of reported statistics only. They do NOT establish that the underlying data exist, that the analysis was appropriate, or that conclusions follow. statcheck is silent on everything it cannot parse (non-APA formats, tables, model-based/Bayesian results) \u2014 no flags is not a clean paper. A GRIM fail proves inconsistency, not its cause (typo, wrong N, exclusions all produce fails). SPRITE reconstructions are candidate datasets, never the real data.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/008-statcheck-grim-adapter/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-008-2: any presentation of a no-flag statcheck run as a clean bill, of a GRIM fail as evidence of fabrication, or of a SPRITE reconstruction as the paper's actual data."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/008-statcheck-grim-adapter/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-008-02-PRECISION-CHALLENGE",
+          "claim_id": "CLM-008-02",
+          "challenge": "Precision challenge",
+          "breakpoint": "Claim contains an undefined or non-measurable term",
+          "severity": "medium",
+          "category": "ambiguous_requirement",
+          "recovery_hint": "Replace vague language with a threshold, observable, or decision rule.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-008-02-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-008-02",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-008-02-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-008-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-008-02 may contradict CLM-008-03",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-008-02-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-008-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-008-02 may contradict CLM-008-04",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-008-03",
+      "text": "A GRIM/GRIMMER impossibility (a mathematical impossibility given the reported N and granularity) attaches contradiction mass to the reporting-consistency sub-claim with falsifier_observation set \u2014 it is the registered falsifying observation for that sub-claim \u2014 while a statcheck decision_error attaches partial contradiction, and mere inconsistencies attach context.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/008-statcheck-grim-adapter/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-008-3: an impossibility finding recorded as context only, or a typo-class inconsistency recorded as a falsifying observation."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/008-statcheck-grim-adapter/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-008-03-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-008-03",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-008-04",
+      "text": "Applicability is checked before mass is assigned: GRIM-family checks run only where data are integer-granular and N/decimals give the test power; where the test is uninformative (large N, continuous data), the adapter records not_applicable rather than a pass.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 \u00a72 adapter interface)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/008-statcheck-grim-adapter/spec.md",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-008-4: a GRIM pass recorded as supporting evidence in a regime the spec's applicability table marks uninformative."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/008-statcheck-grim-adapter/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-008-04-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-008-04",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    }
+  ],
+  "scores": {
+    "CLM-008-01": {
+      "claim_id": "CLM-008-01",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-008-02": {
+      "claim_id": "CLM-008-02",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-008-03": {
+      "claim_id": "CLM-008-03",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-008-04": {
+      "claim_id": "CLM-008-04",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    }
+  },
+  "recoveries": [
+    {
+      "failure_id": "AEE-CLM-008-01-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-008-01",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-008-02-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-008-02",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-008-02-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-008-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-008-02-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-008-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-008-02-PRECISION-CHALLENGE",
+      "claim_id": "CLM-008-02",
+      "strategy": "clarify",
+      "action": "Replace vague language with a threshold, observable, or decision rule.",
+      "priority": 3,
+      "verification": "The revised claim contains a measurable observable or decision rule."
+    },
+    {
+      "failure_id": "AEE-CLM-008-03-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-008-03",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-008-04-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-008-04",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    }
+  ],
+  "metadata": {
+    "threshold": 0.7,
+    "input": "specs/008-statcheck-grim-adapter/aee-claims.json"
+  }
+}

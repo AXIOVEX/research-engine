@@ -1,0 +1,99 @@
+{
+ "spec": "specs/006-checkcif-adapter/spec.md",
+ "version": "0.1.0",
+ "date": "2026-10-12",
+ "claims": [
+  {
+   "id": "CLM-006-01",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/006-checkcif-adapter/spec.md",
+   "text": "The adapter's evidence item records the CIF SHA-256, the checker (checkCIF service vs local PLATON), and the PLATON/check.def version for every run; an alert record without all three is not evidence.",
+   "boundary": [
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+   ],
+   "falsification_tests": [
+    "F-006-1: an adapter evidence item missing the artifact hash, checker identity, or check.def version."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/006-checkcif-adapter/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-006-02",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/006-checkcif-adapter/spec.md",
+   "text": "BLIND SPOT (scope claim): a clean checkCIF result (no A/B alerts) establishes only that the CIF is internally consistent under the check.def suite. It does NOT establish that the structure is chemically correct, that the claimed chemistry is the chemistry in the crystal, or that the dataset is genuine — IUCr states in every report that the absence of alerts does not guarantee there are no aspects needing attention, and internally consistent fabricated datasets are known to pass.",
+   "boundary": [
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+   ],
+   "falsification_tests": [
+    "F-006-2: any study presentation of a clean checkCIF result as establishing structure correctness, chemical identity, or dataset genuineness."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/006-checkcif-adapter/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-006-03",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/006-checkcif-adapter/spec.md",
+   "text": "Alert mapping is monotone and disclosed: A alerts attach contradiction mass to the supported claim's structure sub-claim; B alerts attach partial contradiction; C/G attach context only. The mapping table is part of this spec's record and may not be tuned per-study.",
+   "boundary": [
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+   ],
+   "falsification_tests": [
+    "F-006-3: a study whose alert-to-mass mapping differs from the registered table, or an A alert recorded as context only."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/006-checkcif-adapter/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-006-04",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/006-checkcif-adapter/spec.md",
+   "text": "The adapter supplies lane-1 evidence only: it issues no verdicts, and a checkCIF pass can never be the sole evidence for a supported verdict on a structure claim.",
+   "boundary": [
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+   ],
+   "falsification_tests": [
+    "F-006-4: a verdict of supported whose only evidence group is a checkCIF adapter item."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/006-checkcif-adapter/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  }
+ ]
+}

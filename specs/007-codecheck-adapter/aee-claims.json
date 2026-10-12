@@ -1,0 +1,99 @@
+{
+ "spec": "specs/007-codecheck-adapter/spec.md",
+ "version": "0.1.0",
+ "date": "2026-10-12",
+ "claims": [
+  {
+   "id": "CLM-007-01",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/007-codecheck-adapter/spec.md",
+   "text": "The adapter's evidence item records the certificate's named codechecker, certificate date, register DOI, certified scope (outputs recreated), and the certified work's identifier; a certificate record missing any of these is context, not evidence.",
+   "boundary": [
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+   ],
+   "falsification_tests": [
+    "F-007-1: an adapter evidence item lacking checker identity, date, DOI, or scope."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/007-codecheck-adapter/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-007-02",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/007-codecheck-adapter/spec.md",
+   "text": "BLIND SPOT (scope claim): a CODECHECK certificate establishes only that the named checker, at that time, in that environment, could run the supplied material and recreate the certified outputs. It does NOT establish correctness or scientific validity (the certificates state this themselves), does not cover outputs outside the certified scope, and does not establish that the code is free of bugs that produce plausible wrong outputs.",
+   "boundary": [
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+   ],
+   "falsification_tests": [
+    "F-007-2: any presentation of a certificate as covering outputs outside its stated scope, or as establishing correctness/validity."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/007-codecheck-adapter/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-007-03",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/007-codecheck-adapter/spec.md",
+   "text": "Scope honesty: where the certified scope is partial (a subset of the paper's outputs), the evidence item's mass is capped as partial-scope, and the uncertified outputs are named in the item.",
+   "boundary": [
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+   ],
+   "falsification_tests": [
+    "F-007-3: a partial-scope certificate recorded without the cap or without naming the uncertified outputs."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/007-codecheck-adapter/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-007-04",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/007-codecheck-adapter/spec.md",
+   "text": "Lane separation: the codechecker is a named human performing lane-1 re-execution; the adapter records the certificate as lane-1 evidence and never as explanation, acceptance, or digestion of the work.",
+   "boundary": [
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+   ],
+   "falsification_tests": [
+    "F-007-4: a study record presenting a CODECHECK certificate as lane-2 progress (explained/accepted/digested)."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/007-codecheck-adapter/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  }
+ ]
+}

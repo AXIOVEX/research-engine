@@ -1,0 +1,99 @@
+{
+ "spec": "specs/008-statcheck-grim-adapter/spec.md",
+ "version": "0.1.0",
+ "date": "2026-10-12",
+ "claims": [
+  {
+   "id": "CLM-008-01",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/008-statcheck-grim-adapter/spec.md",
+   "text": "The adapter's evidence item records the checker + version, the extraction coverage (how many results were extractable vs present), and every flagged result with its recomputed values; an item without the coverage record is not evidence.",
+   "boundary": [
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+   ],
+   "falsification_tests": [
+    "F-008-1: an adapter evidence item lacking checker version or extraction coverage."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/008-statcheck-grim-adapter/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-008-02",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/008-statcheck-grim-adapter/spec.md",
+   "text": "BLIND SPOT (scope claim): these checkers establish internal arithmetic consistency of reported statistics only. They do NOT establish that the underlying data exist, that the analysis was appropriate, or that conclusions follow. statcheck is silent on everything it cannot parse (non-APA formats, tables, model-based/Bayesian results) — no flags is not a clean paper. A GRIM fail proves inconsistency, not its cause (typo, wrong N, exclusions all produce fails). SPRITE reconstructions are candidate datasets, never the real data.",
+   "boundary": [
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+   ],
+   "falsification_tests": [
+    "F-008-2: any presentation of a no-flag statcheck run as a clean bill, of a GRIM fail as evidence of fabrication, or of a SPRITE reconstruction as the paper's actual data."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/008-statcheck-grim-adapter/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-008-03",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/008-statcheck-grim-adapter/spec.md",
+   "text": "A GRIM/GRIMMER impossibility (a mathematical impossibility given the reported N and granularity) attaches contradiction mass to the reporting-consistency sub-claim with falsifier_observation set — it is the registered falsifying observation for that sub-claim — while a statcheck decision_error attaches partial contradiction, and mere inconsistencies attach context.",
+   "boundary": [
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+   ],
+   "falsification_tests": [
+    "F-008-3: an impossibility finding recorded as context only, or a typo-class inconsistency recorded as a falsifying observation."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/008-statcheck-grim-adapter/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-008-04",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/008-statcheck-grim-adapter/spec.md",
+   "text": "Applicability is checked before mass is assigned: GRIM-family checks run only where data are integer-granular and N/decimals give the test power; where the test is uninformative (large N, continuous data), the adapter records not_applicable rather than a pass.",
+   "boundary": [
+    "Scope: adapter spec (lane-1 evidence only, DN-010; Spec 004 §2 adapter interface)"
+   ],
+   "falsification_tests": [
+    "F-008-4: a GRIM pass recorded as supporting evidence in a regime the spec's applicability table marks uninformative."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "specs/008-statcheck-grim-adapter/spec.md",
+     "source_quality": "primary"
+    }
+   ]
+  }
+ ]
+}
