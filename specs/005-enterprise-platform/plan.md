@@ -358,3 +358,129 @@ shape has never been installed by an institution (the parity
 battery is in-process service-layer evidence, not an installer or
 a load test — packaging in the distribution sense follows a named
 institution's requirements).
+
+**E5 — Admin console: EXITED 2026-10-12** (branch
+`enterprise/e5-console`; PR opened for CI; merging is the
+coordinator's). Sequence note, stated first because it governs how
+the rest should be read: the phase ran in the order the gate set —
+the break-glass flow wireframes were drawn and committed FIRST
+(step 1), the other nine screens were built meanwhile, and the
+break-glass screen was implemented LAST, to those step-1 drawings.
+Coordinator confirmation of the extension renders was still in
+flight when the screen was implemented; this record flags that
+rather than treating it as settled, and the renders wait on the
+coordinator's surface to the owner like any other wireframe work.
+Delivered: the console as a new package (`src/tekmerion/console/`)
+that is a client of the platform services only — no service
+behavior is mocked or re-implemented in its production paths. Two
+shells for two planes (dark platform shell, light tenant shell,
+route trees that share nothing; a session from one plane asking
+for the other plane's screens gets the sign-in page, because the
+other plane's controls are absent rather than disabled); sign-in
+through the real OIDC and SAML session machinery with no password
+field anywhere in the product (the only password-type input in any
+screen is the field for entering a NEW IdP client secret value
+while configuring that IdP — a configuration act, labeled "never
+displayed", and the battery pins exactly that distinction);
+tenant list and detail with IdP configuration shown by secret
+reference and certificate fingerprint only; users and roles as the
+tenant landing screen, with grants, revocations, deactivation, and
+reactivation issued as service actions and re-read from the
+ledger; keys and bindings with every recorded state and custody
+labeled in plain terms (delegated custody is a software
+development signer, never a KMS/HSM claim); lifecycle events with
+inline expansion of the full record; an audit-ledger inspector
+for both ledger families with a real verification action, export,
+and the absence of an external anchor stated on the screen where
+none exists; the compliance screen with the SPRS self-score
+computed by the E6 machinery at request time (the battery changes
+a recorded state and watches the score move — it is never a
+hard-coded figure), the live POA&M register, and the FIPS gap
+panel reading the crypto inventory's recorded count (0 of 13);
+and system status read from the ledgers themselves (T535–T539).
+A labeled fixture mode exists for tests and demonstrations;
+SAML sign-in cannot be completed inside it (no fixture SAML
+responder exists — the module says so, and SAML is exercised
+end-to-end through the E2 test world instead). Served-artifact
+identity: every page footer and a `/build-id` endpoint carry a
+BUILD_ID built from the git revision plus a hash of the console's
+own sources; the battery asserts both the stamp's presence and
+that changing a source file changes the stamp. Evidence: the
+console battery (`tests/test_e5_console.py`, 33 tests) drives the
+real flows over HTTP — OIDC and SAML sign-ins, the cross-plane
+refusal battery (signed-out, tenant session, and platform session
+against every route), the step-up round trip, the adjudicator
+key-enrollment step-up gate refusing and then succeeding, the
+full break-glass life cycle including the second review attempt
+refusing on screen, and secrets never rendering on any screen.
+Full suite at exit: **429 passed, 2 skipped** (396 at branch
+start + 33 new, no regressions; the Spec 002 battery is green
+unchanged, discharging CLM-005-20's per-phase obligation at this
+exit too). Conformance: 23 Playwright captures from a locally
+served instance, all from one build and verified by its stamp
+(`git-73306a753859+src-32fc32ca8003`), compared screen by screen
+against the approved wireframes in
+`records/e5-conformance/README.md` — every screen matches, with
+the standing differences all ratified or recorded there (the Q8
+identifier entry, the Q5 absence of phase chips, specimen values
+versus live records, the BUILD_ID footer line, the CSP item
+below). Claims at exit (bundle v0.8.0, re-assessed
+`after_implement`, outcome `gather_evidence` — **0 of 31 claims
+below threshold**; the assessor's exit-1 quirk reproduced and the
+scores verified by an identical re-run, as at E3/E4/E6):
+CLM-005-13 (the console claim) moves draft → **supported at
+1.00** on the gate record, the extension wireframes, and the
+conformance set. **Spec 005 final close-out state: of 31 claims,
+30 stand supported. One remains open — CLM-005-31, the hosted
+shape's DFARS 252.204-7012 FedRAMP-equivalency flag, a draft at
+score 1.00 that stands open by design as the owner/legal
+decision it names; E5 does not touch it, and no engineering exit
+closes it.** Spec 005's build phases are now all exited: E1–E6
+plus this console phase, which the plan's claim map always
+carried as the last one. CMMC maintenance: the responsibility
+matrix was reviewed — **no classification changes**; the crypto
+inventory gains no row, and its E5 note records the judgment
+(the console performs no cryptographic operation of its own; it
+is the first HTTP adapter binding the §9 baseline contract, and
+the §3.13.11 position is unchanged at 0 of 13). Findings the work
+itself produced, recorded rather than smoothed over: (1) the §9
+baseline content-security policy (`default-src 'self'`) makes the
+approved design system's inline styles do nothing — under it the
+sign-in brand rendered white on the page background, proven by
+screenshot during this phase; the console therefore serves the
+baseline headers with `style-src 'self' 'unsafe-inline'` added,
+its script posture unchanged (no inline script exists anywhere in
+the console), and `baseline.py` untouched — whether that
+adjustment belongs in the baseline for future HTML adapters is a
+coordinator question, not decided here. (2) `create_tenant` has
+no duplicate check in the as-built service: creating an existing
+tenant id replaces the directory record and appends a second
+`tenant.created` event; the console surfaces the service's
+behavior as it is, and the gap is recorded here as a service-layer
+item for a future phase, not fixed inside a UI phase's boundary.
+(3) The step-up gate the service actually enforces is narrower
+than the wireframe-era wording implied: in the as-built service a
+fresh step-up is required for adjudicator key actions (and
+freshness windows are recorded policy), not for admin actions
+generally; the console's copy was corrected to name the real gate
+rather than repeat the broader phrasing. (4) The API-key
+wireframe's specimen refusal named a check the as-built service
+does not perform (it enforces scope-subset-of-role-class, the
+one-year ceiling, and hashed storage — no verifier-class rule);
+the built screen's copy states the enforced bound as it is.
+(5) A display defect of this phase's own making — a shortened
+session id rendered in full because a zero-length tail slice
+returns the whole string in Python — was caught by the
+conformance screenshot review and fixed before the captures were
+finalized; the shipped set is from the fixed build. What remains
+not understood at this exit: the console has never run against a
+real institution's identity provider, directory, or data (its
+evidence worlds are the E1/E2/E4 test worlds and the labeled
+fixture — real in mechanism, specimen in content); break-glass
+has still never been exercised under a real incident's human
+process (carried from E4/E6 — the mechanism is batteried, the
+drill is organizational); flag (2) above has never been tested
+against a directory an operator depends on, so its operational
+weight is unknown; and no second HTTP adapter exists yet to show
+whether the console's CSP judgment generalizes or was a
+one-surface answer.

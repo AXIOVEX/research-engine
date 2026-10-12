@@ -4,8 +4,8 @@
   "project": "tekmerion",
   "phase": "after_implement",
   "outcome": "gather_evidence",
-  "summary": "Assessed 31 claim(s); found 133 failure mode(s); 0 claim(s) below the 0.70 confidence threshold.",
-  "created_at": "2026-10-12T17:38:20.789463Z",
+  "summary": "Assessed 31 claim(s); found 132 failure mode(s); 0 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T20:12:57.621712Z",
   "claims": [
     {
       "id": "CLM-005-01",
@@ -1609,7 +1609,7 @@
       "id": "CLM-005-13",
       "text": "No admin-console screen ships before its rendered wireframes are added to docs/wireframes/ and approved by the owner; Spec 005 scopes the console functionally (tenant, IdP, user, role, key, audit management) and designs no screens.",
       "kind": "compliance",
-      "status": "draft",
+      "status": "supported",
       "boundary": [
         "Scope: the E5 admin console and any later console surface",
         "Excludes the Spec 002 study UI (Phase 6), which carries its own wireframe package and gate"
@@ -1649,6 +1649,39 @@
           "independent_of": [],
           "observed_at": null,
           "content_hash": null
+        },
+        {
+          "ref": "E5 discharge \u2014 the gate itself: the owner approved the rendered console wireframe package (10 screens at desktop + mobile, docs/wireframes/console/) WITH the coordinator recommendation block on 2026-10-12 (PR #11 merged to main 18e092d; gate T534-WF recorded in tasks.md). Every screen in the shipped console traces to that approved package; the ratified readings govern where they differ from the specimen drawings (Q1\u2013Q8, recorded in the package README).",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Break-glass flow extension: the declared / pending-authorization / active-session / closed / post-use-review states were drawn strictly from the as-built E4 mechanism (src/tekmerion/platform/breakglass.py, service.py) and committed with renders BEFORE the break-glass screen was implemented (docs/wireframes/console/break-glass-{declared,pending,active,closed,review}.html + screens/), per ratified Q6.",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Conformance at exit: 23 Playwright captures of the built console from a locally served instance (single build, BUILD_ID git-73306a753859+src-32fc32ca8003) compared screen-by-screen against the approved wireframes \u2014 specs/005-enterprise-platform/records/e5-conformance/README.md (verdicts + the standing differences, all ratified or recorded). The console battery pins the gate mechanically: tests/test_e5_console.py::test_wireframe_gate_record_precedes_console_code asserts the approval record and the wireframe files precede the console package. Full suite at exit: 429 passed, 2 skipped.",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
         }
       ],
       "assumptions": [],
@@ -1660,7 +1693,7 @@
       "severity": "high",
       "source_ref": "specs/005-enterprise-platform/spec.md",
       "domain": "",
-      "confidence": 0.904068,
+      "confidence": 1.0,
       "confidence_band": "high",
       "failures": [
         {
@@ -1671,16 +1704,6 @@
           "severity": "medium",
           "category": "coverage_gap",
           "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
-          "resolved": false
-        },
-        {
-          "id": "AEE-CLM-005-13-AUTHORITY-CHALLENGE",
-          "claim_id": "CLM-005-13",
-          "challenge": "Authority challenge",
-          "breakpoint": "Compliance claim lacks observed primary-authority or test evidence",
-          "severity": "high",
-          "category": "missing_evidence",
-          "recovery_hint": "Cite the controlling text and attach assessment evidence.",
           "resolved": false
         },
         {
@@ -3753,11 +3776,11 @@
     },
     "CLM-005-13": {
       "claim_id": "CLM-005-13",
-      "direct_score": 0.904068,
-      "propagated_score": 0.904068,
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
       "band": "high",
       "components": {
-        "evidence": 0.825578,
+        "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
@@ -4019,14 +4042,6 @@
     }
   },
   "recoveries": [
-    {
-      "failure_id": "AEE-CLM-005-13-AUTHORITY-CHALLENGE",
-      "claim_id": "CLM-005-13",
-      "strategy": "gather_evidence",
-      "action": "Cite the controlling text and attach assessment evidence.",
-      "priority": 2,
-      "verification": "At least one inspectable non-self-attested evidence item is attached."
-    },
     {
       "failure_id": "AEE-CLM-005-25-AUTHORITY-CHALLENGE",
       "claim_id": "CLM-005-25",
@@ -5086,6 +5101,6 @@
   ],
   "metadata": {
     "threshold": 0.7,
-    "input": "aee-claims.json"
+    "input": "specs/005-enterprise-platform/aee-claims.json"
   }
 }

@@ -1,6 +1,6 @@
 {
  "spec": "specs/005-enterprise-platform/spec.md",
- "version": "0.7.0",
+ "version": "0.8.0",
  "date": "2026-10-12",
  "claims": [
   {
@@ -529,7 +529,7 @@
   {
    "id": "CLM-005-13",
    "kind": "compliance",
-   "status": "draft",
+   "status": "supported",
    "severity": "high",
    "uncertainty": "low",
    "source_ref": "specs/005-enterprise-platform/spec.md",
@@ -559,6 +559,24 @@
      "kind": "observed",
      "ref": "The Article XIV process operating: owner approved the rendered Phase 6 wireframe package 2026-10-12, discharging gate T219-WF — the same gate E5 inherits",
      "source_quality": "human"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "E5 discharge — the gate itself: the owner approved the rendered console wireframe package (10 screens at desktop + mobile, docs/wireframes/console/) WITH the coordinator recommendation block on 2026-10-12 (PR #11 merged to main 18e092d; gate T534-WF recorded in tasks.md). Every screen in the shipped console traces to that approved package; the ratified readings govern where they differ from the specimen drawings (Q1–Q8, recorded in the package README).",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Break-glass flow extension: the declared / pending-authorization / active-session / closed / post-use-review states were drawn strictly from the as-built E4 mechanism (src/tekmerion/platform/breakglass.py, service.py) and committed with renders BEFORE the break-glass screen was implemented (docs/wireframes/console/break-glass-{declared,pending,active,closed,review}.html + screens/), per ratified Q6.",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Conformance at exit: 23 Playwright captures of the built console from a locally served instance (single build, BUILD_ID git-73306a753859+src-32fc32ca8003) compared screen-by-screen against the approved wireframes — specs/005-enterprise-platform/records/e5-conformance/README.md (verdicts + the standing differences, all ratified or recorded). The console battery pins the gate mechanically: tests/test_e5_console.py::test_wireframe_gate_record_precedes_console_code asserts the approval record and the wireframe files precede the console package. Full suite at exit: 429 passed, 2 skipped.",
+     "source_quality": "test"
     }
    ]
   },
