@@ -3,6 +3,8 @@
 **Date:** 2026-10-12 · Companion to `spec.md`. Authority: DN-011 (adopted); DN-003; DN-005; Constitution Articles IV, XII, XIII, XIV.
 **Gate:** owner G-ENT-1 go-ahead on Spec 005 before E1 code. Claims assessed first (`aee-claims.json` v0.1.0 → `aee-assessment.json`, outcome **gather_evidence**, 2026-10-12). **G-ENT-1 GIVEN by the owner 2026-10-12** (Glossa-Lab chat) — E1 authorized. The same day's CMMC directive is absorbed as a claims-first amendment (claims v0.2.0, Spec 005 §13) before E1 code.
 
+**Owner decisions 2026-10-12 (block ratification, Glossa-Lab chat):** (1) **E2 (SAML) starts now**, on the merged E1 foundation (E1 stack merged to main at `85c6210`; branch `enterprise/e2-saml`). (2) **The FIPS-validated crypto migration (Axiomere core, §13.3) waits for a named CUI/defense requirement** — the CMMC open-gap posture stands meanwhile: the crypto inventory (T549) and the seeded POA&M item carry the position, §3.13.11 stays "Supports — OPEN GAP", and no FIPS work starts under this spec until that requirement exists. This ratifies CLM-005-25's recorded route ("migration = owner decision") with the decision taken: *not now, on a named trigger*.
+
 ## Build order
 
 ```
