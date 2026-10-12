@@ -48,10 +48,10 @@ outcome is ledgered per citation:
   `metadata_only` (when content was checked)
 
 Attach a real DOI and watch it resolve; attach a fabricated DOI and
-watch it land in the adjudication queue as `not_found`. Metadata-only
-evidence accumulates verdict mass of zero by design — a claim backed
-only by metadata can at best be inconclusive. That cap is the machinery
-working.
+watch it land in the adjudication queue as `not_found`. Evidence that
+is only a catalogue record (metadata-only) counts for nothing in a
+verdict, by design — a claim backed only by metadata can at best be
+inconclusive. That cap is the machinery working.
 
 ## 4. Adjudicate the queue
 
@@ -75,24 +75,24 @@ item before you run.
 `freeze_study(study_id, linked_exploratory, controls)` — adjudicator
 instance; mode defaults to `"confirmation"`. The freeze registers the
 design — claims, margins, floors, controls, and the exploratory-linkage
-disclosure — before outcomes are seen, and fails closed with every
-failed check listed.
+disclosure — before outcomes are seen. If any check fails, the freeze
+is refused and every failed check is listed (it fails closed).
 
 **Controls must be passed explicitly**: a `positive` control (must
 reach its expected verdict), a `negative` control (must be
 contradicted), and a `swap` control (a provenance swap between early
 ledger lines must be detected). Each names the failure mode it exists
 to catch; the positive control carries a `representative_rationale`.
-Controls that cannot differentially fail mark the run invalid rather
+A control that would pass either way marks the run invalid rather
 than passing it.
 
 ## 6. Run and read the verdicts
 
 `run_evaluation(study_id)`, then `get_verdicts(study_id)`.
 
-- On an unfrozen study the run returns INVALID with the freeze-wall
-  reason and issues nothing — verdicts exist only against a frozen
-  registration.
+- On an unfrozen study the run returns INVALID, with the reason the
+  freeze requirement stopped it (the freeze wall), and issues nothing
+  — verdicts exist only against a frozen registration.
 - A valid run issues one verdict per claim — **supported**,
   **contradicted**, or **inconclusive** — each with its interval and
   reason.

@@ -35,7 +35,8 @@ deployment is named.
 
 ## 3. What personal data we process
 
-- **Directory / account data.** Names, email addresses, IdP subject identifiers, and
+- **Directory / account data.** Names, email addresses, IdP subject identifiers
+  (IdP — the institution's identity provider, its sign-in service), and
   affiliation attributes exactly as asserted by the partner institution's identity
   provider at sign-in. There are no local passwords; we store none.
 - **Key enrollment records.** Public-key fingerprints bound to an identity through a
@@ -119,7 +120,7 @@ matrix; secrets held by reference/fingerprint, never in ledgers. Two disclosures
 make everywhere, including here: **we hold no SOC 2 report**, and **no cryptographic
 operation in the platform uses a FIPS 140-3 validated module** (full inventory in
 `specs/005-enterprise-platform/crypto-inventory.md`; the gap is a recorded, seeded
-POA&M item).
+item on the formal gap register — the POA&M).
 
 ## 9. International transfers
 

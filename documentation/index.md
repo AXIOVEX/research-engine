@@ -17,8 +17,8 @@ can rely on.**
 - **Evidence is provenance-tracked and hash-verified.** Sources are real
   scholarly systems (Crossref, OpenAlex, CORE); every query is logged,
   every retrieved item carries its origin and its licence basis, and
-  derivative sources that repeat one origin are counted once, by origin
-  group.
+  sources that all repeat one original study are counted once, as one
+  origin group.
 - **Records are append-only.** Corrections are new entries, never quiet
   rewrites. The record layer is [Axiomere](https://github.com/AXIOVEX/axiomere),
   a hash-chained, signed ledger with no delete or update operation.
@@ -28,8 +28,8 @@ for exactly that: *inconclusive* is an answer, not a failure.
 
 ## The two lanes
 
-Tekmerion's doctrine (design note DN-010, the stage model) keeps two
-lanes strictly separate:
+Tekmerion's doctrine (the stage model, design note DN-010) keeps two
+kinds of work — two lanes — strictly separate:
 
 - **Lane 1 — machine-speed verification:** citation checks, domain
   adapters, Lean compiles, verdict computation.
@@ -58,7 +58,8 @@ understood. See [Stages & lanes](concepts/stages-and-lanes.md).
 - [Quickstart](guide/quickstart.md) — one study end to end: register,
   verify, adjudicate, freeze, evaluate, export.
 - [Evidence base](evidence/index.md) — what the engine has actually done,
-  including the runs that came back CONTESTED, INCONCLUSIVE, and INVALID.
+  including the runs that came back disputed (CONTESTED), not settled
+  (INCONCLUSIVE), and defective (INVALID).
 
 ## Honest status
 

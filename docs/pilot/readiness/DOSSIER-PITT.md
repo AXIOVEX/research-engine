@@ -43,7 +43,8 @@ methodology documentation as a standing research-support service
   programme describes a two-tiered service model (advisory consultation vs.
   collaboration), a work-plan document guiding the initial meeting, workload
   distribution across health-sciences librarians, and formal peer review of each
-  other's searches using the PRESS checklist (https://jmla.pitt.edu/ojs/jmla — HSLS
+  other's searches using the PRESS checklist (the peer-review checklist for
+  electronic search strategies) (https://jmla.pitt.edu/ojs/jmla — HSLS
   programme article; scholarly literature about the unit, not a current service page).
 - **Named people (public evidence).** The shortlist pass read a named HSLS Research
   and Instruction Librarian profile listing systematic reviews and "systematic review
@@ -116,7 +117,8 @@ text:
   describes the transition to Passport logins as strengthening security "by utilizing
   multifactor authentication"; https://www.technology.pitt.edu — Atlassian/Pitt
   Passport article). Platform-side MFA-evidence enforcement is CLM-005-27
-  (supported); the specific acr/amr Pitt asserts is a configuration-time item.
+  (supported); the specific acr/amr values (the codes stating how strongly a
+  login was authenticated) Pitt asserts is a configuration-time item.
 
 ## 4. Data-handling and retention postures Pitt publishes
 

@@ -95,19 +95,19 @@ records, payment-card data, unpublished or access-restricted corpora.**
 | Data deletion | **There is no deletion workflow.** Retention is export + anchor + access restriction only; the record is append-only by constitutional design, and this is disclosed to partners *before* any data moves (pilot fit criterion F5) | CLM-005-17 (draft); DESIGN §2.2 F5, §5.4 | Answered — the answer is No, with the posture stated |
 | Backups | No backup schedule, retention, or restore-test record exists for the hosted deployment in the platform records | — | **NOT YET ANSWERABLE** |
 | Network controls of the hosted deployment | The application layer is deny-by-default; deployment network rules are the operator's layer and are not recorded in the platform records | Matrix 3.13.6 (Supports) | **NOT YET ANSWERABLE** for the hosted deployment record |
-| Infrastructure monitoring | Platform-plane security events are ledgered and exportable; hosted-infrastructure monitoring/SIEM is not recorded | Matrix 3.14.6/3.14.7 (Supports) | **NOT YET ANSWERABLE** |
+| Infrastructure monitoring | Platform-plane security events are ledgered and exportable; hosted-infrastructure monitoring / security-event monitoring (SIEM) is not recorded | Matrix 3.14.6/3.14.7 (Supports) | **NOT YET ANSWERABLE** |
 
 ## 5. IT Accessibility (ITAC)
 
 | Item (topic) | Draft answer | Basis | State |
 |---|---|---|---|
-| WCAG conformance / VPAT | The partner-facing UI is server-rendered and wireframe-governed, but **no accessibility audit or VPAT exists in the records, and no conformance level is claimed.** Duke's process names Web Accessibility as a possible additional review; we would enter it with this gap stated, not papered over | Phase 6 records (UI built; no accessibility assessment recorded) | **NOT YET ANSWERABLE** — closes with a WCAG audit of the shipped UI |
+| WCAG conformance / VPAT | The partner-facing UI is server-rendered and wireframe-governed, but **no accessibility audit or VPAT (the standard accessibility conformance report) exists in the records, and no conformance level is claimed.** Duke's process names Web Accessibility as a possible additional review; we would enter it with this gap stated, not papered over | Phase 6 records (UI built; no accessibility assessment recorded) | **NOT YET ANSWERABLE** — closes with a WCAG audit of the shipped UI |
 
 ## 6. Case-specific (HIPA · PCID · FERPA · CMMC)
 
 | Item (topic) | Draft answer | Basis | State |
 |---|---|---|---|
-| HIPAA | Not applicable to the pilot scope: no PHI is accepted, by design; no BAA is offered for the pilot. If a future scope required PHI, it would be a different engagement with its own assessment | DESIGN §2.3 | Answered (scope exclusion) |
+| HIPAA | Not applicable to the pilot scope: no PHI is accepted, by design; no BAA (business associate agreement) is offered for the pilot. If a future scope required PHI, it would be a different engagement with its own assessment | DESIGN §2.3 | Answered (scope exclusion) |
 | PCI DSS | Not applicable: no payment-card data is processed | DESIGN §2.3 | Answered (scope exclusion) |
 | FERPA | FERPA appears only as a design constraint in product language; no student education records are in pilot scope. The product never claims "FERPA compliance" as a certification | CLM-005-16 | Answered |
 | CMMC / DFARS | CMMC (32 CFR Part 170) certifies organizations and assessment boundaries, **not products**; Tekmerion claims **CMMC Level 2 alignment / compliance support** only. All 110 NIST SP 800-171 Rev 2 requirements are classified in a maintained responsibility matrix (Platform / Supports / Organizational). §3.13.11 (FIPS) is an open gap (§4 above); CUI is out of pilot scope for exactly this reason; the hosted shape's DFARS 252.204-7012 FedRAMP-equivalency question is a recorded open owner/legal decision | CLM-005-23/24 (draft — the matrix exists and is maintained; the claims' own status is draft and is reported as such); CLM-005-31 (draft) | Answered as posture |

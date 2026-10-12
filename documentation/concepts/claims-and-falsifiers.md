@@ -14,13 +14,13 @@ A registered claim states:
   claim. Registration without one is refused before anything is
   appended; an empty falsifier is refused by the engine itself:
   `no falsifier — not registered (Article II)`.
-- `margin` — how far the evidence interval must clear zero for a
-  verdict to fire.
+- `margin` — how far the range of values the evidence supports (its
+  interval) must clear zero before a verdict may be issued.
 - `sufficiency_floor` — the minimum number of independent **origin
   groups** that must support the claim. Ten echoes of a single study
   are one origin group, not ten pieces of evidence.
-- `kind` and `dependencies` — claims can rest on other claims; a parent
-  can never outrun its weakest load-bearing dependency.
+- `kind` and `dependencies` — claims can rest on other claims; a claim
+  can never stand stronger than the weakest claim it depends on.
 
 ## Headline results decompose
 

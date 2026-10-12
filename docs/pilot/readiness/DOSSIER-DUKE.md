@@ -20,7 +20,8 @@ formal review methodologies.
 - **Intake.** All teams start with the Evidence Synthesis Literature Review Request Form
   (Qualtrics). The service page enumerates what it asks: requester name, email, mentor
   (if applicable), Duke Health status, school/program/center, research question, PICO
-  elements or variables of interest, inclusion and exclusion criteria, 5–10 relevant
+  elements (population, intervention, comparison, outcome — the parts of a clinical
+  question) or variables of interest, inclusion and exclusion criteria, 5–10 relevant
   article references meeting the criteria, and whether reviews already exist on the
   topic. (https://guides.mclibrary.duke.edu/sysreview/service — "This form will ask for
   your name, email, mentor… research question, PICO elements…")
@@ -162,7 +163,8 @@ Duke analysis (see Readiness package report: source-record divergences).
   writing describes IdP login "with MFA turned on for everything" in the author's
   case; https://spaces.at.internet2.edu — Duke, Consent and OAuth). Platform-side,
   CLM-005-27 (supported) requires MFA evidence at the tenant IdP — the shapes are
-  compatible; the exact acr/amr values Duke asserts are a configuration-time item.
+  compatible; the exact acr/amr values (the codes stating how strongly a login was
+  authenticated) Duke asserts are a configuration-time item.
 
 ## 4. Data-handling and retention postures Duke publishes
 

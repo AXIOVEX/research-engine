@@ -2,9 +2,10 @@
 
 The MVP engine's pre-registered evaluation (Spec 002, Phase 7): five
 evidence questions from the systematic-review workflow, ten citations —
-real records from Crossref/OpenAlex, among them a seeded fabricated
-DOI, a seeded corrupted citation, a duplicate citation, and a
-shared-dataset pair — plus positive, negative, and swap controls.
+real records from Crossref/OpenAlex, among them a fabricated DOI and a
+corrupted citation (each planted on purpose, to test the machinery),
+a duplicate citation, and a shared-dataset pair — plus positive,
+negative, and swap controls.
 Predictions for every verdict were recorded in the corpus document
 **before** the freeze.
 
@@ -19,17 +20,17 @@ in the repository.
 
 | Claim | Verdict | Mechanism, as it fired |
 |---|---|---|
-| CLM-E-001 (CBT-I) | **supported** | One origin group (duplicate folded in), support 0.8, interval clears the margin; fabricated citation excluded pre-evidence |
-| CLM-E-002 (meditation) | **supported** | One agreeing group; corrupted citation excluded pre-evidence |
-| CLM-E-003 (exercise) | **inconclusive** | Interval dilution: a content-checked supporting group averaged with a metadata-only group (ignorance mass) straddles the margin |
-| CLM-E-004 (glucosamine) | **contradicted** | The cited record's conclusion negates the proposition; interval clears −margin |
-| CLM-E-005 (Framingham) | **inconclusive** | Below sufficiency floor: the shared-dataset fold leaves 1 group against a registered floor of 2 |
+| CLM-E-001 (CBT-I) | **supported** | One independent group of sources (a duplicate counted once) backed the claim strongly enough — the range the evidence supports sits entirely above the line fixed in advance (support 0.8); the fabricated citation was excluded before evidence was weighed |
+| CLM-E-002 (meditation) | **supported** | One agreeing group; the corrupted citation was excluded before evidence was weighed |
+| CLM-E-003 (exercise) | **inconclusive** | The evidence straddles the line: one group whose full text was checked supports the claim, but averaged with a group known only from catalogue records — which counts as not knowing — the combined range crosses the line fixed in advance (the register calls this interval dilution) |
+| CLM-E-004 (glucosamine) | **contradicted** | The cited record's conclusion says the opposite of the claim; the range sits entirely below the line, in the negative direction (clears the −margin) |
+| CLM-E-005 (Framingham) | **inconclusive** | Too few independent sources: the two citations rest on one shared dataset, so they count once — 1 group against the 2 the claim required in advance (its sufficiency floor) |
 
 ## Kill criteria
 
 | Criterion | Result |
 |---|---|
-| **K1** Citation resolution: fabrications driven to zero in the evidence basis | **Pass** — 10/10 citations accounted to exactly one outcome; the fabricated DOI was caught, quarantined, adjudicated *exclude*, and contributes zero evidence |
+| **K1** Citation resolution: fabrications driven to zero in the evidence basis | **Pass** — 10/10 citations accounted to exactly one outcome; the fabricated DOI was caught, set aside (quarantined), judged *exclude* by the adjudicator, and contributes zero evidence |
 | **K2** Replay integrity: the bundle alone reproduces the verdicts; tampering is detected | **Pass** — *after* the evaluation caught a real verifier defect (below) |
 | **K3** Adjudicator burden: a fresh reviewer retraces every verdict from the bundle alone within 2 h/question | **Pass** — 5/5 claims fully retraced in ~18 minutes total |
 | **K4** Origin honesty: derivative sources counted once | **Pass** — duplicate and shared-dataset pairs each fold to one origin group; the fold is visible in CLM-E-005's verdict |
@@ -52,10 +53,12 @@ sequence disclosed*.
   second reviewer, verdict service). Wherever independence matters,
   the report says so; the claims stand at *checked*, not *accepted*.
 - The bundle carries no per-control outcomes and no retrieved content
-  (the rights gate), so an offline auditor takes stage-3 stance labels
-  on the pipeline's word — recorded as machinery findings, and since
-  addressed in part by Spec 011 (per-control outcomes and falsifier
-  observations now recorded in bundles).
-- The lexical stance checker is brittle at sentence level; a subtler
-  fabrication (a real DOI attached to the wrong proposition) stresses
-  exactly that weakness.
+  (the rights gate), so an auditor working offline has to take the
+  pipeline's word for the labels that say whether each source agrees
+  or disagrees (the stage-3 stance labels) — recorded as machinery
+  findings, and since addressed in part by Spec 011 (per-control
+  outcomes and falsifier observations now recorded in bundles).
+- The checker that judges agreement from wording alone (the lexical
+  stance checker) is brittle at sentence level; a subtler fabrication
+  (a real DOI attached to the wrong proposition) stresses exactly
+  that weakness.

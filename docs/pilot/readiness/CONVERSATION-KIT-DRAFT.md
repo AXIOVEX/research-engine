@@ -45,8 +45,9 @@ slots are filled per target from the dossier personalization blocks in §2.
 >
 > [SIGN-OFF SLOT]
 
-Template rules (binding on any send): no claim beyond the claims records; no SLA,
-certification, or timeline promises; the kill criteria are named in the first
+Template rules (binding on any send): no claim beyond the claims records; no SLA
+(service-level agreement), certification, or timeline promises; the kill criteria
+are named in the first
 letter, not discovered later (F6 is an agreement, and this letter is where it
 starts); the INVALID demo is linked in the first letter, not the third meeting.
 
@@ -96,7 +97,8 @@ conversation that produces no record did not happen.
 
 **Q1 — the gate (ask first, in the target's vocabulary).** *Does your vendor
 security review hard-require SOC 2 Type II (or a completed HECVAT at a threshold)
-for a hosted pilot holding no PHI — or does an evidence-based review satisfy it?*
+for a hosted pilot holding no PHI (protected health information) — or does an
+evidence-based review satisfy it?*
 (Duke form: is the HECVAT + evidence pack sufficient without a SOC 2 report, and
 does ITSO or DHTS review us? Pitt form: what does the Operating Standard's
 assessment require for a low-data-class vendor — and may we see the questionnaire?
@@ -129,7 +131,8 @@ directory/payload division under UK GDPR.)
 - **Deletion-on-demand required → F5 fails → the target exits**, per the
   shortlist's rule, regardless of enthusiasm elsewhere. Record and close honestly.
 
-**Q4 — identity.** *Which attributes will your IdP release to a new SP, and is
+**Q4 — identity.** *Which attributes will your IdP release to a new SP (service
+provider — our side of the sign-in connection), and is
 per-tenant SAML configuration acceptable as-is?* (Pitt: use the dev IdP first, per
 their published flow. Duke: confirm the operative entityID form and attribute
 release for our SP.)

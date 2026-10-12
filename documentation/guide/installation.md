@@ -39,8 +39,9 @@ interpreter), a Rust toolchain (<https://rustup.rs>), and `git`.
 
 ## Configure one instance = one actor
 
-A server instance runs as **one named actor with one WS6 role**; every
-record it appends carries that identity. Multi-actor work (the normal
+A server instance runs as **one named actor with one role from the
+platform's role matrix (WS6)**; every record it appends carries that
+identity. Multi-actor work (the normal
 shape — a researcher and an adjudicator) means multiple configured
 instances against the same workspace directory.
 
@@ -107,8 +108,8 @@ Claude Desktop: paste the generic JSON into `claude_desktop_config.json`
 Two instances are the quickstart shape, not an advanced one: freeze, run,
 adjudication decisions, and deposit are adjudicator-only actions, and the
 integrity swap control needs early ledger events from **different**
-actors to bite — register the study's first claims from both instances
-(see the [quickstart](quickstart.md)).
+actors before it has anything to catch — register the study's first
+claims from both instances (see the [quickstart](quickstart.md)).
 
 ## The agent skill
 

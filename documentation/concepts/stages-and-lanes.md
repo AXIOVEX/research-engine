@@ -26,7 +26,7 @@ flagged risk state, not a footnote.
 
 | Lane | Contents | Pace |
 |---|---|---|
-| **Lane 1** | Machine verification: resolution, stance checks, adapters, compiles, verdict computation | Machine speed |
+| **Lane 1** | Machine verification: looking up citations, judging whether sources agree or disagree (stance checks), adapters, compiles, verdict computation | Machine speed |
 | **Lane 2** | Explanation, acceptance, digestion — by named humans, on recorded evidence | Human pace |
 
 The lanes are tracked in separate fields on every verdict record
@@ -46,10 +46,10 @@ The remaining DN-010 points, each carried by a named mechanism:
 - **Attribution is a claim** — disputes are registered with both
   sides' evidence; a live dispute holds the parent at *contested*.
   Disputes are appends, never edits.
-- **Anti-gradability** — easily graded metrics (counts, scores) never
-  stand in for understanding. No Tekmerion output publishes aggregate
-  "solved" counts; every theorem verdict carries
-  `remains_not_understood`.
+- **Anti-gradability — counts are not understanding.** Easily graded
+  metrics (counts, scores) never stand in for understanding. No
+  Tekmerion output publishes aggregate "solved" counts; every theorem
+  verdict carries `remains_not_understood`.
 - **Openness is protected** — registration is hash-chained and
   checkpointed at registration time, and audit bundles are publishable
   and externally anchored, so a claimant's priority is provable from

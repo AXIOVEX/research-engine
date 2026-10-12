@@ -61,7 +61,8 @@ can be checked byte-for-byte against them.
 
 **Stated limit:** this procedure has been exercised in its pieces (clean-room
 install; standalone bundle verification; live anchor verification) but has **not**
-been run as a single timed disaster-recovery exercise, and no RTO is claimed for
+been run as a single timed disaster-recovery exercise, and no recovery-time
+objective (RTO) is claimed for
 it. **[OWNER TO CONFIRM: whether a timed end-to-end exercise is run before the
 first pilot onboarding — recommended.]**
 
@@ -72,7 +73,8 @@ first pilot onboarding — recommended.]**
   checkpointed in the repo by program discipline.
 - Registry-side failure is a handled case, not a theory: when OSF's archive step
   destroyed a submitted registration, the deposit machinery detected it on
-  read-back, recorded the state honestly, and resumed idempotently to a completed
+  read-back, recorded the state honestly, and resumed safely, without duplicating
+  anything (idempotently), to a completed
   registration (Spec 010 records). Zenodo versioning gives the same property on
   the deposit side.
 - No single person's machine is a system of record for anything already anchored
@@ -86,7 +88,8 @@ and are not claimed anywhere:
 - a backup schedule or retention policy for deployment storage;
 - restore tests of deployment backups;
 - disaster-recovery exercises of a hosted service;
-- RPO/RTO commitments of any kind.
+- commitments on how much data could be lost or how fast service returns
+  (RPO/RTO commitments) of any kind.
 
 **Trigger:** the owner's hosting decision (`HOSTING-FACTS-MEMO.md`) and the
 creation of the first hosted deployment. Before the first partner tenant onboards

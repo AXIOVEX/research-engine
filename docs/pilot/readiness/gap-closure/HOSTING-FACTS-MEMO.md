@@ -49,7 +49,7 @@ From the HECVAT register (`HECVAT-SELF-ASSESSMENT-DRAFT.md` §9):
 | **3 — Hosting provider, regions, host certifications** | There is no provider to name. Certifications (the host's own SOC 2 / ISO / FedRAMP posture) attach to a named provider's service and region. |
 | **5 — Backup schedule/retention and restore tests** | A schedule is a property of operating deployment storage. The record layer's recoverability exists today (see `BCP-DR-DRAFT.md`); deployment backups do not, because there is no deployment storage. |
 | **8 — Hosted vulnerability scanning (tooling, cadence)** | Scanning targets a running deployment. Code-plane hygiene exists (CI on every change); hosted scanning tooling/cadence is a deployment record. |
-| **9 — Hosted network controls and monitoring/SIEM** | Network rules and SIEM are properties of the deployment's network, which does not exist. Application-layer deny-by-default is built and answered separately in the HECVAT draft. |
+| **9 — Hosted network controls and monitoring/SIEM** | Network rules and security-event monitoring (SIEM) are properties of the deployment's network, which does not exist. Application-layer deny-by-default is built and answered separately in the HECVAT draft. |
 | **6 (hosted half) — DR exercises of a hosted service** | The record-plane recovery procedure is drafted and its pieces exercised; an exercise *of the hosted service* requires the service. |
 | **7 (target) — Penetration test** | Commissioned work (not this memo's gate), but its meaningful target is the hosted deployment; a pen test commissioned before the deployment exists tests the wrong thing. Sequencing note, recorded for the owner's planning. |
 

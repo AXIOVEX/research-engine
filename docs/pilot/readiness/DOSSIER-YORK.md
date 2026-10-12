@@ -78,7 +78,8 @@ no-fee pilot does not route around it.
    meet" and include remedies for breach and an SLA specifying working practices.
    **Which standards a York contract would name for this pilot is UNKNOWN** — that
    is York's form of the Q1 question (§6): if the named standard is an ISO 27001
-   certification we do not hold, the honesty position is the same as for SOC 2 and
+   certification (the international information-security management standard) we
+   do not hold, the honesty position is the same as for SOC 2 and
    must be stated, not negotiated around.
    (Policy page + contractual-requirements method statement, same index.)
 4. **Personal-data terms.** Where a contract involves personal-data or
@@ -99,7 +100,8 @@ no-fee pilot does not route around it.
    **in advance** (Third Party Access to University Information and IT Services
    Policy, same index). Oversight sits with the Information Security Board.
 7. **Breach posture on their side.** York's Data Protection Policy maintains a
-   breach procedure reporting qualifying breaches to the ICO within 72 hours. Our
+   breach procedure reporting qualifying breaches to the ICO (the UK
+   data-protection regulator) within 72 hours. Our
    side's commitment (DESIGN §5.3: every record-touching incident disclosed to the
    partner with evidence) is compatible in spirit; contractual notification
    timelines on our side are **not yet answerable** — see the HECVAT draft's list.
@@ -139,7 +141,8 @@ no-fee pilot does not route around it.
   rights that US candidates' retention conversations do not raise in the same way.
   The pilot's honest position, from DESIGN §2.3/§5.4 and CLM-005-17: identities live
   in the platform directory (mutable, deprovisionable — access ends, the directory
-  record is the institution's to govern); ledger payloads carry no PII beyond what
+  record is the institution's to govern); ledger payloads carry no PII (personally
+  identifying information) beyond what
   the record requires, and there is no deletion workflow for the record itself —
   retention is export + anchor + access restriction. Whether that division satisfies
   York's data-protection review for a literature-only pilot is Q3 here, and it is a

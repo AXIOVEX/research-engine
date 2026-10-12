@@ -43,11 +43,14 @@ expressly.
   asserted by the Controller's IdP); key enrollment records (public-key
   fingerprints); content those persons author for the record (claim statements,
   falsifiers, adjudication rationales); audit events keyed by a random actor ID.
-- **Scope exclusions (obligations, not aspirations).** The pilot takes **no** PHI or
-  human-subjects raw data, **no** CUI, **no** student education records, **no**
+- **Scope exclusions (obligations, not aspirations).** The pilot takes **no**
+  protected health information (PHI) or
+  human-subjects raw data, **no** controlled unclassified information (CUI), **no**
+  student education records, **no**
   payment-card data, and no content whose licence basis cannot be recorded. If
   out-of-scope data is transmitted to the Processor, the Processor will notify the
-  Controller, quarantine it from the study record, and follow the Controller's
+  Controller, keep it set aside (quarantine it) from the study record, and follow
+  the Controller's
   instructions — it will not be appended to a ledger.
 
 ## 4. Documented instructions
@@ -85,7 +88,8 @@ item 11, owner-supplied) and must be true before this section is finalized.]**
 - Disclosure carried into this contract deliberately: **the Processor holds no
   SOC 2 report**, and **no cryptographic operation uses a FIPS 140-3 validated
   module** today (inventory: `specs/005-enterprise-platform/crypto-inventory.md`;
-  the gap is a seeded POA&M item). The Controller accepts these stated facts as the
+  the gap is a seeded item on the formal gap register — the POA&M). The Controller
+  accepts these stated facts as the
   security posture for a pilot whose scope excludes CUI and PHI.
 
 ## 7. Subprocessors
