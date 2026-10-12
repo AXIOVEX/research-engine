@@ -1,5 +1,5 @@
 {
- "build_note": "2026-10-12 build (DN-012 pilot OSF workstream): claims moved only on shipped-test and live-provider evidence; CLM-010-05 and CLM-010-07 are partially_supported with the residue stated in their evidence \u2014 both wait on OSF admin approval through the provider's email-link channel, which the token API cannot perform (409/403 observed). Lifecycle stage checked throughout (author's own tests and live runs; DN-010 convention).",
+ "build_note": "2026-10-12 build (DN-012 pilot OSF workstream): claims moved only on shipped-test and live-provider evidence; CLM-010-05 and CLM-010-07 are partially_supported with the residue stated in their evidence \u2014 both wait on OSF admin approval through the provider's email-link channel, which the token API cannot perform (409/403 observed). Lifecycle stage checked throughout (author's own tests and live runs; DN-010 convention). FINALIZE (T-P4b, 2026-10-12, bundle v0.3.0): the demo registration's approval completed via the email-link channel; CLM-010-05 moved to supported on the issued live receipt + passed public verification (its build-exit residue is retained as superseded evidence). CLM-010-07 remains partially_supported \u2014 the embargo test registration kcysa still awaits its own admin approval, untouched.",
  "claims": [
   {
    "boundary": [
@@ -101,7 +101,7 @@
     {
      "direction": "supports",
      "kind": "observed",
-     "ref": "Live: the embargo deposit was re-run six times across provider-driven fixes against state records/embargo-test-state.json \u2014 exactly one project (xwdr5), one draft, one registration (kcysa) exist; the T-P4 demo likewise names exactly one registration (h94bf) in records/demo-deposit-state.json",
+     "ref": "Live: the embargo deposit was re-run six times across provider-driven fixes against state records/embargo-test-state.json \u2014 exactly one project (xwdr5), one draft, one registration (kcysa) exist; the T-P4 demo resumed across the provider-side death of its first registration (h94bf, OSF archive-step failure) into exactly one live registration (84dk7) named in records/demo-deposit-state.json",
      "source_quality": "primary"
     }
    ],
@@ -185,9 +185,21 @@
      "source_quality": "primary"
     },
     {
-     "direction": "contradicts",
+     "direction": "supports",
      "kind": "observed",
-     "ref": "RESIDUE at build exit: no live receipt has issued \u2014 both live registrations sit in OSF's approval window (admin approval runs through OSF's email-link channel, outside the token API), and the demo registration h94bf subsequently read HTTP 410 / absent from the project list (records/demo-deposit-observation.md). Public unauthenticated verification and the live receipt remain outstanding until the record's provider-side fate is resolved and it is final.",
+     "ref": "Live (T-P4b finalize, 2026-10-12): admin approval completed via OSF's email-link channel; registration 84dk7 re-fetched final (reviews_state accepted, public, date_registered 2026-10-12T15:21:45Z; records/demo-registration-final.json) and the deposit resume issued the receipt (records/demo-receipt.json; DOI 10.17605/OSF.IO/84DK7; already_existed: true \u2014 no second registration)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Live (T-P4b finalize, 2026-10-12): verify_osf_anchor on an unauthenticated public fetch PASSED \u2014 anchor values stated in the registration record, project structure and per-component file sets (13 files) match the mapping, contributor matches the mapping creator (records/demo-verification.json)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "SUPERSEDED residue (build exit): no live receipt had issued \u2014 both live registrations sat in OSF's approval window (admin approval runs through OSF's email-link channel, outside the token API), and the demo registration h94bf died at the provider's archive step (HTTP 410; OSF failure email, provider-confirmed) and was replaced by 84dk7 on resume (records/demo-deposit-observation.md). Resolved 2026-10-12 by the approval + finalize recorded above; the residue no longer holds.",
      "source_quality": "primary"
     }
    ],
@@ -199,10 +211,10 @@
    "lifecycle_stage": "checked",
    "severity": "high",
    "source_ref": "specs/010-osf-registration/spec.md",
-   "stage_basis": "PARTIAL at build exit: machinery built and unit-proven, embargo record fetched back stating the values; the live receipt and the public verification are outstanding on provider-side finalization outside the API (see residue evidence).",
-   "status": "partially_supported",
+   "stage_basis": "Completed at T-P4b finalize (2026-10-12): machinery built and unit-proven; the live demo registration (84dk7, replacing h94bf which died at the provider's archive step) was admin-approved via OSF's email-link channel, re-fetched final, issued its receipt on resume, and passed verify_osf_anchor on an unauthenticated public fetch. Checking (the author's own runs, read back from the provider's record).",
+   "status": "supported",
    "text": "A completed deposit returns a receipt (mechanism, root, bundle hash, registration hash, project GUID, registration GUID, URL/DOI, approver, anchored-at, embargo state), and verify_osf_anchor independently re-fetches the registration from the OSF API and passes only if the fetched record states the mapping's anchor values and the project structure matches the component mapping.",
-   "uncertainty": "medium"
+   "uncertainty": "low"
   },
   {
    "boundary": [
@@ -318,5 +330,5 @@
  ],
  "date": "2026-10-12",
  "spec": "specs/010-osf-registration/spec.md",
- "version": "0.2.0"
+ "version": "0.3.0"
 }

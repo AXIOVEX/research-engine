@@ -4,8 +4,8 @@
   "project": "tekmerion",
   "phase": "after_implement",
   "outcome": "clarify",
-  "summary": "Assessed 8 claim(s); found 17 failure mode(s); 2 claim(s) below the 0.70 confidence threshold.",
-  "created_at": "2026-10-12T15:12:02.188832Z",
+  "summary": "Assessed 8 claim(s); found 16 failure mode(s); 1 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T15:46:58.533000Z",
   "claims": [
     {
       "id": "CLM-010-01",
@@ -212,7 +212,7 @@
           "content_hash": null
         },
         {
-          "ref": "Live: the embargo deposit was re-run six times across provider-driven fixes against state records/embargo-test-state.json \u2014 exactly one project (xwdr5), one draft, one registration (kcysa) exist; the T-P4 demo likewise names exactly one registration (h94bf) in records/demo-deposit-state.json",
+          "ref": "Live: the embargo deposit was re-run six times across provider-driven fixes against state records/embargo-test-state.json \u2014 exactly one project (xwdr5), one draft, one registration (kcysa) exist; the T-P4 demo resumed across the provider-side death of its first registration (h94bf, OSF archive-step failure) into exactly one live registration (84dk7) named in records/demo-deposit-state.json",
           "kind": "observed",
           "direction": "supports",
           "source_quality": "primary",
@@ -342,7 +342,7 @@
       "id": "CLM-010-05",
       "text": "A completed deposit returns a receipt (mechanism, root, bundle hash, registration hash, project GUID, registration GUID, URL/DOI, approver, anchored-at, embargo state), and verify_osf_anchor independently re-fetches the registration from the OSF API and passes only if the fetched record states the mapping's anchor values and the project structure matches the component mapping.",
       "kind": "requirement",
-      "status": "partially_supported",
+      "status": "supported",
       "boundary": [
         "Scope: Spec 010 receipt + verify_osf_anchor; comparison is against the deposited bundle's osf_metadata anchor_values (plan.md ambiguity 5)"
       ],
@@ -394,9 +394,31 @@
           "content_hash": null
         },
         {
-          "ref": "RESIDUE at build exit: no live receipt has issued \u2014 both live registrations sit in OSF's approval window (admin approval runs through OSF's email-link channel, outside the token API), and the demo registration h94bf subsequently read HTTP 410 / absent from the project list (records/demo-deposit-observation.md). Public unauthenticated verification and the live receipt remain outstanding until the record's provider-side fate is resolved and it is final.",
+          "ref": "Live (T-P4b finalize, 2026-10-12): admin approval completed via OSF's email-link channel; registration 84dk7 re-fetched final (reviews_state accepted, public, date_registered 2026-10-12T15:21:45Z; records/demo-registration-final.json) and the deposit resume issued the receipt (records/demo-receipt.json; DOI 10.17605/OSF.IO/84DK7; already_existed: true \u2014 no second registration)",
           "kind": "observed",
-          "direction": "contradicts",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Live (T-P4b finalize, 2026-10-12): verify_osf_anchor on an unauthenticated public fetch PASSED \u2014 anchor values stated in the registration record, project structure and per-component file sets (13 files) match the mapping, contributor matches the mapping creator (records/demo-verification.json)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "SUPERSEDED residue (build exit): no live receipt had issued \u2014 both live registrations sat in OSF's approval window (admin approval runs through OSF's email-link channel, outside the token API), and the demo registration h94bf died at the provider's archive step (HTTP 410; OSF failure email, provider-confirmed) and was replaced by 84dk7 on resume (records/demo-deposit-observation.md). Resolved 2026-10-12 by the approval + finalize recorded above; the residue no longer holds.",
+          "kind": "observed",
+          "direction": "supports",
           "source_quality": "primary",
           "description": "",
           "source_id": "",
@@ -410,12 +432,12 @@
       "falsification_tests": [
         "F-010-5: verify_osf_anchor passing on a fetched record whose stated checkpoint root, bundle hash, or registration hash differs from the bundle's anchor values, or whose component structure diverges from the mapping."
       ],
-      "uncertainty": "medium",
+      "uncertainty": "low",
       "severity": "high",
       "source_ref": "specs/010-osf-registration/spec.md",
       "domain": "",
-      "confidence": 0.25,
-      "confidence_band": "low",
+      "confidence": 1.0,
+      "confidence_band": "high",
       "failures": [
         {
           "id": "AEE-CLM-010-05-IRREDUCIBILITY-CHALLENGE",
@@ -425,16 +447,6 @@
           "severity": "medium",
           "category": "coverage_gap",
           "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
-          "resolved": false
-        },
-        {
-          "id": "AEE-CLM-010-05-COUNTEREVIDENCE-CHALLENG",
-          "claim_id": "CLM-010-05",
-          "challenge": "Counterevidence challenge",
-          "breakpoint": "Recorded evidence contradicts the claim",
-          "severity": "high",
-          "category": "contradiction",
-          "recovery_hint": "Resolve, narrow, or supersede the claim without deleting counterevidence.",
           "resolved": false
         },
         {
@@ -750,19 +762,17 @@
     },
     "CLM-010-05": {
       "claim_id": "CLM-010-05",
-      "direct_score": 0.25,
-      "propagated_score": 0.25,
-      "band": "low",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
       "components": {
         "evidence": 1.0,
         "independence": 1.0,
         "falsifiability": 1.0,
         "boundary": 1.0,
-        "contradiction_penalty": 0.75
+        "contradiction_penalty": 0
       },
-      "notes": [
-        "Contradiction penalty 0.750"
-      ]
+      "notes": []
     },
     "CLM-010-06": {
       "claim_id": "CLM-010-06",
@@ -810,14 +820,6 @@
     }
   },
   "recoveries": [
-    {
-      "failure_id": "AEE-CLM-010-05-COUNTEREVIDENCE-CHALLENG",
-      "claim_id": "CLM-010-05",
-      "strategy": "resolve_contradiction",
-      "action": "Resolve, narrow, or supersede the claim without deleting counterevidence.",
-      "priority": 2,
-      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
-    },
     {
       "failure_id": "AEE-CLM-010-07-COUNTEREVIDENCE-CHALLENG",
       "claim_id": "CLM-010-07",

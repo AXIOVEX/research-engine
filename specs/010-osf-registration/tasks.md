@@ -18,31 +18,40 @@ Article XIV gate and appears nowhere in this spec.
       approval action is performable through the token API (409/403
       observed); admin approval runs through OSF's email-link channel,
       and the finalize step reads finality from the fetched record.
-- [ ] T-P3 Receipt + verification: receipt in the Zenodo shape discipline;
+- [x] T-P3 Receipt + verification: receipt in the Zenodo shape discipline;
       `record_anchor` ledgering exercised on a fixture study;
       `verify_osf_anchor` — independent fetch, anchor-value comparison,
       component-structure comparison; mismatch never passes.
-      **Status: machinery built and unit-proven; the live receipt +
-      public verification are outstanding** — both wait on T-P4b
-      (provider-side finalization). CLM-010-05 partially_supported.
-- [ ] T-P4 Live demonstration on the Phase 7 evaluation study (bundle-v2):
+      **Status: complete (T-P4b finalize, 2026-10-12)** — the live
+      receipt issued (`records/demo-receipt.json`) and the public
+      unauthenticated verification passed
+      (`records/demo-verification.json`). CLM-010-05 supported.
+- [x] T-P4 Live demonstration on the Phase 7 evaluation study (bundle-v2):
       study-directory hashes recorded before; deposit submitted public
       with `approved_by` naming the DN-012 authorization; idempotency
       re-run refused with the existing registration named; independent
       unauthenticated fetch verifies the public record; study-directory
       hashes re-recorded after (identical); receipt + fetched records in
       `records/`; claims re-assessed at after_implement.
-      **Status: deposit executed** (project `dvrew`, 13 files,
-      registration `h94bf` submitted; study directory byte-identical
-      before/after, 30 files). Completion (receipt + public verify +
-      idempotency re-run against the final record) waits on T-P4b.
-- [ ] T-P4b (OPEN, operator) Resolve registration `h94bf`'s
-      provider-side fate and complete the demonstration: re-fetch the
-      registration and the project log (`/v2/nodes/dvrew/logs/`) when
-      the egress path is reliable (at build exit the record read
-      HTTP 410 / absent from the project list minutes after a
-      successful finalize read — `records/demo-deposit-observation.md`);
-      admin approval via OSF's email-link channel as applicable; then
-      re-run the deposit (it resumes against the recorded state —
-      no second registration) to issue the receipt, run the public
-      `verify_osf_anchor`, and record both in `records/`.
+      **Status: complete (via T-P4b)** — deposit executed (project
+      `dvrew`, 13 files); the first registration `h94bf` died at the
+      provider's archive step and was replaced on resume by `84dk7`,
+      now final and public (DOI 10.17605/OSF.IO/84DK7); the finalize
+      re-run resumed against it (`already_existed: true`, no second
+      registration) and issued the receipt; public verify passed;
+      study directory byte-identical before/after/finalize (30 files).
+- [x] T-P4b Resolve registration `h94bf`'s provider-side fate and
+      complete the demonstration. **Status: complete, 2026-10-12.**
+      Outcome: OSF's own failure email confirmed `h94bf` died at the
+      provider's archive/copy step (project, components, and files
+      unharmed); a resume run submitted replacement registration
+      `84dk7` from the intact project; admin approval completed via
+      OSF's email-link channel (2026-10-12, ~11:35 EDT); the finalize
+      re-run re-fetched the final record
+      (`records/demo-registration-final.json`), issued the receipt
+      (`records/demo-receipt.json`, state at stage `complete`), and
+      the public `verify_osf_anchor` passed
+      (`records/demo-verification.json`). Registration DOI:
+      10.17605/OSF.IO/84DK7. Full narrative:
+      `records/demo-deposit-observation.md` + the T-P4b section of
+      `assessment-2026-10-12.md`.

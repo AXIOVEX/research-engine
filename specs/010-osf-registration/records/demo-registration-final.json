@@ -1,0 +1,404 @@
+{
+ "fetched_via": "OSF API v2, authenticated (owner account), 2026-10-12 \u2014 T-P4b finalize re-fetch; finality read from this record, not from the brief",
+ "registration": {
+  "attributes": {
+   "access_requests_enabled": false,
+   "archiving": false,
+   "article_doi": null,
+   "category": "project",
+   "collection": false,
+   "current_user_can_comment": true,
+   "current_user_is_contributor": true,
+   "current_user_is_contributor_or_group_member": true,
+   "current_user_permissions": [
+    "admin",
+    "write",
+    "read"
+   ],
+   "custom_citation": "",
+   "date_created": "2026-10-12T15:21:45.651871",
+   "date_modified": "2026-10-12T14:56:10.880791",
+   "date_registered": "2026-10-12T15:21:45.605580",
+   "date_withdrawn": null,
+   "description": "Tekmerion audit bundle (format tekmerion-audit-bundle/1).\nMerkle checkpoint root (anchored value): 7c277327a93b029503df91107a036d03aaf0e33e87e488a3fcf6c12d4abb88da\nBundle hash (SHA-256): a325a09a8bb47f52d7c6e895e057484c12f6c11220c01480832a9be703ed06c6\nRegistration hash: 977c1db162e9ba06b3e34c633a5bbae96fe4779aa49c43356b564cc8c3b9ac9b\nLedger events: 45",
+   "embargo_end_date": null,
+   "embargoed": false,
+   "fork": false,
+   "has_analytic_code": false,
+   "has_data": false,
+   "has_materials": false,
+   "has_papers": false,
+   "has_project": true,
+   "has_supplements": false,
+   "ia_url": "https://archive.org/details/osf-registrations-84dk7-v1",
+   "node_license": null,
+   "pending_embargo_approval": false,
+   "pending_embargo_termination_approval": false,
+   "pending_registration_approval": false,
+   "pending_withdrawal": false,
+   "preprint": false,
+   "provider_specific_metadata": [],
+   "public": true,
+   "registered_meta": {
+    "summary": {
+     "extra": [],
+     "value": "Tekmerion audit bundle (format tekmerion-audit-bundle/1).\nMerkle checkpoint root (anchored value): 7c277327a93b029503df91107a036d03aaf0e33e87e488a3fcf6c12d4abb88da\nBundle hash (SHA-256): a325a09a8bb47f52d7c6e895e057484c12f6c11220c01480832a9be703ed06c6\nRegistration hash: 977c1db162e9ba06b3e34c633a5bbae96fe4779aa49c43356b564cc8c3b9ac9b\nLedger events: 45"
+    },
+    "uploader": {
+     "extra": [],
+     "value": ""
+    }
+   },
+   "registration": true,
+   "registration_responses": {
+    "summary": "Tekmerion audit bundle (format tekmerion-audit-bundle/1).\nMerkle checkpoint root (anchored value): 7c277327a93b029503df91107a036d03aaf0e33e87e488a3fcf6c12d4abb88da\nBundle hash (SHA-256): a325a09a8bb47f52d7c6e895e057484c12f6c11220c01480832a9be703ed06c6\nRegistration hash: 977c1db162e9ba06b3e34c633a5bbae96fe4779aa49c43356b564cc8c3b9ac9b\nLedger events: 45",
+    "uploader": []
+   },
+   "registration_supplement": "Open-Ended Registration",
+   "reviews_state": "accepted",
+   "revision_state": "approved",
+   "subjects": [
+    [
+     {
+      "id": "584240da54be81056cecaaaa",
+      "text": "Medicine and Health Sciences"
+     }
+    ]
+   ],
+   "tags": [
+    "audit bundle",
+    "research integrity",
+    "tekmerion"
+   ],
+   "title": "Tekmerion audit bundle \u2014 spec002-phase7-evaluation",
+   "wiki_enabled": true,
+   "withdrawal_justification": null,
+   "withdrawn": false
+  },
+  "id": "84dk7",
+  "links": {
+   "html": "https://osf.io/84dk7/",
+   "iri": "https://osf.io/84dk7",
+   "self": "https://api.osf.io/v2/registrations/84dk7/"
+  },
+  "relationships": {
+   "affiliated_institutions": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/institutions/",
+      "meta": {}
+     },
+     "self": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/relationships/institutions/",
+      "meta": {}
+     }
+    }
+   },
+   "bibliographic_contributors": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/bibliographic_contributors/",
+      "meta": {}
+     }
+    }
+   },
+   "cedar_metadata_records": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/cedar_metadata_records/",
+      "meta": {}
+     }
+    }
+   },
+   "children": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/children/",
+      "meta": {}
+     }
+    }
+   },
+   "citation": {
+    "data": {
+     "id": "84dk7",
+     "type": "citation"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/citation/",
+      "meta": {}
+     }
+    }
+   },
+   "collected_in": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/nodes/84dk7/collections/",
+      "meta": {}
+     }
+    }
+   },
+   "comments": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/comments/?filter%5Btarget%5D=84dk7",
+      "meta": {}
+     }
+    }
+   },
+   "contributors": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/contributors/",
+      "meta": {}
+     }
+    }
+   },
+   "files": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/files/",
+      "meta": {}
+     }
+    }
+   },
+   "forks": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/forks/",
+      "meta": {}
+     }
+    }
+   },
+   "identifiers": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/identifiers/",
+      "meta": {}
+     }
+    }
+   },
+   "implicit_contributors": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/implicit_contributors/",
+      "meta": {}
+     }
+    }
+   },
+   "latest_response": {
+    "data": {
+     "id": "6accfb1baf8d266c6d833ebe",
+     "type": "schema_responses"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/schema_responses/6accfb1baf8d266c6d833ebe/",
+      "meta": {}
+     }
+    }
+   },
+   "linked_by_nodes": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/linked_by_nodes/",
+      "meta": {}
+     }
+    }
+   },
+   "linked_by_registrations": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/linked_by_registrations/",
+      "meta": {}
+     }
+    }
+   },
+   "linked_nodes": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/linked_nodes/",
+      "meta": {}
+     },
+     "self": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/relationships/linked_nodes/",
+      "meta": {}
+     }
+    }
+   },
+   "linked_registrations": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/linked_registrations/",
+      "meta": {}
+     },
+     "self": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/relationships/linked_registrations/",
+      "meta": {}
+     }
+    }
+   },
+   "logs": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/logs/",
+      "meta": {}
+     }
+    }
+   },
+   "node_links": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/node_links/",
+      "meta": {}
+     }
+    }
+   },
+   "original_response": {
+    "data": {
+     "id": "6accfb1baf8d266c6d833ebe",
+     "type": "schema_responses"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/schema_responses/6accfb1baf8d266c6d833ebe/",
+      "meta": {}
+     }
+    }
+   },
+   "provider": {
+    "data": {
+     "id": "osf",
+     "type": "registration-providers"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/providers/registrations/osf/",
+      "meta": {}
+     }
+    }
+   },
+   "region": {
+    "data": {
+     "id": "us",
+     "type": "regions"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/regions/us/",
+      "meta": {}
+     }
+    }
+   },
+   "registered_by": {
+    "data": {
+     "id": "7m8yx",
+     "type": "users"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/users/7m8yx/",
+      "meta": {}
+     }
+    }
+   },
+   "registered_from": {
+    "data": {
+     "id": "dvrew",
+     "type": "nodes"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/nodes/dvrew/",
+      "meta": {}
+     }
+    }
+   },
+   "registration_schema": {
+    "data": {
+     "id": "5df83f7dd28338001ac0ab0d",
+     "type": "registration-schemas"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/schemas/registrations/5df83f7dd28338001ac0ab0d/",
+      "meta": {}
+     }
+    }
+   },
+   "requests": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/requests/",
+      "meta": {}
+     }
+    }
+   },
+   "resources": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/resources/",
+      "meta": {}
+     }
+    }
+   },
+   "review_actions": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/actions/",
+      "meta": {}
+     }
+    }
+   },
+   "root": {
+    "data": {
+     "id": "84dk7",
+     "type": "registrations"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/",
+      "meta": {}
+     }
+    }
+   },
+   "schema_responses": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/schema_responses/",
+      "meta": {}
+     }
+    }
+   },
+   "storage": {
+    "data": {
+     "id": "84dk7",
+     "type": "node-storage"
+    },
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/nodes/84dk7/storage/",
+      "meta": {}
+     }
+    }
+   },
+   "view_only_links": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/view_only_links/",
+      "meta": {}
+     }
+    }
+   },
+   "wikis": {
+    "links": {
+     "related": {
+      "href": "https://api.osf.io/v2/registrations/84dk7/wikis/",
+      "meta": {}
+     }
+    }
+   }
+  },
+  "type": "registrations"
+ }
+}
