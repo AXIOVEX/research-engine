@@ -320,15 +320,27 @@
     },
     {
       "boundary": [
-        "Scope: Phase 5 export/anchor (not yet built)",
-        "Axiomere checkpoint roots exist today; bundle format and deposit actions do not"
+        "Scope: Phase 5 export (built 2026-10-12)",
+        "Standalone verification delegates chain/signature checks to the production Axiomere verifier"
       ],
       "evidence": [
         {
           "direction": "supports",
           "kind": "asserted",
-          "ref": "WS4 §4 bundle format; Spec 002 Phase 5 (T216-T218) not yet built; Axiomere checkpoint roots implemented (AXIOVEX/axiomere)",
-          "source_quality": "primary"
+          "ref": "src/tekmerion/export.py (bundle generator + standalone verifier, WS4 §4 format)",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase5.py (18 tests: determinism, flipped byte, altered root, truncated ledger, tampered registration — incl. attacker-rehashed manifests)",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "Decomposed into CLM-002-21…27, each supported on its own tests",
+          "source_quality": "test"
         }
       ],
       "falsification_tests": [
@@ -338,9 +350,9 @@
       "kind": "prediction",
       "severity": "high",
       "source_ref": "specs/002-mvp-implementation/spec.md",
-      "status": "draft",
+      "status": "supported",
       "text": "A complete study run can be exported as an audit bundle whose manifest verifies standalone, using only the bundle and the log files it contains.",
-      "uncertainty": "high"
+      "uncertainty": "low"
     },
     {
       "boundary": [
@@ -373,15 +385,28 @@
     },
     {
       "boundary": [
-        "Scope: Phase 5 anchor transport (not yet built)",
-        "Axiomere checkpoint roots exist today; anchor transport does not"
+        "Scope: AR-1 anchor transport (built + demonstrated live 2026-10-12)",
+        "Gate G2 ratification is the owner's act; this claim covers the demonstration evidence",
+        "Decomposed into CLM-002-28…30"
       ],
       "evidence": [
         {
           "direction": "supports",
           "kind": "asserted",
-          "ref": "WS4 records/export design + Spec 002 gate G2/AR-1 (docs/architecture/04-records-export.md)",
-          "source_quality": "primary"
+          "ref": "src/tekmerion/deposit.py (Zenodo deposit transport; adjudicator-approval gate)",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "Live AR-1 demonstration 2026-10-12: demo study checkpoint root 7434209696ea39ba8e97a33b5caa0ae08928269ea81c7d6407f423191e86e317 deposited to Zenodo, DOI 10.5281/zenodo.23311479, record created 2026-10-12T06:46:48Z; receipt appended to the study ledger (anchor.recorded) and carried in the re-exported bundle's manifest",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "Independent verification 2026-10-12: verify_anchor(bundle-v2, public Zenodo record) — ok",
+          "source_quality": "test"
         }
       ],
       "falsification_tests": [
@@ -391,9 +416,9 @@
       "kind": "prediction",
       "severity": "high",
       "source_ref": "specs/002-mvp-implementation/spec.md",
-      "status": "draft",
+      "status": "supported",
       "text": "Before any pilot, a study checkpoint root will be deposited with an external anchor the operator does not control, and the deposit receipt will be part of the study record (AR-1 / gate G2).",
-      "uncertainty": "high"
+      "uncertainty": "low"
     },
     {
       "boundary": [
@@ -676,9 +701,326 @@
       "status": "supported",
       "text": "The metadata-only cap is mechanized in the verdict path: a metadata-only item contributes no support mass and cannot falsify, and a claim whose entire supporting basis is metadata-only caps at INCONCLUSIVE (RT-5).",
       "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: tekmerion.export audit bundles (Spec 002 Phase 5, T216)",
+        "Completeness is judged against the frozen registration and the ledger head at export time"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/export.py export_bundle (ledger copied byte-for-byte; frozen claim set)",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase5.py::test_bundle_verifies_standalone, ::test_export_is_deterministic (two exports byte-identical)",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D21: a bundle whose ledger copy differs from the study ledger at export by any byte, or whose claims.json omits a claim committed in the ledger's study.frozen event, while presenting itself as complete."
+      ],
+      "id": "CLM-002-21",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "An exported audit bundle contains the study's complete record: the ledger copied byte-for-byte and the full claim register of the frozen registration; an export that would be partial is labeled partial in the manifest and the HUMAN-README, never silently incomplete.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: bundle manifest + standalone verifier (T216)",
+        "The manifest itself is the one file not listed in its own file list"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/export.py manifest (per-file sha256 + bytes; bundle_hash over the file set)",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase5.py::test_flipped_byte_fails_verification, ::test_unlisted_file_fails_verification",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D22: flipping one byte in any bundle payload file, or adding an unlisted file to a bundle, that standalone verification nevertheless accepts."
+      ],
+      "id": "CLM-002-22",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "Every file in an audit bundle is listed in manifest.json with its SHA-256 and byte size, and the manifest carries a bundle hash computed over that file set; an altered file or an unlisted file is a verification failure, never a silent difference.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: tekmerion.export.verify_bundle (T216)",
+        "Chain/signature verification is delegated to the production Axiomere verifier (RT-1 discipline), not reimplemented"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/export.py verify_bundle (production axiomere.verify_file on the exported ledger; checkpoint cross-check)",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase5.py::test_truncated_ledger_fails_even_rehashed, ::test_tampered_ledger_payload_fails_production_verification, ::test_altered_manifest_root_fails_even_rehashed (all with attacker-rehashed manifests)",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D23: a bundle whose exported ledger is truncated, or whose manifest checkpoint root is altered to a foreign value, that standalone verification accepts."
+      ],
+      "id": "CLM-002-23",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "Bundle integrity is verifiable from the bundle alone: the standalone verifier re-checks every manifest hash, verifies the exported ledger with the production Axiomere verifier (hash chain and signatures), and requires the manifest's checkpoint root to equal the latest Merkle checkpoint root recorded in the exported ledger.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: bundles of frozen studies (T216)",
+        "Export requires the caller to present the registration whose hash matches the commitment — export fails closed otherwise"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/freeze.py: freeze captures the frozen document on the register; src/tekmerion/export.py binds registration.json to the study.frozen commitment by hash",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase5.py::test_tampered_registration_fails_binding_even_rehashed, ::test_export_refuses_unfrozen_and_mismatched_registration",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D24: a bundle whose registration.json hashes to anything other than the frozen commitment recorded in its own exported ledger, that standalone verification accepts."
+      ],
+      "id": "CLM-002-24",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "The bundle's registration document is bound to the ledger: its registration hash, recomputed with the production freeze code, equals the registration hash committed in the ledger's study.frozen event and recorded in the manifest.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: coverage section of the audit bundle (T216), computed from ClaimRegister.group_masses group records + citation.checked ledger events",
+        "Coverage counts origin groups, not items (Article V)"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/export.py coverage_report (group records' metadata_only + citation.checked events)",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase5.py::test_coverage_reports_metadata_only_groups (metadata-only claim shows group_coverage 0.0)",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D25: a study with a metadata-only origin group whose bundle coverage reports the claim as fully content-checked, or a bundle with no coverage reporting at all."
+      ],
+      "id": "CLM-002-25",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "Every bundle reports support-check coverage per claim (WS5 §2): origin groups are counted as content-checked or metadata-only from the group records Phase 4 emits, and a claim resting partly on metadata-only groups shows that share as a number in the bundle.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: evidence/content/ in the audit bundle (T216)",
+        "The ledger itself is exported faithfully (DN-005); this gate is about third-party source content, not study records"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/export.py redistribution_permitted (WS5 §4 gate) + manifest content_substitutions",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase5.py::test_content_rights_gate_and_substitution_listing (CC-BY content in; unlicensed abstract stubbed + listed)",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D26: content from a record whose licence basis does not permit redistribution present in a bundle's content files, or a stub substitution missing from the manifest's substitution list."
+      ],
+      "id": "CLM-002-26",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "Retrieved source content enters a bundle's content files only where the record's licence basis permits redistribution; otherwise the bundle carries the provenance stub and the manifest lists the substitution (WS5 §4).",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: tekmerion.deposit deposit actions (T217)",
+        "Approval names a person; an approval string is a record entry, not an authentication mechanism"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/deposit.py deposit_bundle (named-approval gate; refuses unverifiable bundles) + zenodo_metadata (root + bundle hash in the description)",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase5.py::test_deposit_requires_named_approval, ::test_deposit_refuses_unverifiable_bundle, ::test_deposit_metadata_states_root_and_bundle_hash",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D27: a deposit executed with no approval on record, or published deposit metadata that omits the bundle hash or the checkpoint root."
+      ],
+      "id": "CLM-002-27",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "A deposit action runs only with a named adjudicator's approval recorded for that bundle; without approval the deposit is refused and the bundle stays internal (WS5 §3). The deposit metadata states the bundle hash and the checkpoint root the deposit anchors.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: AR-1 anchor transport in Tekmerion (T218); Axiomere layer 5 transport side",
+        "Zenodo is the demonstrated mechanism; the receipt shape is mechanism-neutral"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/deposit.py ZenodoTransport + deposit_bundle (receipt: mechanism, root, DOI/locator, anchored_at, approver, file checksums)",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase5.py::test_anchor_loop_end_to_end_local (full loop via local transport)",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "Live AR-1 demonstration 2026-10-12: demo study checkpoint root 7434209696ea39ba8e97a33b5caa0ae08928269ea81c7d6407f423191e86e317 deposited to Zenodo, DOI 10.5281/zenodo.23311479, record created 2026-10-12T06:46:48Z; receipt appended to the study ledger (anchor.recorded) and carried in the re-exported bundle's manifest",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D28: an anchoring flow whose only surviving record lives in storage the operator controls, or a receipt missing the anchored root, the locator, or the external creation time."
+      ],
+      "id": "CLM-002-28",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "A study checkpoint root can be anchored with an external party the operator does not control — a Zenodo deposit minting a DOI (Spec 002 AR-1; DN-005 layer 5) — yielding a receipt that names the anchored root, the DOI/record locator, and the time the external record was created.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: anchor receipt recording + bundle manifest anchors section (T218)"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/store.py log_anchor (anchor.recorded append); src/tekmerion/export.py carries ledger anchor receipts in the manifest",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase5.py::test_anchor_loop_end_to_end_local (receipt in re-exported manifest; bundle cross-checks manifest anchors against ledger events)",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "Live AR-1 demonstration 2026-10-12: demo study checkpoint root 7434209696ea39ba8e97a33b5caa0ae08928269ea81c7d6407f423191e86e317 deposited to Zenodo, DOI 10.5281/zenodo.23311479, record created 2026-10-12T06:46:48Z; receipt appended to the study ledger (anchor.recorded) and carried in the re-exported bundle's manifest",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D29: a completed anchor whose receipt appears neither as an event in the study ledger nor in the manifest of a bundle exported afterward."
+      ],
+      "id": "CLM-002-29",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "A completed anchor's receipt is part of the study record: it is appended to the study ledger as an anchor event naming the mechanism, the anchored root, and the locator, and it is carried in the manifest of every bundle exported afterward (Article XIII).",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: tekmerion.export.verify_anchor against a fetched public record (T218)",
+        "Existence-at-time rests on the external record's own creation timestamp, which the operator cannot backdate on the anchor's platform"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/export.py verify_anchor (bundle + public record only: root in ledger checkpoints; record states root + deposited bundle hash; file md5)",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase5.py::test_anchor_verification_rejects_foreign_record, ::test_anchor_verification_rejects_tampered_public_record",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "Live verification 2026-10-12: verify_anchor over the re-exported demo bundle against the public Zenodo record 23311479 fetched independently — ok; package md5 matches the record's file checksum",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D30: anchor verification passing for a bundle checked against a different study's anchor record, or where the public record's stated root differs from every checkpoint root in the bundle's ledger."
+      ],
+      "id": "CLM-002-30",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "Given only a bundle and the public anchor record, verification confirms that the anchored root is a Merkle checkpoint root of the bundle's own ledger and that the public record states that same root and the deposited bundle's hash; a different study's receipt, or a root the public record does not state, fails verification.",
+      "uncertainty": "low"
     }
   ],
   "date": "2026-10-12",
   "spec": "002-mvp-implementation",
-  "version": "0.4.1"
+  "version": "0.5.1"
 }

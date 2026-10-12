@@ -110,6 +110,10 @@ def freeze(store: Any, register: ClaimRegister, controls: list[Control], *,
     linked = list(linked_exploratory or [])
     doc = registration_document(register, controls, mode, linked)
     reg_hash = registration_hash(doc)
+    # Capture the frozen document on the register before statuses
+    # move: exports (Phase 5) bind to exactly this document, and its
+    # hash — checked against the ledger commitment — is the proof.
+    register.frozen_document = json.loads(json.dumps(doc))
     frozen_event = store.db.append(
         "study.frozen",
         {"registration_hash": reg_hash, "mode": mode, "claims": sorted(register.claims),

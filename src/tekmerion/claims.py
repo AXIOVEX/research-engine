@@ -65,6 +65,10 @@ class ClaimRegister:
         self.evidence: dict[str, list[EvidenceItem]] = {}
         self.frozen = False
         self.registration_hash: Optional[str] = None
+        # The exact document whose hash freeze committed (set by
+        # tekmerion.freeze.freeze). Lifecycle statuses move after
+        # freezing; this capture is what exports bind to (Phase 5).
+        self.frozen_document: Optional[dict[str, Any]] = None
 
     # -- registration -------------------------------------------------------
 

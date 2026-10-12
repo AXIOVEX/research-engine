@@ -84,6 +84,13 @@ class StudyStore:
             actor=reviewer,
         )
 
+    def log_anchor(self, receipt: dict[str, Any], *, actor: str) -> dict:
+        """Record an external anchor receipt (AR-1): the checkpoint
+        root now also lives where the operator does not control it,
+        and the receipt naming it is part of this record (DN-005
+        layer 5; Article XIII)."""
+        return self.db.append("anchor.recorded", receipt, actor=actor)
+
     def events(self) -> list:
         return self.db.events()
 
