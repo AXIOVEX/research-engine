@@ -12,6 +12,10 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
+mcp = ["mcp>=2,<3"]
+
+[project.scripts]
+tekmerion-mcp = "tekmerion.mcp.server:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
