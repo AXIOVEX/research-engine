@@ -20,9 +20,10 @@ sleeping.
 
 from __future__ import annotations
 
+import base64
 import secrets as _secrets
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -30,7 +31,7 @@ from . import authz, ed25519
 from .authz import AuthorizationService
 from .directory import (
     ApiKeyRecord, Directory, IdPConfig, Identity, InMemorySecrets,
-    Session, Tenant, hash_api_secret,
+    SamlIdPConfig, Session, Tenant, hash_api_secret,
 )
 from .errors import AuthenticationError, AuthorizationDenied, ConfigurationError, GateDenied
 from .keys import DelegatedSigner, KeyRecord, KeyRegistry, fingerprint
@@ -42,6 +43,15 @@ from .ledger import (
     SESSION_REVOKED, TENANT_CREATED, TENANT_UPDATED, PlatformLedger,
 )
 from .oidc import OIDCClient, pkce_pair
+from .saml import (
+    CLOCK_SKEW_SECONDS, SamlAssertion, SamlIdPSettings, build_authn_request,
+    new_request_id, parse_metadata, redirect_binding_url, validate_response,
+)
+from .x509 import parse_certificate
+
+#: Step-up requests ask the IdP for the REFEDS MFA profile context;
+#: an IdP that cannot evidence MFA cannot step a session up (§2).
+STEPUP_MFA_CONTEXT_REF = "https://refeds.org/profile/mfa"
 
 PLATFORM_TENANT_ID = "__platform__"
 SYSTEM_ACTOR = "system"
@@ -266,6 +276,74 @@ class PlatformService:
             required_amr=list(config.required_amr), at=self._now())
         return config
 
+    # -- SAML IdP configuration (E2, T513) -------------------------------------
+
+    def _register_saml_idp(self, admin: Identity, *, tenant_id: str,
+                           sp_entity_id: str, acs_url: str, metadata_xml: str,
+                           attribute_map: Optional[dict], subject_source: str,
+                           allow_idp_initiated: bool, via: str) -> SamlIdPConfig:
+        """Metadata import + validation, shared by provisioning and
+        tenant self-service. The imported certificates are stored by
+        reference (T502 discipline); the ledger event carries their
+        fingerprints, never the material."""
+        meta = parse_metadata(metadata_xml, now=self._now())
+        if all(c.not_after <= self._now() for c in meta.signing_certs):
+            raise ConfigurationError("every signing certificate in the metadata is expired")
+        refs: list[str] = []
+        fingerprints: list[str] = []
+        for cert in meta.signing_certs:
+            ref = f"saml-cert:{tenant_id}:{meta.entity_id}:{cert.fingerprint[:16]}"
+            self.secrets.put(ref, base64.b64encode(cert.der).decode("ascii"))
+            refs.append(ref)
+            fingerprints.append(cert.fingerprint)
+        kwargs: dict = {}
+        if attribute_map is not None:
+            kwargs["attribute_map"] = dict(attribute_map)
+        config = SamlIdPConfig(
+            tenant_id=tenant_id, idp_entity_id=meta.entity_id,
+            sp_entity_id=sp_entity_id, acs_url=acs_url,
+            sso_redirect_url=meta.sso_redirect_url, sso_post_url=meta.sso_post_url,
+            signing_cert_refs=tuple(refs),
+            signing_cert_fingerprints=tuple(fingerprints),
+            subject_source=subject_source,
+            allow_idp_initiated=allow_idp_initiated, **kwargs)
+        existing = (tenant_id, meta.entity_id) in self.directory.saml_idps
+        self.directory.add_saml_idp(config)
+        self._tenant_ledger(tenant_id).record(
+            IDP_UPDATED if existing else IDP_CONFIGURED,
+            actor_id=admin.actor_id, target=f"idp:{meta.entity_id}",
+            protocol="saml", idp_entity_id=meta.entity_id, sp_entity_id=sp_entity_id,
+            signing_cert_refs=refs, signing_cert_fingerprints=fingerprints,
+            subject_source=subject_source, allow_idp_initiated=allow_idp_initiated,
+            via=via, at=self._now())
+        return config
+
+    def provision_tenant_saml_idp(self, session_token: str, *, tenant_id: str,
+                                  sp_entity_id: str, acs_url: str, metadata_xml: str,
+                                  attribute_map: Optional[dict] = None,
+                                  subject_source: str = "nameid",
+                                  allow_idp_initiated: bool = True) -> SamlIdPConfig:
+        """Platform provisioning of a tenant's SAML IdP (tenant
+        lifecycle act, like provision_tenant_idp)."""
+        _, admin = self._require(session_token, authz.PLATFORM_TENANT_MANAGE, tenant_id=None)
+        return self._register_saml_idp(
+            admin, tenant_id=tenant_id, sp_entity_id=sp_entity_id, acs_url=acs_url,
+            metadata_xml=metadata_xml, attribute_map=attribute_map,
+            subject_source=subject_source, allow_idp_initiated=allow_idp_initiated,
+            via="provisioning")
+
+    def configure_saml_idp(self, session_token: str, *, tenant_id: str,
+                           sp_entity_id: str, acs_url: str, metadata_xml: str,
+                           attribute_map: Optional[dict] = None,
+                           subject_source: str = "nameid",
+                           allow_idp_initiated: bool = True) -> SamlIdPConfig:
+        _, admin = self._require(session_token, authz.TENANT_IDP_MANAGE, tenant_id=tenant_id)
+        return self._register_saml_idp(
+            admin, tenant_id=tenant_id, sp_entity_id=sp_entity_id, acs_url=acs_url,
+            metadata_xml=metadata_xml, attribute_map=attribute_map,
+            subject_source=subject_source, allow_idp_initiated=allow_idp_initiated,
+            via="tenant-admin")
+
     # -- role grants ------------------------------------------------------------------
 
     def grant_role(self, session_token: str, *, identity_id: str, role: str,
@@ -336,7 +414,8 @@ class PlatformService:
 
     def complete_login(self, state: str, code: str) -> str:
         pending = self._pending_auth.pop(state, None)
-        if pending is None or pending["expires"] < self._now():
+        if (pending is None or pending["expires"] < self._now()
+                or pending.get("protocol", "oidc") != "oidc"):
             raise AuthenticationError("login state unknown or expired")
         tenant_id, issuer = pending["tenant_id"], pending["issuer"]
         config = self.directory.idp(tenant_id, issuer)
@@ -382,6 +461,183 @@ class PlatformService:
                       identity_id=identity.identity_id, subject_actor_id=identity.actor_id,
                       session_id=session.session_id, mfa=claims.mfa,
                       mfa_required=policy.require_mfa, at=self._now())
+        return session.session_id
+
+    # -- SAML login lifecycle (E2, T513–T515, T517) ----------------------------
+
+    def _saml_settings(self, config: SamlIdPConfig) -> SamlIdPSettings:
+        certs = tuple(
+            parse_certificate(base64.b64decode(self.secrets.get(ref)))
+            for ref in config.signing_cert_refs)
+        return SamlIdPSettings(
+            idp_entity_id=config.idp_entity_id, sp_entity_id=config.sp_entity_id,
+            acs_url=config.acs_url, signing_certs=certs,
+            attribute_map=config.attribute_map, subject_source=config.subject_source)
+
+    def _saml_redirect(self, config: SamlIdPConfig, *, purpose: str,
+                       extra: Optional[dict] = None) -> str:
+        if not config.sso_redirect_url:
+            raise ConfigurationError("tenant's SAML IdP offers no redirect SSO endpoint")
+        state = _secrets.token_urlsafe(24)
+        request_id = new_request_id()
+        pending = {
+            "protocol": "saml", "purpose": purpose,
+            "tenant_id": config.tenant_id, "idp_entity_id": config.idp_entity_id,
+            "request_id": request_id, "expires": self._now() + 600,
+        }
+        if extra:
+            pending.update(extra)
+        self._pending_auth[state] = pending
+        xml = build_authn_request(
+            request_id=request_id, sp_entity_id=config.sp_entity_id,
+            acs_url=config.acs_url, destination=config.sso_redirect_url,
+            issue_instant=self._now(),
+            force_authn=(purpose == "stepup"),
+            mfa_context_ref=STEPUP_MFA_CONTEXT_REF if purpose == "stepup" else None)
+        return redirect_binding_url(xml, endpoint=config.sso_redirect_url,
+                                    relay_state=state)
+
+    def begin_saml_login(self, tenant_id: str, idp_entity_id: str) -> str:
+        config = self.directory.saml_idp(tenant_id, idp_entity_id)
+        return self._saml_redirect(config, purpose="login")
+
+    def begin_saml_step_up(self, session_token: str) -> str:
+        """Step-up for a SAML-born session (T517 parity): a fresh,
+        ForceAuthn request to the same IdP that made the identity."""
+        session, identity = self._resolve_session(session_token)
+        config = self.directory.saml_idp(identity.tenant_id, identity.issuer)
+        return self._saml_redirect(
+            config, purpose="stepup",
+            extra={"session_id": session.session_id, "identity_id": identity.identity_id})
+
+    def _validate_saml(self, tenant_id: str, idp_entity_id: str,
+                       relay_state: Optional[str], saml_response_b64: str,
+                       *, purpose: str) -> tuple[SamlIdPConfig, SamlAssertion, Optional[dict]]:
+        """The validation half of both SAML completions. Raises
+        AuthenticationError with the specific refusal; callers record
+        it as an authentication failure, then raise the generic
+        message (the E1 complete_login pattern)."""
+        try:
+            config = self.directory.saml_idp(tenant_id, idp_entity_id)
+        except ConfigurationError:
+            raise AuthenticationError("no SAML IdP configured for tenant")
+        pending: Optional[dict] = None
+        if relay_state:
+            pending = self._pending_auth.pop(relay_state, None)
+            if (pending is None or pending.get("protocol") != "saml"
+                    or pending.get("purpose") != purpose
+                    or pending["expires"] < self._now()
+                    or pending["tenant_id"] != tenant_id
+                    or pending["idp_entity_id"] != idp_entity_id):
+                raise AuthenticationError("login state unknown, expired, or mismatched")
+        elif purpose == "stepup":
+            raise AuthenticationError("step-up requires a RelayState")
+        elif not config.allow_idp_initiated:
+            raise AuthenticationError("IdP-initiated login is not enabled for this tenant")
+        settings = self._saml_settings(config)
+        now = self._now()
+        live = tuple(c for c in settings.signing_certs
+                     if c.not_before - CLOCK_SKEW_SECONDS <= now <= c.not_after + CLOCK_SKEW_SECONDS)
+        if not live:
+            raise AuthenticationError("IdP signing certificate is expired")
+        settings = replace(settings, signing_certs=live)
+        claims = validate_response(
+            saml_response_b64, settings=settings,
+            pending_request_id=pending["request_id"] if pending else None, now=now)
+        hold_until = claims.expires_at + CLOCK_SKEW_SECONDS
+        if not self.directory.consume_saml_id(claims.assertion_id, hold_until, now):
+            raise AuthenticationError("assertion replay detected")
+        if not self.directory.consume_saml_id(claims.response_id, hold_until, now):
+            raise AuthenticationError("response replay detected")
+        return config, claims, pending
+
+    def complete_saml_login(self, tenant_id: str, idp_entity_id: str,
+                            relay_state: Optional[str], saml_response_b64: str) -> str:
+        """The tenant's ACS, as a service method. SP-initiated when a
+        RelayState is carried; IdP-initiated (unsolicited) when not —
+        and only where the tenant's configuration allows it."""
+        ledger = self._auth_ledger(tenant_id)
+
+        def fail(reason: str) -> AuthenticationError:
+            ledger.record(AUTH_LOGIN_FAILED, actor_id="unknown",
+                          target=f"tenant:{tenant_id}", outcome="failed",
+                          reason=f"saml: {reason}", issuer=idp_entity_id,
+                          protocol="saml", at=self._now())
+            return AuthenticationError("authentication failed")
+
+        try:
+            _, claims, _ = self._validate_saml(
+                tenant_id, idp_entity_id, relay_state, saml_response_b64,
+                purpose="login")
+        except AuthenticationError as exc:
+            raise fail(str(exc))
+        identity, created = self.directory.get_or_create_identity(
+            tenant_id, idp_entity_id, claims.subject, created_via="saml",
+            display_name=claims.attributes.get("display_name", ""),
+            email=claims.attributes.get("email", ""),
+            affiliation=claims.attributes.get("affiliation", ""))
+        if not identity.active:
+            raise fail("identity deactivated")
+        if created:
+            ledger.record(IDENTITY_CREATED, actor_id=identity.actor_id,
+                          target=f"identity:{identity.identity_id}",
+                          identity_id=identity.identity_id,
+                          subject_actor_id=identity.actor_id,
+                          via="saml", at=self._now())
+        session = self.directory.new_session(
+            identity, amr=claims.amr, acr=claims.acr, mfa=claims.mfa, now=self._now())
+        policy = self.directory.tenant(tenant_id).policy
+        ledger.record(AUTH_LOGIN_SUCCEEDED, actor_id=identity.actor_id,
+                      target=f"identity:{identity.identity_id}",
+                      identity_id=identity.identity_id,
+                      subject_actor_id=identity.actor_id,
+                      session_id=session.session_id, mfa=claims.mfa,
+                      mfa_required=policy.require_mfa, protocol="saml",
+                      at=self._now())
+        return session.session_id
+
+    def complete_saml_step_up(self, relay_state: str, saml_response_b64: str) -> str:
+        """Consume a step-up response: the pending record names the
+        tenant, IdP, and session; the assertion must be for the same
+        identity and must evidence MFA (T517 — the SAML door reaches
+        the same §2 step-up state as the OIDC door)."""
+        peek = self._pending_auth.get(relay_state)
+        if peek is None or peek.get("protocol") != "saml" or peek.get("purpose") != "stepup":
+            raise AuthenticationError("step-up state unknown")
+        tenant_id, idp_entity_id = peek["tenant_id"], peek["idp_entity_id"]
+        ledger = self._auth_ledger(tenant_id)
+
+        def fail(reason: str) -> AuthenticationError:
+            ledger.record(AUTH_LOGIN_FAILED, actor_id="unknown",
+                          target=f"tenant:{tenant_id}", outcome="failed",
+                          reason=f"saml step-up: {reason}", issuer=idp_entity_id,
+                          protocol="saml", at=self._now())
+            return AuthenticationError("step-up failed")
+
+        try:
+            _, claims, pending = self._validate_saml(
+                tenant_id, idp_entity_id, relay_state, saml_response_b64,
+                purpose="stepup")
+        except AuthenticationError as exc:
+            raise fail(str(exc))
+        assert pending is not None  # step-up always carries a pending record
+        session = self.directory.session(pending["session_id"])
+        identity = self.directory.identity(pending["identity_id"])
+        if session is None or session.revoked:
+            raise fail("step-up session is gone")
+        if claims.subject != identity.subject or claims.issuer != identity.issuer:
+            raise fail("step-up assertion is for a different identity")
+        if not claims.mfa:
+            raise fail("step-up requires MFA evidence")
+        session.stepped_up_at = self._now()
+        session.amr = claims.amr
+        session.mfa = True
+        ledger.record(AUTH_STEPUP, actor_id=identity.actor_id,
+                      target=f"session:{session.session_id}",
+                      identity_id=identity.identity_id,
+                      subject_actor_id=identity.actor_id,
+                      session_id=session.session_id, protocol="saml",
+                      at=self._now())
         return session.session_id
 
     def logout(self, session_token: str) -> None:
