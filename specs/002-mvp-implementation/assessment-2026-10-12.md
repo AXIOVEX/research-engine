@@ -70,3 +70,24 @@ Claims preceded code again. CLM-002-11 (bundle) and CLM-002-13 (anchor) were dec
 **A defect the demonstration surfaced (recorded, not worked around):** the demo study's evaluation run was **INVALID and issued no verdicts**. The swap control tampers by exchanging the actor fields of ledger lines 1 and 2; in this single-actor study both are `researcher`, so the tamper is a no-op, the production verifier (correctly) sees an intact chain, the control fails, and the run is INVALID per WS3 — the machinery refused to certify, which is its job (Article VI). The limitation is the control's fixed line selection: it assumes two early events with distinct actors (true of the Phase 3 fixtures, false of single-actor studies). Consequences, honestly: (1) the deposited bundle's `verdicts.json` is an empty list — the bundle records the INVALID outcome rather than a verdict; (2) the Zenodo description as first published anticipated an INCONCLUSIVE verdict and was **corrected in place** (metadata edit, same DOI, files unchanged) to state the INVALID outcome and why. Fixing the control's event selection is Phase 7 preparation work (the evaluation corpus will hit this), not Phase 5 scope; it is logged here and in tasks.md.
 
 **Outcome remains ITERATE** (30 claims; exactly 1 below threshold): CLM-002-10 (K1) at 0.68, a draft by design until the Phase 7 frozen evaluation. Everything else in the bundle — Phases 0–5 — stands at 1.00.
+
+## Phase 6 addendum (2026-10-12, after_specify — claims first, honored; then re-sequenced by owner ruling)
+
+Ten atomic Phase 6 claims (CLM-002-31…40, bundle v0.6.0) were authored and assessed at `after_specify` **before** any UI code existed; the machine record `aee-assessment.json` now reflects this run. All ten are drafts below threshold — the correct pre-build state:
+
+| Claim | After_specify | State |
+|-------|-------|-------|
+| CLM-002-31 register-first workspace (no landing/chat surface) | 0.68 | draft |
+| CLM-002-32 registration rules enforced identically (falsifier refusal is the engine's; no ledger write) | 0.675 | draft |
+| CLM-002-33 no edit/delete affordances; mutations are appends only | 0.68 | draft |
+| CLM-002-34 dead renders dead (status + reason + score 0.0) | 0.675 | draft |
+| CLM-002-35 INVALID run renders INVALID, reasons shown, zero claim verdicts | 0.675 | draft |
+| CLM-002-36 metadata-only visibly flagged at every level | 0.68 | draft |
+| CLM-002-37 adjudication via the engine's named appends; re-decision refused + surfaced | 0.675 | draft |
+| CLM-002-38 role views bound affordances; identity via the SSO hook, recorded as actor | 0.68 | draft |
+| CLM-002-39 export reachable; verifier result shown truthfully (failures surface with reasons) | 0.675 | draft |
+| CLM-002-40 anchor receipt displayed from the record (mechanism, DOI, root) | 0.675 | draft |
+
+**Re-sequencing (owner ruling, 2026-10-12):** before implementation began, the owner ruled *wireframes first, and the wireframes are constitutional* — no UI change without updated wireframes and his approval of the **rendered** wireframes (DN-009; constitution Article XIV drafted for v1.2.0, effective on that approval). The Phase 6 deliverable is therefore, first, the wireframe package in `docs/wireframes/` (screens (a)–(f) + component specimens, rendered at desktop + mobile and inspected; sample data is the Phase 5 demo study throughout — its INVALID run, metadata-only group, variant/excluded citations, and live DOI are the content). tasks.md gate T219-WF records the block; **no UI task is checked off, and these claims stay drafts**: their evidence is the approved-wireframe implementation, which does not exist yet. Two build notes from the wireframing itself: (1) the anchored bundle and the current bundle differ (v1 anchored, v2 carries the receipt) — screen (f) states both hashes rather than conflating them; (2) states absent from the demo study are specified as labeled specimens (`components.html`), not fabricated into study screens.
+
+**Outcome remains ITERATE** (40 claims; 11 below threshold): CLM-002-10 (K1) at 0.68 by design, and CLM-002-31…40 as drafts awaiting gate T219-WF (owner approval of the rendered wireframes) and then implementation.
