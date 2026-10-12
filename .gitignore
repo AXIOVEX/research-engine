@@ -3,3 +3,6 @@
 # Python bytecode (test runs must never enter history — PR #20 pollution, 2026-10-12)
 __pycache__/
 *.pyc
+
+# MkDocs build output (ReadTheDocs builds from source)
+site/
