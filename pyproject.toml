@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "Tekmerion — defensible AI research: append-only, hash-chained research records with per-claim verdicts."
 requires-python = ">=3.12"
 license = { text = "All rights reserved. (c) 2026 Axiovex Systems, LLC" }
+readme = "README.md"
 dependencies = []
 
 [project.optional-dependencies]
