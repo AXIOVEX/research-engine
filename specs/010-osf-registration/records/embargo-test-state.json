@@ -1,0 +1,36 @@
+{
+  "bundle_hash": "5e8b396be840938a700a6578284b3b9011b2fbcbc0505b889ecee9c349a82e70",
+  "components": {
+    "evidence": "cshxf",
+    "record": "ef7uc",
+    "registration": "5td9c",
+    "verdicts": "jxr5w",
+    "verification": "3zrkt"
+  },
+  "draft_id": "6accf21f0677de53ca413298",
+  "project_guid": "xwdr5",
+  "registration_guid": "kcysa",
+  "registration_hash": "7f8790733864ffad0662f1518feeb0e8c5de6357768f416b8b6027f7d066eea6",
+  "schema_id": "5df83f7dd28338001ac0ab0d",
+  "schema_name": "Open-Ended Registration",
+  "stage": "files_uploaded",
+  "subjects": [
+    "Sleep Medicine"
+  ],
+  "uploaded": [
+    "registration:registration.json",
+    "registration:claims.json",
+    "registration:controls.json",
+    "evidence:items.json",
+    "evidence:groups.json",
+    "evidence:content/CIT-1.txt",
+    "evidence:coverage.json",
+    "verification:verification.json",
+    "verification:queries.json",
+    "verdicts:verdicts.json",
+    "verdicts:adjudication.json",
+    "record:ledger/study.axmr",
+    "record:manifest.json",
+    "record:HUMAN-README.md"
+  ]
+}
