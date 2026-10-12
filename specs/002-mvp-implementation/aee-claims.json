@@ -1,0 +1,402 @@
+{
+  "claims": [
+    {
+      "boundary": [
+        "Scope: Tekmerion study records on the Axiomere record layer (DN-007)",
+        "Excludes external anchor transport (Axiomere layer 5, Phase 5 / AR-1)"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-005 (adopted) + DN-007 (record layer = Axiomere)",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "AXIOVEX/axiomere crates/axiomere/src/lib.rs (no update/delete in API); 7 integration tests incl. seeded tamper/deletion/forgery",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "tekmerion.store.StudyStore + tests/test_store_axiomere.py (dead semantics verified against the real core)",
+          "source_quality": "artifact"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D1a: any code path in the record layer or framework that mutates a stored event in place."
+      ],
+      "id": "CLM-002-01",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "The record layer is append-only: events are hash-chained and Ed25519-signed, and no API operation in the record layer or the framework mutates a stored event.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: Crossref and OpenAlex connectors (Spec 002 Phase 2)",
+        "Excludes sources without verified public APIs (WS1 registry)"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/connectors.py (license_basis mandatory on RetrievedItem; abstract-drop rule)",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_connectors.py::test_crossref_abstract_dropped_without_licence",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "Live verification 2026-10-11: Crossref search/resolve roundtrip; NC-licensed item flagged hosted_ok=False",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D2: a retrieved item in a study record with an empty/defaulted license_basis, or an unlicensed abstract present in claim evidence."
+      ],
+      "id": "CLM-002-02",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "Every connector-retrieved item carries a per-record license_basis, and material without an asserted licence is not treated as reusable (Crossref abstracts without a licence are dropped).",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: OpenAlex calls issued through tekmerion.connectors",
+        "Unit costs are configuration; the budget relation (filter << search) is the verified part"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/connectors.py CreditBudget reserve/settle + BudgetExhausted",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_connectors.py::test_budget_exhaustion_is_a_stop_not_an_overrun",
+          "source_quality": "test"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "Live verification 2026-10-11 with the owner's key: filter search settled at cost_filter",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D3: an OpenAlex call issued without a prior reservation, or a run that continues after BudgetExhausted."
+      ],
+      "id": "CLM-002-03",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "OpenAlex access is budget-disciplined: calls reserve credits before they run (filter preferred at the verified ~10x cost relation) and exhaustion stops the run rather than overrunning.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: claims registered through ClaimRegister",
+        "Draft (proposed) claims may be revised pre-freeze per WS2 lifecycle"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/claims.py ClaimRegister.register (RegistrationError paths)",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase3.py::test_no_falsifier_no_registration, ::test_statement_immutable_and_supersede_path",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D4: a registered claim with an empty falsifier, or a post-registration statement edit that does not create a superseding claim."
+      ],
+      "id": "CLM-002-04",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "A claim cannot be registered without a falsifier, and claim statements are immutable after registration \u2014 a changed statement is a new claim that supersedes the old, with the link recorded.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: within-study claim graph",
+        "Evidence-group dependencies (EVG-) are not graph nodes for cycle purposes"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/claims.py find_cycle; src/tekmerion/freeze.py freeze_check",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase3.py::test_cycle_is_circular_support",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D5: a frozen registration whose claim graph contains a cycle."
+      ],
+      "id": "CLM-002-05",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "Circular claim dependencies are rejected: the dependency graph is a DAG and the freeze check names any cycle as circular support.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: runs evaluated through evaluate_run",
+        "Human adjudication overrides are separate appended records, not run verdicts"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/verdicts.py evaluate_run (invalid short-circuit, empty claim_verdicts)",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase3.py::test_invalid_run_issues_no_claim_verdicts, ::test_failing_control_invalidates_the_run",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D6: any run with a failed control or unverified citation that nevertheless carries a claim-level verdict."
+      ],
+      "id": "CLM-002-06",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "INVALID attaches to the run, not the claim: a control failure, unverified citation, chain break, or deviation from the frozen registration yields a run verdict of INVALID and zero claim verdicts.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: verdicts from evaluate_claim under a registered margin and floor",
+        "Entrenchment rules for conflicting groups are not yet implemented (conflict falls to INCONCLUSIVE by interval straddle)"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/verdicts.py evaluate_claim (could_falsify gate, interval margin test, sufficiency floor)",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase3.py::test_untested_is_inconclusive_never_supported, ::test_supported_requires_exposure_and_margin, ::test_below_floor_and_straddle_are_inconclusive",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D7: a SUPPORTED verdict issued for a claim whose evidence set contains no group that could have contradicted it, or whose interval straddles the margin."
+      ],
+      "id": "CLM-002-07",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "SUPPORTED requires exposure to refutation: the falsifier test must have been capable of firing and the interval of net support must clear the registered margin; otherwise the verdict is INCONCLUSIVE.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: the three registered control kinds (positive, negative, swap)",
+        "The swap control verifies a copy; the production ledger is never the tampered one"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/verdicts.py run_controls + _swap_control (RT-1)",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase3.py::test_failing_control_invalidates_the_run (control exercised against the real ledger file)",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D8: a control evaluated by a code path that production verdicts or production verification do not use."
+      ],
+      "id": "CLM-002-08",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "Controls certify through the production paths: positive/negative controls are evaluated by the same evaluate_claim function real claims use, and the swap control requires the production Axiomere verifier to detect a provenance swap in a copy of the study ledger.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: mode separation inside evaluate_run and freeze_check",
+        "Design-shopping beyond disclosure is a governance risk the engine records but cannot prevent (WS3 \u00a74)"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "src/tekmerion/verdicts.py evaluate_run (mode wall); src/tekmerion/freeze.py freeze_check (RT-3 disclosure)",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_phase3.py::test_confirmation_without_freeze_hits_the_wall, ::test_freeze_check_fails_closed",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D9: a confirmation verdict whose registration lacks a freeze record or a linked-exploratory disclosure."
+      ],
+      "id": "CLM-002-09",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "supported",
+      "text": "Exploratory results cannot be promoted: a confirmation run without a frozen registration is INVALID, and a confirmation registration must disclose its linked exploratory studies (an explicit empty list is required, not an omission).",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: the Phase 7 frozen evaluation corpus",
+        "This is kill criterion K1 (DN-002): failure kills the MVP slice"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS5 pipeline design (docs/architecture/05-trust-safety.md); Spec 002 Phase 4 (T214) not yet built",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Spec 001 CLM-001-05 carries the same commitment at product level",
+          "source_quality": "primary"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D10: the Phase 7 evaluation reports any fabricated or unresolvable citation in the frozen corpus (K1 fails; the MVP slice is killed per DN-002)."
+      ],
+      "id": "CLM-002-10",
+      "kind": "prediction",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "draft",
+      "text": "The citation pipeline (existence, metadata agreement, content support) will drive fabricated or unsupported citations to zero in the evaluation corpus (kill criterion K1: 100% citation resolution).",
+      "uncertainty": "high"
+    },
+    {
+      "boundary": [
+        "Scope: Phase 5 export/anchor (not yet built)",
+        "Axiomere checkpoint roots exist today; bundle format and deposit actions do not"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS4 \u00a74 bundle format; Spec 002 Phase 5 (T216-T218) not yet built; Axiomere checkpoint roots implemented (AXIOVEX/axiomere)",
+          "source_quality": "primary"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D11a: an exported bundle whose manifest fails standalone verification."
+      ],
+      "id": "CLM-002-11",
+      "kind": "prediction",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "draft",
+      "text": "A complete study run can be exported as an audit bundle whose manifest verifies standalone, using only the bundle and the log files it contains.",
+      "uncertainty": "high"
+    },
+    {
+      "boundary": [
+        "Scope: Axiomere dead semantics as consumed by StudyStore.withdraw"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "AXIOVEX/axiomere crates/axiomere/src/lib.rs mark_dead + current_view",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "tests/test_store_axiomere.py::test_withdrawal_is_dead_snapshot_not_deletion; axiomere-python tests (5)",
+          "source_quality": "test"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D1b: a withdrawn record whose prior snapshots are not fully readable, or a dead record with score other than 0.0 or no reason."
+      ],
+      "id": "CLM-002-12",
+      "kind": "requirement",
+      "severity": "high",
+      "source_ref": "docs/design-notes/DN-005-absolute-append-only.md",
+      "status": "supported",
+      "text": "Withdrawal is a dead snapshot: status dead, a mandatory reason on the record, score forced to 0.0, and the record's full history remains readable.",
+      "uncertainty": "low"
+    },
+    {
+      "boundary": [
+        "Scope: Phase 5 anchor transport (not yet built)",
+        "Axiomere checkpoint roots exist today; anchor transport does not"
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "WS4 records/export design + Spec 002 gate G2/AR-1 (docs/architecture/04-records-export.md)",
+          "source_quality": "primary"
+        }
+      ],
+      "falsification_tests": [
+        "F-002-D11b: a pilot started before the AR-1 anchor demonstration, or an anchor receipt missing from the study record."
+      ],
+      "id": "CLM-002-13",
+      "kind": "prediction",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "status": "draft",
+      "text": "Before any pilot, a study checkpoint root will be deposited with an external anchor the operator does not control, and the deposit receipt will be part of the study record (AR-1 / gate G2).",
+      "uncertainty": "high"
+    }
+  ],
+  "date": "2026-10-12",
+  "spec": "002-mvp-implementation",
+  "version": "0.3.0"
+}

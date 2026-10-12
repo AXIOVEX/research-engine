@@ -17,3 +17,7 @@
 ## Reading
 
 No claim is marked supported: at design phase every design claim is a *commitment to a test*, and its falsifier names the test. That is the correct epistemic state and the assessment records it rather than inflating it. The gate to implementation is not a better assessment score — it is the owner's OD-1/OD-2 decisions, after which the MVP evaluation (itself a frozen registration, WS6 §4) generates the first real evidence for CLM-001-01…06.
+
+---
+
+**Addendum (2026-10-12):** the claims bundle was normalized to the AEE engine's native claim format (the founding file used a pre-engine vocabulary the assessor cannot load) and re-assessed mechanically: `aee-assessment.json`, outcome **gather_evidence** — the same reading as above, now machine-produced. This hand assessment remains the historical record of the founding review.

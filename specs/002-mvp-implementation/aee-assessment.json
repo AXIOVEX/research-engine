@@ -1,0 +1,1103 @@
+{
+  "schema_version": "1.0",
+  "methodology_version": "1.0",
+  "project": "tekmerion",
+  "phase": "after_implement",
+  "outcome": "iterate",
+  "summary": "Assessed 13 claim(s); found 13 failure mode(s); 3 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T05:36:24.078685Z",
+  "claims": [
+    {
+      "id": "CLM-002-01",
+      "text": "The record layer is append-only: events are hash-chained and Ed25519-signed, and no API operation in the record layer or the framework mutates a stored event.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: Tekmerion study records on the Axiomere record layer (DN-007)",
+        "Excludes external anchor transport (Axiomere layer 5, Phase 5 / AR-1)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "DN-005 (adopted) + DN-007 (record layer = Axiomere)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "AXIOVEX/axiomere crates/axiomere/src/lib.rs (no update/delete in API); 7 integration tests incl. seeded tamper/deletion/forgery",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tekmerion.store.StudyStore + tests/test_store_axiomere.py (dead semantics verified against the real core)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D1a: any code path in the record layer or framework that mutates a stored event in place."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-01-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-01",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-02",
+      "text": "Every connector-retrieved item carries a per-record license_basis, and material without an asserted licence is not treated as reusable (Crossref abstracts without a licence are dropped).",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: Crossref and OpenAlex connectors (Spec 002 Phase 2)",
+        "Excludes sources without verified public APIs (WS1 registry)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "src/tekmerion/connectors.py (license_basis mandatory on RetrievedItem; abstract-drop rule)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_connectors.py::test_crossref_abstract_dropped_without_licence",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Live verification 2026-10-11: Crossref search/resolve roundtrip; NC-licensed item flagged hosted_ok=False",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D2: a retrieved item in a study record with an empty/defaulted license_basis, or an unlicensed abstract present in claim evidence."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-02-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-02",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-03",
+      "text": "OpenAlex access is budget-disciplined: calls reserve credits before they run (filter preferred at the verified ~10x cost relation) and exhaustion stops the run rather than overrunning.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: OpenAlex calls issued through tekmerion.connectors",
+        "Unit costs are configuration; the budget relation (filter << search) is the verified part"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "src/tekmerion/connectors.py CreditBudget reserve/settle + BudgetExhausted",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_connectors.py::test_budget_exhaustion_is_a_stop_not_an_overrun",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Live verification 2026-10-11 with the owner's key: filter search settled at cost_filter",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D3: an OpenAlex call issued without a prior reservation, or a run that continues after BudgetExhausted."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-03-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-03",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-04",
+      "text": "A claim cannot be registered without a falsifier, and claim statements are immutable after registration \u2014 a changed statement is a new claim that supersedes the old, with the link recorded.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: claims registered through ClaimRegister",
+        "Draft (proposed) claims may be revised pre-freeze per WS2 lifecycle"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "src/tekmerion/claims.py ClaimRegister.register (RegistrationError paths)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_phase3.py::test_no_falsifier_no_registration, ::test_statement_immutable_and_supersede_path",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D4: a registered claim with an empty falsifier, or a post-registration statement edit that does not create a superseding claim."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-04-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-04",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-05",
+      "text": "Circular claim dependencies are rejected: the dependency graph is a DAG and the freeze check names any cycle as circular support.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: within-study claim graph",
+        "Evidence-group dependencies (EVG-) are not graph nodes for cycle purposes"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "src/tekmerion/claims.py find_cycle; src/tekmerion/freeze.py freeze_check",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_phase3.py::test_cycle_is_circular_support",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D5: a frozen registration whose claim graph contains a cycle."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-05-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-05",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-06",
+      "text": "INVALID attaches to the run, not the claim: a control failure, unverified citation, chain break, or deviation from the frozen registration yields a run verdict of INVALID and zero claim verdicts.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: runs evaluated through evaluate_run",
+        "Human adjudication overrides are separate appended records, not run verdicts"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "src/tekmerion/verdicts.py evaluate_run (invalid short-circuit, empty claim_verdicts)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_phase3.py::test_invalid_run_issues_no_claim_verdicts, ::test_failing_control_invalidates_the_run",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D6: any run with a failed control or unverified citation that nevertheless carries a claim-level verdict."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-06-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-06",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-07",
+      "text": "SUPPORTED requires exposure to refutation: the falsifier test must have been capable of firing and the interval of net support must clear the registered margin; otherwise the verdict is INCONCLUSIVE.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: verdicts from evaluate_claim under a registered margin and floor",
+        "Entrenchment rules for conflicting groups are not yet implemented (conflict falls to INCONCLUSIVE by interval straddle)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "src/tekmerion/verdicts.py evaluate_claim (could_falsify gate, interval margin test, sufficiency floor)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_phase3.py::test_untested_is_inconclusive_never_supported, ::test_supported_requires_exposure_and_margin, ::test_below_floor_and_straddle_are_inconclusive",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D7: a SUPPORTED verdict issued for a claim whose evidence set contains no group that could have contradicted it, or whose interval straddles the margin."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-07-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-07",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-08",
+      "text": "Controls certify through the production paths: positive/negative controls are evaluated by the same evaluate_claim function real claims use, and the swap control requires the production Axiomere verifier to detect a provenance swap in a copy of the study ledger.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: the three registered control kinds (positive, negative, swap)",
+        "The swap control verifies a copy; the production ledger is never the tampered one"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "src/tekmerion/verdicts.py run_controls + _swap_control (RT-1)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_phase3.py::test_failing_control_invalidates_the_run (control exercised against the real ledger file)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D8: a control evaluated by a code path that production verdicts or production verification do not use."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-08-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-08",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-09",
+      "text": "Exploratory results cannot be promoted: a confirmation run without a frozen registration is INVALID, and a confirmation registration must disclose its linked exploratory studies (an explicit empty list is required, not an omission).",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: mode separation inside evaluate_run and freeze_check",
+        "Design-shopping beyond disclosure is a governance risk the engine records but cannot prevent (WS3 \u00a74)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "src/tekmerion/verdicts.py evaluate_run (mode wall); src/tekmerion/freeze.py freeze_check (RT-3 disclosure)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_phase3.py::test_confirmation_without_freeze_hits_the_wall, ::test_freeze_check_fails_closed",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D9: a confirmation verdict whose registration lacks a freeze record or a linked-exploratory disclosure."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-09-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-09",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-10",
+      "text": "The citation pipeline (existence, metadata agreement, content support) will drive fabricated or unsupported citations to zero in the evaluation corpus (kill criterion K1: 100% citation resolution).",
+      "kind": "prediction",
+      "status": "draft",
+      "boundary": [
+        "Scope: the Phase 7 frozen evaluation corpus",
+        "This is kill criterion K1 (DN-002): failure kills the MVP slice"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "WS5 pipeline design (docs/architecture/05-trust-safety.md); Spec 002 Phase 4 (T214) not yet built",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "Spec 001 CLM-001-05 carries the same commitment at product level",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D10: the Phase 7 evaluation reports any fabricated or unresolvable citation in the frozen corpus (K1 fails; the MVP slice is killed per DN-002)."
+      ],
+      "uncertainty": "high",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 0.680227,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-10-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-10",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-11",
+      "text": "A complete study run can be exported as an audit bundle whose manifest verifies standalone, using only the bundle and the log files it contains.",
+      "kind": "prediction",
+      "status": "draft",
+      "boundary": [
+        "Scope: Phase 5 export/anchor (not yet built)",
+        "Axiomere checkpoint roots exist today; bundle format and deposit actions do not"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "WS4 \u00a74 bundle format; Spec 002 Phase 5 (T216-T218) not yet built; Axiomere checkpoint roots implemented (AXIOVEX/axiomere)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D11a: an exported bundle whose manifest fails standalone verification."
+      ],
+      "uncertainty": "high",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-11-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-11",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-12",
+      "text": "Withdrawal is a dead snapshot: status dead, a mandatory reason on the record, score forced to 0.0, and the record's full history remains readable.",
+      "kind": "requirement",
+      "status": "supported",
+      "boundary": [
+        "Scope: Axiomere dead semantics as consumed by StudyStore.withdraw"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "AXIOVEX/axiomere crates/axiomere/src/lib.rs mark_dead + current_view",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "artifact",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        },
+        {
+          "ref": "tests/test_store_axiomere.py::test_withdrawal_is_dead_snapshot_not_deletion; axiomere-python tests (5)",
+          "kind": "observed",
+          "direction": "supports",
+          "source_quality": "test",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D1b: a withdrawn record whose prior snapshots are not fully readable, or a dead record with score other than 0.0 or no reason."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "docs/design-notes/DN-005-absolute-append-only.md",
+      "domain": "",
+      "confidence": 1.0,
+      "confidence_band": "high",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-12-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-12",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-002-13",
+      "text": "Before any pilot, a study checkpoint root will be deposited with an external anchor the operator does not control, and the deposit receipt will be part of the study record (AR-1 / gate G2).",
+      "kind": "prediction",
+      "status": "draft",
+      "boundary": [
+        "Scope: Phase 5 anchor transport (not yet built)",
+        "Axiomere checkpoint roots exist today; anchor transport does not"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "WS4 records/export design + Spec 002 gate G2/AR-1 (docs/architecture/04-records-export.md)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-002-D11b: a pilot started before the AR-1 anchor demonstration, or an anchor receipt missing from the study record."
+      ],
+      "uncertainty": "high",
+      "severity": "high",
+      "source_ref": "specs/002-mvp-implementation/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-002-13-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-002-13",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    }
+  ],
+  "scores": {
+    "CLM-002-01": {
+      "claim_id": "CLM-002-01",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-002-02": {
+      "claim_id": "CLM-002-02",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-002-03": {
+      "claim_id": "CLM-002-03",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-002-04": {
+      "claim_id": "CLM-002-04",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-002-05": {
+      "claim_id": "CLM-002-05",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-002-06": {
+      "claim_id": "CLM-002-06",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-002-07": {
+      "claim_id": "CLM-002-07",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-002-08": {
+      "claim_id": "CLM-002-08",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-002-09": {
+      "claim_id": "CLM-002-09",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-002-10": {
+      "claim_id": "CLM-002-10",
+      "direct_score": 0.680227,
+      "propagated_score": 0.680227,
+      "band": "medium",
+      "components": {
+        "evidence": 0.418594,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence"
+      ]
+    },
+    "CLM-002-11": {
+      "claim_id": "CLM-002-11",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-002-12": {
+      "claim_id": "CLM-002-12",
+      "direct_score": 1.0,
+      "propagated_score": 1.0,
+      "band": "high",
+      "components": {
+        "evidence": 1.0,
+        "independence": 1.0,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": []
+    },
+    "CLM-002-13": {
+      "claim_id": "CLM-002-13",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    }
+  },
+  "recoveries": [
+    {
+      "failure_id": "AEE-CLM-002-01-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-01",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-02-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-02",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-03-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-03",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-04-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-04",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-05-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-05",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-06-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-06",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-07-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-07",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-08-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-08",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-09-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-09",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-10-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-10",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-11-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-11",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-12-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-12",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-002-13-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-002-13",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    }
+  ],
+  "metadata": {
+    "threshold": 0.7,
+    "input": "specs/002-mvp-implementation/aee-claims.json"
+  }
+}
