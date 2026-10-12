@@ -7,7 +7,7 @@ ratification, 2026-10-12. **Counsel review is required before execution with any
 partner.** The header above stands as this document's drafting provenance;
 adoption changes nothing substantive in the text.
 **Date:** 2026-10-12 · **Closes:** HECVAT register item 14 (with the DPA term) ·
-**Sources:** DN-010 (Tao realignment doctrine), `specs/005-enterprise-platform/spec.md`
+**Sources:** DN-010 (stage-model doctrine), `specs/005-enterprise-platform/spec.md`
 (§8: no secondary use), `specs/009-mcp-server/spec.md`, `docs/install.md`,
 HECVAT draft §7.
 

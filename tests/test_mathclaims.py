@@ -1,4 +1,4 @@
-"""Spec 003 math-layer tests: the Tao doctrine as seeded defects.
+"""Spec 003 math-layer tests: the stage model as seeded defects.
 
 Each test names the failure it exists to catch: a sorry in the bytes
 must fail proof verification from the artifact itself; a scope mismatch

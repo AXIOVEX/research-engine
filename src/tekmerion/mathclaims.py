@@ -1,4 +1,4 @@
-"""Math layer (Spec 003; DN-010 — the Tao doctrine, mechanized).
+"""Math layer (Spec 003; DN-010 — the stage model, mechanized).
 
 A public headline result ("X solved Y") is not one claim. It is five:
 the formal statement is faithful to the original problem; the proof is

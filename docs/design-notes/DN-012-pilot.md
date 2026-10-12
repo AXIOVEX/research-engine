@@ -18,7 +18,7 @@
 ## Basis
 
 - **G2 evidence** (DN-008): audit-bundle export with independent verification and a live Zenodo anchor, verified by read-back at ratification.
-- **Public demonstration:** the Spec 003 worked study (2026 AI-mathematics claims) — frozen, verdicted, and anchored at DOI [10.5281/zenodo.23317259](https://doi.org/10.5281/zenodo.23317259) — plus the Tao realignment audit of all prior work (`docs/audits/2026-10-12-tao-realignment-audit.md`), including its corrections to the demo study's record (bundle v3, DOI [10.5281/zenodo.23317023](https://doi.org/10.5281/zenodo.23317023)).
+- **Public demonstration:** the Spec 003 worked study (2026 AI-mathematics claims) — frozen, verdicted, and anchored at DOI [10.5281/zenodo.23317259](https://doi.org/10.5281/zenodo.23317259) — plus the stage-model audit of all prior work (`docs/audits/2026-10-12-stage-model-audit.md`), including its corrections to the demo study's record (bundle v3, DOI [10.5281/zenodo.23317023](https://doi.org/10.5281/zenodo.23317023)).
 - **G3 thresholds** (owner, 2026-10-12, same ratification): K3 adjudicator audit-time budget **2 hours per bundle**; K5 cost ceiling **$25 per question**. The pilot's pre-registered criteria adopt both values unchanged (DESIGN.md §3).
 - **Product surface:** the Phase 6 register-first UI (constitution v1.2.0; wireframe-governed) and Spec 005 E1 identity core (OIDC, key enrollment, service-layer RBAC, platform audit ledger) are built and merged; E2 (SAML) is authorized and in flight.
 

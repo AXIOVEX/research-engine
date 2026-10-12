@@ -1,7 +1,7 @@
-# Spec 003 — The Math Layer: theorem claims under the Tao doctrine
+# Spec 003 — The Math Layer: theorem claims under the stage model
 
 **Status:** DRAFT — claims first (this spec's `aee-claims.json` is assessed before code, per Article XII) · **Date:** 2026-10-12 · **Constitution:** v1.1.0
-**Authority:** DN-010 (Tao realignment, adopted 2026-10-12) · Spec 002 machinery (register, freeze, verdicts, verification, export, deposit) · Owner directive 2026-10-12 (worked study on the 2026 public AI-mathematics claims).
+**Authority:** DN-010 (stage model, adopted 2026-10-12) · Spec 002 machinery (register, freeze, verdicts, verification, export, deposit) · Owner directive 2026-10-12 (worked study on the 2026 public AI-mathematics claims).
 **Scope:** a math layer over the Spec 002 engine that takes a public headline result ("X solved Y") and returns a decomposed, evidenced, lane-separated verdict — plus its first worked study. Nothing beyond that slice.
 
 ## 1. Purpose

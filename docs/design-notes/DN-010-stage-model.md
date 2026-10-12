@@ -1,8 +1,8 @@
-# Design Note 010 — Tao Realignment: the engine's doctrine for public claims
+# Design Note 010 — The Stage Model: the engine's doctrine for public claims
 
 **Date:** 2026-10-12 · **Status:** Adopted (owner directive, 2026-10-12).
-**Decision source:** Owner realignment brief, 2026-10-12, aligning the program on Terence Tao's stated positions — his Sept 11, 2026 Caltech Science × AI keynote; the 25-Fields-Medalist declaration "A Severe Misalignment of AI in Mathematics"; and his New Scientist interview. (The doctrine below is adopted on the owner's direction; the three sources are cited as the brief names them.)
-**Scope:** Tekmerion product doctrine. The parallel realignment of the AEE framework itself is separate work in the AEE repos and is not governed by this note.
+**Decision source:** Owner brief, 2026-10-12. The doctrine below is adopted on the owner's direction as the program's standard for public claims.
+**Scope:** Tekmerion product doctrine. The parallel adoption of this doctrine for the AEE framework itself is separate work in the AEE repos and is not governed by this note.
 
 ## Decision
 
@@ -10,7 +10,7 @@ Tekmerion's treatment of any public claim — above all a headline mathematical
 result — follows eight points. Each point names the engine mechanism that
 carries it; a point with no mechanism is a slogan, and this note adopts none.
 
-| # | Point (Tao) | Engine mechanism (where it lives) |
+| # | Point | Engine mechanism (where it lives) |
 |---|-------------|-----------------------------------|
 | 1 | A result passes five stages — **created, checked, explained, accepted, digested** — and creation + checking alone never settle it. | Verdict records distinguish the checked state (verification lane) from explained/accepted/digested states (acceptance lane). No code path promotes a lane-1 state into a settled result (Spec 003, `mathclaims`). |
 | 2 | "Solved" decomposes into five claims: (i) the formal statement is **faithful** to the original problem; (ii) the proof is **verified**; (iii) the problem was **genuinely open**; (iv) **attribution is clean**, prior literature cited; (v) the result is **significant and explained**. | The theorem-claim schema: a parent claim plus five first-class sub-claims in the register, each with its own falsifier, evidence, and verdict. The parent verdict is a composition that can never outrun its weakest load-bearing sub-claim (Spec 003 §2). |
@@ -38,6 +38,6 @@ carries it; a point with no mechanism is a slogan, and this note adopts none.
 If a Tekmerion output is found presenting a machine-checked result as
 accepted/digested understanding (lane confusion), or a parent theorem verdict
 standing above a contested or unverified load-bearing sub-claim, or an
-exported "solved count" offered as a verdict — the realignment has failed in
+exported "solved count" offered as a verdict — the doctrine has failed in
 the artifact, whatever this note says, and the defect is in the product, to
 be fixed in the open.

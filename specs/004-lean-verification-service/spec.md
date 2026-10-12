@@ -1,7 +1,7 @@
 # Spec 004 — Lean Verification Service (first-class engine component)
 
 - **Date:** 2026-10-12 · **Status:** Draft (claims first; assessed before code)
-- **Doctrine:** DN-010 (Tao realignment). This service is lane-1 machinery: it produces *evidence*, never verdicts.
+- **Doctrine:** DN-010 (stage model). This service is lane-1 machinery: it produces *evidence*, never verdicts.
 - **Owner directive:** 2026-10-12 — Lean as a persistent service any study can call; this service is the reference implementation of the domain-adapter interface (Part 2 survey, docs/surveys/2026-10-12-domain-evidence-adapters.md).
 
 ## 1. Purpose

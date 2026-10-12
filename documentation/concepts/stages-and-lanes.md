@@ -1,9 +1,8 @@
 # Stages & lanes
 
 Tekmerion's doctrine for any claim — above all a headline result —
-follows the five-stage model adopted in design note **DN-010** (the Tao
-realignment, 2026-10-12, aligning the program on Terence Tao's stated
-positions in his Sept 11, 2026 Caltech keynote and related statements).
+follows the five-stage model adopted in design note **DN-010**
+(adopted 2026-10-12).
 
 ## The five stages
 
