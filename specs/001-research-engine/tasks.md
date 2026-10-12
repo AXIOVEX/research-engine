@@ -31,7 +31,7 @@
 ## Owner gates (one at a time, never bundled)
 
 - [x] T016 OD-1 — MVP slice + kill criteria APPROVED by owner 2026-10-11 (DN-002).
-- [!] T017 OD-2 — deployment shape direction (hosted / local / hybrid).
+- [x] T017 OD-2 — deployment shape APPROVED by owner 2026-10-11 (DN-003): hybrid architecture, hosted-first pilot.
 - [!] T018 Any spend or external signup beyond free API keys — none requested in this phase.
 
 ## Explicitly not in this phase

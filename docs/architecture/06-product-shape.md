@@ -25,7 +25,7 @@ The engine is API-first (the UI is one client):
 
 Every mutating call appends events (WS4); there is no update-in-place endpoint for record objects.
 
-## 3. Deployment shapes (OD-2 — owner decision)
+## 3. Deployment shapes (OD-2 — RATIFIED 2026-10-11, DN-003: hybrid, hosted-first pilot)
 
 | Shape | Fits | Trade-offs |
 |-------|------|------------|
@@ -33,7 +33,7 @@ Every mutating call appends events (WS4); there is no update-in-place endpoint f
 | **Institution-local** | Integrity offices, sensitive/unpublished corpora (OQ-5.2) | Strongest data control; heavier IT lift; updates and connector keys are the institution's |
 | **Hybrid** (local record store, hosted connectors/verification) | Most universities, long-term | Record never leaves campus; verification and discovery use shared services |
 
-**Recommendation (for owner decision, not yet decided):** design for hybrid from the start — the record store and the connector layer are separate deployables precisely so custody of the record can sit with the institution. Hosted-first for the pilot (speed of learning), with the bundle export guaranteeing no lock-in: an institution can leave with a complete, verifiable record. That exit guarantee is a feature of the defensibility pitch, not a concession.
+**Recommendation — RATIFIED (DN-003):** design for hybrid from the start — the record store and the connector layer are separate deployables precisely so custody of the record can sit with the institution. Hosted-first for the pilot (speed of learning), with the bundle export guaranteeing no lock-in: an institution can leave with a complete, verifiable record. That exit guarantee is a feature of the defensibility pitch, not a concession.
 
 ## 4. MVP slice (OD-1 — proposed in spec 001 §6)
 
