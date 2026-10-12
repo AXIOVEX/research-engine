@@ -18,6 +18,8 @@
 - [x] T203 Event store done: append-only JSONL, single sequencing point (lock + monotonic seq), SHA-256 hash chain, fsync appends.
 - [x] T204 Projections + replay done: invalid log replays INVALID with no verdicts surfaced.
 - [x] T205 Standalone verifier core done (`verify_log` needs only the log file); bundle-level manifest verification lands in Phase 5.
+- [x] T223 DN-005 code alignment done (2026-10-11): tombstone redaction removed from the record service; no-redaction test in place. (Payload encryption at ingest + erasure-certificate protocol moved to the Axiomere layer — tracked in AXIOVEX/axiomere DESIGN §6, still open.)
+- [x] T224 Record layer adopted: **Axiomere** (DN-007) — `tekmerion.store.StudyStore` over the `axiomere` Python package; Phase 1 EventStore retained as prototype/reference. Migration of remaining Phase 3+ services proceeds on Axiomere from the start.
 
 ## Phase 2 — Connectors
 

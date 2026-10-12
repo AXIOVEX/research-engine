@@ -33,3 +33,7 @@ Each phase ends with its seeded-defect tests green *and able to fail* (a test th
 - OpenAlex credit economics at evaluation scale (mitigated by reservation, RT2-2; measured in Phase 7 under K5).
 - Full-text availability for support checks varies by field (RT2-3; coverage reported, not hidden).
 - LLM extraction nondeterminism in replay (WS3 §5/WS4 §3: verdict-level comparison + variance log; OQ-3.1 budget set by Phase 7 measurement).
+
+## Phase records
+
+- 2026-10-11 — Phase 0/1 complete (record service live, 8/8 tests, CI green). **DN-005 adopted** (absolute append-only; redaction removed). **DN-006:** framework renamed **Tekmerion**. **DN-007:** record layer is **Axiomere** (AXIOVEX/axiomere + axiomere-python); Phase 1 EventStore is the prototype/reference, `tekmerion.store.StudyStore` is the live surface. Phase 2 begins on Axiomere.

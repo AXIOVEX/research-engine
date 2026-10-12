@@ -1,0 +1,74 @@
+"""Tekmerion study store — the framework's record layer is Axiomere (DN-007).
+
+One study = one `.axmr` ledger (AXIOVEX/axiomere, via the `axiomere`
+Python package). Claims are snapshots, verdicts are typed appends,
+withdrawal is a dead snapshot, and a freeze is a Merkle checkpoint.
+There is no delete here because there is no delete beneath here.
+
+The Phase 1 prototype (`tekmerion.record`) remains for reference; new
+Spec 002 work writes through this module.
+"""
+
+from __future__ import annotations
+
+from typing import Any, Optional
+
+try:
+    import axiomere
+except ImportError as exc:  # pragma: no cover
+    raise ImportError(
+        "tekmerion.store requires the axiomere package: "
+        "https://github.com/AXIOVEX/axiomere-python (native extension "
+        "built from https://github.com/AXIOVEX/axiomere)"
+    ) from exc
+
+
+class StudyStore:
+    """A study's Axiomere ledger, with Tekmerion's event vocabulary."""
+
+    def __init__(self, db: "axiomere.Database") -> None:
+        self.db = db
+
+    @classmethod
+    def create(cls, path: str, *, seed_hex: Optional[str] = None) -> "StudyStore":
+        return cls(axiomere.Database.create(path, seed_hex=seed_hex))
+
+    @classmethod
+    def open(cls, path: str, *, seed_hex: Optional[str] = None) -> "StudyStore":
+        return cls(axiomere.Database.open(path, seed_hex=seed_hex))
+
+    # -- the Tekmerion vocabulary, expressed as Axiomere appends ---------
+
+    def register_claim(self, claim_id: str, content: dict[str, Any], *, actor: str,
+                       score: Optional[float] = None) -> dict:
+        """Register (or revise) a claim: a new snapshot in its lineage."""
+        return self.db.snapshot(claim_id, content, actor=actor, score=score)
+
+    def issue_verdict(self, claim_id: str, verdict: dict[str, Any], *, actor: str) -> dict:
+        """Issue a verdict. Verdicts are appends, never edits; a changed
+        verdict is a new verdict event superseding by order, with the old
+        one still on the record."""
+        return self.db.append("verdict.issued", {"claim_id": claim_id, **verdict}, actor=actor)
+
+    def log_query(self, connector: str, query: dict[str, Any], *, actor: str) -> dict:
+        """Record a connector query in the study ledger itself, so the
+        provenance of everything retrieved is chained and signed."""
+        return self.db.append("connector.query", {"connector": connector, **query}, actor=actor)
+
+    def withdraw(self, record_id: str, *, reason: str, actor: str) -> dict:
+        """The only removal that exists: dead snapshot, reason recorded,
+        score 0.0 — history intact (DN-005)."""
+        return self.db.dead(record_id, reason=reason, actor=actor)
+
+    def freeze(self, *, actor: str) -> dict:
+        """Freeze = Merkle checkpoint. The root in the returned event is
+        the freeze commitment Phase 5 anchors externally (AR-1)."""
+        return self.db.checkpoint(actor=actor)
+
+    # -- reads --------------------------------------------------------------
+
+    def current_claims(self, *, include_dead: bool = False) -> dict:
+        return self.db.current(include_dead=include_dead)
+
+    def verify(self) -> "axiomere.Verification":
+        return self.db.verify()
