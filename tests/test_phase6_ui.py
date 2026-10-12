@@ -461,7 +461,18 @@ def test_demo_study_anchor_receipts_render_from_the_record(ui):
     assert "anchor.recorded" in body and "seq 13" in body
     assert "10.5281/zenodo.23317023" in body          # the audit re-anchor (seq 19)
     _, _, body = client.get(f"/studies/{sid}/", role="researcher", actor="op-one")
-    assert "Latest run: INVALID" in body              # replayed from the record
+    # Phase 7 re-derivation: this page used to show "Latest run: INVALID",
+    # replayed under the swap control's defective fixed lines-1/2 selection
+    # (both 'researcher' in this study — a no-op exchange). The control now
+    # selects the first distinct-actor pair (lines 2 and 8 here:
+    # 'researcher'/'adjudicator') and detects its tamper, so a replay under
+    # current machinery finds no run failure; with no verdict.issued events
+    # the study presents as not-run. The historical INVALID stands as
+    # issued — it is in the ledger's audit.stage_assigned event, the
+    # anchored bundles, and DN-008 — and no verdicts are issued
+    # retroactively. (Spec 002 Phase 7, Step 1a.)
+    assert "Latest run: INVALID" not in body          # fixed control: replay is clean
+    assert "Latest run: valid" not in body            # and nothing was ever issued
     assert "1 / 2" in body                            # citations resolved
 
 

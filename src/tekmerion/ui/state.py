@@ -26,10 +26,13 @@ shown from them. Before any run is issued, the workspace *replays*
 the run-level checks that are reconstructible from the record —
 chain verification, the WS3 §1 structural checks, and the swap
 control (RT-1) — through `tekmerion.verdicts.evaluate_run` itself.
-An INVALID replay is displayed as INVALID with the engine's reasons:
-for the Phase 5 demo study this reproduces, from the record alone,
-the INVALID its driver recorded (the swap control cannot bite on a
-ledger whose first events share one actor).
+An INVALID replay is displayed as INVALID with the engine's reasons.
+(Phase 7 correction to this note: the swap control's event selection
+was fixed — it exchanges the first pair of events with distinct
+actors, or rewrites a probe actor on single-actor ledgers — so a
+replay now applies the control as it stands today. The Phase 5 demo
+study's INVALID was issued under the defective fixed lines-1/2
+selection and stands as recorded; it is not re-derived here.)
 """
 
 from __future__ import annotations
