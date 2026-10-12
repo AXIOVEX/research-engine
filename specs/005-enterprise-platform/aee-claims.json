@@ -1,6 +1,6 @@
 {
   "spec": "specs/005-enterprise-platform/spec.md",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "date": "2026-10-12",
   "claims": [
     {
@@ -689,6 +689,288 @@
           "direction": "supports",
           "kind": "asserted",
           "ref": "Constitution Article IV",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-23",
+      "kind": "compliance",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "low",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "All product language frames CMMC truthfully: CMMC (32 CFR Part 170) certifies organizations and assessment boundaries, not software; Tekmerion claims only CMMC Level 2 alignment / compliance support, implies Level 1 by that alignment, and nowhere claims Level 3 (SP 800-172) practices.",
+      "boundary": [
+        "Scope: every product surface — docs, spec language, UI copy, exports, marketing-adjacent text in this repo",
+        "The qualifier structure (alignment / compliance support) is the claim; dropping it anywhere is a violation, not a wording choice"
+      ],
+      "falsification_tests": [
+        "F-005-23: any surface stating or implying a 'CMMC compliant product', 'CMMC certified' software, or Level 3 practice coverage without the §13.1 qualifier structure."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12), CMMC posture section",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Spec 005 §13 (CMMC amendment, claims-first, 2026-10-12) §13.1",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "32 CFR Part 170 (CMMC program rule: certification attaches to organizations/assessment boundaries)",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-24",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Every NIST SP 800-171 Rev 2 requirement (110, 14 families) is classified in the control responsibility matrix as Platform, Supports, or Organizational, with a stated basis; no family or requirement is omitted, and any phase-exit reclassification updates the matrix in the same commit.",
+      "boundary": [
+        "Scope: SP 800-171 Rev 2 only; SP 800-172 (Level 3) is out of scope per §11",
+        "The 800-53 SA family has no 800-171 counterpart; the matrix records that absence explicitly rather than mapping it silently"
+      ],
+      "falsification_tests": [
+        "F-005-24: a requirement ID from SP 800-171 Rev 2 absent from cmmc-responsibility-matrix.md, a family with no classification rows, or a classification whose named machinery does not exist at the phase exit that claims it."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "specs/005-enterprise-platform/cmmc-responsibility-matrix.md (all 14 families, 110 requirements classified)",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Spec 005 §13 (CMMC amendment, claims-first, 2026-10-12) §13.2",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-25",
+      "kind": "compliance",
+      "status": "draft",
+      "severity": "critical",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "The platform makes no FIPS-validation claim it cannot evidence: every cryptographic operation in the platform plane is listed in the crypto inventory with its implementation and validation status; §3.13.11 (FIPS-validated modules) is recorded as an open gap with recorded migration routes, a cross-repo dependency on the Axiomere roadmap, and an owner decision pending — never as satisfied.",
+      "boundary": [
+        "Scope: platform plane incl. the Axiomere record layer it embeds; tenant-side IdP/KMS cryptography is the tenant's inventory, not this claim's",
+        "E1 delivers the inventory (T549); the validated-module migration itself is NOT an E1 deliverable and this claim must not be read as promising it"
+      ],
+      "falsification_tests": [
+        "F-005-25: a cryptographic operation reachable in the platform plane that is absent from crypto-inventory.md; or any text claiming FIPS 140-3 validation for a module that is not on the CMVP validated-modules list."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Spec 005 §13 (CMMC amendment, claims-first, 2026-10-12) §13.3",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "Axiomere core Cargo.toml: sha2 0.10, ed25519-dalek 2 (capable implementations; neither is a FIPS-validated module)",
+          "source_quality": "artifact"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12), CMMC posture section",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-26",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "The platform audit ledger emits the SP 800-171 §3.3.1/§3.3.2 event classes from E1: account creation and modification, authentication successes and failures, authorization decisions on mutations including denials, administrative actions, the complete key lifecycle, session lifecycle, and API-key lifecycle — each event carrying actor identity, event type, timestamp, target, and outcome.",
+      "boundary": [
+        "Scope: platform plane (deployment + per-tenant audit ledgers); study-plane events remain Spec 002's vocabulary",
+        "E1 delivers the emission; E4 completes review/retention semantics — this claim is discharged in halves and must be scored as such"
+      ],
+      "falsification_tests": [
+        "F-005-26: a mutation or authentication attempt in the E1 surface that produces no corresponding audit event in the T550 sweep, or an audit event missing any element of the AU content set."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Spec 005 §13 (CMMC amendment, claims-first, 2026-10-12) §13.4",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Spec 005 §8 (platform audit ledger) + T510/T550",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-27",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Interactive platform access requires MFA at the tenant IdP, enforced platform-side: tenant IdP policy records the required acr/amr, a session whose assertion lacks MFA evidence cannot act beyond sign-in completion and cannot step up, and authenticator management is the §3 key lifecycle (enrollment with proof of possession, rotation, revocation, closure).",
+      "boundary": [
+        "Scope: interactive human access; service accounts authenticate under CLM-005-18, not this claim",
+        "Password-family requirements (§3.5.7–3.5.10) are not applicable by design — no local passwords exist (CLM-005-01) — and are recorded against the tenant IdP in the matrix, not silently skipped"
+      ],
+      "falsification_tests": [
+        "F-005-27: a session established from an assertion without MFA evidence performing any platform mutation, or stepping up to a verdict-class or admin-plane action."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Spec 005 §13 (CMMC amendment, claims-first, 2026-10-12) §13.5",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Spec 005 §2 (step-up) + §3 (key lifecycle as authenticator management)",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-28",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "medium",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Audit bundles and platform exports carry CUI marking support: banner/footer marking fields in the manifest and HUMAN-README, populated from recorded study/tenant fields (category, controlling authority, dissemination controls); the platform records markings, it does not adjudicate them.",
+      "boundary": [
+        "Scope: export artifacts (study bundles from E6 platform export; study-plane bundle marking fields ride the same manifest extension)",
+        "Specced in the amendment so E1/E4 payloads never need re-shaping; the rendering itself is an E6 deliverable (T551)"
+      ],
+      "falsification_tests": [
+        "F-005-28: an exported bundle for a study/tenant whose record carries CUI marking fields, whose manifest or HUMAN-README omits the corresponding markings."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Spec 005 §13 (CMMC amendment, claims-first, 2026-10-12) §13.6",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Spec 005 §8 (export pattern) + T551",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-29",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "medium",
+      "uncertainty": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "The platform maintains its SP 800-171 control states in SPRS-ready form: per-requirement state, the weighted deduction class of any unimplemented requirement under the DoD scoring methodology (the -203…110 scale), and an evidence link — so an operator can compute and maintain their self-assessment score from platform-maintained inputs.",
+      "boundary": [
+        "Scope: platform-owned and platform-supported requirements; the operator's SPRS submission itself is the operator's act and is not claimed",
+        "E6 deliverable (T552); the matrix (§13.2) is its data source and must stay current per phase exit"
+      ],
+      "falsification_tests": [
+        "F-005-29: a requirement whose matrix classification and SPRS-form state disagree, or an unimplemented requirement with no deduction class recorded."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Spec 005 §13 (CMMC amendment, claims-first, 2026-10-12) §13.7 (SPRS self-assessment support)",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "observed",
+          "ref": "specs/005-enterprise-platform/cmmc-responsibility-matrix.md (the maintained data source)",
+          "source_quality": "artifact"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-30",
+      "kind": "requirement",
+      "status": "draft",
+      "severity": "medium",
+      "uncertainty": "medium",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "Incident-response support is mechanized: security-significant platform events (authentication-failure bursts, break-glass use, revocation storms, audit-verification failures) are first-class signed egress events over the webhook channel, and unimplemented 800-171 requirements live in an append-only POA&M register (items, milestones, status as events) seeded with the §3.13.11 FIPS gap.",
+      "boundary": [
+        "Scope: IR family support only — the incident-response capability and its testing remain the organization's (matrix 3.6)",
+        "Webhook channel is E4 (CLM-005-21); the IR event classes and the POA&M register are E6 (T553/T554) — the claim joins both and is discharged across them"
+      ],
+      "falsification_tests": [
+        "F-005-30: a security-significant event class that produces no egress event in the E4/E6 battery, or a POA&M item whose status changes without an appended event."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Spec 005 §13 (CMMC amendment, claims-first, 2026-10-12) §13.7 (POA&M register; incident-response hooks)",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Spec 005 §9 (webhook egress) + T553/T554",
+          "source_quality": "primary"
+        }
+      ]
+    },
+    {
+      "id": "CLM-005-31",
+      "kind": "compliance",
+      "status": "draft",
+      "severity": "high",
+      "uncertainty": "high",
+      "source_ref": "specs/005-enterprise-platform/spec.md",
+      "text": "The hosted shape's CUI posture is an open owner/legal decision, recorded and visible: DFARS 252.204-7012's FedRAMP-Moderate-equivalency expectation for cloud providers storing CUI is not met by the Axiovex-hosted shape today, hosted-shape materials carry the flag wherever CUI hosting is described, and engineering does not resolve or conceal the question.",
+      "boundary": [
+        "Scope: the Axiovex-hosted shape only; the self-hosted shape (T546) is the fully capable CUI path in the meantime",
+        "This claim is about the flag's visibility and honesty, not about the decision's outcome, which is not engineering's to make"
+      ],
+      "falsification_tests": [
+        "F-005-31: hosted-shape material describing CUI hosting without the open-decision flag, or any engineering artifact treating FedRAMP equivalency as settled."
+      ],
+      "evidence": [
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "Spec 005 §13 (CMMC amendment, claims-first, 2026-10-12) §13.8",
+          "source_quality": "primary"
+        },
+        {
+          "direction": "supports",
+          "kind": "asserted",
+          "ref": "DN-011 (enterprise platform direction, adopted 2026-10-12), CMMC posture section (hosted-shape flag)",
           "source_quality": "primary"
         }
       ]

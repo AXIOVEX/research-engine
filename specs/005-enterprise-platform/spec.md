@@ -84,6 +84,8 @@ Functional scope only — **this spec designs no screens.** The console manages:
 - **Federation metadata aggregates (InCommon MDQ)** — v1.1 candidate; v1 configures IdPs per tenant.
 - **Billing, payments, tenant self-signup** — commercial plumbing, not platform trust; tenant creation in v1 is a platform-admin act.
 - **Self-service key recovery without countersign** — excluded by §3; recovery is re-enrollment.
+- **CMMC Level 3 (NIST SP 800-172) practices** — out of scope for v1; Level 2 alignment is the target (§13).
+- **CMMC certification of the product** — a category error, not a roadmap item: 32 CFR Part 170 certifies organizations and assessment boundaries. The platform claims Level 2 *alignment / compliance support* only (§13), under the same Article X discipline as CLM-005-16.
 
 ## 12. Gates
 
@@ -92,3 +94,49 @@ Functional scope only — **this spec designs no screens.** The console manages:
 - **Article XIV gate** inside E5 (T534-WF): no console code before rendered-wireframe approval.
 - **Pilot gate (G2 analog):** no institutional pilot on the enterprise build until the E4 isolation battery passes and a platform audit export has been demonstrated anchored — the AR-1 pattern applied to the platform plane.
 - **Spend gate:** hosted infrastructure, KMS, or IdP test-tenancy costs return to the owner individually (DN-003's rule).
+- **CMMC amendment sequencing (2026-10-12):** the CMMC amendment (§13, claims CLM-005-23…31) was assessed before E1 code under gate G-ENT-1's authorization, so E1 absorbs the CMMC deltas that touch it (audit completeness, crypto inventory). No phase exit after E1 may close over a [CMMC]-flagged task in its scope.
+
+## 13. CMMC amendment — Level 2 alignment / compliance support (CLM-005-23 … CLM-005-31)
+
+*Added 2026-10-12 by owner directive ("also make this tool CMMC compliant"), claims first (bundle v0.2.0), before E1 code. DN-011's CMMC section carries the direction; this section carries the engineering.*
+
+### 13.1 Framing (binding on all product language)
+
+CMMC (32 CFR Part 170) certifies **organizations and assessment boundaries**, not software products. Tekmerion therefore claims **CMMC Level 2 alignment / compliance support**: the platform is designed so an organization can operate it inside a CMMC Level 2 boundary and evidence the NIST SP 800-171 Rev 2 requirements the platform owns. The design target is all **110 requirements** of SP 800-171 Rev 2. Level 1 (the FAR 52.204-21 subset) is implied by Level 2 alignment. Level 3 (SP 800-172 enhanced practices) is out of scope for v1 (§11). The words "CMMC compliant product" or "CMMC certified" must never appear without this qualifier structure (CLM-005-23) — the same Article X rule CLM-005-16 applies to SOC 2.
+
+### 13.2 Control responsibility matrix
+
+`cmmc-responsibility-matrix.md` (companion to this spec) classifies **every** SP 800-171 Rev 2 requirement: **Platform** (satisfied by construction when the platform is operated as designed), **Supports** (the platform provides the mechanism or the evidence; the operator, IdP, or organization owns the remainder), or **Organizational** (outside product scope). No family is omitted; the matrix also records that SP 800-171 Rev 2 has no SA (System and Services Acquisition) family, so the acquisition obligations a reviewer may expect under that code are organizational/contractual, with platform support limited to provenance evidence. The matrix is a living engineering artifact: a phase exit that changes a classification updates the matrix in the same commit (CLM-005-24).
+
+### 13.3 FIPS-validated cryptography — the open gap, stated plainly (CLM-005-25)
+
+SP 800-171 §3.13.11 requires FIPS-validated cryptographic modules where cryptography protects CUI. **The platform does not satisfy this today and does not claim to:** the Axiomere core hashes and signs with RustCrypto `sha2` / `ed25519-dalek` (capable implementations, not FIPS 140-3 validated modules), and the E1 service layer adds prototype implementations of the same status. The amendment's obligations:
+
+- **Crypto inventory (E1, T549).** Every cryptographic operation in the platform plane — ledger hashing/signing, actor intent signatures, token verification, key hashing, session/token generation, egress signing — is listed with its algorithm, implementation, and validation status in `crypto-inventory.md` (companion artifact, delivered with E1). An operation absent from the inventory is a defect against CLM-005-25.
+- **Routes recorded, not chosen.** Realistic routes to validated modules exist (a FIPS-validated module binding for the platform services — e.g. an AWS-LC-FIPS or OpenSSL FIPS provider route — and, for the record layer, Axiomere core options). Choosing among them commits the Axiomere roadmap and real money; that is a **cross-repo dependency and an owner decision** when the CMMC track reaches it, not a decision this amendment makes. Until then, deployments handling CUI must treat §3.13.11 as an open POA&M item (T553) — the platform's job is to make that status explicit and evidenced, never to blur it.
+
+### 13.4 Audit completeness — AU family absorbed by E1 (CLM-005-26)
+
+The platform audit ledger core (T510) must emit the §3.3.1/§3.3.2 event classes from the start: account creation and modification; authentication successes **and failures**; authorization decisions on mutations, including denials; administrative actions; the complete key lifecycle (enrollment, rotation, revocation, closure); session lifecycle; API-key lifecycle. Each event carries the AU content set (actor identity, event type, timestamp, target, outcome). Review and retention semantics: audit records are append-only and exportable (§8); retention schedules apply to off-ledger copies only. A platform admin action with no corresponding audit event is a defect (the T550 sweep test is the falsifier's instrument).
+
+### 13.5 Identification & authentication — IA deltas (CLM-005-27)
+
+- Interactive platform access requires MFA **at the IdP**, enforced platform-side: tenant IdP policy records the required `acr`/`amr`; a session whose assertion lacks MFA evidence cannot perform platform actions beyond sign-in completion (and cannot step up at all). Verdict-signing and admin-plane step-up (§2) are unchanged and already stricter.
+- Authenticator management is the key lifecycle of §3: enrollment with proof of possession, rotation, revocation, and closure on deprovisioning are the platform's authenticator controls, claimed under CLM-005-04 and this section jointly.
+- Password requirements (§3.5.7–3.5.10) are **not applicable by design** — there are no local passwords (CLM-005-01); they bind the tenant's IdP, and the matrix records them as such rather than leaving them blank.
+
+### 13.6 CUI handling in artifacts (CLM-005-28; E6, T551)
+
+Audit bundles and platform exports carry **CUI marking support**: banner/footer marking fields in the bundle manifest and HUMAN-README, populated from the study/tenant record (marking category, controlling authority, dissemination controls as recorded fields — the platform records markings; it does not adjudicate them). Specced now so E1/E4 event payloads never need re-shaping to carry a marking reference; the export-side rendering lands in E6.
+
+### 13.7 Compliance plane (CLM-005-29, CLM-005-30; E6 extension)
+
+E6's scope is extended and retitled in the plan: **compliance evidence — SOC 2 readiness + CMMC Level 2 support.**
+
+- **SPRS self-assessment support (T552).** The platform tracks its own 800-171 control states (the §13.2 matrix, maintained per phase exit) in a form an operator can carry into the SPRS weighted scoring methodology (the −203…110 scale): per-requirement state, the deduction weight class of any unimplemented requirement, and the evidence link. The platform computes and maintains the *inputs*; the operator's score submission is the operator's act.
+- **POA&M register (T553).** An append-only register — items, affected requirements, milestones, status changes as events — seeded with the §13.3 FIPS gap. Hosted in the platform plane (deployment ledger scope), exportable with the audit export (T542).
+- **Incident-response hooks (T554; joins CLM-005-21).** Security-significant platform events (authentication-failure bursts, break-glass use, revocation storms, audit-verification failures) are first-class egress events over the signed webhook channel (E4), so an operator's IR process receives them as records, not as log noise.
+
+### 13.8 Hosted-shape flag — open owner/legal decision (CLM-005-31)
+
+DFARS 252.204-7012 expects a cloud service provider that stores, processes, or transmits CUI to meet the FedRAMP Moderate baseline or an equivalent. The Axiovex-hosted shape does not meet that expectation today, and this spec does not resolve whether it will, or whether CUI-bearing tenants are self-hosted-only until it does. The flag is recorded here and in DN-011; hosted-shape materials must carry it wherever CUI hosting is described. Engineering's obligation is limited to keeping the flag visible and the self-hosted shape (E6, T546) fully capable for CUI tenants in the meantime.

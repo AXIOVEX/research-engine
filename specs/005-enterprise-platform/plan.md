@@ -10,7 +10,9 @@ E1  Identity core — OIDC (code + PKCE) per-tenant IdP config; internal
     identity model; key enrollment (proof of possession) + rotation /
     revocation; custody modes; authorization service on the WS6 matrix
     + disjoint admin planes; platform audit ledger core; scoped API
-    keys.                                        [CLM-005-01, 03, 04*, 08, 09, 14*, 18]
+    keys. CMMC absorbed (§13): AU event classes, MFA-evidence
+    enforcement, crypto inventory.
+                                       [CLM-005-01, 03, 04*, 08, 09, 14*, 18, 25(inv), 26*, 27]
 E2  SAML — SP for Web Browser SSO; per-tenant metadata + attribute
     mapping (Shibboleth / InCommon class).       [CLM-005-02]
 E3  Provisioning & lifecycle — SCIM 2.0; JIT (no-role default);
@@ -19,14 +21,17 @@ E3  Provisioning & lifecycle — SCIM 2.0; JIT (no-role default);
 E4  Tenancy hardening — tenant context at the data-access layer;
     isolation battery; break-glass (+ alarming, review); session /
     transport baseline battery; signed webhook egress + reference
-    receiver; platform↔study reconciliation join. [CLM-005-09†, 10, 11, 14†, 19, 21, 22]
+    receiver; platform↔study reconciliation join; CMMC IR egress
+    event classes.                    [CLM-005-09†, 10, 11, 14†, 19, 21, 22, 26†, 30*]
 E5  Admin console — FUNCTIONAL build only, behind the Article XIV
     wireframe gate (T534-WF): tenant / IdP / user / role / key /
     audit surfaces as clients of the service APIs. [CLM-005-13]
 E6  Compliance evidence + self-hosted shape — residency pin +
     migration; platform audit export + anchored demonstration;
     SOC 2 readiness mapping document; retention / legal-hold
-    markers; self-hosted packaging + upgrade path. [CLM-005-12, 15, 16, 17]
+    markers; self-hosted packaging + upgrade path. CMMC (§13.7):
+    SPRS support, POA&M register, CUI marking.
+                                       [CLM-005-12, 15, 16, 17, 23, 24, 28, 29, 30†, 31]
 
 Every phase exit: (a) the phase's claims re-assessed at after_implement
 with build evidence; (b) the full Spec 002 battery re-run unchanged
@@ -60,6 +65,15 @@ with build evidence; (b) the full Spec 002 battery re-run unchanged
 | CLM-005-20 no Spec 002 weakening | every exit | Spec 002 battery green unchanged, CI-recorded per phase |
 | CLM-005-21 signed webhooks | E4 | reference receiver rejects unsigned/bad/replayed deliveries |
 | CLM-005-22 platform↔study join | E4 | join walk for a bound actor; no cross-identity pairing (test) |
+| CLM-005-23 CMMC framing honesty (L2 alignment, never product certification) | amendment; swept at E6 (T544) | wording sweep over product surfaces finds no unqualified CMMC claim |
+| CLM-005-24 responsibility matrix complete (110/110) | amendment; maintained per exit | matrix coverage check; classifications match shipped machinery at each exit |
+| CLM-005-25 FIPS position: inventory + open gap, no false claim | E1 (inventory, T549); migration = owner decision | crypto inventory delivered with E1; gap + routes recorded; zero FIPS claims in surfaces |
+| CLM-005-26 AU event-class completeness | E1 core, E4 completion | T550 sweep: every E1 mutation/auth path emits its event with the AU content set |
+| CLM-005-27 MFA at the IdP, platform-enforced | E1 | session without MFA evidence cannot mutate or step up (test) |
+| CLM-005-28 CUI marking in artifacts | E6 (T551) | bundle for a marked study/tenant carries markings in manifest + HUMAN-README |
+| CLM-005-29 SPRS self-assessment support | E6 (T552) | control states export in SPRS-input form; matrix↔state agreement check |
+| CLM-005-30 IR hooks + POA&M register | E4 (hooks, T554) + E6 (register, T553) | IR event classes egress signed; POA&M status changes are appended events only |
+| CLM-005-31 DFARS/FedRAMP hosted-shape flag stays visible | standing | hosted-shape materials carry the open-decision flag (spot-check per exit) |
 
 ## Key decisions recorded in the spec (argued there, indexed here)
 

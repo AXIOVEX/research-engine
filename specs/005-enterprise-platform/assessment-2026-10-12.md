@@ -43,3 +43,27 @@ The engine's challenges, dispositioned per house practice — recorded, answered
 - **Precision** on CLM-005-19 stands after one tightening pass (the claim was rewritten into enumerable checks — named cookie attributes, named headers, the 429 behavior); the residual challenge is recorded.
 
 *Process note:* claims preceded the spec prose (DN-011 and `aee-claims.json` were written and assessed before `spec.md`/`plan.md`/`tasks.md`), and this spec was authored on its own branch/worktree (`enterprise-spec`, `~/workspace/tekmerion-ent`) writing only new files, so the running Tao-audit and Phase 6 UI workstreams are untouched. No implementation exists for any claim above; statuses are drafts and will move only on build evidence at phase exits.
+
+---
+
+## Amendment — CMMC (2026-10-12, after gate G-ENT-1, before E1 code)
+
+**Trigger:** owner directives the same day — G-ENT-1 given (*"start E1 identity core"*), then *"also make this tool CMMC compliant."* The amendment was assessed **before any E1 code**, so E1 absorbs the CMMC deltas that touch it (Spec 005 §13; DN-011 CMMC section).
+
+**Framing (Article X discipline, not optional):** CMMC (32 CFR Part 170) certifies organizations and assessment boundaries, not products. The amendment therefore claims **CMMC Level 2 alignment / compliance support** against NIST SP 800-171 Rev 2 (110 requirements); Level 1 is implied; Level 3 (SP 800-172) is out of scope (§11). The responsibility matrix (`cmmc-responsibility-matrix.md`) classifies all 110 requirements — Platform / Supports / Organizational — and records that SP 800-171 Rev 2 has no SA family (acquisition is organizational/contractual; platform support is provenance evidence only), so the 15-code list in the owner's brief is fully accounted: 14 families in the standard + SA recorded as absent-from-standard.
+
+**New claims (bundle v0.2.0, 31 total), re-assessed at `after_specify`, outcome `gather_evidence` (11 ≥ 0.70, 20 below):**
+
+| Claim | Score | Reading |
+|-------|-------|---------|
+| CLM-005-23 CMMC framing honesty | 0.756 | Rests on DN-011 + §13.1 records; discharged continuously, swept at E6 (T544) |
+| CLM-005-24 matrix complete, 110/110 | 0.958 | The matrix artifact exists and was verified complete at authoring; classifications re-checked per phase exit |
+| CLM-005-25 FIPS position + inventory obligation | 0.968 | Scores the *position* (gap + routes + dependency recorded; zero FIPS claims). The inventory itself is an E1 deliverable (T549); §3.13.11 satisfaction is an owner-decision-gated migration, **not** claimed |
+| CLM-005-26 AU event-class completeness | 0.68 | **draft** — E1 core (T550 sweep is its instrument), E4 completion |
+| CLM-005-27 MFA at IdP, platform-enforced | 0.68 | **draft** — E1 (joins T503) |
+| CLM-005-28 CUI marking in artifacts | 0.68 | **draft** — E6 (T551); specced now so payloads never re-shape |
+| CLM-005-29 SPRS self-assessment support | 0.958 | **Score flagged as ahead of its machinery:** the evidence is the matrix artifact (its data source) + §13.7. The matrix does not yet carry per-requirement SPRS deduction classes — that is T552 (E6). Recorded here so the 0.958 is never quoted as the feature existing; re-examined at E6 exit |
+| CLM-005-30 IR hooks + append-only POA&M | 0.68 | **draft** — E4 hooks (T554) + E6 register (T553), seeded with the FIPS gap |
+| CLM-005-31 DFARS/FedRAMP hosted-shape flag | 0.68 | **draft** — standing flag; an open owner/legal decision engineering does not resolve |
+
+The original 22 claims' scores are unchanged by the amendment run (same evidence; the seven above-threshold claims stand as recorded in the first section). Tasks absorbed the deltas in place: [CMMC] flags on T503, T507, T510, T529, T531, T542, T544; new tasks T549 (crypto inventory, E1), T550 (AU completeness, E1), T551 (CUI marking, E6), T552 (SPRS support, E6), T553 (POA&M register, E6), T554 (IR event classes, E4). E6 is retitled "Compliance evidence (SOC 2 readiness + CMMC Level 2 support) + self-hosted shape" in plan and tasks.
