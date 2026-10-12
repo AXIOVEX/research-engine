@@ -1,0 +1,343 @@
+{
+ "spec": "specs/003-math-claims/spec.md",
+ "version": "0.1.0",
+ "date": "2026-10-12",
+ "claims": [
+  {
+   "id": "CLM-003-01",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/003-math-claims/spec.md",
+   "text": "A theorem claim is registered as a parent claim plus five first-class sub-claims (faithful, proof_verified, genuinely_open, attribution, significance), each with its own falsifier, evidence, and verdict; the parent carries no evidence of its own.",
+   "boundary": [
+    "Scope: tekmerion.mathclaims theorem registration over the Spec 002 register",
+    "Sub-claim ids follow the Spec 003 §2 scheme"
+   ],
+   "falsification_tests": [
+    "F-003-D1: a theorem parent registered with any of the five sub-claims missing, unevidenced, or sharing the parent's falsifier verbatim."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "DN-010 point 2 + Spec 003 §2 (theorem claim schema)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "tekmerion.claims.ClaimRegister (parent/dependency DAG exists in the production register)",
+     "source_quality": "artifact"
+    }
+   ]
+  },
+  {
+   "id": "CLM-003-02",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "medium",
+   "source_ref": "specs/003-math-claims/spec.md",
+   "text": "The parent theorem verdict never outruns its weakest load-bearing sub-claim: a live attribution dispute caps the parent at contested, any contradicted sub-claim makes the parent contradicted, and supported requires all five sub-claims supported.",
+   "boundary": [
+    "Scope: the composition rule in tekmerion.mathclaims over WS3 sub-verdicts",
+    "Precedence is the Spec 003 §2 order; sub-verdicts remain visible beside the parent"
+   ],
+   "falsification_tests": [
+    "F-003-D2: any issued parent verdict of supported while a sub-claim verdict is inconclusive/contradicted or an attribution dispute stands unresolved."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "DN-010 points 2 + 4; Spec 003 §2 composition precedence",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "tekmerion.verdicts.evaluate_run/evaluate_claim (WS3 sub-verdicts the composition consumes)",
+     "source_quality": "artifact"
+    }
+   ]
+  },
+  {
+   "id": "CLM-003-03",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/003-math-claims/spec.md",
+   "text": "Lean ingestion content-hashes every fetched artifact and derives its sorry/admit counts and statement text from the artifact bytes; an ingestion record naming a URL whose bytes were not fetched does not exist.",
+   "boundary": [
+    "Scope: tekmerion.mathclaims.ingest_lean_artifact",
+    "Fetch is by URL over public HTTP; private/authenticated artifacts are out of scope"
+   ],
+   "falsification_tests": [
+    "F-003-D3: an ingestion record whose stated SHA-256 does not match the bytes at the stated URL at retrieval time, or whose sorry count differs from a hand count of the same bytes."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "Spec 003 §3 (fetch + hash + parse)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "tekmerion.connectors HttpJson fetch discipline + WS1 query ledgering (pattern reused)",
+     "source_quality": "artifact"
+    }
+   ]
+  },
+  {
+   "id": "CLM-003-04",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "medium",
+   "source_ref": "specs/003-math-claims/spec.md",
+   "text": "Compile status distinguishes run_by_us (toolchain version, exit code, output hash recorded), not_runnable_here (reason recorded; never scored as proof failure), and claimed_by_source (claimant's own evidence cited as asserted); no record presents an unrun compile as run.",
+   "boundary": [
+    "Scope: compile reporting in the ingestion record and the proof_verified evidence built on it",
+    "A local Lean 4.33.1 toolchain exists under ~/.elan/toolchains; Mathlib-scale builds are not present and bound what is runnable"
+   ],
+   "falsification_tests": [
+    "F-003-D4: an ingestion record marked run_by_us for a compile whose command, toolchain version, or output hash cannot be produced from the record; or a not_runnable_here artifact scored as proof-contradicting."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "Spec 003 §3 honesty states",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Lean 4.33.1 toolchain binaries present at ~/.elan/toolchains/leanprover--lean4---v4.33.1/bin (lean --version run during spec drafting)",
+     "source_quality": "artifact"
+    }
+   ]
+  },
+  {
+   "id": "CLM-003-05",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/003-math-claims/spec.md",
+   "text": "Every theorem claim pins the extracted formal statement beside the original problem statement verbatim with its source, so the faithfulness gap is adjudicable from the pinned pair rather than from memory or paraphrase.",
+   "boundary": [
+    "Scope: the faithful sub-claim's evidence set",
+    "The original statement's source is the problem's primary listing or the claimant's own announcement, retrieved and dated"
+   ],
+   "falsification_tests": [
+    "F-003-D5: a faithful sub-claim carrying a verdict whose evidence set lacks either the pinned formal statement text or the sourced original statement text."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "DN-010 point 2(i); Spec 003 §3 faithfulness pinning",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-003-06",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "medium",
+   "uncertainty": "medium",
+   "source_ref": "specs/003-math-claims/spec.md",
+   "text": "Openness evidence comes from a primary status source plus a connector literature search with queries ledgered; the check emits evidence on the genuinely_open sub-claim and never a verdict by itself.",
+   "boundary": [
+    "Scope: tekmerion.mathclaims openness check; Erdős problems use the erdosproblems.com status listing as primary",
+    "Search coverage is Crossref + OpenAlex (the WS1 registry); absence of hits is recorded as absence within that coverage, not as proof of openness"
+   ],
+   "falsification_tests": [
+    "F-003-D6: a genuinely_open verdict whose evidence contains no primary-status-source record, or an openness check that wrote a verdict instead of evidence."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "Spec 003 §4 (openness)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "tekmerion.connectors.run_query (queries ledgered before results are used)",
+     "source_quality": "artifact"
+    }
+   ]
+  },
+  {
+   "id": "CLM-003-07",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/003-math-claims/spec.md",
+   "text": "An attribution dispute is registered as a ledger record naming the parties, each side's position, and each side's retrieved evidence; attribution state is a replay of those records, and a standing dispute is mechanically visible as contested.",
+   "boundary": [
+    "Scope: tekmerion.mathclaims dispute registration + attribution state projection",
+    "The engine registers and projects disputes; it does not decide who is right — adjudication is a named human append (Article IX)"
+   ],
+   "falsification_tests": [
+    "F-003-D7: a dispute record carrying only one side's evidence, or an attribution state of undisputed while a dispute record stands unresolved in the ledger."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "DN-010 point 4; Spec 003 §4 (attribution)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "tekmerion.verification.queue_state precedent: state as replay of appends, never edits",
+     "source_quality": "artifact"
+    }
+   ]
+  },
+  {
+   "id": "CLM-003-08",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/003-math-claims/spec.md",
+   "text": "Every theorem claim carries either a digestion record (named explainer + explanation artifact) or the explicit UNEXPLAINED state with its risk flag set; the flag appears on the parent record and in exports whenever the state is UNEXPLAINED.",
+   "boundary": [
+    "Scope: tekmerion.mathclaims digestion records + theorem report rendering",
+    "An explanation artifact is a public link or pinned quotation from a named human; claimant self-explanation is recordable but labeled as the claimant's"
+   ],
+   "falsification_tests": [
+    "F-003-D8: a theorem report or bundle entry for a claim with no digestion record that does not show UNEXPLAINED + risk flag."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "DN-010 point 3; Spec 003 §5 (digestion)",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-003-09",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "low",
+   "source_ref": "specs/003-math-claims/spec.md",
+   "text": "Every theorem verdict record carries lane1_verification and lane2_acceptance as separate fields, and lane 2 advances only on human-evidence events (named explainer artifact, named adjudicator decision) — never as a side effect of lane-1 completion.",
+   "boundary": [
+    "Scope: theorem verdict records produced by tekmerion.mathclaims (composition + report + bundle projection)",
+    "Lane-2 stages: unexplained, explained, accepted, digested"
+   ],
+   "falsification_tests": [
+    "F-003-D9: a verdict record whose lane2_acceptance exceeds what its human-evidence events support (e.g., digested with no digestion record), or a record lacking either lane field."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "DN-010 points 1 + 6; Spec 003 §5 (two lanes)",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-003-10",
+   "kind": "compliance",
+   "status": "draft",
+   "severity": "medium",
+   "uncertainty": "low",
+   "source_ref": "specs/003-math-claims/spec.md",
+   "text": "No math-layer report or export publishes an aggregate count of solved results; outputs enumerate per-claim verdicts only.",
+   "boundary": [
+    "Scope: tekmerion.mathclaims reports and the audit-bundle projection of theorem verdicts",
+    "Internal completeness accounting (e.g., citation outcome counts, WS5 §2 coverage) is not a verdict surface and is out of this claim's scope"
+   ],
+   "falsification_tests": [
+    "F-003-D10: any math-layer output containing a field or sentence of the form 'N solved' / 'N of M results established' presented as a result."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "DN-010 point 5 (anti-gradability); Spec 003 §6",
+     "source_quality": "primary"
+    }
+   ]
+  },
+  {
+   "id": "CLM-003-11",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "medium",
+   "uncertainty": "medium",
+   "source_ref": "specs/003-math-claims/spec.md",
+   "text": "A resolved claim is seeded into its source's per-source reliability record as a replayable ledger projection (asserted claim, resolution outcome, resolution evidence); a case whose claim or resolution cannot be identified from retrieved sources seeds nothing.",
+   "boundary": [
+    "Scope: tekmerion.mathclaims reliability events + projection; the worked study's case (e) is the first seed candidate",
+    "Reliability here is a factual track record, not a score that reweights verdicts automatically"
+   ],
+   "falsification_tests": [
+    "F-003-D11: a reliability record naming a resolved-false claim whose resolution evidence cannot be retrieved from the recorded reference, or a seed entered for an unidentified retraction."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "Spec 003 §7 (reliability record)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "Append-only projection pattern (verification.queue_state; export coverage) reused",
+     "source_quality": "artifact"
+    }
+   ]
+  },
+  {
+   "id": "CLM-003-12",
+   "kind": "requirement",
+   "status": "draft",
+   "severity": "high",
+   "uncertainty": "medium",
+   "source_ref": "specs/003-math-claims/spec.md",
+   "text": "The Spec 003 worked study's verdicts are issued only through the production register/freeze/verdict path with multi-actor controls; if the run is INVALID it issues no verdicts and the study reports exactly that.",
+   "boundary": [
+    "Scope: the worked study driver + its bundle",
+    "Multi-actor means registration, evidence, adjudication, and control-relevant events carry distinct actors so the swap control can bite (Phase 5 lesson)"
+   ],
+   "falsification_tests": [
+    "F-003-D12: a study bundle whose verdicts were produced by any path other than tekmerion.verdicts.evaluate_run on the frozen register, or claim verdicts present under an INVALID run."
+   ],
+   "evidence": [
+    {
+     "direction": "supports",
+     "kind": "asserted",
+     "ref": "Spec 003 §8 (worked study); DN-008 caveat 1 (single-actor swap-control lesson)",
+     "source_quality": "primary"
+    },
+    {
+     "direction": "supports",
+     "kind": "observed",
+     "ref": "Phase 5 demo: single-actor study ran INVALID and issued no verdicts (Zenodo DOI 10.5281/zenodo.23311479 record)",
+     "source_quality": "artifact"
+    }
+   ]
+  }
+ ]
+}
