@@ -22,7 +22,7 @@ A claim is the atomic unit of the engine. Nothing is asserted by the system exce
 
 ## 2. The evidence item and the origin group
 
-An **evidence item** is one retrieved artifact: `item_id`, `source_id` (WS1 connector), source-native identifier (DOI preferred), retrieval timestamp, query-log reference, content hash, license/rights stub (WS1/WS5), and a stance extraction (supports / contradicts / contextual, with the extractor identified — model name and version, or human).
+An **evidence item** is one retrieved artifact: `item_id`, `source_id` (WS1 connector), source-native identifier (DOI preferred), retrieval timestamp, query-log reference, content hash, **`license_basis`** — the licence governing *this record*, captured at ingest from the source (WS1 Appendix A flag 2: several sources have no blanket licence, so this field is mandatory and has no system-wide default) — and a stance extraction (supports / contradicts / contextual, with the extractor identified — model name and version, or human).
 
 An **origin group** is the set of items that trace to one underlying origin: the same study, dataset, or document, however many times it is republished, summarized, cited, or re-retrieved. Grouping keys, in precedence order:
 
