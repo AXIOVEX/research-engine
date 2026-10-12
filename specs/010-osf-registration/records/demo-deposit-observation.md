@@ -35,10 +35,26 @@ Subsequent observation (same day, minutes later):
   deposit: 30 files, SHA-256 sets equal
   (`study-dir-hashes-before.json` / `study-dir-hashes-after.json`).
 
-Status: **open.** The registration's fate (approval-window mechanics
-vs withdrawal vs a provider-side removal) must be read from the
-provider's own record — the project log (`/v2/nodes/dvrew/logs/`) and
-a re-fetch of both registrations — once the egress path is reliable.
-No conclusion is recorded here beyond the observations above, and no
+Status: **open, narrowed.** Follow-up reads once the egress path
+recovered (same day):
+
+- The project log (`/v2/nodes/dvrew/logs/`) records exactly two
+  events — `project_created` (14:52:59Z) and `registration_initiated`
+  (14:56:10Z). **No cancellation, withdrawal, or removal event
+  exists.** The project and its components are intact.
+- The embargo test registration `kcysa` (pending embargo approval)
+  remains fetchable; `h94bf` (pending *registration* approval)
+  consistently reads 410 and is absent from the project's
+  registration list.
+
+The observables are consistent with the pending record being held in
+OSF's approval queue — served in the immediate post-submit read,
+then not served until an admin approves through OSF's email-link
+channel — and inconsistent with any removal: nothing in the
+provider's own log removes it. That mechanism is recorded as the
+leading explanation, not as established fact; the discriminating
+event is the approval itself (T-P4b): if `h94bf` becomes a served,
+final registration after the admin approval, the explanation holds;
+if it does not, the record here is wrong and must be revisited. No
 second registration has been created: the deposit state names h94bf,
 and any re-run resumes against it rather than duplicating it.
