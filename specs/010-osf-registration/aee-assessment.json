@@ -1,0 +1,729 @@
+{
+  "schema_version": "1.0",
+  "methodology_version": "1.0",
+  "project": "tekmerion",
+  "phase": "after_specify",
+  "outcome": "iterate",
+  "summary": "Assessed 8 claim(s); found 15 failure mode(s); 8 claim(s) below the 0.70 confidence threshold.",
+  "created_at": "2026-10-12T14:15:18.687190Z",
+  "claims": [
+    {
+      "id": "CLM-010-01",
+      "text": "Every OSF-visible field of a deposit \u2014 project title, description, category, tags, the component set, each component's file set, and the registration's summary \u2014 is computed from osf_metadata of the deposited bundle's manifest. No code path accepts a caller-supplied title, description, or component structure for the record.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: Spec 010 OSF deposit action (pilot DESIGN \u00a74); the osf_metadata mapping in tekmerion.deposit is the contract and is not modified by this spec"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/010-osf-registration/spec.md (design decision: the mapping is the contract)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-010-1: an OSF record produced by the deposit action whose title, description, tags, component set, file set, or registration summary differs from osf_metadata(that bundle's manifest), or a deposit API parameter that lets a caller override any of them."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/010-osf-registration/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-010-01-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-010-01",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-010-01-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-010-01",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-010-01 may contradict CLM-010-05",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-010-02",
+      "text": "The deposit refuses, before creating any OSF object, when approved_by is empty, when the bundle does not verify standalone, or when the bundle's manifest carries no freeze binding (missing registration_hash or checkpoint_root).",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: Spec 010 OSF deposit action; the approval gate is DESIGN \u00a74.2.1's identical application of the WS5 \u00a73 gate in tekmerion.deposit.deposit_bundle"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/010-osf-registration/spec.md (design decision: approval gate)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-010-2: a refusal case (empty approver, tampered bundle, unfrozen bundle) in which any OSF object was created before the refusal, observed via a counting transport in tests."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/010-osf-registration/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-010-02-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-010-02",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-010-02-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-010-02",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-010-02 may contradict CLM-010-05",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-010-03",
+      "text": "Submission is idempotent: before creating a draft registration the action checks for an existing registration binding the same registration_hash under the same schema (deposit state first; the project's registration list when a project GUID is known), and a repeat attempt creates no second registration \u2014 it reports the existing registration's GUID and URL.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: repeat attempts that have the deposit state or the project GUID available to the check; a from-nothing run cannot know a prior project exists (recorded in plan.md, not hidden)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/010-osf-registration/spec.md (design decision: deposit state + idempotency)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-010-3: two distinct registration GUIDs binding the same study + schema after a repeat deposit attempt that had the deposit state or the project GUID available."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/010-osf-registration/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-010-03-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-010-03",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-010-03-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-010-03",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-010-03 may contradict CLM-010-05",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-010-04",
+      "text": "Provider failures abort the action with the provider's actual HTTP status and response body carried in the error; an ambiguous create is never retried blind into a duplicate; partial progress is persisted to the deposit state and a later run resumes from it instead of starting over.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: Spec 010 OSF transport + deposit action; a 429 is a stop, never a retry (the Zenodo transport's rule, adopted unchanged)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/010-osf-registration/spec.md (design decisions: transport shape; deposit state + idempotency)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-010-4: a swallowed provider error, an automatically retried create that produced a duplicate OSF object, or a resumed run that re-created the project or components instead of continuing from the recorded state."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/010-osf-registration/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-010-04-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-010-04",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-010-04-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-010-04",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-010-04 may contradict CLM-010-05",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-010-05",
+      "text": "A completed deposit returns a receipt (mechanism, root, bundle hash, registration hash, project GUID, registration GUID, URL/DOI, approver, anchored-at, embargo state), and verify_osf_anchor independently re-fetches the registration from the OSF API and passes only if the fetched record states the mapping's anchor values and the project structure matches the component mapping.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: Spec 010 receipt + verify_osf_anchor; comparison is against the deposited bundle's osf_metadata anchor_values (plan.md ambiguity 5)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/010-osf-registration/spec.md (design decision: receipt)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-010-5: verify_osf_anchor passing on a fetched record whose stated checkpoint root, bundle hash, or registration hash differs from the bundle's anchor values, or whose component structure diverges from the mapping."
+      ],
+      "uncertainty": "medium",
+      "severity": "high",
+      "source_ref": "specs/010-osf-registration/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-010-05-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-010-05",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-010-05-NEGATION-CONFLICT-CHALLE",
+          "claim_id": "CLM-010-05",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-010-05 may contradict CLM-010-06",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-010-05-NEGATION-CONFLICT-CHALLE-2",
+          "claim_id": "CLM-010-05",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-010-05 may contradict CLM-010-07",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        },
+        {
+          "id": "AEE-CLM-010-05-NEGATION-CONFLICT-CHALLE-3",
+          "claim_id": "CLM-010-05",
+          "challenge": "Negation conflict challenge",
+          "breakpoint": "CLM-010-05 may contradict CLM-010-08",
+          "severity": "medium",
+          "category": "contradiction",
+          "recovery_hint": "Confirm whether the claims share a boundary and preserve both pending review.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-010-06",
+      "text": "The T-P4 demonstration modifies nothing in the Phase 7 study directory: every file's bytes are identical before and after (hashes recorded), and the registration references the study externally \u2014 the receipt lives in this spec's records, not in the frozen study's ledger or bundles.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: the T-P4 demonstration only; the anchor.recorded ledgering of DESIGN \u00a74.2.4 remains the flow for future live studies and is test-exercised on fixtures (plan.md ambiguity 1)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/010-osf-registration/spec.md (design decision: receipt) + plan.md ambiguity 1",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-010-6: any differing file hash in specs/002-mvp-implementation/evaluation/study/ across the demonstration, or a receipt written anywhere inside that directory."
+      ],
+      "uncertainty": "low",
+      "severity": "high",
+      "source_ref": "specs/010-osf-registration/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-010-06-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-010-06",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-010-07",
+      "text": "The embargo path is demonstrated, not asserted: a test registration created with an embargo end date is fetched back showing the embargoed state (not public, the embargo end date as set) before embargo support is claimed anywhere.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: DESIGN \u00a74.2.3's embargo demonstration requirement; the demonstration registration itself is public/immediate (plan.md ambiguity 2)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/010-osf-registration/spec.md (requirement CLM-010-07) + docs/pilot/DESIGN.md \u00a74.2.3",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-010-7: embargo support claimed in any record without a fetched-back test registration record showing embargoed = true and the embargo end date as set."
+      ],
+      "uncertainty": "high",
+      "severity": "medium",
+      "source_ref": "specs/010-osf-registration/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-010-07-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-010-07",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "CLM-010-08",
+      "text": "SCOPE: an OSF registration is an anchor and a discovery record, not a validation: it certifies that this bundle, stating these anchor values, was snapshotted at a point in time. It does not certify the study's verdicts, is not lane-2 acceptance of anything, and \u2014 because the OSF project remains editable after registration \u2014 anchor verification reads the values from the registration record, never from the live project.",
+      "kind": "requirement",
+      "status": "draft",
+      "boundary": [
+        "Scope: all Spec 010 surfaces and any pilot material describing OSF anchoring (DESIGN \u00a76 evidence pack language included)"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "evidence": [
+        {
+          "ref": "specs/010-osf-registration/spec.md (requirement CLM-010-08, scope)",
+          "kind": "asserted",
+          "direction": "supports",
+          "source_quality": "primary",
+          "description": "",
+          "source_id": "",
+          "independent_of": [],
+          "observed_at": null,
+          "content_hash": null
+        }
+      ],
+      "assumptions": [],
+      "alternatives": [],
+      "falsification_tests": [
+        "F-010-8: any presentation of an OSF registration as validating a study's verdicts or as human acceptance, or a verification path that reads anchor values from the mutable project instead of the registration record."
+      ],
+      "uncertainty": "low",
+      "severity": "medium",
+      "source_ref": "specs/010-osf-registration/spec.md",
+      "domain": "",
+      "confidence": 0.480625,
+      "confidence_band": "medium",
+      "failures": [
+        {
+          "id": "AEE-CLM-010-08-IRREDUCIBILITY-CHALLENGE",
+          "claim_id": "CLM-010-08",
+          "challenge": "Irreducibility challenge",
+          "breakpoint": "Claim may contain multiple independently falsifiable propositions",
+          "severity": "medium",
+          "category": "coverage_gap",
+          "recovery_hint": "Split the claim into atomic propositions and link them explicitly.",
+          "resolved": false
+        }
+      ],
+      "metadata": {}
+    }
+  ],
+  "scores": {
+    "CLM-010-01": {
+      "claim_id": "CLM-010-01",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-010-02": {
+      "claim_id": "CLM-010-02",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-010-03": {
+      "claim_id": "CLM-010-03",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-010-04": {
+      "claim_id": "CLM-010-04",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-010-05": {
+      "claim_id": "CLM-010-05",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-010-06": {
+      "claim_id": "CLM-010-06",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-010-07": {
+      "claim_id": "CLM-010-07",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    },
+    "CLM-010-08": {
+      "claim_id": "CLM-010-08",
+      "direct_score": 0.480625,
+      "propagated_score": 0.480625,
+      "band": "medium",
+      "components": {
+        "evidence": 0.2375,
+        "independence": 0.5,
+        "falsifiability": 1.0,
+        "boundary": 1.0,
+        "contradiction_penalty": 0
+      },
+      "notes": [
+        "No observed supporting evidence",
+        "Fewer than two independent supporting sources"
+      ]
+    }
+  },
+  "recoveries": [
+    {
+      "failure_id": "AEE-CLM-010-01-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-010-01",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-010-01-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-010-01",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-010-02-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-010-02",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-010-02-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-010-02",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-010-03-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-010-03",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-010-03-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-010-03",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-010-04-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-010-04",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-010-04-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-010-04",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-010-05-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-010-05",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-010-05-NEGATION-CONFLICT-CHALLE",
+      "claim_id": "CLM-010-05",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-010-05-NEGATION-CONFLICT-CHALLE-2",
+      "claim_id": "CLM-010-05",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-010-05-NEGATION-CONFLICT-CHALLE-3",
+      "claim_id": "CLM-010-05",
+      "strategy": "resolve_contradiction",
+      "action": "Confirm whether the claims share a boundary and preserve both pending review.",
+      "priority": 3,
+      "verification": "Both positions remain recorded; discriminating evidence resolves or scopes them."
+    },
+    {
+      "failure_id": "AEE-CLM-010-06-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-010-06",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-010-07-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-010-07",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    },
+    {
+      "failure_id": "AEE-CLM-010-08-IRREDUCIBILITY-CHALLENGE",
+      "claim_id": "CLM-010-08",
+      "strategy": "decompose",
+      "action": "Split the claim into atomic propositions and link them explicitly.",
+      "priority": 3,
+      "verification": "Every resulting claim contains one independently falsifiable proposition."
+    }
+  ],
+  "metadata": {
+    "threshold": 0.7,
+    "input": "specs/010-osf-registration/aee-claims.json"
+  }
+}
