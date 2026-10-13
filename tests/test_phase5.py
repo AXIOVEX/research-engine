@@ -383,9 +383,27 @@ def test_anchor_loop_end_to_end_local(tmp_path):
     assert receipt["root"] == manifest2["study"]["checkpoints"][0]["merkle_root"]
     assert manifest2["anchors"] and manifest2["anchors"][0]["root"] == receipt["root"]
     assert verify_bundle(str(tmp_path / "bundle2")).ok
+    # Receipt-chain presentation: bundle2 carries bundle1's receipt,
+    # and that receipt validates against bundle1's record — but the
+    # record does not anchor bundle2's OWN hash, so under CLM-013-02
+    # the presentation does not pass: the named unanchored outcome is
+    # the only failure (the chain itself is intact).
     result = verify_anchor(str(tmp_path / "bundle2"), record,
                            package_path=str(tmp_path / "bundle.zip"))
-    assert result.ok, result.failures
+    assert not result.ok
+    assert result.details["own_hash_anchor"] == "unanchored"
+    assert len(result.failures) == 1
+    assert "own bundle_hash is not anchored" in result.failures[0]
+    # The completed ritual: deposit bundle2 itself; its own record
+    # states bundle2's hash and root, and verification passes.
+    receipt2 = deposit_bundle(str(tmp_path / "bundle2"), transport,
+                              approved_by="Adjudicator A",
+                              package_out=str(tmp_path / "bundle2.zip"))
+    record2 = transport.record(str(receipt2["record_id"]))
+    result2 = verify_anchor(str(tmp_path / "bundle2"), record2,
+                            package_path=str(tmp_path / "bundle2.zip"))
+    assert result2.ok, result2.failures
+    assert result2.details["own_hash_anchor"] == "anchored"
     readme = (tmp_path / "bundle2" / "HUMAN-README.md").read_text()
     assert "not externally anchored" not in readme
     assert "local-filesystem" in readme  # the receipt's mechanism, named honestly
