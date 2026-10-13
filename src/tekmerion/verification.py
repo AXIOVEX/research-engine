@@ -45,7 +45,7 @@ from dataclasses import dataclass, field
 from typing import Any, Optional
 
 from .claims import Claim, EvidenceItem
-from .connectors import RetrievedItem
+from .connectors import RetrievedItem, normalize_doi
 
 RESOLVED = "resolved"
 NOT_FOUND = "not_found"
@@ -109,13 +109,27 @@ class CitationResult:
     source: Optional[str] = None           # connector that resolved it
     source_id: Optional[str] = None        # retrieved record's native id
     detail: str = ""                       # error text / notes
+    #: Retraction state the source of record asserts (Spec 013,
+    #: CLM-013-36), surfaced from the retrieved item onto the
+    #: citation's — and through it the claim's — record.
+    retraction: Optional[str] = None
+    #: Every connector resolution consulted (Spec 013, CLM-013-40):
+    #: the resolution record names its sources.
+    sources_consulted: list[str] = field(default_factory=list)
+    #: Material disagreement BETWEEN sources about the same work
+    #: (Spec 013, CLM-013-40): its own quarantine trigger, distinct
+    #: from the citation-vs-record mismatches above.
+    source_disagreement: list[str] = field(default_factory=list)
     retrieved: Optional[RetrievedItem] = field(default=None, repr=False)
 
     @property
     def quarantined(self) -> bool:
         """Quarantined items contribute no evidence until adjudicated:
-        unresolved (not_found / error) or materially disagreeing."""
-        return self.resolution != RESOLVED or self.agreement == DISAGREE
+        unresolved (not_found / error), materially disagreeing with
+        the citation, carrying a retraction state, or the subject of
+        a material disagreement between sources."""
+        return (self.resolution != RESOLVED or self.agreement == DISAGREE
+                or self.retraction is not None or bool(self.source_disagreement))
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -124,6 +138,9 @@ class CitationResult:
             "mismatches": list(self.mismatches), "content": self.content,
             "origin_group": self.origin_group, "extractor": self.extractor,
             "source": self.source, "source_id": self.source_id, "detail": self.detail,
+            "retraction": self.retraction,
+            "sources_consulted": list(self.sources_consulted),
+            "source_disagreement": list(self.source_disagreement),
         }
 
 
@@ -224,10 +241,23 @@ def _enrich(citation: Citation, primary: RetrievedItem,
     source never manufactures a disagreement the primary record did
     not produce. Failures never un-resolve a resolved citation: the
     primary stands and the failure is noted."""
-    doi = citation.doi or _norm_doi(primary.source_id)
+    item, note, _fetched = _enrich_collect(citation, primary, candidates)
+    return item, note
+
+
+def _enrich_collect(citation: Citation, primary: RetrievedItem,
+                    candidates: list) -> tuple[RetrievedItem, str, list]:
+    """`_enrich`, also returning every record the candidates produced
+    (the resolution layer compares them for CLM-013-40). Identity is
+    asserted HERE, in the pipeline (Spec 013, CLM-013-41): a
+    candidate whose record id is not the requested normalized DOI is
+    passed over before any agreement test runs, whatever the
+    candidate connector enforces internally."""
+    doi = normalize_doi(citation.doi) or normalize_doi(primary.source_id)
     if not doi or not doi.startswith("10."):
-        return primary, ""
+        return primary, "", []
     notes: list[str] = []
+    fetched: list[RetrievedItem] = []
     for conn in candidates:
         name = getattr(conn, "name", "connector")
         try:
@@ -235,7 +265,14 @@ def _enrich(citation: Citation, primary: RetrievedItem,
         except Exception as exc:
             notes.append(f"enrichment via {name} failed: {exc}")
             continue
-        if cand is None or not cand.abstract:
+        if cand is None:
+            continue
+        fetched.append(cand)
+        if normalize_doi(cand.source_id) != doi:
+            notes.append(f"enrichment via {name} passed over: its record "
+                         f"id {cand.source_id} is not the cited DOI")
+            continue
+        if not cand.abstract:
             continue
         if check_agreement(citation, cand)[0] != AGREE:
             notes.append(f"enrichment via {name} passed over: its record "
@@ -243,40 +280,123 @@ def _enrich(citation: Citation, primary: RetrievedItem,
             continue
         return cand, (f"resolved via {primary.source} without "
                       f"licence-permitted content; content via {cand.source} "
-                      f"(same DOI)")
-    return primary, "; ".join(notes)
+                      f"(same DOI)"), fetched
+    return primary, "; ".join(notes), fetched
 
 
-def _resolve(citation: Citation, connectors: list) -> tuple[Optional[RetrievedItem], str, str]:
-    """Resolve against a source of record. Returns (item, outcome,
-    detail); an exception from every attempted route is an explicit
-    `error` outcome, never a silent skip."""
+def _item_disagreements(a: RetrievedItem, b: RetrievedItem) -> list[str]:
+    """Material disagreement between two sources' records of the
+    same work (Spec 013, CLM-013-40), judged with stage 2's field
+    discipline: only fields present on both sides are judged, and
+    absence is a coverage fact, not a mismatch."""
+    out: list[str] = []
+    if a.title and b.title and not _text_match(a.title, b.title):
+        out.append("title")
+    if a.authors and b.authors:
+        if not ({_surname(x) for x in a.authors} & {_surname(x) for x in b.authors}):
+            out.append("authors")
+    if a.year and b.year and a.year != b.year:
+        out.append("year")
+    if a.venue and b.venue and not _text_match(a.venue, b.venue):
+        out.append("venue")
+    return out
+
+
+def _source_disagreement(items: list[RetrievedItem]) -> list[str]:
+    """Every material field on which any two consulted records of
+    the same work disagree, in stage-2 field order."""
+    fields: list[str] = []
+    for i, a in enumerate(items):
+        for b in items[i + 1:]:
+            for f in _item_disagreements(a, b):
+                if f not in fields:
+                    fields.append(f)
+    return fields
+
+
+@dataclass
+class _Resolution:
+    item: Optional[RetrievedItem]
+    outcome: str
+    detail: str
+    sources_consulted: list[str] = field(default_factory=list)
+    source_disagreement: list[str] = field(default_factory=list)
+
+
+def _resolve_full(citation: Citation, connectors: list) -> _Resolution:
+    """Resolve against sources of record, comparing what they say
+    (Spec 013, CLM-013-40). First-answer-wins no longer decides the
+    record: whenever the first record cannot stand on its own —
+    it carries no licence-permitted content (the Spec 012
+    enrichment case) or it disagrees with the citation — the
+    remaining configured sources are consulted, their records are
+    compared against each other, and any material inter-source
+    disagreement is recorded as its own quarantine trigger. A
+    primary that resolves, agrees with the citation, and carries
+    content stands without further calls: nothing is left for a
+    second source to decide (the Spec 012 call discipline)."""
     last_error = ""
     if citation.doi:
+        doi = normalize_doi(citation.doi)
+        consulted: list[str] = []
         primary: Optional[RetrievedItem] = None
         primary_at = -1
         for idx, conn in enumerate(connectors):
+            name = getattr(conn, "name", "connector")
+            consulted.append(name)
             try:
-                item = conn.resolve(citation.doi)
-            except Exception as exc:  # transport/parse failure = explicit outcome
-                last_error = f"{getattr(conn, 'name', 'connector')}: {exc}"
+                item = conn.resolve(doi)
+            except Exception as exc:  # connector error = explicit outcome
+                last_error = f"{name}: {exc}"
                 continue
             if item is not None:
                 primary, primary_at = item, idx
                 break
         if primary is None:
-            return None, (ERROR if last_error else NOT_FOUND), last_error
-        if primary.abstract:
-            return primary, RESOLVED, ""
-        enriched, note = _enrich(citation, primary, connectors[primary_at + 1:])
-        return enriched, RESOLVED, note
+            return _Resolution(None, (ERROR if last_error else NOT_FOUND),
+                               last_error, consulted)
+        if primary.abstract and check_agreement(citation, primary)[0] == AGREE:
+            return _Resolution(primary, RESOLVED, "", consulted)
+        if not primary.abstract:
+            rest = connectors[primary_at + 1:]
+            consulted += [getattr(c, "name", "connector") for c in rest]
+            enriched, note, fetched = _enrich_collect(citation, primary, rest)
+            disagreement = _source_disagreement([primary, *fetched])
+            detail = note
+            if disagreement:
+                detail = (f"{detail}; " if detail else "") + (
+                    "inter-source disagreement on: " + ", ".join(disagreement))
+            return _Resolution(enriched, RESOLVED, detail, consulted, disagreement)
+        # The primary carries content but disagrees with the citation:
+        # consult the remaining sources and compare records before
+        # the disagreement is laid at the citation's door.
+        fetched = []
+        errors: list[str] = []
+        for conn in connectors[primary_at + 1:]:
+            name = getattr(conn, "name", "connector")
+            consulted.append(name)
+            try:
+                other = conn.resolve(doi)
+            except Exception as exc:
+                errors.append(f"{name}: {exc}")
+                continue
+            if other is not None:
+                fetched.append(other)
+        disagreement = _source_disagreement([primary, *fetched])
+        detail = "; ".join(errors)
+        if disagreement:
+            detail = (f"{detail}; " if detail else "") + (
+                "inter-source disagreement on: " + ", ".join(disagreement))
+        return _Resolution(primary, RESOLVED, detail, consulted, disagreement)
     # No DOI: source-native record matched on title + authors + venue +
     # year (WS5 §1.1) — the first agreeing candidate resolves; if the
     # source answers but nothing agrees, the best candidate is carried
     # forward and stage 2 renders the disagreement explicitly.
     best: Optional[RetrievedItem] = None
     best_from: Any = None
+    consulted = []
     for conn in connectors:
+        consulted.append(getattr(conn, "name", "connector"))
         try:
             candidates = conn.search(citation.title)
         except Exception as exc:
@@ -287,29 +407,38 @@ def _resolve(citation: Citation, connectors: list) -> tuple[Optional[RetrievedIt
                 best, best_from = cand, conn
             if check_agreement(citation, cand)[0] == AGREE:
                 if cand.abstract:
-                    return cand, RESOLVED, ""
+                    return _Resolution(cand, RESOLVED, "", consulted)
                 enriched, note = _enrich(citation, cand,
                                          [c for c in connectors if c is not conn]
                                          + [conn])
-                return enriched, RESOLVED, note
+                return _Resolution(enriched, RESOLVED, note, consulted)
     if best is not None:
         if not best.abstract:
             enriched, note = _enrich(citation, best,
                                      [c for c in connectors if c is not best_from]
                                      + [best_from])
-            return enriched, RESOLVED, note
-        return best, RESOLVED, ""
-    return None, (ERROR if last_error else NOT_FOUND), last_error
+            return _Resolution(enriched, RESOLVED, note, consulted)
+        return _Resolution(best, RESOLVED, "", consulted)
+    return _Resolution(None, (ERROR if last_error else NOT_FOUND),
+                       last_error, consulted)
+
+
+def _resolve(citation: Citation, connectors: list) -> tuple[Optional[RetrievedItem], str, str]:
+    """Resolve against a source of record. Returns (item, outcome,
+    detail); an exception from every attempted route is an explicit
+    `error` outcome, never a silent skip."""
+    full = _resolve_full(citation, connectors)
+    return full.item, full.outcome, full.detail
 
 
 # ------------------------------------------------------------------ grouping (WS2 §2)
 
 def _norm_doi(doi: Optional[str]) -> str:
-    raw = (doi or "").strip().lower()
-    for prefix in ("https://doi.org/", "http://doi.org/", "doi:"):
-        if raw.startswith(prefix):
-            raw = raw[len(prefix):]
-    return raw
+    """Pipeline DOI normalization is the connectors' one shared
+    normalizer (Spec 013, CLM-013-42) — grouping, falsifier
+    matching, and enrichment all see the same normalized form the
+    connectors resolve by."""
+    return normalize_doi(doi)
 
 
 def assign_origin_groups(
@@ -389,15 +518,22 @@ def assign_origin_groups(
 # ------------------------------------------------------------------ the pipeline
 
 def _run_stages(citation: Citation, connectors: list, checker: Any) -> CitationResult:
-    item, outcome, detail = _resolve(citation, connectors)
+    full = _resolve_full(citation, connectors)
+    item, outcome, detail = full.item, full.outcome, full.detail
     result = CitationResult(citation_id=citation.citation_id, claim_id=citation.claim_id,
                             resolution=outcome, detail=detail,
-                            extractor=getattr(checker, "name", type(checker).__name__))
+                            extractor=getattr(checker, "name", type(checker).__name__),
+                            sources_consulted=full.sources_consulted,
+                            source_disagreement=full.source_disagreement)
     if item is None:
         return result
     result.retrieved = item
     result.source = item.source
     result.source_id = item.source_id
+    result.retraction = item.retraction
+    if item.degradation_reason:
+        note = f"{item.source} degradation: {item.degradation_reason}"
+        result.detail = f"{result.detail}; {note}" if result.detail else note
     result.agreement, result.mismatches = check_agreement(citation, item)
     if not item.abstract:
         # No licence-permitted content survived the connectors' rules:
@@ -461,6 +597,9 @@ def verify_citations(
         store.log_citation_check(r.as_dict(), actor=actor)
         if r.quarantined:
             reason = ("resolution failed" if r.resolution != RESOLVED
+                      else f"retracted record ({r.retraction})" if r.retraction
+                      else f"inter-source disagreement: {', '.join(r.source_disagreement)}"
+                      if r.source_disagreement
                       else f"metadata disagreement: {', '.join(r.mismatches)}")
             enqueue("quarantine", {"citation_id": r.citation_id, "claim_id": r.claim_id,
                                    "result": r.as_dict()}, reason)
