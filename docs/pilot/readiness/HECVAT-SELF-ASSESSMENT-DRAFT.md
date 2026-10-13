@@ -196,6 +196,43 @@ in the tables above, and no line below may be quoted as the owner's statement.
   the program facts, and the DPA template's personnel section stays unfinalized
   until they are true (gap-closure board, item 11).
 
+### Owner confirmation of items 1 and 2 (2026-10-13) — CONFIRMED as stated below; item 11 deferred
+
+On 2026-10-13 the owner ruled on the three drafted entries above. The drafted
+entries stand as written — this subsection records their new status; it does
+not replace them.
+
+- **Item 1 — company profile: CONFIRMED as drafted, with additions.** The owner
+  confirmed the drafted facts: legal name **Axiovex Systems, LLC**; state of
+  organization **Michigan**; membership **two-member LLC**; officers **Tristen
+  Pierson, President**, and **Rockson Arnold, Chief of Strategy**. Two facts
+  the draft left open are now supplied: **headcount is 2** — the two
+  members/partners — and the **business start date is September 15, 2026**,
+  taken from the Michigan LARA registry (Axiovex Systems LLC, identification
+  number 900279747, a domestic limited liability company, status active and in
+  good standing; Articles of Organization filed September 15, 2026; registered
+  agent Tristen Pierson; registered office 6633 18 Mile Road, Sterling
+  Heights, MI 48314). *Still open in item 1:* an HQ address — the owner has not
+  ruled that the registered office serves as HQ, and this record does not
+  state it as HQ — and financial-stability evidence, which remains unsupplied.
+- **Item 2 — named contacts: CONFIRMED.** Tristen Pierson holds both the
+  security contact and the privacy contact functions. Contact is **email
+  only**: security contact **security@axiovexsystems.com**; privacy contact
+  **legal@axiovexsystems.com**. Both addresses are live: on 2026-10-13
+  security@axiovexsystems.com was created as a shared mailbox in the tenant,
+  and legal@axiovexsystems.com was read back live as an existing shared
+  mailbox; Tristen Pierson and Rockson Arnold each hold Full Access and Send
+  As on both. Item 2 is answered.
+- **Item 11 — personnel security: NOT confirmed — deferred.** The owner has
+  deferred drafting this item until a meeting between the two owners pulls
+  the facts together. Item 11 remains an open gap, exactly as the drafted
+  entry flags it; nothing in this subsection supplies any part of it.
+
+Status after this confirmation: item 2 is **answered**; item 1 is **answered
+except its HQ-address and financial-stability residues**; item 11 remains
+**NOT YET ANSWERABLE**. The register list above and the drafted entries stand
+unedited, as the record of what was drafted and when.
+
 *Not on this list, deliberately:* SOC 2 (answered — none exists, readiness only) and
 FIPS validation (answered — none, gap disclosed with inventory and POA&M seed). A
 "No, stated" is an answer; this register is only for questions the records cannot
