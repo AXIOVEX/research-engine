@@ -67,9 +67,23 @@ def test_cycle_is_circular_support():
 def test_statement_immutable_and_supersede_path():
     reg = ClaimRegister()
     reg.register(claim())
-    reg.frozen = True
-    with pytest.raises(RegistrationError, match="supersedes"):
+    # Immutability binds at every status, proposed included (Spec 013
+    # CLM-013-11): a changed statement is refused, never edited in.
+    with pytest.raises(RegistrationError, match="immutable"):
         reg.register(claim(statement="X holds, edited"))
+    reg.frozen = True
+    # While frozen the wall is unconditional (Spec 013 CLM-013-06, no
+    # exceptions): not an edit, and not even the superseding claim —
+    # a frozen register's claim set changes only through a labeled
+    # freeze amendment. (The pre-013 form of this test registered the
+    # superseding claim against the frozen register; that acceptance
+    # was the RTA-03 freeze-wall hole.)
+    with pytest.raises(RegistrationError, match="frozen"):
+        reg.register(claim(statement="X holds, edited"))
+    with pytest.raises(RegistrationError, match="frozen"):
+        reg.register(claim("CLM-S-002", statement="X holds, narrowed",
+                           supersedes="CLM-S-001"))
+    reg.frozen = False
     reg.register(claim("CLM-S-002", statement="X holds, narrowed", supersedes="CLM-S-001"))
     assert reg.claims["CLM-S-001"].status == "superseded"
 

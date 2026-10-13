@@ -47,9 +47,16 @@ from .. import export as export_mod
 from .. import verification as vf
 from ..claims import Claim, ClaimRegister
 from ..connectors import RetrievedItem
-from ..freeze import freeze, registration_document, registration_hash
+from ..freeze import (
+    AMENDMENT_EVENT,
+    amend_freeze,
+    binding_frozen_event,
+    freeze,
+    registration_document,
+    registration_hash,
+)
 from ..store import StudyStore
-from ..verdicts import Control, RunResult, evaluate_run
+from ..verdicts import Control, RunResult, evaluate_run, fixture_identity
 
 ROLES = ("researcher", "reviewer", "adjudicator", "integrity")
 ROLE_LABELS = {
@@ -141,8 +148,12 @@ def _events(store: StudyStore) -> list[dict[str, Any]]:
 
 
 def frozen_event(store: StudyStore) -> Optional[dict[str, Any]]:
-    frozen = [e for e in _events(store) if e["type"] == "study.frozen"]
-    return frozen[-1] if frozen else None
+    """The binding freeze (Spec 013 CLM-013-07): the FIRST
+    `study.frozen` event, or the latest labeled amendment when the
+    record carries amendment events. An unlabeled second freeze
+    never binds — the silent last-freeze-wins behavior was the
+    RTA-03 laundering path."""
+    return binding_frozen_event(_events(store))
 
 
 def checkpoints(store: StudyStore) -> list[dict[str, Any]]:
@@ -399,6 +410,44 @@ def run_controls_for(store_path: str, control_fields: list[dict[str, Any]]) -> l
     return controls
 
 
+def _fixture_commitment_mismatch(fe: dict[str, Any],
+                                 control_fields: list[dict[str, Any]]) -> Optional[str]:
+    """Compare the fixtures presented for execution against the
+    fixture identities the binding freeze committed (Spec 013
+    CLM-013-09, answering RTA-04). Returns a refusal reason, or None
+    when every presented fixture is the committed one. Freezes that
+    predate the commitment (their events carry no `control_fixtures`)
+    have nothing to compare against — the commitment cannot be
+    retro-fitted, and those runs keep the pre-existing behavior."""
+    committed = fe["payload"].get("control_fixtures")
+    if committed is None:
+        return None
+    committed_ids: dict[tuple[str, str], Optional[str]] = {}
+    for entry in committed:
+        fixture = entry.get("fixture") or {}
+        committed_ids[(entry.get("kind"), entry.get("failure_mode"))] = \
+            fixture.get("sha256")
+    presented_ids: dict[tuple[str, str], str] = {}
+    for ctl in control_objects(control_fields):
+        identity = fixture_identity(ctl)
+        if identity is not None:
+            presented_ids[(ctl.kind, ctl.failure_mode)] = identity["sha256"]
+    for (kind, failure_mode), sha in committed_ids.items():
+        if sha is not None and presented_ids.get((kind, failure_mode)) != sha:
+            return (
+                f"presented fixture for the {kind} control ({failure_mode}) "
+                "does not match the fixture identity committed in the frozen "
+                "registration — the freeze sidecar is not the record "
+                "(Spec 013 CLM-013-09)")
+    for (kind, failure_mode), sha in presented_ids.items():
+        if committed_ids.get((kind, failure_mode)) != sha:
+            return (
+                f"presented fixture for the {kind} control ({failure_mode}) "
+                "is not the fixture the frozen registration committed "
+                "(Spec 013 CLM-013-09)")
+    return None
+
+
 def evaluate_workspace_run(store: StudyStore, register: ClaimRegister,
                            store_path: str,
                            control_fields: list[dict[str, Any]]) -> RunResult:
@@ -431,6 +480,13 @@ def evaluate_workspace_run(store: StudyStore, register: ClaimRegister,
             mode="confirmation", disclosure=[])
     mode = fe["payload"].get("mode", "confirmation")
     linked = fe["payload"].get("linked_exploratory", [])
+    mismatch = _fixture_commitment_mismatch(fe, control_fields)
+    if mismatch is not None:
+        # The fixtures presented for execution are not the fixtures
+        # the freeze committed (Spec 013 CLM-013-09): fail closed as
+        # an INVALID run — nothing issues on an uncommitted fixture.
+        return RunResult(run_verdict="invalid", invalid_reasons=[mismatch],
+                         mode=mode, disclosure=list(linked))
     return evaluate_run(
         register, mode=mode,
         controls=run_controls_for(store_path, control_fields),
@@ -474,12 +530,49 @@ def action_register_claim(store: StudyStore, register: ClaimRegister,
     return claim
 
 
+class _QueryLoggingConnector:
+    """Transparent connector proxy for the workspace attach path:
+    every call the pipeline makes through it is first recorded as a
+    `connector.query` ledger event (Spec 013 CLM-013-05, answering
+    RTA-10(ii) — the workspace attach path logged none, so exported
+    bundles carried `queries.json: {"queries": []}` despite connector
+    use). Logging precedes the call, so a call that raises still
+    leaves its record. The proxy changes nothing about results: it
+    delegates and returns/raises exactly what the connector does."""
+
+    def __init__(self, inner: Any, store: StudyStore, actor: str) -> None:
+        self._inner = inner
+        self._store = store
+        self._actor = actor
+
+    @property
+    def name(self) -> str:
+        return getattr(self._inner, "name", type(self._inner).__name__)
+
+    def __getattr__(self, item: str) -> Any:
+        return getattr(self._inner, item)
+
+    def resolve(self, doi: Any) -> Any:
+        self._store.log_query(self.name, {
+            "operation": "resolve", "doi": doi, "path": "workspace-attach",
+        }, actor=self._actor)
+        return self._inner.resolve(doi)
+
+    def search(self, query: str, *, limit: int = 10) -> Any:
+        self._store.log_query(self.name, {
+            "operation": "search", "query": query, "limit": limit,
+            "path": "workspace-attach",
+        }, actor=self._actor)
+        return self._inner.search(query, limit=limit)
+
+
 def action_attach_citation(store: StudyStore, ws: Workspace, study_id: str,
                            citation: vf.Citation, connectors: list,
                            actor: str) -> vf.CitationResult:
     """Run the production pipeline for one citation (outcomes +
     quarantine enqueues are ledger appends), then cache the citation
     input and any retrieved record as workspace sidecars."""
+    connectors = [_QueryLoggingConnector(c, store, actor) for c in connectors]
     report = vf.verify_citations(store, [citation], connectors, actor=actor)
     result = report.results[0]
     citations = ws.read_sidecar(study_id, "citations.json", {}) or {}
@@ -533,6 +626,29 @@ def action_freeze(store: StudyStore, register: ClaimRegister, ws: Workspace,
     return result
 
 
+def action_amend_freeze(store: StudyStore, register: ClaimRegister, ws: Workspace,
+                        study_id: str, actor: str, *, reason: str,
+                        mode: str | None,
+                        linked_exploratory: list[str] | None,
+                        control_fields: list[dict[str, Any]],
+                        deployment_shape: str = "hosted") -> dict[str, Any]:
+    """Amend a frozen study's design through the labeled amendment
+    act (Spec 013 CLM-013-07; FreezeError is the refusal). The freeze
+    sidecar is re-captured from the amended document, exactly as at
+    freeze time."""
+    controls = control_objects(control_fields)
+    result = amend_freeze(store, register, controls, actor=actor,
+                          reason=reason, mode=mode,
+                          linked_exploratory=linked_exploratory,
+                          deployment_shape=deployment_shape)
+    ws.write_sidecar(study_id, "freeze.json", {
+        "document": register.frozen_document,
+        "controls": control_fields,
+        "deployment_shape": deployment_shape,
+    })
+    return result
+
+
 def frozen_document(ws: Workspace, study_id: str,
                     store: StudyStore) -> Optional[dict[str, Any]]:
     """The study's frozen registration document from the sidecar,
@@ -571,6 +687,24 @@ def action_run(store: StudyStore, register: ClaimRegister, store_path: str,
     (WS3 §1)."""
     result = evaluate_workspace_run(store, register, store_path, control_fields)
     if result.run_verdict == "valid":
+        # Issuance is recorded as record (Spec 013 CLM-013-03 +
+        # CLM-013-07): a `run.issued` event states the regime the
+        # verdicts are issued under (the binding registration, and
+        # whether it arrived by amendment), and each control outcome
+        # is appended as a `control.outcome` event — the bundle's
+        # outcome projection then cross-checks against these events
+        # instead of resting on attestation.
+        binding = frozen_event(store)
+        store.db.append("run.issued", {
+            "registration_hash": (binding or {}).get("payload", {}).get(
+                "registration_hash"),
+            "mode": result.mode,
+            "frozen_event_seq": (binding or {}).get("seq"),
+            "regime_amended": (binding or {}).get("type") == AMENDMENT_EVENT,
+            "claims": [v.claim_id for v in result.claim_verdicts],
+        }, actor=actor)
+        for outcome in result.control_outcomes:
+            store.db.append("control.outcome", dict(outcome), actor=actor)
         for verdict in result.claim_verdicts:
             claim = register.claims.get(verdict.claim_id)
             if claim is not None and claim.status == "dead":

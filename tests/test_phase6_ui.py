@@ -221,8 +221,13 @@ def test_full_flow_event_sequence_matches_the_api_path(ui):
     status, _, _ = client.post("/studies/s1/export", {}, role="researcher",
                                actor="op-one")
     assert status == 303
+    # Spec 013 additions to the sequence: connector.query at attach
+    # (CLM-013-05), and run.issued + control.outcome at issuance
+    # (CLM-013-03) — the UI path and the API path remain the same
+    # actions, so the sequence is still identical across both.
     assert event_types(ws, "s1") == [
-        "record.snapshot", "citation.checked", "study.frozen", "checkpoint",
+        "record.snapshot", "connector.query", "citation.checked",
+        "study.frozen", "checkpoint", "run.issued", "control.outcome",
         "verdict.issued", "export.generated",
     ]
     _, _, body = client.get("/studies/s1/", role="researcher", actor="op-one")
