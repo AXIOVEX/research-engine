@@ -49,7 +49,7 @@ The method is not new decoration. It is the epistemic engineering framework Axio
 
 ## Status
 
-**Built (October 2026).** What follows is the state of the work as the records support it; the specifications under [`specs/`](specs/) carry the claim-by-claim evidence.
+**Built (October 2026).** What follows is the state of the work as the records support it; the specifications under [`specs/`](specs/) carry the claim-by-claim evidence. Release history: [CHANGELOG.md](CHANGELOG.md).
 
 - **The engine (Specs 001–002)** is complete through a pre-registered evaluation (Phase 7): questions, verdict rules, and predictions were frozen before the run, all five verdicts matched the frozen predictions, and every threshold set in advance was met. The evaluation is deposited at Zenodo ([doi:10.5281/zenodo.23319126](https://doi.org/10.5281/zenodo.23319126)). The earlier Phase 5 demonstration run was **INVALID** — its swap control could not fail — and is recorded as such, not quietly dropped ([doi:10.5281/zenodo.23311479](https://doi.org/10.5281/zenodo.23311479)). Spec 001 was re-assessed on 2026-10-12; three of its seven claims still sit below the evidence bar, each for a stated reason in its record.
 - **The study interface (Phase 6)** is built: a server-rendered web app over the same services, implemented from owner-approved wireframes.
