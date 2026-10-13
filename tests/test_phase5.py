@@ -6,6 +6,8 @@ manual smoke (recorded in tasks.md), not a CI dependency; the anchor
 loop is exercised end-to-end here against the local transport, whose
 receipts are honestly labeled local."""
 
+import io
+import urllib.error
 import hashlib
 import json
 from pathlib import Path
@@ -66,7 +68,7 @@ class RoutingHttp(HttpJson):
         for marker, work in (("xyz123", REAL_WORK), ("metaonly", META_WORK)):
             if marker in url:
                 return {"message": work}
-        raise RuntimeError("404 from source of record")
+        raise urllib.error.HTTPError(url, 404, "Not Found", hdrs=None, fp=io.BytesIO(b"{}"))
 
 
 def crossref():

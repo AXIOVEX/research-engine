@@ -8,6 +8,8 @@ against the imported UI matrix (CLM-009-03), adapter/Lean state
 passthrough (CLM-009-08), and the no-delete inventory (CLM-009-10).
 """
 
+import io
+import urllib.error
 import ast
 import json
 import subprocess
@@ -45,7 +47,7 @@ class RoutingHttp(HttpJson):
     def get(self, url, headers=None):
         if "xyz123" in url:
             return {"message": REAL_WORK}
-        raise RuntimeError("404 from source of record")
+        raise urllib.error.HTTPError(url, 404, "Not Found", hdrs=None, fp=io.BytesIO(b"{}"))
 
 
 def connectors():

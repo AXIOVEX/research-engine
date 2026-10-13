@@ -3,6 +3,9 @@ adjudication queue, RT-4 sampling, RT-5 cap — seeded defects through
 the production paths (a fabricated DOI, tampered metadata, content
 that does not support, a metadata-only basis)."""
 
+import io
+import urllib.error
+
 import pytest
 
 pytest.importorskip("axiomere")
@@ -59,7 +62,8 @@ META_WORK = {  # resolves and agrees, but no content anyone may check
 
 class RoutingHttp(HttpJson):
     """Routes by DOI substring, like the live API's shape: unknown DOIs
-    raise (CrossrefConnector.resolve turns that into a None)."""
+    raise the HTTPError the real transport raises for a 404
+    (CrossrefConnector.resolve classifies that as a None)."""
 
     def get(self, url, headers=None):
         if "query.bibliographic" in url:
@@ -68,7 +72,8 @@ class RoutingHttp(HttpJson):
                              ("metaonly", META_WORK)):
             if marker in url:
                 return {"message": work}
-        raise RuntimeError("404 from source of record")
+        raise urllib.error.HTTPError(url, 404, "Not Found",
+                                     hdrs=None, fp=io.BytesIO(b"{}"))
 
 
 class ExplodingConnector:

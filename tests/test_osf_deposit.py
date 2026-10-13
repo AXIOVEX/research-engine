@@ -8,6 +8,8 @@ records/), not a CI dependency — the same posture as Phase 5's Zenodo
 tests. The fixture study builder mirrors tests/test_phase5.py.
 """
 
+import io
+import urllib.error
 import hashlib
 import inspect
 import json
@@ -67,7 +69,7 @@ class RoutingHttp(HttpJson):
         for marker, work in (("xyz123", REAL_WORK), ("metaonly", META_WORK)):
             if marker in url:
                 return {"message": work}
-        raise RuntimeError("404 from source of record")
+        raise urllib.error.HTTPError(url, 404, "Not Found", hdrs=None, fp=io.BytesIO(b"{}"))
 
 
 def crossref():
