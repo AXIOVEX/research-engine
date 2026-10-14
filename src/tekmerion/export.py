@@ -45,10 +45,11 @@ from pathlib import Path
 from typing import Any, Optional
 
 from .claims import Claim, ClaimRegister, EvidenceItem, RegistrationError
-from .freeze import registration_document, registration_hash
+from .freeze import (binding_frozen_event, registration_document,
+                    registration_hash)
 from .marking import banner_lines, normalize_marking
-from .verdicts import (evaluate_claim, evaluate_run, run_controls_report,
-                      swap_control_report)
+from .verdicts import (evaluate_claim, evaluate_run, fixture_identity,
+                      run_controls_report, swap_control_report)
 from .verification import queue_state, second_review_report
 
 BUNDLE_FORMAT = "tekmerion-audit-bundle/1"
@@ -250,10 +251,81 @@ def run_outcome_projection(
     against the committed registration and the verifier's own swap
     replay on the bundle's ledger copy); fixture-dependent control
     outcomes are attested by this replay and bound by the manifest
-    hashes, like every other projection the bundle carries."""
+    hashes, like every other projection the bundle carries.
+
+    Since Spec 013 (CLM-013-03) an issued run's outcomes are the
+    run's own `control.outcome` ledger events when the ledger
+    carries them (`controls_recorded: true`) — the projection then
+    restates the record, and the verifier compares it
+    payload-for-payload. Runs predating that issuance keep the
+    re-execution/attested path above and are labeled
+    operator-attested in the HUMAN-README. The projection also
+    states the regime (CLM-013-07): the binding registration hash
+    and whether it arrived by amendment."""
     issued = [e for e in events if e["type"] == "verdict.issued"]
     registered_kinds = [c.get("kind") for c in doc.get("controls", [])]
+    # The regime this run belongs to (Spec 013 CLM-013-07): the
+    # binding registration the verdicts were issued under, and whether
+    # it arrived by a labeled amendment.
+    binding = binding_frozen_event(events)
+    regime = {
+        "registration_hash": registration_hash(doc),
+        "regime": {
+            "frozen_event_seq": binding["seq"] if binding else None,
+            "amended": bool(binding and binding["type"] == "study.frozen.amended"),
+        },
+    }
+    # Control outcomes recorded at issuance (Spec 013 CLM-013-03):
+    # the `control.outcome` events following the latest `run.issued`
+    # event are that run's outcomes, appended when it issued.
+    recorded: list[dict[str, Any]] = []
+    run_event_indexes = [i for i, e in enumerate(events)
+                         if e["type"] == "run.issued"]
+    if run_event_indexes:
+        recorded = [e["payload"] for e in events[run_event_indexes[-1] + 1:]
+                    if e["type"] == "control.outcome"]
     if issued:
+        if recorded:
+            # The projection covers the committed control set (the
+            # Spec 011 discipline): controls the issuing run executed
+            # restate its own control.outcome ledger events verbatim
+            # (CLM-013-03) — the record wins over any export-time
+            # re-execution — and controls it did not execute are
+            # recorded as not executed, never as passed.
+            base = _issued_control_outcomes(controls, store, store_path)
+            by_key = {(o.get("kind"), o.get("failure_mode")): o
+                      for o in recorded}
+            merged: list[dict[str, Any]] = []
+            used: set = set()
+            for entry in base:
+                key = (entry.get("kind"), entry.get("failure_mode"))
+                if key in by_key:
+                    merged.append(by_key[key])
+                    used.add(key)
+                else:
+                    merged.append(entry)
+            for key, payload in by_key.items():
+                if key not in used:
+                    merged.append(payload)
+            return {
+                "outcome": "valid",
+                "basis": "verdict.issued events in the exported ledger "
+                         "(an invalid run issues none, WS3 §1); the "
+                         "control outcomes the issuing run executed are "
+                         "its own control.outcome ledger events, appended "
+                         "at issuance (Spec 013 CLM-013-03) and "
+                         "cross-checked against them by the standalone "
+                         "verifier; controls the run did not execute are "
+                         "recorded as not executed",
+                "mode": doc.get("mode"),
+                "verdicts_issued": len(issued),
+                "invalid_reasons": [],
+                "controls_replayed": [o["kind"] for o in merged if o["executed"]],
+                "controls_registered": registered_kinds,
+                "controls": merged,
+                "controls_recorded": True,
+                **regime,
+            }
         outcomes = _issued_control_outcomes(controls, store, store_path)
         return {
             "outcome": "valid",
@@ -268,6 +340,8 @@ def run_outcome_projection(
             "controls_replayed": [o["kind"] for o in outcomes if o["executed"]],
             "controls_registered": registered_kinds,
             "controls": outcomes,
+            "controls_recorded": False,
+            **regime,
         }
     replay = ClaimRegister()
     for cdoc in doc.get("claims", []):
@@ -300,6 +374,8 @@ def run_outcome_projection(
             "controls_replayed": replayed_kinds,
             "controls_registered": registered_kinds,
             "controls": result.control_outcomes,
+            "controls_recorded": False,
+            **regime,
         }
     return {
         "outcome": "not-run",
@@ -312,6 +388,8 @@ def run_outcome_projection(
         "controls_replayed": replayed_kinds,
         "controls_registered": registered_kinds,
         "controls": result.control_outcomes,
+        "controls_recorded": False,
+        **regime,
     }
 
 
@@ -341,10 +419,9 @@ def export_bundle(
                           "a broken record is evidence, not an export")
     events = store.events()
 
-    frozen = [e for e in events if e["type"] == "study.frozen"]
-    if not frozen:
+    frozen_event = binding_frozen_event(events)
+    if frozen_event is None:
         raise ExportError("study is not frozen — bundles export frozen registrations (WS4 §4)")
-    frozen_event = frozen[-1]
     committed_hash = frozen_event["payload"]["registration_hash"]
 
     # The registration this bundle binds to is the document freeze
@@ -358,6 +435,29 @@ def export_bundle(
         raise ExportError(
             "presented registration does not hash to the frozen commitment "
             f"({committed_hash}); export refused rather than misbound")
+
+    # Fixture commitment (Spec 013 CLM-013-09): a fixture PRESENTED
+    # at export must be the fixture the registration committed. A
+    # fixture not presented at export is the recorded attested case
+    # (see _issued_control_outcomes), not a mismatch.
+    committed_fixtures: dict[tuple[Any, Any], Optional[str]] = {}
+    for entry in doc.get("controls", []):
+        if "fixture" not in entry:
+            continue  # a pre-Spec-013 document recorded no commitment
+        fixture = entry.get("fixture") or {}
+        committed_fixtures[(entry.get("kind"), entry.get("failure_mode"))] = \
+            fixture.get("sha256")
+    for ctl in controls:
+        identity = fixture_identity(ctl)
+        if identity is None:
+            continue
+        key = (ctl.kind, ctl.failure_mode)
+        if key not in committed_fixtures or committed_fixtures[key] != identity["sha256"]:
+            raise ExportError(
+                f"presented fixture for the {ctl.kind} control "
+                f"({ctl.failure_mode}) does not match the fixture identity "
+                "committed in the frozen registration (Spec 013 CLM-013-09); "
+                "export refused rather than misbound")
 
     checkpoints = _checkpoints(events)
     if not checkpoints:
@@ -560,6 +660,19 @@ def _human_readme(manifest: dict[str, Any], register: ClaimRegister,
         f"- Merkle checkpoint root: `{study['checkpoint_root']}`",
         f"- Registration hash: `{study['registration_hash']}`",
         f"- Bundle hash: stated in `manifest.json` (`bundle_hash`).",
+        *(
+            ["- Control outcomes: **operator-attested** — this run "
+             "predates control-outcome issuance events (Spec 013 "
+             "CLM-013-03), so its per-control outcomes in "
+             "`verdicts.json` are not cross-checked against ledger "
+             "events the way a recorded run's are; they rest on the "
+             "operator's attestation, bound by the manifest hashes "
+             "only."]
+            if (run_outcome or {}).get("outcome") == "valid"
+            and (run_outcome or {}).get("controls")
+            and not (run_outcome or {}).get("controls_recorded")
+            else []
+        ),
         "",
         "## How citation outcomes become evidence",
         "",
@@ -811,7 +924,11 @@ def verify_bundle(bundle_dir: str) -> BundleVerification:
         failures.append("no study.frozen event in the exported ledger")
         frozen_event = None
     else:
-        frozen_event = frozen[-1]
+        # Consumers bind through binding_frozen_event (Spec 013
+        # CLM-013-07): a labeled amendment when one exists, else the
+        # binding freeze — see that function for the legacy
+        # multi-freeze rule and its recorded limitation.
+        frozen_event = binding_frozen_event(events)
 
     # -- registration binding ---------------------------------------------
     registration = load_json("registration.json")
@@ -964,6 +1081,67 @@ def verify_bundle(bundle_dir: str) -> BundleVerification:
                     failures.append(
                         "verdicts.json run_outcome controls do not match the "
                         "registration's committed control set")
+                # Fixture identities committed in the registration
+                # (Spec 013 CLM-013-09): an outcome that names a
+                # fixture must name the committed one. Registrations
+                # predating the commitment carry no fixture field —
+                # nothing to check against, noted not failed.
+                committed_fixtures = {}
+                for entry in registration.get("controls", []):
+                    if "fixture" in entry:
+                        fixture = entry.get("fixture") or {}
+                        committed_fixtures[
+                            (entry.get("kind"), entry.get("failure_mode"))] = \
+                            fixture.get("sha256")
+                for o in outcomes:
+                    key = (o.get("kind"), o.get("failure_mode"))
+                    fixture = o.get("fixture") or {}
+                    if key in committed_fixtures and fixture.get("sha256") is not None \
+                            and fixture["sha256"] != committed_fixtures[key]:
+                        failures.append(
+                            "verdicts.json run_outcome records a fixture "
+                            "identity for the "
+                            f"{key[0]} control that differs from the "
+                            "registration's committed fixture (CLM-013-09)")
+            # Control outcomes recorded at issuance (Spec 013
+            # CLM-013-03): when the ledger carries control.outcome
+            # events for the latest run, the projection's EXECUTED
+            # outcomes must equal them payload-for-payload — the K2
+            # discipline, extended to outcomes (the projection also
+            # carries not-executed entries for committed controls the
+            # run never executed; those are projection statements, not
+            # record). Bundles of runs predating the issuance carry
+            # no such events: their outcomes are the operator-attested
+            # case, visible in checks, not failed.
+            run_indexes = [i for i, e in enumerate(events)
+                           if e["type"] == "run.issued"]
+            recorded_outcomes: list[dict[str, Any]] = []
+            if run_indexes:
+                recorded_outcomes = [
+                    e["payload"] for e in events[run_indexes[-1] + 1:]
+                    if e["type"] == "control.outcome"]
+            if recorded_outcomes:
+                checks["control_outcomes_recorded"] = len(recorded_outcomes)
+                canon = lambda lst: sorted(_canonical(o) for o in lst)
+                executed_outcomes = [o for o in outcomes if o.get("executed")]
+                if canon(executed_outcomes) != canon(recorded_outcomes):
+                    failures.append(
+                        "verdicts.json run_outcome executed controls do "
+                        "not match the ledger's control.outcome events "
+                        "(CLM-013-03)")
+                if not run_outcome.get("controls_recorded"):
+                    failures.append(
+                        "verdicts.json run_outcome does not mark its "
+                        "control outcomes as ledger-recorded but the "
+                        "ledger carries control.outcome events for the "
+                        "run (CLM-013-03)")
+            elif run_outcome.get("controls_recorded"):
+                failures.append(
+                    "verdicts.json run_outcome claims ledger-recorded "
+                    "control outcomes but the ledger carries no "
+                    "control.outcome events for the run (CLM-013-03)")
+            else:
+                checks["control_outcomes_recorded"] = 0
             failed_outcomes = [o for o in outcomes if o.get("passed") is False]
             if stated == "valid" and failed_outcomes:
                 failures.append(
