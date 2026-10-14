@@ -1,0 +1,15 @@
+{
+  "basis": "origin groups from ClaimRegister.group_masses (metadata_only per group, Phase 4); citation counts from citation.checked ledger events",
+  "per_claim": {
+    "CLM-D-001": {
+      "citations_checked": 2,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 1,
+      "citations_unresolved": 1,
+      "group_coverage": 0.0,
+      "groups_content_checked": 0,
+      "groups_metadata_only": 1,
+      "origin_groups": 1
+    }
+  }
+}

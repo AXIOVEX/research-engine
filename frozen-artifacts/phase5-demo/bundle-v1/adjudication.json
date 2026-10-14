@@ -1,0 +1,62 @@
+{
+  "decided": [
+    {
+      "citation_id": "CIT-1",
+      "claim_id": "CLM-D-001",
+      "decided_by": "adjudicator",
+      "decision": "variant",
+      "kind": "quarantine",
+      "queue_id": "ADQ-001",
+      "rationale": "Crossref carries the German title; the citation's English title is the standard translation — same paper, legitimate variant",
+      "reason": "metadata disagreement: title",
+      "result": {
+        "agreement": "disagree",
+        "citation_id": "CIT-1",
+        "claim_id": "CLM-D-001",
+        "content": "metadata_only",
+        "detail": "",
+        "extractor": "tekmerion.keyword-stance/1",
+        "mismatches": [
+          "title"
+        ],
+        "origin_group": "EVG-001",
+        "resolution": "resolved",
+        "source": "crossref",
+        "source_id": "10.1002/andp.19053221004"
+      },
+      "second_reviews": [
+        {
+          "agrees": true,
+          "reviewer": "second-reviewer"
+        }
+      ],
+      "status": "decided"
+    },
+    {
+      "citation_id": "CIT-2",
+      "claim_id": "CLM-D-001",
+      "decided_by": "adjudicator",
+      "decision": "exclude",
+      "kind": "quarantine",
+      "queue_id": "ADQ-002",
+      "rationale": "DOI does not resolve at the source of record — fabricated; excluded",
+      "reason": "resolution failed",
+      "result": {
+        "agreement": null,
+        "citation_id": "CIT-2",
+        "claim_id": "CLM-D-001",
+        "content": null,
+        "detail": "",
+        "extractor": "tekmerion.keyword-stance/1",
+        "mismatches": [],
+        "origin_group": "EVG-002",
+        "resolution": "not_found",
+        "source": null,
+        "source_id": null
+      },
+      "second_reviews": [],
+      "status": "decided"
+    }
+  ],
+  "pending": []
+}

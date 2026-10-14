@@ -1,0 +1,22 @@
+{
+  "controls": [
+    {
+      "expected": "supported",
+      "failure_mode": "verification broken: known-true claim not supported",
+      "kind": "positive",
+      "representative_rationale": "known-answer control"
+    },
+    {
+      "expected": "contradicted",
+      "failure_mode": "verification decorative: false claim supported",
+      "kind": "negative",
+      "representative_rationale": ""
+    },
+    {
+      "expected": null,
+      "failure_mode": "integrity machinery decorative: provenance swap undetected",
+      "kind": "swap",
+      "representative_rationale": ""
+    }
+  ]
+}

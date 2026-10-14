@@ -1,0 +1,386 @@
+{
+  "claims": [
+    {
+      "claim_id": "CLM-M-111",
+      "dependencies": [],
+      "falsifier": "the pinned formal statement differs from the original problem statement in hypotheses, scope, or conclusion, adjudicated from the pinned pair",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "The Lean-formalized statements proved are faithful to Fefferman alternatives (C) and (D) as stated in the Clay problem — including the role of the external force — so the headline's scope matches the formal scope",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-112",
+      "dependencies": [],
+      "falsifier": "the artifact bytes contain sorry/admit, or fail compilation in a clean environment, or an axioms probe reports sorryAx or an unapproved axiom",
+      "kind": "data",
+      "margin": 0.1,
+      "statement": "The public Lean artifact (github.com/openai/NavierStokesAndEuler) proves the pinned statements: sorry-free in its proof files and kernel-checked",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-113",
+      "dependencies": [],
+      "falsifier": "a prior solution, or a non-open status for the problem, appears in the primary status source or in the searched literature",
+      "kind": "data",
+      "margin": 0.1,
+      "statement": "The Navier-Stokes problem stood genuinely open (no accepted resolution in the literature) at the announcement date",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-114",
+      "dependencies": [],
+      "falsifier": "a prior-work or priority dispute with retrieved evidence stands registered, or prior literature the headline omits is produced",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "Attribution is clean: priority and the provenance of the proof route are not subject to a standing evidenced dispute",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-115",
+      "dependencies": [],
+      "falsifier": "independent expert assessment retrieved that disputes the claimed significance, or the result is shown to be a special case of a known theorem",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "The result, if it stands, resolves a Millennium Prize problem and is significant to mathematics",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-211",
+      "dependencies": [],
+      "falsifier": "the pinned formal statement differs from the original problem statement in hypotheses, scope, or conclusion, adjudicated from the pinned pair",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "The Lean statement proved is faithful to the sphere-packing result as announced",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-212",
+      "dependencies": [],
+      "falsifier": "the artifact bytes contain sorry/admit, or fail compilation in a clean environment, or an axioms probe reports sorryAx or an unapproved axiom",
+      "kind": "data",
+      "margin": 0.1,
+      "statement": "SpherePacking.lean is a sorry-free Lean certificate for the pinned statement",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-213",
+      "dependencies": [],
+      "falsifier": "a prior solution, or a non-open status for the problem, appears in the primary status source or in the searched literature",
+      "kind": "data",
+      "margin": 0.1,
+      "statement": "The announced improvement was genuinely open / not present in the prior literature",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-214",
+      "dependencies": [],
+      "falsifier": "a prior-work or priority dispute with retrieved evidence stands registered, or prior literature the headline omits is produced",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "Attribution is clean: the argument's precedents in the prior literature are properly cited and discussed",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-215",
+      "dependencies": [],
+      "falsifier": "independent expert assessment retrieved that disputes the claimed significance, or the result is shown to be a special case of a known theorem",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "The result is a significant advance on sphere-packing bounds",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-311",
+      "dependencies": [],
+      "falsifier": "the pinned formal statement differs from the original problem statement in hypotheses, scope, or conclusion, adjudicated from the pinned pair",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "The Lean statement proved is faithful to the non-sofic-group result as announced",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-312",
+      "dependencies": [],
+      "falsifier": "the artifact bytes contain sorry/admit, or fail compilation in a clean environment, or an axioms probe reports sorryAx or an unapproved axiom",
+      "kind": "data",
+      "margin": 0.1,
+      "statement": "NonSoficGroup.lean is a sorry-free Lean certificate for the pinned statement",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-313",
+      "dependencies": [],
+      "falsifier": "a prior solution, or a non-open status for the problem, appears in the primary status source or in the searched literature",
+      "kind": "data",
+      "margin": 0.1,
+      "statement": "The existence of a finitely presented non-sofic group was genuinely open at announcement",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-314",
+      "dependencies": [],
+      "falsifier": "a prior-work or priority dispute with retrieved evidence stands registered, or prior literature the headline omits is produced",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "Attribution is clean: the prior results the construction combines are properly credited, in the paper and in the announcement framing",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-315",
+      "dependencies": [],
+      "falsifier": "independent expert assessment retrieved that disputes the claimed significance, or the result is shown to be a special case of a known theorem",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "The result resolves a long-standing question in group theory",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-411",
+      "dependencies": [],
+      "falsifier": "the pinned formal statement differs from the original problem statement in hypotheses, scope, or conclusion, adjudicated from the pinned pair",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "The Lean formal statement is faithful to the 199-page manuscript's headline claim, across zeta, Dirichlet, and Hecke L-functions",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-412",
+      "dependencies": [],
+      "falsifier": "the artifact bytes contain sorry/admit, or fail compilation in a clean environment, or an axioms probe reports sorryAx or an unapproved axiom",
+      "kind": "data",
+      "margin": 0.1,
+      "statement": "The public Lean formalization proves the pinned statements: the full dependency tree is sorry-free and kernel-checked",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-413",
+      "dependencies": [],
+      "falsifier": "a prior solution, or a non-open status for the problem, appears in the primary status source or in the searched literature",
+      "kind": "data",
+      "margin": 0.1,
+      "statement": "A uniform zero-free half-plane at 7/8 was genuinely open (far beyond established zero-free regions)",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-414",
+      "dependencies": [],
+      "falsifier": "a prior-work or priority dispute with retrieved evidence stands registered, or prior literature the headline omits is produced",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "Attribution/provenance is clean: the claimant and the result's provenance are identified and prior literature is properly credited",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-415",
+      "dependencies": [],
+      "falsifier": "independent expert assessment retrieved that disputes the claimed significance, or the result is shown to be a special case of a known theorem",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "The result, if it stands, is a major advance in analytic number theory",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-511",
+      "dependencies": [],
+      "falsifier": "the pinned formal statement differs from the original problem statement in hypotheses, scope, or conclusion, adjudicated from the pinned pair",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "The Lean statements proved are faithful to the original Erdos problems (including the density-interpretation corrections the paper itself discloses for 125 and 741(i))",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-512",
+      "dependencies": [],
+      "falsifier": "the artifact bytes contain sorry/admit, or fail compilation in a clean environment, or an axioms probe reports sorryAx or an unapproved axiom",
+      "kind": "data",
+      "margin": 0.1,
+      "statement": "The public Lean artifacts (google-deepmind/alphaproof-nexus-results) prove the pinned statements, sorry-free and kernel-checked",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-513",
+      "dependencies": [],
+      "falsifier": "a prior solution, or a non-open status for the problem, appears in the primary status source or in the searched literature",
+      "kind": "data",
+      "margin": 0.1,
+      "statement": "The nine problems stood genuinely open in the Erdos problem record at the time of the run",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-514",
+      "dependencies": [],
+      "falsifier": "a prior-work or priority dispute with retrieved evidence stands registered, or prior literature the headline omits is produced",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "Attribution is clean: formalization provenance (formal-conjectures) and prior literature are credited; no evidenced dispute stands",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-515",
+      "dependencies": [],
+      "falsifier": "independent expert assessment retrieved that disputes the claimed significance, or the result is shown to be a special case of a known theorem",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "The results are significant: peer-reviewed (Science) resolutions of long-open problems, two open for 56 years per the paper",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-110",
+      "dependencies": [
+        "CLM-M-111",
+        "CLM-M-112",
+        "CLM-M-113",
+        "CLM-M-114",
+        "CLM-M-115"
+      ],
+      "falsifier": "a load-bearing sub-claim is contradicted, or the attribution dispute stands unresolved (contested cap, Spec 003 §2)",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "OpenAI (2026-09-08): an internal model resolved the Navier-Stokes Millennium Prize problem by establishing Fefferman alternatives (C) and (D) — finite-time breakdown with smooth forcing",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-210",
+      "dependencies": [
+        "CLM-M-211",
+        "CLM-M-212",
+        "CLM-M-213",
+        "CLM-M-214",
+        "CLM-M-215"
+      ],
+      "falsifier": "a load-bearing sub-claim is contradicted, or the attribution dispute stands unresolved (contested cap, Spec 003 §2)",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "OpenAI Astra (2026-08-01), result 1 of ten: sharp Cohn-Elkies sphere-packing asymptotics in high dimensions, with a public Lean certificate",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-310",
+      "dependencies": [
+        "CLM-M-311",
+        "CLM-M-312",
+        "CLM-M-313",
+        "CLM-M-314",
+        "CLM-M-315"
+      ],
+      "falsifier": "a load-bearing sub-claim is contradicted, or the attribution dispute stands unresolved (contested cap, Spec 003 §2)",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "OpenAI Astra (2026-08-01), result 4 of ten: existence of a finitely presented non-sofic group, with a public Lean certificate",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-410",
+      "dependencies": [
+        "CLM-M-411",
+        "CLM-M-412",
+        "CLM-M-413",
+        "CLM-M-414",
+        "CLM-M-415"
+      ],
+      "falsifier": "a load-bearing sub-claim is contradicted, or the attribution dispute stands unresolved (contested cap, Spec 003 §2)",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "OpenAI math dump family 003 (released 2026-10-06): the quasi-Riemann hypothesis — every Dirichlet L-function (incl. zeta) is zero-free for Re(s) > 7/8, with Landau-Siegel zeros excluded",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    },
+    {
+      "claim_id": "CLM-M-510",
+      "dependencies": [
+        "CLM-M-511",
+        "CLM-M-512",
+        "CLM-M-513",
+        "CLM-M-514",
+        "CLM-M-515"
+      ],
+      "falsifier": "a load-bearing sub-claim is contradicted, or the attribution dispute stands unresolved (contested cap, Spec 003 §2)",
+      "kind": "interpretation",
+      "margin": 0.1,
+      "statement": "Google DeepMind AlphaProof Nexus (arXiv:2605.22763; Science 2026-10-08): autonomous resolution of nine open Erdos problems (12(i), 12(ii), 125 variant, 138 variant, 152, 26 variant, 741(i), 741(ii), 846) with public Lean proofs",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    }
+  ],
+  "controls": [
+    {
+      "expected": "supported",
+      "failure_mode": "verification broken: known-true claim not supported",
+      "kind": "positive",
+      "representative_rationale": "known-answer control"
+    },
+    {
+      "expected": "contradicted",
+      "failure_mode": "verification decorative: false claim supported",
+      "kind": "negative",
+      "representative_rationale": ""
+    },
+    {
+      "expected": null,
+      "failure_mode": "integrity machinery decorative: provenance swap undetected",
+      "kind": "swap",
+      "representative_rationale": ""
+    }
+  ],
+  "linked_exploratory": [],
+  "mode": "confirmation"
+}

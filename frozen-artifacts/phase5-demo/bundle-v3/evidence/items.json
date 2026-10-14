@@ -1,0 +1,17 @@
+{
+  "items": [
+    {
+      "claim_id": "CLM-D-001",
+      "contradiction_mass": 0.0,
+      "could_falsify": false,
+      "falsifier_observation": false,
+      "hosted_ok": true,
+      "item_id": "CIT-1",
+      "metadata_only": true,
+      "origin_group": "EVG-001",
+      "stance": "contextual",
+      "support_mass": 0.0,
+      "verified": true
+    }
+  ]
+}

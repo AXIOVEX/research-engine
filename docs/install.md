@@ -12,6 +12,17 @@ executed verbatim in the Spec 009 clean-room acceptance
 decision). You install from wheels you build from the three public
 repositories — five commands, below.
 
+**Correction (2026-10-13):** the status above is out of date. Both packages
+**are** on PyPI, at version **0.1.0**: `tekmerion` and `axiomere`. One part
+of the install is still build-from-source, honestly stated: Tekmerion's
+record layer needs the compiled Axiomere verification extension
+(`axiomere_py`), and prebuilt extension wheels are not published yet — so
+that one piece is built from the `axiomere` repository exactly as in step 1
+below, and Tekmerion's own error message says so if it is missing. With the
+extension wheel installed, `pip install tekmerion axiomere` works. The full
+from-source path below remains accurate and is the path the acceptance run
+used.
+
 ## Prerequisites
 
 - Python 3.12 (the prebuilt bindings wheel is tagged `cp312`; other

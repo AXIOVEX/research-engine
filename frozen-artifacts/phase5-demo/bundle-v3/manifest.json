@@ -1,0 +1,124 @@
+{
+  "anchors": [
+    {
+      "anchored_at": "2026-10-12T06:46:48.160573+00:00",
+      "approved_by": "Tristen Pierson (owner; Phase 5 go-order, 2026-10-12)",
+      "bundle_hash": "92093186dcd717eaa823d04e5f93d99b41a35ec31f4e7085da273891b6b7fc54",
+      "doi": "10.5281/zenodo.23311479",
+      "file": {
+        "bytes": 8693,
+        "md5": "7b014e9ac42546d39f0ea45d581d34c7",
+        "name": "bundle-v1.zip",
+        "sha256": "979a01ec593f8511a3ee67a34bac058b3915a56627f437c159665ab5da05fa7a"
+      },
+      "locator": "https://doi.org/10.5281/zenodo.23311479",
+      "mechanism": "zenodo",
+      "record_id": 23311479,
+      "registration_hash": "238b1eb802de495016f0d71b03a398574b7a70540d7119c5991688a15b3950ff",
+      "root": "7434209696ea39ba8e97a33b5caa0ae08928269ea81c7d6407f423191e86e317"
+    }
+  ],
+  "bundle_hash": "7fc697fd721b54a10869dce41129d1f17a2011b5d2ea3f7522dfcb01a2ded600",
+  "complete": true,
+  "content_substitutions": [],
+  "files": [
+    {
+      "bytes": 3269,
+      "path": "HUMAN-README.md",
+      "sha256": "5b802b9a55ca6d1cac0d65034cab80b50a7233acc2a5663fb1e04590cbe0ac11"
+    },
+    {
+      "bytes": 1753,
+      "path": "adjudication.json",
+      "sha256": "48e286a63f1d057372613bcf21bfc5397e214fb4bdb220ed290a33e78c7d2476"
+    },
+    {
+      "bytes": 719,
+      "path": "anchors/00-zenodo.json",
+      "sha256": "bd9386e47fc5bfc1769711c0599d838066ea71278ec9016855ff1daed740d79e"
+    },
+    {
+      "bytes": 539,
+      "path": "claims.json",
+      "sha256": "68bd8d784b39e0df3b34b07fd565871b5dbce1de1b38b9a899011b50198ddf1f"
+    },
+    {
+      "bytes": 619,
+      "path": "controls.json",
+      "sha256": "afcd6de6d5e6369d86efa57e584e12c9af981b31c400be4c0261319ce7b79953"
+    },
+    {
+      "bytes": 457,
+      "path": "coverage.json",
+      "sha256": "402c4291f841b489c79c7dc03e57c241b06928421354a42500fac91c7252530e"
+    },
+    {
+      "bytes": 296,
+      "path": "evidence/groups.json",
+      "sha256": "b0e241901c5d68c3b74016fb40818b4408b262b96b2451bb7e194721b5b76322"
+    },
+    {
+      "bytes": 358,
+      "path": "evidence/items.json",
+      "sha256": "ec7faa77703759a6a7d92c3d756c76168fab3a7a002245eb90ee02d72abcfdbf"
+    },
+    {
+      "bytes": 9571,
+      "path": "ledger/study.axmr",
+      "sha256": "30d70d63f2f337db2f5e5e89757a1b04dcd2820fa07bc05b5d04e308fd74fc6a"
+    },
+    {
+      "bytes": 169,
+      "path": "queries.json",
+      "sha256": "708a93dd5c740e24ccbaddc1289b97c029e4487d6d5ef5058b6961c3a2e3d37d"
+    },
+    {
+      "bytes": 1118,
+      "path": "registration.json",
+      "sha256": "f70a95e11aee6a42a63d3e6dfe7d5e7021f4c85dfd48dc22e7cbfd0fea8f5b1a"
+    },
+    {
+      "bytes": 21,
+      "path": "verdicts.json",
+      "sha256": "607bc9d1385a1110c7588755deb31ecfebcb071f199b42ed7dc7577ee1fae695"
+    },
+    {
+      "bytes": 924,
+      "path": "verification.json",
+      "sha256": "32377337e9f40a9e05d204136966a2da21b935602caa894eec16524ffa24a770"
+    }
+  ],
+  "format": "tekmerion-audit-bundle/1",
+  "schema_versions": {
+    "bundle": "1",
+    "ledger": "AXMR1",
+    "registration": "1"
+  },
+  "study": {
+    "checkpoint_root": "52e08f7ac25b18dd26fbb90f6a8cdfd52bb36a7a208982c6e46e0510c5e37223",
+    "checkpoints": [
+      {
+        "merkle_root": "7434209696ea39ba8e97a33b5caa0ae08928269ea81c7d6407f423191e86e317",
+        "seq": 11,
+        "upto_seq": 10
+      },
+      {
+        "merkle_root": "dab67b1c2dbd348f91b667326f04fe3c9196aaa536e1201de2fc0fe787becce5",
+        "seq": 14,
+        "upto_seq": 13
+      },
+      {
+        "merkle_root": "52e08f7ac25b18dd26fbb90f6a8cdfd52bb36a7a208982c6e46e0510c5e37223",
+        "seq": 18,
+        "upto_seq": 17
+      }
+    ],
+    "event_count": 18,
+    "frozen_event_seq": 10,
+    "head_hash": "847874d2373798a1d583b82a79e64f61c59bf235a9ae631790c485d299316cc1",
+    "head_seq": 18,
+    "label": "ar1-demo-1905",
+    "ledger_file": "ledger/study.axmr",
+    "registration_hash": "238b1eb802de495016f0d71b03a398574b7a70540d7119c5991688a15b3950ff"
+  }
+}
