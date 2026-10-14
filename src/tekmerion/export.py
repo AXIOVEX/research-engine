@@ -463,6 +463,19 @@ def export_bundle(
     if not checkpoints:
         raise ExportError("no Merkle checkpoint in the ledger — freeze the study first")
 
+    # The root written into the manifest below is the value anchors
+    # bind to, so it is confirmed against the root the verifier
+    # recomputes from the ledger's events — never merely read out
+    # of the checkpoint event's payload (Axiomere Spec 003
+    # companion, AXM-003-15).
+    pin = store.verify(
+        expected_head={"checkpoint_root": checkpoints[-1]["merkle_root"]})
+    if not pin.ok:
+        raise ExportError(
+            "the ledger's latest checkpoint root does not match the root "
+            f"verification recomputes ({pin.reason}); export refused rather "
+            "than misbound")
+
     run_outcome = run_outcome_projection(
         store, store_path, register=register, controls=controls, doc=doc, events=events)
 
@@ -898,13 +911,22 @@ def verify_bundle(bundle_dir: str) -> BundleVerification:
     if ledger_path.exists():
         import axiomere as ax
 
-        ok, count, reason = ax.verify_file(str(ledger_path))
-        checks["ledger_verify"] = {"ok": ok, "events": count, "reason": reason}
-        if not ok:
-            failures.append(f"ledger fails production verification: {reason}")
-        if count != study.get("event_count"):
+        result = ax.verify_file(str(ledger_path))
+        checks["ledger_verify"] = {
+            "ok": result.ok, "events": result.events, "reason": result.reason,
+            # The signature state rides in the verification record
+            # (Axiomere Spec 003): an honestly unsigned ledger is a
+            # visible state here, never a silent pass.
+            "signatures_checked": result.signatures_checked,
+            "signatures_failed": result.signatures_failed,
+            "unsigned_events": list(result.unsigned_events),
+            "untrusted_actors": list(result.untrusted_actors),
+        }
+        if not result.ok:
+            failures.append(f"ledger fails production verification: {result.reason}")
+        if result.events != study.get("event_count"):
             failures.append(
-                f"ledger event count {count} != manifest {study.get('event_count')}")
+                f"ledger event count {result.events} != manifest {study.get('event_count')}")
         try:
             events = _ledger_events(ledger_path.read_bytes())
         except (ValueError, UnicodeDecodeError) as exc:
@@ -918,6 +940,27 @@ def verify_bundle(bundle_dir: str) -> BundleVerification:
         if not checkpoints or checkpoints[-1]["merkle_root"] != study.get("checkpoint_root"):
             failures.append("manifest checkpoint root is not the ledger's latest checkpoint root")
         checks["checkpoint_root"] = study.get("checkpoint_root")
+
+        # Recomputed-root binding (Axiomere Spec 003 companion,
+        # AXM-003-15): the manifest's checkpoint root and head hash
+        # are also pinned through the production verifier, which
+        # compares them against the values it recomputes from the
+        # ledger's events. A root transplanted from another study's
+        # ledger fails here even when the presented file's chain and
+        # signatures are internally consistent — the comparison
+        # above, payload against payload, cannot see that lie.
+        pin_spec: dict[str, Any] = {}
+        if study.get("checkpoint_root"):
+            pin_spec["checkpoint_root"] = study["checkpoint_root"]
+        if study.get("head_hash"):
+            pin_spec["head_hash"] = study["head_hash"]
+        if pin_spec and result.ok:
+            pinned = ax.verify_file(str(ledger_path), expected_head=pin_spec)
+            checks["ledger_head_pin"] = {"ok": pinned.ok, "reason": pinned.reason}
+            if not pinned.ok:
+                failures.append(
+                    "manifest head does not match the recomputed head: "
+                    f"{pinned.reason}")
 
     frozen = [e for e in events if e["type"] == "study.frozen"]
     if not frozen:

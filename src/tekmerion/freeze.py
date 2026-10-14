@@ -240,6 +240,20 @@ def _commit(store: Any, register: ClaimRegister, doc: dict[str, Any], *,
         actor=actor,
     )
     checkpoint = store.freeze(actor=actor)
+    # The root this act returns is the value callers anchor
+    # externally (AR-1), so it is never merely read out of the
+    # checkpoint event's payload: the verifier must recompute the
+    # same root from the ledger's events (Axiomere Spec 003
+    # companion, AXM-003-15). A mismatch means the record itself is
+    # broken — the freeze events stand in the ledger, but this root
+    # must not be anchored or trusted, so the act fails closed.
+    pin = store.verify(
+        expected_head={"checkpoint_root": checkpoint["payload"]["merkle_root"]})
+    if not pin.ok:
+        raise FreezeError([
+            f"freeze checkpoint root does not match the root verification "
+            f"recomputes ({pin.reason}); the freeze stands in the ledger "
+            "but its root must not be anchored"])
     for claim in register.claims.values():
         if claim.status == "proposed":
             claim.status = "registered"

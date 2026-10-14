@@ -202,5 +202,13 @@ class PlatformLedger:
     def checkpoint(self, *, actor_id: str) -> dict:
         return self.db.checkpoint(actor=actor_id)
 
-    def verify(self) -> "axiomere.Verification":
-        return self.db.verify()
+    def verify(self, *, trusted: Optional[dict] = None,
+               expected_head: Optional[dict] = None) -> "axiomere.Verification":
+        """Verify this audit ledger (Axiomere Spec 003 policy): the
+        chain and the checkpoint roots — recomputed from the events,
+        never read from the checkpoint payloads — plus, in trusted
+        mode (`trusted={actor: public_key_hex}`), a signature by the
+        enrolled key for every event. Unsigned events are named in
+        the result's `unsigned_events` in every mode: an unsigned
+        ledger is a visible state, never a silent one."""
+        return self.db.verify(trusted=trusted, expected_head=expected_head)
