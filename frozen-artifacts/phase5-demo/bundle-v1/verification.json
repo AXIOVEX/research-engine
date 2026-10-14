@@ -1,0 +1,54 @@
+{
+  "citation_outcomes": [
+    {
+      "agreement": "disagree",
+      "citation_id": "CIT-1",
+      "claim_id": "CLM-D-001",
+      "content": "metadata_only",
+      "detail": "",
+      "extractor": "tekmerion.keyword-stance/1",
+      "mismatches": [
+        "title"
+      ],
+      "origin_group": "EVG-001",
+      "resolution": "resolved",
+      "source": "crossref",
+      "source_id": "10.1002/andp.19053221004"
+    },
+    {
+      "agreement": null,
+      "citation_id": "CIT-2",
+      "claim_id": "CLM-D-001",
+      "content": null,
+      "detail": "",
+      "extractor": "tekmerion.keyword-stance/1",
+      "mismatches": [],
+      "origin_group": "EVG-002",
+      "resolution": "not_found",
+      "source": null,
+      "source_id": null
+    }
+  ],
+  "retrieved": {
+    "CIT-1": {
+      "authors": [
+        "A. Einstein"
+      ],
+      "content_included": false,
+      "hosted_ok": true,
+      "license_basis": "http://onlinelibrary.wiley.com/termsAndConditions#vor",
+      "source": "crossref",
+      "source_id": "10.1002/andp.19053221004",
+      "title": "Zur Elektrodynamik bewegter Körper",
+      "venue": "Annalen der Physik",
+      "year": 1905
+    }
+  },
+  "second_review": {
+    "anomaly": false,
+    "anomaly_reason": "",
+    "disagreement_rate": 0.0,
+    "disagreements": 0,
+    "second_reviews": 1
+  }
+}

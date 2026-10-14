@@ -1,0 +1,411 @@
+{
+  "verdicts": [
+    {
+      "actor": "adjudicator",
+      "attribution": "contested",
+      "claim_id": "CLM-M-110",
+      "digestion": {
+        "artifact_ref": null,
+        "explainer": null,
+        "risk_flag": true,
+        "state": "UNEXPLAINED"
+      },
+      "lane1_verification": "checked — proof sub-verdict: inconclusive; compile: not_attempted, 0 sorry",
+      "lane2_acceptance": "unexplained",
+      "parent_id": "CLM-M-110",
+      "reason": "attribution dispute stands unresolved — parent capped at contested (DN-010 point 4); sub-verdicts stand as recorded",
+      "remains_not_understood": "Why the proof works, in human terms: no named human has explained OpenAI's 166-page argument, and independent human verification is outstanding; whether forced (C)/(D) as formalized is exactly Fefferman's (C)/(D) also remains publicly unresolved",
+      "seq": 64,
+      "sub_verdicts": {
+        "attribution": {
+          "reason": "interval straddles the margin",
+          "verdict": "inconclusive"
+        },
+        "faithful": {
+          "reason": "interval straddles the margin",
+          "verdict": "inconclusive"
+        },
+        "genuinely_open": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "proof_verified": {
+          "reason": "interval straddles the margin",
+          "verdict": "inconclusive"
+        },
+        "significance": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        }
+      },
+      "verdict": "contested"
+    },
+    {
+      "actor": "adjudicator",
+      "attribution": "contested",
+      "claim_id": "CLM-M-210",
+      "digestion": {
+        "artifact_ref": null,
+        "explainer": null,
+        "risk_flag": true,
+        "state": "UNEXPLAINED"
+      },
+      "lane1_verification": "checked — proof sub-verdict: inconclusive; compile: not_attempted, 0 sorry",
+      "lane2_acceptance": "unexplained",
+      "parent_id": "CLM-M-210",
+      "reason": "attribution dispute stands unresolved — parent capped at contested (DN-010 point 4); sub-verdicts stand as recorded",
+      "remains_not_understood": "Whether the sphere-packing argument's key step is Miller's 2016 precedent or an independent rediscovery cannot be settled from the public record; no independent compile or human verification of the 55k-line certificate was performed by us",
+      "seq": 65,
+      "sub_verdicts": {
+        "attribution": {
+          "reason": "interval straddles the margin",
+          "verdict": "inconclusive"
+        },
+        "faithful": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "genuinely_open": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "proof_verified": {
+          "reason": "untested: no evidence group could have contradicted the claim",
+          "verdict": "inconclusive"
+        },
+        "significance": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        }
+      },
+      "verdict": "contested"
+    },
+    {
+      "actor": "adjudicator",
+      "attribution": "undisputed",
+      "claim_id": "CLM-M-310",
+      "digestion": {
+        "artifact_ref": null,
+        "explainer": null,
+        "risk_flag": true,
+        "state": "UNEXPLAINED"
+      },
+      "lane1_verification": "checked — proof sub-verdict: inconclusive; compile: not_attempted, 0 sorry",
+      "lane2_acceptance": "unexplained",
+      "parent_id": "CLM-M-310",
+      "reason": "sub-claim(s) not established: faithful, proof_verified, genuinely_open, attribution, significance",
+      "remains_not_understood": "The distance between the paper's (credited) attribution and the announcement's framing is documented but not quantified; no independent compile of the 34k-line certificate was performed by us",
+      "seq": 66,
+      "sub_verdicts": {
+        "attribution": {
+          "reason": "no evidence groups",
+          "verdict": "inconclusive"
+        },
+        "faithful": {
+          "reason": "no evidence groups",
+          "verdict": "inconclusive"
+        },
+        "genuinely_open": {
+          "reason": "no evidence groups",
+          "verdict": "inconclusive"
+        },
+        "proof_verified": {
+          "reason": "no evidence groups",
+          "verdict": "inconclusive"
+        },
+        "significance": {
+          "reason": "no evidence groups",
+          "verdict": "inconclusive"
+        }
+      },
+      "verdict": "inconclusive"
+    },
+    {
+      "actor": "adjudicator",
+      "attribution": "undisputed",
+      "claim_id": "CLM-M-410",
+      "digestion": {
+        "artifact_ref": null,
+        "explainer": null,
+        "risk_flag": true,
+        "state": "UNEXPLAINED"
+      },
+      "lane1_verification": "checked — proof sub-verdict: inconclusive; compile: not_attempted, 0 sorry",
+      "lane2_acceptance": "unexplained",
+      "parent_id": "CLM-M-410",
+      "reason": "sub-claim(s) not established: proof_verified, genuinely_open, attribution, significance",
+      "remains_not_understood": "Almost everything that matters: the transitive Lean dependency tree was neither compiled by us nor audited for sorries; the 199-page manuscript was not humanly verified; the claimant is an unnamed model with no named accountable authors",
+      "seq": 67,
+      "sub_verdicts": {
+        "attribution": {
+          "reason": "no evidence groups",
+          "verdict": "inconclusive"
+        },
+        "faithful": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "genuinely_open": {
+          "reason": "no evidence groups",
+          "verdict": "inconclusive"
+        },
+        "proof_verified": {
+          "reason": "interval straddles the margin",
+          "verdict": "inconclusive"
+        },
+        "significance": {
+          "reason": "no evidence groups",
+          "verdict": "inconclusive"
+        }
+      },
+      "verdict": "inconclusive"
+    },
+    {
+      "actor": "adjudicator",
+      "attribution": "undisputed",
+      "claim_id": "CLM-M-510",
+      "digestion": {
+        "artifact_ref": "https://github.com/google-deepmind/alphaproof-nexus-results (NaturalLanguageProofs/ErdosProblems: human-written prose proofs per problem)",
+        "claimant_explanation": false,
+        "explainer": "AlphaProof Nexus authors (Tsoukalas et al.)",
+        "risk_flag": false,
+        "state": "explained"
+      },
+      "lane1_verification": "checked — proof sub-verdict: inconclusive; compile: not_attempted, 0 sorry",
+      "lane2_acceptance": "accepted",
+      "parent_id": "CLM-M-510",
+      "reason": "sub-claim(s) not established: proof_verified, attribution",
+      "remains_not_understood": "Why the agent's constructions work is explained only at the level of the authors' prose proofs; independent replication of the full nine-problem sweep (beyond the artifacts published) has not been performed by us, and our compile check is parse-level (toolchain/Mathlib not run here)",
+      "seq": 68,
+      "sub_verdicts": {
+        "attribution": {
+          "reason": "interval straddles the margin",
+          "verdict": "inconclusive"
+        },
+        "faithful": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "genuinely_open": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "proof_verified": {
+          "reason": "untested: no evidence group could have contradicted the claim",
+          "verdict": "inconclusive"
+        },
+        "significance": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        }
+      },
+      "verdict": "inconclusive"
+    },
+    {
+      "actor": "adjudicator",
+      "attribution": "contested",
+      "claim_id": "CLM-M-110",
+      "digestion": {
+        "artifact_ref": null,
+        "explainer": null,
+        "risk_flag": true,
+        "state": "UNEXPLAINED"
+      },
+      "lane1_verification": "checked — proof sub-verdict: inconclusive; compile: not_attempted, 0 sorry; not_runnable_here, 0 sorry; not_runnable_here, 0 sorry; not_runnable_here, 0 sorry",
+      "lane2_acceptance": "unexplained",
+      "parent_id": "CLM-M-110",
+      "reason": "attribution dispute stands unresolved — parent capped at contested (DN-010 point 4); sub-verdicts stand as recorded",
+      "remains_not_understood": "Why the proof works, in human terms: no named human has explained OpenAI's 166-page argument, and independent human verification is outstanding; whether forced (C)/(D) as formalized is exactly Fefferman's (C)/(D) also remains publicly unresolved",
+      "seq": 89,
+      "sub_verdicts": {
+        "attribution": {
+          "reason": "interval straddles the margin",
+          "verdict": "inconclusive"
+        },
+        "faithful": {
+          "reason": "interval straddles the margin",
+          "verdict": "inconclusive"
+        },
+        "genuinely_open": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "proof_verified": {
+          "reason": "interval straddles the margin",
+          "verdict": "inconclusive"
+        },
+        "significance": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        }
+      },
+      "supersedes": "run 1 verdict for this claim (driver defect correction, math.study_correction)",
+      "verdict": "contested"
+    },
+    {
+      "actor": "adjudicator",
+      "attribution": "contested",
+      "claim_id": "CLM-M-210",
+      "digestion": {
+        "artifact_ref": null,
+        "explainer": null,
+        "risk_flag": true,
+        "state": "UNEXPLAINED"
+      },
+      "lane1_verification": "checked — proof sub-verdict: supported; compile: not_attempted, 0 sorry; not_runnable_here, 0 sorry; not_runnable_here, 0 sorry; not_runnable_here, 0 sorry",
+      "lane2_acceptance": "unexplained",
+      "parent_id": "CLM-M-210",
+      "reason": "attribution dispute stands unresolved — parent capped at contested (DN-010 point 4); sub-verdicts stand as recorded",
+      "remains_not_understood": "Whether the sphere-packing argument's key step is Miller's 2016 precedent or an independent rediscovery cannot be settled from the public record; no independent compile or human verification of the 55k-line certificate was performed by us",
+      "seq": 90,
+      "sub_verdicts": {
+        "attribution": {
+          "reason": "interval straddles the margin",
+          "verdict": "inconclusive"
+        },
+        "faithful": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "genuinely_open": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "proof_verified": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "significance": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        }
+      },
+      "supersedes": "run 1 verdict for this claim (driver defect correction, math.study_correction)",
+      "verdict": "contested"
+    },
+    {
+      "actor": "adjudicator",
+      "attribution": "undisputed",
+      "claim_id": "CLM-M-310",
+      "digestion": {
+        "artifact_ref": null,
+        "explainer": null,
+        "risk_flag": true,
+        "state": "UNEXPLAINED"
+      },
+      "lane1_verification": "checked — proof sub-verdict: supported; compile: not_attempted, 0 sorry; not_runnable_here, 0 sorry; not_runnable_here, 0 sorry; not_runnable_here, 0 sorry",
+      "lane2_acceptance": "unexplained",
+      "parent_id": "CLM-M-310",
+      "reason": "sub-claim(s) not established: attribution",
+      "remains_not_understood": "The distance between the paper's (credited) attribution and the announcement's framing is documented but not quantified; no independent compile of the 34k-line certificate was performed by us",
+      "seq": 91,
+      "sub_verdicts": {
+        "attribution": {
+          "reason": "interval straddles the margin",
+          "verdict": "inconclusive"
+        },
+        "faithful": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "genuinely_open": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "proof_verified": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "significance": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        }
+      },
+      "supersedes": "run 1 verdict for this claim (driver defect correction, math.study_correction)",
+      "verdict": "inconclusive"
+    },
+    {
+      "actor": "adjudicator",
+      "attribution": "undisputed",
+      "claim_id": "CLM-M-410",
+      "digestion": {
+        "artifact_ref": null,
+        "explainer": null,
+        "risk_flag": true,
+        "state": "UNEXPLAINED"
+      },
+      "lane1_verification": "checked — proof sub-verdict: inconclusive; compile: not_attempted, 0 sorry; not_runnable_here, 0 sorry; not_runnable_here, 0 sorry; not_runnable_here, 0 sorry",
+      "lane2_acceptance": "unexplained",
+      "parent_id": "CLM-M-410",
+      "reason": "sub-claim(s) not established: faithful, proof_verified, attribution",
+      "remains_not_understood": "Almost everything that matters: the transitive Lean dependency tree was neither compiled by us nor audited for sorries; the 199-page manuscript was not humanly verified; the claimant is an unnamed model with no named accountable authors",
+      "seq": 92,
+      "sub_verdicts": {
+        "attribution": {
+          "reason": "interval straddles the margin",
+          "verdict": "inconclusive"
+        },
+        "faithful": {
+          "reason": "untested: no evidence group could have contradicted the claim",
+          "verdict": "inconclusive"
+        },
+        "genuinely_open": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "proof_verified": {
+          "reason": "interval straddles the margin",
+          "verdict": "inconclusive"
+        },
+        "significance": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        }
+      },
+      "supersedes": "run 1 verdict for this claim (driver defect correction, math.study_correction)",
+      "verdict": "inconclusive"
+    },
+    {
+      "actor": "adjudicator",
+      "attribution": "undisputed",
+      "claim_id": "CLM-M-510",
+      "digestion": {
+        "artifact_ref": "https://github.com/google-deepmind/alphaproof-nexus-results (NaturalLanguageProofs/ErdosProblems: human-written prose proofs per problem)",
+        "claimant_explanation": false,
+        "explainer": "AlphaProof Nexus authors (Tsoukalas et al.)",
+        "risk_flag": false,
+        "state": "explained"
+      },
+      "lane1_verification": "checked — proof sub-verdict: supported; compile: not_attempted, 0 sorry; not_runnable_here, 0 sorry; not_runnable_here, 0 sorry; not_runnable_here, 0 sorry",
+      "lane2_acceptance": "accepted",
+      "parent_id": "CLM-M-510",
+      "reason": "all five sub-claims supported; no dispute stands",
+      "remains_not_understood": "Why the agent's constructions work is explained only at the level of the authors' prose proofs; independent replication of the full nine-problem sweep (beyond the artifacts published) has not been performed by us, and our compile check did not run here (pinned toolchain/Mathlib not installed)",
+      "seq": 93,
+      "sub_verdicts": {
+        "attribution": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "faithful": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "genuinely_open": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "proof_verified": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        },
+        "significance": {
+          "reason": "falsifier test ran, did not fire; interval clears the margin",
+          "verdict": "supported"
+        }
+      },
+      "supersedes": "run 1 verdict for this claim (driver defect correction, math.study_correction)",
+      "verdict": "supported"
+    }
+  ]
+}

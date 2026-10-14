@@ -1,0 +1,96 @@
+{
+  "anchors": [],
+  "bundle_hash": "abb856aa5b5d5f57725b088399f2276e6ac712c6896b3c3ed1fb47c91a353de4",
+  "complete": true,
+  "content_substitutions": [],
+  "files": [
+    {
+      "bytes": 3192,
+      "path": "HUMAN-README.md",
+      "sha256": "eed4ad6d7ccdae40979bcda90c07928ce7a0539296b3d7d0cbdc1cfffeeb4c92"
+    },
+    {
+      "bytes": 37,
+      "path": "adjudication.json",
+      "sha256": "667fea655aa3e6dfe0cf2f7ba87b780c0a8ae46eccce7e4fefe3c69f9d82819e"
+    },
+    {
+      "bytes": 15635,
+      "path": "claims.json",
+      "sha256": "7734340b8e1ac0d4d6a6c3c7d7145ce0c83d3b880e8dbbc19c63e3b4db1e5a9f"
+    },
+    {
+      "bytes": 589,
+      "path": "controls.json",
+      "sha256": "5d9f33fe15f4602127d145f1d2f12882a4951715d307f05cb9ef102661bb06dc"
+    },
+    {
+      "bytes": 8727,
+      "path": "coverage.json",
+      "sha256": "ebb9625cb8221d0d22d9e6f45a8c44ea9ffb71e7d2418d61c040e35401ed2e1d"
+    },
+    {
+      "bytes": 8633,
+      "path": "evidence/groups.json",
+      "sha256": "8c0f73b7761f7750a51e8781058d659b2e7645f3f52614d103d8d15bf5883ade"
+    },
+    {
+      "bytes": 10613,
+      "path": "evidence/items.json",
+      "sha256": "a04c1b3aab3d8b25072b741623250704041772aa3d0ad6fae86ff64eb524ca35"
+    },
+    {
+      "bytes": 4500319,
+      "path": "ledger/study.axmr",
+      "sha256": "a3b10dba55329af16113f4c80e17122d391ecf7849b8d15738cbc4b07ebd87bf"
+    },
+    {
+      "bytes": 305,
+      "path": "queries.json",
+      "sha256": "3f7762e946d59d637e9047e6e9bf5d187005920c6717188370a4c57ec1a9967b"
+    },
+    {
+      "bytes": 16184,
+      "path": "registration.json",
+      "sha256": "96e3ab13526697726e4da59b32d854546eb87155df75936c1656e787b81b1a34"
+    },
+    {
+      "bytes": 17354,
+      "path": "verdicts.json",
+      "sha256": "e759a8aded7a00d64d864f09cfea5439bcb86515c2228b4fa79943a1fdcff95b"
+    },
+    {
+      "bytes": 202,
+      "path": "verification.json",
+      "sha256": "79b3d9595c38170d547f47f5988b95a5bcbff7393bd8111342280989a813de8a"
+    }
+  ],
+  "format": "tekmerion-audit-bundle/1",
+  "schema_versions": {
+    "bundle": "1",
+    "ledger": "AXMR1",
+    "registration": "1"
+  },
+  "study": {
+    "checkpoint_root": "5b497655dd6ae50d0ca39328b674bc528ad1f03d4a1febca70077ad514a49ad4",
+    "checkpoints": [
+      {
+        "merkle_root": "b179057b35a1d55c3878914a8bf7e1c273cd4d9f58e5c0b1a704c8f0fe3ff858",
+        "seq": 63,
+        "upto_seq": 62
+      },
+      {
+        "merkle_root": "5b497655dd6ae50d0ca39328b674bc528ad1f03d4a1febca70077ad514a49ad4",
+        "seq": 88,
+        "upto_seq": 87
+      }
+    ],
+    "event_count": 93,
+    "frozen_event_seq": 87,
+    "head_hash": "e3bc3cd9c7635f968f975f62fbeb21ef320dd24d2931bfb720e774fc60bb4d57",
+    "head_seq": 93,
+    "label": "math-claims-2026",
+    "ledger_file": "ledger/study.axmr",
+    "registration_hash": "523c7545f3c072e14f7cca623f630fd65902f84fd58ab4f33d88b450008e7b7c"
+  }
+}

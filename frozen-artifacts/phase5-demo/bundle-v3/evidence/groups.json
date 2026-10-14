@@ -1,0 +1,15 @@
+{
+  "groups": [
+    {
+      "claim_id": "CLM-D-001",
+      "contradiction_mass": 0.0,
+      "could_falsify": false,
+      "falsifier_observation": false,
+      "items": 1,
+      "metadata_only": true,
+      "origin_group": "EVG-001",
+      "support_mass": 0.0,
+      "verified": true
+    }
+  ]
+}

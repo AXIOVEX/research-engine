@@ -216,6 +216,32 @@ longer non-claims, and §3 as corrected states them as built. **Admin-console
 availability** remains a true non-claim (unbuilt; owner wireframe gate).
 Everything else in this section stands as written.
 
+**Correction (2026-10-13):** three statements above have been superseded since
+the 2026-10-12 corrections.
+
+1. **Deployment shape (§2).** §2 describes the pilot's shape as "Hosted by
+   Axiovex (multi-tenant platform; the partner is a tenant…)". That is not the
+   pilot's shape. On the owner's decision of 2026-10-12, the pilot runs as
+   **installs on partner workstations** — the same install shape as the MCP
+   server and agent skill (Spec 009) — operated by the partner's own staff on
+   the partner's own machines. An Axiovex-hosted offering is **deferred**: it
+   will be built only when a partner requirement names it. The multi-tenant
+   platform described in §3 exists and is claim-supported; it is the platform a
+   hosted offering would use. What a hosted deployment would still need (the
+   hosted-only open items, including the §5 DFARS question) remains open for
+   that future offering, not for this pilot.
+2. **Spec 005 figures (§3, §9).** The bundle now stands at **v0.8.0 — 30 of
+   31 claims supported** (the E5 console phase landed after the 2026-10-12
+   correction above, which reported v0.7.0 and 29 of 31).
+3. **The admin console (§3, §9).** The 2026-10-12 corrections left
+   CLM-005-13 standing draft and admin-console availability listed as a
+   non-claim. Both are superseded: the console is built, its wireframes were
+   owner-approved before it shipped, and **CLM-005-13 is supported**.
+   Admin-console availability is no longer a do-not-claim item. The one
+   remaining open Spec 005 claim is **CLM-005-31**, the DFARS 252.204-7012
+   FedRAMP-equivalency question for the hosted shape — an owner/legal
+   decision, unchanged; §5's statement of it stands.
+
 ---
 
 *Assembled 2026-10-12 from DESIGN §6 and the records it cites, updated to the
@@ -224,3 +250,6 @@ was drafted; this packet follows the claims records). DRAFT — not sent anywher
 *Corrections appended 2026-10-12 after the Spec 005 E3/E4/E6 and Spec 012
 landings (§3, §5, §9); the original statements are preserved in place with their
 corrections, per this program's append-only correction discipline.*
+*Correction appended 2026-10-13 (deployment shape in §2; Spec 005 bundle
+v0.8.0 figures and console state in §3 and §9). Original statements preserved
+in place, per the same discipline.*

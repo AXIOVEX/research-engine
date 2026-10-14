@@ -1,0 +1,16 @@
+{
+  "queries": [
+    {
+      "connector": "crossref",
+      "limit": 10,
+      "query": "Navier-Stokes finite-time blowup smooth forcing",
+      "results": 10
+    },
+    {
+      "connector": "crossref",
+      "limit": 10,
+      "query": "Erdos problem 12 Sarkozy density",
+      "results": 10
+    }
+  ]
+}

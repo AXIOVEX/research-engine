@@ -23,7 +23,7 @@ The missing piece is not a better summary. It is a research process whose every 
 ## What it will do
 
 - **Register the question before answering it.** Research questions, inclusion criteria, and verdict rules are frozen and timestamped before evidence is gathered — the same discipline as a pre-registered study.
-- **Retrieve from scholarly infrastructure, with provenance.** Sources are real scholarly systems (OpenAlex, Semantic Scholar, Crossref, CORE, and peers — see the [source registry](docs/architecture/01-source-layer.md)), every query is logged, and every retrieved item carries its origin. Nothing enters the record without a source that can be re-checked.
+- **Retrieve from scholarly infrastructure, with provenance.** Sources are real scholarly systems (Crossref, OpenAlex, CORE — the three connectors that have shipped; see the [source registry](docs/architecture/01-source-layer.md)), every query is logged, and every retrieved item carries its origin. Nothing enters the record without a source that can be re-checked. (This list earlier named Semantic Scholar as well; no Semantic Scholar connector has shipped, and the list was corrected to the shipped three on 2026-10-13.)
 - **Build a claim register, not a prose answer.** Findings are decomposed into claims with stable IDs, each carrying its evidence, its dependencies, and an explicit **falsifier** — the observation that would overturn it.
 - **Count evidence honestly.** Derivative sources that repeat one origin are counted once, by origin group. Ten echoes of a single study are one piece of evidence, not ten.
 - **Render verdicts that can fail.** Each claim resolves to a verdict from a fixed taxonomy — **Supported, Contradicted, Inconclusive,** or **Invalid** (the run itself was defective). Controls are designed so they *can* fail: a check that cannot differentially fail marks the run invalid rather than passing it.
@@ -67,11 +67,35 @@ Under the project's stage model (DN-010), the engineering claims stand at **chec
 .
 ├── README.md                  # This page
 ├── LICENSE                    # All rights reserved, © 2026 Axiovex Systems, LLC
+├── CHANGELOG.md               # Release history (Semantic Versioning)
 ├── .specify/memory/           # Project constitution
-├── specs/001-research-engine/ # Spec, plan, tasks, AEE claims
+├── specs/                     # Governing specifications, each with spec, plan, tasks, AEE claims
+│   ├── 001-research-engine/   # The engine: claims, falsifiers, verdicts
+│   ├── 002-mvp-implementation/
+│   ├── 003-math-claims/
+│   ├── 004-lean-verification-service/
+│   ├── 005-enterprise-platform/
+│   ├── 006-checkcif-adapter/  # Domain adapters (006–008)
+│   ├── 007-codecheck-adapter/
+│   ├── 008-statcheck-grim-adapter/
+│   ├── 009-mcp-server/        # MCP server + agent skill
+│   ├── 010-osf-registration/
+│   ├── 011-evaluation-machinery/
+│   ├── 012-core-connector/
+│   └── 013-red-team-remediation/
+├── src/tekmerion/             # The engine, platform, console, and MCP server
+├── tests/                     # Test suite
+├── skill/                     # The agent skill for the MCP server
+├── documentation/             # ReadTheDocs sources (tekmerion.readthedocs.io)
+├── frozen-artifacts/          # Frozen deposited study bundles — records, do not edit
 └── docs/
     ├── architecture/          # The six architecture workstreams
-    └── design-notes/          # Numbered, append-only design decisions
+    ├── design-notes/          # Numbered, append-only design decisions
+    ├── audits/                # Dated audit reports
+    ├── pilot/                 # Pilot design, shortlist, and readiness packet
+    ├── surveys/               # Domain surveys
+    ├── wireframes/            # Owner-approved UI wireframes
+    └── install.md             # Install + MCP quickstart
 ```
 
 ## License

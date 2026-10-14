@@ -1,0 +1,305 @@
+{
+  "basis": "origin groups from ClaimRegister.group_masses (metadata_only per group, Phase 4); citation counts from citation.checked ledger events",
+  "per_claim": {
+    "CLM-M-110": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": null,
+      "groups_content_checked": 0,
+      "groups_metadata_only": 0,
+      "origin_groups": 0
+    },
+    "CLM-M-111": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 2,
+      "groups_metadata_only": 0,
+      "origin_groups": 2
+    },
+    "CLM-M-112": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 2,
+      "groups_metadata_only": 0,
+      "origin_groups": 2
+    },
+    "CLM-M-113": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-114": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 2,
+      "groups_metadata_only": 0,
+      "origin_groups": 2
+    },
+    "CLM-M-115": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-210": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": null,
+      "groups_content_checked": 0,
+      "groups_metadata_only": 0,
+      "origin_groups": 0
+    },
+    "CLM-M-211": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-212": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-213": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-214": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 2,
+      "groups_metadata_only": 0,
+      "origin_groups": 2
+    },
+    "CLM-M-215": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-310": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": null,
+      "groups_content_checked": 0,
+      "groups_metadata_only": 0,
+      "origin_groups": 0
+    },
+    "CLM-M-311": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-312": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-313": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-314": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 2,
+      "groups_metadata_only": 0,
+      "origin_groups": 2
+    },
+    "CLM-M-315": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-410": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": null,
+      "groups_content_checked": 0,
+      "groups_metadata_only": 0,
+      "origin_groups": 0
+    },
+    "CLM-M-411": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-412": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 2,
+      "groups_metadata_only": 0,
+      "origin_groups": 2
+    },
+    "CLM-M-413": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-414": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-415": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-510": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": null,
+      "groups_content_checked": 0,
+      "groups_metadata_only": 0,
+      "origin_groups": 0
+    },
+    "CLM-M-511": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-512": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-513": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-514": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    },
+    "CLM-M-515": {
+      "citations_checked": 0,
+      "citations_content_checked": 0,
+      "citations_metadata_only": 0,
+      "citations_unresolved": 0,
+      "group_coverage": 1.0,
+      "groups_content_checked": 1,
+      "groups_metadata_only": 0,
+      "origin_groups": 1
+    }
+  }
+}
