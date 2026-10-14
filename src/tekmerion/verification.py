@@ -75,7 +75,19 @@ DEFAULT_ANOMALY_MIN_REVIEWS = 5        # window below this cannot acquit a queue
 @dataclass
 class Citation:
     """What a study cites, as the citing context states it. Stage 2
-    exists because these fields can be wrong about a real paper."""
+    exists because these fields can be wrong about a real paper.
+
+    The DOI is normalized ONCE, here at intake, by the shared
+    normalizer (Spec 013, CLM-013-14): `doi` carries the normalized
+    form that resolution, origin grouping, and falsifier matching
+    all consume, so the same work behaves identically whether it
+    was cited bare, as a doi.org URL, or in uppercase (RTA-09).
+    The string exactly as cited survives verbatim in
+    `doi_as_cited` — the preserved input record (Spec 011), used
+    for nothing else. `as_dict` emits the as-cited form, so the
+    records built from a citation (the bundle's as-cited section,
+    the workspace citation cache) keep carrying what the
+    researcher actually typed."""
     citation_id: str
     claim_id: str
     proposition: str                       # the finding attributed to the source
@@ -86,11 +98,23 @@ class Citation:
     venue: Optional[str] = None
     dataset_id: Optional[str] = None      # WS2 grouping key 2 (dataset / registration)
     derived_from: Optional[str] = None    # WS2 grouping key 3 (citation_id this derives from)
+    #: The DOI exactly as cited (verbatim, pre-normalization).
+    #: Intake assigns it from the as-passed `doi`; callers leave it
+    #: alone — it is a constructor field only so a citation can be
+    #: rehydrated from its own fields without losing the record.
+    doi_as_cited: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        if self.doi_as_cited is None:
+            self.doi_as_cited = self.doi
+        if self.doi is not None:
+            self.doi = normalize_doi(self.doi) or None
 
     def as_dict(self) -> dict[str, Any]:
         return {
             "citation_id": self.citation_id, "claim_id": self.claim_id,
-            "proposition": self.proposition, "doi": self.doi, "title": self.title,
+            "proposition": self.proposition, "doi": self.doi_as_cited,
+            "title": self.title,
             "authors": list(self.authors), "year": self.year, "venue": self.venue,
             "dataset_id": self.dataset_id, "derived_from": self.derived_from,
         }
@@ -164,10 +188,23 @@ def _key(token: str) -> str:
 class KeywordStanceChecker:
     """Deterministic lexical stance baseline. A sentence of the content
     supports the proposition when it carries most of the proposition's
-    key terms; the same sentence carrying a negation contradicts it;
-    anything else is contextual. Crude by design — its value is that
-    it is inspectable, reproducible, and honestly labeled; model-based
-    extraction replaces it at this seam, with its identity recorded."""
+    key terms and matches the proposition's negation parity; the same
+    sentence at the opposite parity contradicts it; anything else is
+    contextual. Crude by design — its value is that it is inspectable,
+    reproducible, and honestly labeled; model-based extraction replaces
+    it at this seam, with its identity recorded.
+
+    Parity (Spec 013, CLM-013-13, answering RTA-07): the historical
+    rule — any negation in a matching sentence means CONTRADICTS —
+    inverted every verdict for a proposition that itself carries a
+    negation ("the treatment does not reduce symptoms"), the natural
+    phrasing of a null result, and an inverted CONTRADICTS feeds the
+    falsifier path. For an unnegated proposition the historical rule
+    applies unchanged. For a negated proposition, matching sentences
+    are sorted by parity: same-parity sentences affirm the
+    proposition as stated (SUPPORTS), opposite-parity sentences deny
+    it (CONTRADICTS), and when both parities match, parity cannot
+    decide — the checker abstains (CONTEXTUAL) rather than guess."""
 
     name = "tekmerion.keyword-stance/1"
 
@@ -177,18 +214,24 @@ class KeywordStanceChecker:
         if not prop_keys or not content:
             return CONTEXTUAL
         need = math.ceil(0.6 * len(prop_keys))
-        hit = False
-        negated = False
+        prop_negated = bool(_NEGATIONS & set(_tokens(proposition)))
+        hit_plain = False      # a matching sentence without a negation
+        hit_negated = False    # a matching sentence carrying a negation
         for sentence in re.split(r"[.!?]", content):
             toks = _tokens(sentence)
             keys = {_key(t) for t in toks}
             if len(prop_keys & keys) >= need:
-                hit = True
                 if _NEGATIONS & set(toks):
-                    negated = True
-        if not hit:
+                    hit_negated = True
+                else:
+                    hit_plain = True
+        if not (hit_plain or hit_negated):
             return CONTEXTUAL
-        return CONTRADICTS if negated else SUPPORTS
+        if not prop_negated:
+            return CONTRADICTS if hit_negated else SUPPORTS
+        if hit_plain and hit_negated:
+            return CONTEXTUAL
+        return SUPPORTS if hit_negated else CONTRADICTS
 
 
 # ------------------------------------------------------------------ stage 2
@@ -198,8 +241,34 @@ def _norm(text: str) -> str:
 
 
 def _surname(author: str) -> str:
-    parts = _tokens(author)
+    """The surname token of an author string. Both citation forms
+    occur in the wild: "Firstname Lastname" (surname last) and the
+    bibliographic "Lastname, F." (surname before the comma). The
+    comma form is read off the part before the first comma;
+    without that, "Wandel, S." keys as "s" and surname matching
+    silently disables itself for exactly the form reference lists
+    use (RTA-06)."""
+    text = author or ""
+    if "," in text:
+        parts = _tokens(text.split(",", 1)[0])
+    else:
+        parts = _tokens(text)
     return parts[-1] if parts else ""
+
+
+def _given_name(author: str) -> str:
+    """The given-name token of an author string, either form
+    ("Firstname Lastname", "Lastname, Firstname"); "" when the
+    string carries nothing usable (an initial alone is too weak
+    to identify anyone, so it does not count)."""
+    text = author or ""
+    if "," in text:
+        parts = _tokens(text.split(",", 1)[1])
+        given = parts[0] if parts else ""
+    else:
+        parts = _tokens(text)
+        given = parts[0] if len(parts) > 1 else ""
+    return given if len(given) >= 3 and given not in _STOPWORDS else ""
 
 
 def _text_match(cited: str, retrieved: str) -> bool:
@@ -612,6 +681,54 @@ def verify_citations(
                               second_review_fraction=second_review_fraction)
 
 
+#: A DOI-shaped span in prose: the registrant prefix and the suffix
+#: up to the next delimiter. Candidate spans are normalized and
+#: compared EXACTLY against the cited DOI (Spec 013, CLM-013-12):
+#: a span that merely *contains* the cited DOI — 10.1000/xyz22 for
+#: a cited 10.1000/xyz2 — is a different DOI and never fires
+#: (RTA-06, where the naming test was a raw substring check).
+_DOI_SPAN = re.compile(r"10\.\d{4,9}/[^\s()\[\]{}<>\"']+")
+
+
+def _doi_named_in(text: str, doi: str) -> bool:
+    """Whether `text` names `doi` (already normalized) as an exact
+    delimited token — bare, behind a `doi:`/doi.org prefix, or with
+    sentence punctuation attached; all normalize to the same form."""
+    return any(normalize_doi(m.group(0)) == doi
+               for m in _DOI_SPAN.finditer(text))
+
+
+def _surname_year_adjacent(text: str, surname: str, year: int) -> bool:
+    """Whether "Surname YYYY" appears as one citation-shaped unit —
+    adjacent, with only whitespace, an opening parenthesis, or a
+    possessive between the surname and the year ("Wandel 2010",
+    "Smith (2019)", "Wandel's 2010"). A surname in one sentence and
+    a year in another do not name a work."""
+    pattern = (re.escape(surname) + r"(?:\s|\(|'s|’s)+"
+               + str(year) + r"\b")
+    return re.search(pattern, text) is not None
+
+
+def _second_identity_element(falsifier: str, retrieved: RetrievedItem) -> bool:
+    """Whether the falsifier ties itself to *this* record by an
+    identity element beyond surname+year (Spec 013, CLM-013-12).
+    Surname+year alone cannot identify a work — a different
+    same-surname same-year paper is common in exactly the
+    literatures this engine serves (RTA-06 case B). Either of
+    these counts: a content word from the record's title appears
+    in the falsifier (the naming discusses the named work's
+    subject), or the first author's given name appears in it
+    (the naming names the person, not just the surname)."""
+    toks = set(_tokens(falsifier))
+    surname = _surname(retrieved.authors[0])
+    for tok in set(_tokens(retrieved.title or "")):
+        if (len(tok) >= 4 and tok not in _STOPWORDS
+                and tok != surname and tok in toks):
+            return True
+    given = _given_name(retrieved.authors[0])
+    return bool(given) and given in toks
+
+
 def falsifier_names_record(claim: Claim, citation: Citation,
                            result: CitationResult) -> bool:
     """Whether the claim's registered falsifier names *this resolved
@@ -625,9 +742,15 @@ def falsifier_names_record(claim: Claim, citation: Citation,
       contradict the proposition (the observation was checked, not
       inferred);
     - the falsifier text names the resolved record by one of the two
-      conventional citation forms: the citation's normalized DOI
-      appears in it, or the resolved record's **first-author surname
-      and year** both appear in it.
+      conventional citation forms, held to identity-grade exactness
+      (Spec 013, CLM-013-12, answering RTA-06): the citation's
+      normalized DOI as an exact delimited token, or the resolved
+      record's **first-author surname and year** as a citation-shaped
+      adjacent pair accompanied by a second identity element from
+      the record (a title content word or the author's given name).
+      A DOI that is a prefix of the named DOI never fires, and
+      neither does a bare surname+year that could name a different
+      same-surname same-year work.
 
     Identity is read only from the resolved record (and the cited
     DOI) — never from the as-cited fields, which are precisely what
@@ -645,15 +768,17 @@ def falsifier_names_record(claim: Claim, citation: Citation,
         return False
     text = falsifier.lower()
     doi = _norm_doi(citation.doi)
-    if doi and doi in text:
+    if doi and _doi_named_in(text, doi):
         return True
     retrieved = result.retrieved
     if retrieved is None or not retrieved.authors or retrieved.year is None:
         return False
     surname = _surname(retrieved.authors[0])
-    if not surname or surname not in set(_tokens(falsifier)):
+    if not surname:
         return False
-    return str(retrieved.year) in set(re.findall(r"[0-9]+", falsifier))
+    if not _surname_year_adjacent(text, surname, retrieved.year):
+        return False
+    return _second_identity_element(falsifier, retrieved)
 
 
 def to_evidence_item(citation: Citation, result: CitationResult, *,
