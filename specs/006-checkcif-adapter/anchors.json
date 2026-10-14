@@ -1,0 +1,22 @@
+{
+ "anchors": [
+  {
+   "mechanism": "zenodo",
+   "recorded_at": "2026-10-13",
+   "doi": "10.5281/zenodo.23355380",
+   "conceptdoi": "10.5281/zenodo.23355379",
+   "record_id": 23355380,
+   "locator": "https://doi.org/10.5281/zenodo.23355380",
+   "bundle_version": "0.2.0",
+   "files": {
+    "aee-assessment.json": {
+     "sha256": "50a22b3a9f9934f4bbadc34b5b445bc484fe66e6eae1bc916fb9b9457b80838c"
+    },
+    "aee-claims.json": {
+     "sha256": "39234f2f86902ae64717af8a9efd940f20758f3e09a6b715760a77122015118c"
+    }
+   },
+   "note": "External anchor for this spec's claim bundle and assessment (red-team follow-up RTE-23, WS-7 records completion, 2026-10-13). The deposit's description carries the same SHA-256 values; any copy of these files can be checked against either record."
+  }
+ ]
+}

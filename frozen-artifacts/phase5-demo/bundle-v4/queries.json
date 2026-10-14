@@ -1,0 +1,10 @@
+{
+  "queries": [
+    {
+      "connector": "crossref",
+      "limit": 10,
+      "query": "Einstein Elektrodynamik bewegter Körper 1905",
+      "results": 10
+    }
+  ]
+}

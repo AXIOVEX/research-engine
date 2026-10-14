@@ -1,0 +1,16 @@
+{
+  "claims": [
+    {
+      "claim_id": "CLM-D-001",
+      "dependencies": [],
+      "falsifier": "the source of record holds no such paper, or names a different author, venue, or year",
+      "kind": "data",
+      "margin": 0.1,
+      "statement": "Einstein's electrodynamics paper appeared in Annalen der Physik in 1905, authored by Albert Einstein",
+      "status": "proposed",
+      "sufficiency_floor": 1,
+      "supersedes": null
+    }
+  ],
+  "registration_hash": "238b1eb802de495016f0d71b03a398574b7a70540d7119c5991688a15b3950ff"
+}

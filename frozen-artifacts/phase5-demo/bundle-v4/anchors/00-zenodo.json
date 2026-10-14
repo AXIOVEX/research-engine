@@ -1,0 +1,17 @@
+{
+  "anchored_at": "2026-10-12T06:46:48.160573+00:00",
+  "approved_by": "Tristen Pierson (owner; Phase 5 go-order, 2026-10-12)",
+  "bundle_hash": "92093186dcd717eaa823d04e5f93d99b41a35ec31f4e7085da273891b6b7fc54",
+  "doi": "10.5281/zenodo.23311479",
+  "file": {
+    "bytes": 8693,
+    "md5": "7b014e9ac42546d39f0ea45d581d34c7",
+    "name": "bundle-v1.zip",
+    "sha256": "979a01ec593f8511a3ee67a34bac058b3915a56627f437c159665ab5da05fa7a"
+  },
+  "locator": "https://doi.org/10.5281/zenodo.23311479",
+  "mechanism": "zenodo",
+  "record_id": 23311479,
+  "registration_hash": "238b1eb802de495016f0d71b03a398574b7a70540d7119c5991688a15b3950ff",
+  "root": "7434209696ea39ba8e97a33b5caa0ae08928269ea81c7d6407f423191e86e317"
+}
