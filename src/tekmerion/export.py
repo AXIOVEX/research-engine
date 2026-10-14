@@ -212,6 +212,38 @@ def _issued_control_outcomes(controls: list, store: Any,
     return adjusted
 
 
+def _replay_can_execute(control: Any) -> bool:
+    """Whether the export replay can execute this control: the swap
+    control needs only the ledger; a fixture control needs its whole
+    fixture (claim, groups, expected verdict) presented at export.
+    Anything else presenting as a fixture control is a descriptor,
+    not an executable control — the registration alone never carries
+    fixture material for legacy studies."""
+    if getattr(control, "kind", None) in ("positive", "negative"):
+        return (control.claim is not None and control.groups is not None
+                and control.expected is not None)
+    return True
+
+
+def _unexecuted_control_outcome(control: Any) -> dict[str, Any]:
+    """The projection entry for a registered fixture control the
+    export replay did not execute because its fixture was not
+    presented: `passed: null` — no outcome is stated for a control
+    the machinery did not run, and an unexecuted control is never a
+    failed one (the same convention `_issued_control_outcomes`
+    applies to issued runs)."""
+    return {
+        "kind": control.kind, "failure_mode": control.failure_mode,
+        "expected": control.expected, "observed": None, "passed": None,
+        "executed": False, "fixture": None,
+        "detail": "fixture not presented at export; the control was not "
+                  "executed by the export replay — an unexecuted control "
+                  "is not a failed control, and no outcome is stated for "
+                  "it (its outcome, if any, belongs to a run; an invalid "
+                  "run appends nothing, WS3 §1)",
+    }
+
+
 def run_outcome_projection(
     store: Any,
     store_path: str,
@@ -234,9 +266,17 @@ def run_outcome_projection(
     - Otherwise the run-level checks are **replayed at export time**
       through the production path (`tekmerion.verdicts.evaluate_run`)
       on a register rebuilt from the frozen document plus this
-      export's evidence — the same replay the workspace performs.
-      INVALID carries the engine's reasons verbatim; a clean replay
-      with no issued verdicts is `not-run`.
+      export's evidence — the same replay the workspace performs,
+      under the workspace's execution discipline: only controls the
+      replay can execute are executed (the swap control, and fixture
+      controls whose fixtures are presented at export). A registered
+      fixture control whose fixture is not presented is recorded as
+      not executed (`passed: null`), never as failed — a legacy
+      registration commits no fixture material, so failing bare
+      descriptors manufactured invalid reasons no run ever produced
+      and misstated the study's record. INVALID carries the engine's
+      reasons verbatim; a clean replay with no issued verdicts is
+      `not-run`.
 
     Since Spec 011 the projection also records **per-control
     outcomes** (`controls`): the replay's own outcomes for unissued
@@ -351,29 +391,56 @@ def run_outcome_projection(
             if cid in replay.claims:
                 replay.add_evidence(cid, item)
     replay.frozen = True
+    # The replay executes only the controls it can execute — the
+    # workspace's own discipline (`run_controls_for` in ui/state.py):
+    # the swap control (it needs only the ledger) plus fixture
+    # controls whose fixture is presented at export. A registered
+    # fixture control whose fixture is NOT presented is not executed
+    # and never failed: legacy registrations commit no fixture
+    # material, so replaying bare descriptors through `evaluate_run`
+    # manufactured "control missing claim/groups/expected" failures
+    # — invalid reasons no run ever produced — and branded every
+    # legacy re-export INVALID, misstating the study's record (the
+    # Phase 5 demo re-export: its run's recorded invalidity rested
+    # on the swap control, yet the export cited two fixture
+    # artifacts instead and recorded the swap control as passed).
+    # Unexecuted controls are recorded with the same honesty the
+    # issued branch uses (`_issued_control_outcomes`): `passed:
+    # null`, an outcome the machinery did not produce.
+    executable = [c for c in controls if _replay_can_execute(c)]
     result = evaluate_run(
         replay,
         mode=doc.get("mode", "confirmation"),
-        controls=list(controls),
+        controls=executable,
         chain_ok=True,  # export has already refused a broken chain above
         linked_exploratory=list(doc.get("linked_exploratory") or []),
         store=store,
         store_path=store_path,
     )
-    replayed_kinds = [o["kind"] for o in result.control_outcomes if o["executed"]]
+    replay_outcomes = iter(result.control_outcomes)
+    merged_outcomes: list[dict[str, Any]] = []
+    for ctl in controls:
+        if _replay_can_execute(ctl):
+            merged_outcomes.append(next(replay_outcomes))
+        else:
+            merged_outcomes.append(_unexecuted_control_outcome(ctl))
+    replayed_kinds = [o["kind"] for o in merged_outcomes if o["executed"]]
     if result.run_verdict == "invalid":
         return {
             "outcome": "invalid",
             "basis": "replayed at export time through tekmerion.verdicts.evaluate_run "
                      "(production path); an invalid run appends nothing, so no "
                      "verdict.issued events exist to state it; the replay's "
-                     "per-control outcomes are recorded in controls",
+                     "per-control outcomes are recorded in controls — fixture "
+                     "controls whose fixtures were not presented at export were "
+                     "not executed by the replay and are recorded as not "
+                     "executed, never as failed",
             "mode": doc.get("mode"),
             "verdicts_issued": 0,
             "invalid_reasons": list(result.invalid_reasons),
             "controls_replayed": replayed_kinds,
             "controls_registered": registered_kinds,
-            "controls": result.control_outcomes,
+            "controls": merged_outcomes,
             "controls_recorded": False,
             **regime,
         }
@@ -381,13 +448,16 @@ def run_outcome_projection(
         "outcome": "not-run",
         "basis": "no verdict.issued events in the exported ledger, and the "
                  "run-level checks replayed at export time found no failure; "
-                 "the replay's per-control outcomes are recorded in controls",
+                 "the replay's per-control outcomes are recorded in controls — "
+                 "fixture controls whose fixtures were not presented at export "
+                 "were not executed by the replay and are recorded as not "
+                 "executed, never as failed",
         "mode": doc.get("mode"),
         "verdicts_issued": 0,
         "invalid_reasons": [],
         "controls_replayed": replayed_kinds,
         "controls_registered": registered_kinds,
-        "controls": result.control_outcomes,
+        "controls": merged_outcomes,
         "controls_recorded": False,
         **regime,
     }
