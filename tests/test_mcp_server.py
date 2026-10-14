@@ -420,7 +420,28 @@ def test_lean_ingestion_records_state_as_it_is(tmp_path):
     lean.write_text("theorem t1 : True := by sorry\n", encoding="utf-8")
     s = make_session(tmp_path, "ada", "researcher")
     s.create_study("lean", "Lean study")
-    out = s.ingest_lean("lean", url=lean.as_uri(), theorem_name="t1")
+    # file:// is refused (Spec 013 CLM-013-33): ingestion fetches
+    # http/https only — a local file is not an artifact source.
+    with pytest.raises(SurfaceRefusal):
+        s.ingest_lean("lean", url=lean.as_uri(), theorem_name="t1")
+    # The same artifact served over HTTP ingests, and its state is
+    # recorded as it is.
+    import functools
+    import http.server
+    import threading
+
+    class Quiet(http.server.SimpleHTTPRequestHandler):
+        def log_message(self, *args):
+            pass
+
+    handler = functools.partial(Quiet, directory=str(tmp_path))
+    httpd = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    try:
+        url = f"http://127.0.0.1:{httpd.server_address[1]}/artifact.lean"
+        out = s.ingest_lean("lean", url=url, theorem_name="t1")
+    finally:
+        httpd.shutdown()
     ing = out["ingestion"]
     assert ing["sorry_count"] == 1
     assert ing["compile_status"] == "not_attempted"
@@ -439,11 +460,23 @@ def test_theorem_registration_and_lane2_records(tmp_path):
     state = s.get_theorem_state("math", "CLM-M-110")
     assert state["lane2"] == "unexplained"
     assert state["digestion"]["risk_flag"] is True
-    s.record_digestion("math", "CLM-M-110", explainer="ada",
-                       artifact_ref="notes/explanation.md")
+    # Digestion is an adjudicator act (Spec 013 CLM-013-28), and the
+    # explanation artifact must be a record the study holds — here a
+    # note filed in the study's workspace directory.
+    note = tmp_path / "ws" / "studies" / "math" / "notes" / "explanation.md"
+    note.parent.mkdir(parents=True, exist_ok=True)
+    note.write_text("ada's explanation of the headline result\n",
+                    encoding="utf-8")
+    adjudicator = make_session(tmp_path, "grace", "adjudicator")
+    adjudicator.record_digestion("math", "CLM-M-110", explainer="ada",
+                                 artifact_ref="notes/explanation.md")
     state = s.get_theorem_state("math", "CLM-M-110")
     assert state["lane2"] == "explained"
     assert state["digestion"]["risk_flag"] is False
+    # The projection distinguishes the named explainer from the
+    # actor who recorded the digestion.
+    assert state["digestion"]["explainer"] == "ada"
+    assert state["digestion"]["recorded_by"] == "grace"
 
 
 # -- SDK shell (needs the extra) ------------------------------------------------

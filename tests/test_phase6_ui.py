@@ -10,7 +10,9 @@ Claims under test: CLM-002-31 … CLM-002-40.
 """
 
 import http.client
+import http.cookies
 import io
+import re
 import urllib.error
 import json
 import shutil
@@ -61,8 +63,17 @@ class RoutingHttp(HttpJson):
 
 
 class Client:
+    """A browser-shaped client: it keeps the identity cookies and
+    submits forms the way the pages render them — including the
+    per-session CSRF token every POST now requires (Spec 013
+    CLM-013-31). Before a POST it reads a page as the same identity
+    if it has no token for it yet, exactly as a browser would have
+    the rendered form in front of it."""
+
     def __init__(self, server):
         self.port = server.server_address[1]
+        self.jar: dict[str, str] = {}
+        self._csrf: dict[tuple, str] = {}
 
     def req(self, method, path, form=None, role=None, actor=None):
         conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=15)
@@ -74,10 +85,21 @@ class Client:
             headers["X-Tekmerion-Role"] = role
         if actor:
             headers["X-Tekmerion-Actor"] = actor
+        if self.jar:
+            headers["Cookie"] = "; ".join(
+                f"{k}={v}" for k, v in self.jar.items())
         conn.request(method, path, body=body, headers=headers)
         resp = conn.getresponse()
         data = resp.read().decode("utf-8")
-        status, headers_out = resp.status, dict(resp.getheaders())
+        raw_headers = resp.getheaders()
+        status, headers_out = resp.status, dict(raw_headers)
+        for key, value in raw_headers:
+            if key.lower() == "set-cookie":
+                for name, morsel in http.cookies.SimpleCookie(value).items():
+                    self.jar[name] = morsel.value
+        match = re.search(r'name="csrf-token" content="([0-9a-f]{64})"', data)
+        if match:
+            self._csrf[(actor, role)] = match.group(1)
         conn.close()
         return status, headers_out, data
 
@@ -85,6 +107,14 @@ class Client:
         return self.req("GET", path, **kw)
 
     def post(self, path, form, **kw):
+        form = dict(form)
+        if "csrf_token" not in form:
+            token = self._csrf.get((kw.get("actor"), kw.get("role")))
+            if token is None:
+                self.get("/", **kw)
+                token = self._csrf.get((kw.get("actor"), kw.get("role")))
+            if token is not None:
+                form["csrf_token"] = token
         return self.req("POST", path, form=form, **kw)
 
 

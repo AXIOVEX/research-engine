@@ -608,7 +608,7 @@ def retrieved_items(ws: Workspace, study_id: str) -> dict[str, RetrievedItem]:
 
 def action_freeze(store: StudyStore, register: ClaimRegister, ws: Workspace,
                   study_id: str, actor: str, *, mode: str,
-                  linked_exploratory: list[str],
+                  linked_exploratory: Optional[list[str]],
                   control_fields: list[dict[str, Any]],
                   deployment_shape: str = "hosted") -> dict[str, Any]:
     """Freeze through the production workflow (FreezeError is the
@@ -745,9 +745,10 @@ def action_deposit(store: StudyStore, ws: Workspace, study_id: str,
                    approved_by: str, actor: str) -> dict[str, Any]:
     """Deposit through the production deposit service (DepositError
     is the refusal — including its mechanical adjudicator-approval
-    gate) and append the receipt to the ledger."""
+    gate and the two-party rule: the approver may not be the
+    depositing actor) and append the receipt to the ledger."""
     receipt = deposit_mod.deposit_bundle(str(bundle_dir), transport,
-                                         approved_by=approved_by)
+                                         approved_by=approved_by, actor=actor)
     deposit_mod.record_anchor(store, receipt, actor=actor)
     return receipt
 

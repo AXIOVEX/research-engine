@@ -48,9 +48,17 @@ REPO = Path(__file__).parent.parent
 # ------------------------------------------------------------ HTTP client
 
 class Client:
+    """A browser-shaped client: it keeps the session cookie and
+    submits forms the way the pages render them — including the
+    per-session CSRF token every state-changing POST now requires
+    (Spec 013 CLM-013-32). Before a POST it reads a page (following
+    the plane redirect) if it holds no token yet, exactly as a
+    browser would have the rendered form in front of it."""
+
     def __init__(self, port: int) -> None:
         self.port = port
         self.jar: dict[str, str] = {}
+        self._csrf: str | None = None
 
     def request(self, method: str, path: str, form: dict | None = None):
         conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=15)
@@ -70,13 +78,29 @@ class Client:
         if set_cookie:
             for key, morsel in http.cookies.SimpleCookie(set_cookie).items():
                 self.jar[key] = morsel.value
+        match = re.search(r'name="csrf-token" content="([0-9a-f]{64})"', data)
+        if match:
+            self._csrf = match.group(1)
         conn.close()
         return resp.status, raw_headers, data
 
     def get(self, path):
         return self.request("GET", path)
 
+    def _fetch_csrf(self):
+        status, headers, _ = self.get("/")
+        hops = 0
+        while status == 303 and headers.get("Location") and hops < 3:
+            status, headers, _ = self.get(headers["Location"])
+            hops += 1
+
     def post(self, path, form):
+        form = dict(form)
+        if "csrf_token" not in form:
+            if self._csrf is None and "tekmerion_session" in self.jar:
+                self._fetch_csrf()
+            if self._csrf is not None:
+                form["csrf_token"] = self._csrf
         return self.request("POST", path, form)
 
     def with_session(self, token: str) -> "Client":

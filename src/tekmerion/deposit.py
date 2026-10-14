@@ -256,16 +256,26 @@ def deposit_bundle(bundle_dir: str, transport: Any, *, approved_by: str,
                    title: Optional[str] = None,
                    creators: Optional[list[dict[str, str]]] = None,
                    description_extra: str = "",
-                   package_out: Optional[str] = None) -> dict[str, Any]:
+                   package_out: Optional[str] = None,
+                   actor: Optional[str] = None) -> dict[str, Any]:
     """Deposit a verified bundle and return the anchor receipt.
 
     The adjudicator-approval gate (WS5 §3) is mechanical: no named
-    approver, no deposit. A bundle that does not verify standalone is
-    likewise refused — anchoring a broken record would certify it."""
+    approver, no deposit. Approval is also two-party in fact (Spec
+    013 CLM-013-30): when the depositing actor is known (`actor`),
+    an approver who is that same actor is refused — a deposit one
+    person both makes and approves is not an approved deposit. A
+    bundle that does not verify standalone is likewise refused —
+    anchoring a broken record would certify it."""
     if not approved_by or not approved_by.strip():
         raise DepositError(
             "deposit refused: deposits are adjudicator-approved actions "
             "(WS5 §3) — name the approver; without one the bundle stays internal")
+    if actor is not None and approved_by.strip() == actor.strip():
+        raise DepositError(
+            "deposit refused: the approver must be someone other than the "
+            "depositing actor — approval is a second person's act, and "
+            "self-approval is not approval (Spec 013 CLM-013-30)")
     result = verify_bundle(bundle_dir)
     if not result.ok:
         raise DepositError(f"deposit refused: bundle does not verify: {result.failures}")

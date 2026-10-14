@@ -16,15 +16,27 @@ shipped UI's permission matrix, imported from
 `tekmerion.ui.server.PERMISSIONS` so the surfaces cannot drift
 (CLM-009-03); tool families with no UI counterpart (adapters, math)
 take the register family's tuple by reference.
+
+Spec 013 (WS-5) hardens this surface: lane-2 appends
+(`record_digestion` / `record_acceptance`) are adjudicator acts
+whose references must resolve to records in the study; faithfulness
+re-pinning is adjudicator-only and the pin history is projected;
+`ingest_lean` fetches http/https only and adapter file paths are
+confined to the workspace; second reviews are validated against
+the queue; and an OS error inside a tool surfaces as a
+`SurfaceRefusal` that names no absolute path (CLM-013-28…35).
 """
 
 from __future__ import annotations
 
+import functools
 import json
 import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Optional
+from urllib.parse import urlparse
 
 from .. import deposit as deposit_mod
 from .. import export as export_mod
@@ -63,8 +75,12 @@ TOOL_ROLES: dict[str, Optional[tuple[str, ...]]] = {
     "register_theorem": PERMISSIONS["register_claim"],
     "pin_faithfulness": PERMISSIONS["register_claim"],
     "ingest_lean": PERMISSIONS["register_claim"],
-    "record_digestion": PERMISSIONS["register_claim"],
-    "record_acceptance": PERMISSIONS["register_claim"],
+    # Lane-2 appends are adjudicator acts (Spec 013 CLM-013-28): a
+    # digestion or acceptance record states that a human explained
+    # or accepted a result, so the role that may append one is the
+    # adjudicator's — not the register family's.
+    "record_digestion": ("adjudicator",),
+    "record_acceptance": ("adjudicator",),
 }
 
 
@@ -76,6 +92,35 @@ class SurfaceRefusal(RuntimeError):
     """A refusal originated by this surface (role, transport, or
     workspace state) — its own text, like the UI's refusal banner.
     Engine refusals are never wrapped in this class."""
+
+
+def _scrub_paths(text: str, root: str) -> str:
+    """Take absolute filesystem paths out of an error's text. The
+    workspace root becomes a label; any other absolute path becomes
+    a placeholder. What remains is the plain reason (for example
+    'File name too long'), which is the part a caller can act on."""
+    if root:
+        text = text.replace(root, "<workspace>")
+    return re.sub(r"/(?:[\w.\-+@]+/)*[\w.\-+@]*", "<path>", text)
+
+
+def _surface_guard(fn):
+    """Spec 013 CLM-013-35: an `OSError` raised inside a tool (a file
+    name too long, a missing file, a full disk) surfaces as a
+    `SurfaceRefusal` naming no absolute path, instead of leaking the
+    raw OS error — paths and all — to the client. Engine refusals
+    are not `OSError`s and pass through with their text unchanged
+    (CLM-009-02)."""
+    @functools.wraps(fn)
+    def wrapped(self, *args, **kwargs):
+        try:
+            return fn(self, *args, **kwargs)
+        except OSError as exc:
+            detail = _scrub_paths(str(exc), str(self.ws.root))
+            raise SurfaceRefusal(
+                "the workspace could not carry out that operation: "
+                f"{detail}") from exc
+    return wrapped
 
 
 @dataclass
@@ -194,12 +239,92 @@ class Session:
             return deposit_mod.ZenodoTransport()
         return None
 
+    # ------------------------------------------- Spec 013 WS-5 gates
+
+    def _ref_resolves(self, study_id: str, store, register,
+                      ref: Optional[str]) -> bool:
+        """Whether a lane-2 reference points at an existing record
+        (CLM-013-28). Resolvable means the study's own record holds
+        it: a claim id in the register; an ingested artifact's URL
+        (named exactly, or appearing inside the reference's text);
+        a citation id or DOI from a citation check; a queue id; an
+        anchor receipt's locator, root, bundle hash, or DOI; or a
+        file that exists inside the workspace. Anything else — an
+        invented name, a bare token, an outside URL the study never
+        ingested — does not resolve."""
+        ref = (ref or "").strip()
+        if not ref:
+            return False
+        if ref in register.claims:
+            return True
+        ingestion_urls = []
+        for event in store.events():
+            payload = event["payload"]
+            etype = event["type"]
+            if etype == "math.lean_ingested":
+                url = (payload.get("artifact") or {}).get("url") or ""
+                if url:
+                    ingestion_urls.append(url)
+                    if ref == url:
+                        return True
+            elif etype == "citation.checked":
+                if ref in (payload.get("citation_id"), payload.get("doi")):
+                    return True
+            elif etype == "adjudication.enqueued":
+                if ref == payload.get("queue_id"):
+                    return True
+            elif etype == "anchor.recorded":
+                if ref in (payload.get("locator"), payload.get("root"),
+                           payload.get("bundle_hash"), payload.get("doi")):
+                    return True
+        if any(url in ref for url in ingestion_urls):
+            return True
+        root = self.ws.root.resolve()
+        for base in (self.ws.study_dir(study_id), self.ws.root):
+            try:
+                resolved = (base / ref).resolve()
+            except OSError:
+                continue
+            if resolved.is_file() and resolved.is_relative_to(root):
+                return True
+        return False
+
+    def _require_resolvable(self, study_id: str, store, register,
+                            ref: Optional[str], field: str) -> None:
+        if not self._ref_resolves(study_id, store, register, ref):
+            raise SurfaceRefusal(
+                f"{field} {ref!r} does not resolve to an existing record "
+                "in this study: name a claim, an ingested artifact, a "
+                "checked citation, an anchor receipt, or a file inside "
+                "the workspace — a lane-2 stage cannot rest on a "
+                "reference the record does not hold (Spec 013 CLM-013-28)")
+
+    def _confine_adapter_path(self, raw: str, field: str) -> str:
+        """Resolve an adapter file path and confine it to the
+        workspace (CLM-013-33). Relative paths are read as relative
+        to the workspace root. A path that lands outside the
+        workspace is refused: the server is not a way to read, hash,
+        or fingerprint the host's files."""
+        root = self.ws.root.resolve()
+        candidate = Path(raw)
+        if not candidate.is_absolute():
+            candidate = root / candidate
+        resolved = candidate.resolve()
+        if not resolved.is_relative_to(root):
+            raise SurfaceRefusal(
+                f"{field} must name a file inside the workspace: paths "
+                "outside the workspace are refused, so the server cannot "
+                "be used to read or fingerprint the host's files "
+                "(Spec 013 CLM-013-33)")
+        return str(resolved)
+
     @staticmethod
     def _ok(**payload: Any) -> dict[str, Any]:
         return {"ok": True, **payload}
 
     # ------------------------------------------------------------ studies
 
+    @_surface_guard
     def list_studies(self) -> dict[str, Any]:
         studies = []
         for sid in self.ws.list_study_ids():
@@ -207,6 +332,7 @@ class Session:
             studies.append({"study_id": sid, "title": meta["title"]})
         return self._ok(studies=studies, actor=self.actor, role=self.role)
 
+    @_surface_guard
     def create_study(self, study_id: str, title: str = "") -> dict[str, Any]:
         self._require("create_study")
         try:
@@ -215,6 +341,7 @@ class Session:
             raise SurfaceRefusal(str(exc)) from exc
         return self._ok(study=meta)
 
+    @_surface_guard
     def get_study_status(self, study_id: str) -> dict[str, Any]:
         store, register, info = self._load(study_id)
         verification = store.verify()
@@ -240,6 +367,7 @@ class Session:
 
     # ------------------------------------------------------------ claims
 
+    @_surface_guard
     def register_claim(self, study_id: str, claim_id: str, statement: str,
                        falsifier: str, kind: str = "data",
                        dependencies: Optional[list[str]] = None,
@@ -258,6 +386,7 @@ class Session:
         st.action_register_claim(store, register, claim, self.actor)
         return self._ok(claim=claim.as_dict())
 
+    @_surface_guard
     def list_claims(self, study_id: str) -> dict[str, Any]:
         store, register, info = self._load(study_id)
         verdicts = st.verdicts_by_claim(store)
@@ -274,6 +403,7 @@ class Session:
             out.append(entry)
         return self._ok(claims=out)
 
+    @_surface_guard
     def get_claim(self, study_id: str, claim_id: str) -> dict[str, Any]:
         result = self.list_claims(study_id)
         for entry in result["claims"]:
@@ -281,6 +411,7 @@ class Session:
                 return self._ok(claim=entry)
         raise SurfaceRefusal(f"no such claim in study {study_id}: {claim_id}")
 
+    @_surface_guard
     def withdraw_claim(self, study_id: str, claim_id: str,
                        reason: str) -> dict[str, Any]:
         self._require("withdraw_claim")
@@ -294,6 +425,7 @@ class Session:
 
     # ------------------------------------------------------------ citations
 
+    @_surface_guard
     def attach_citation(self, study_id: str, citation_id: str, claim_id: str,
                         proposition: str, doi: Optional[str] = None,
                         title: str = "", authors: Optional[list[str]] = None,
@@ -314,12 +446,14 @@ class Session:
 
     # ------------------------------------------------------------ adjudication
 
+    @_surface_guard
     def list_adjudication_queue(self, study_id: str) -> dict[str, Any]:
         store, _, _ = self._load(study_id)
         meta = self.ws.meta(study_id)
         view = st.queue_view(store, meta)
         return self._ok(**view)
 
+    @_surface_guard
     def decide_adjudication(self, study_id: str, queue_id: str, decision: str,
                             rationale: str = "") -> dict[str, Any]:
         self._require("decide_adjudication")
@@ -328,16 +462,28 @@ class Session:
                           adjudicator=self.actor, rationale=rationale)
         return self._ok(event=event)
 
+    @_surface_guard
     def record_second_review(self, study_id: str, queue_id: str,
                              agrees: bool) -> dict[str, Any]:
         self._require("record_second_review")
+        # Strictly boolean (Spec 013 CLM-013-34): the JSON wire can
+        # carry the string "yes"; coercing it to True would let a
+        # malformed call agree on the reviewer's behalf. The store
+        # then validates the target itself — the item must exist, be
+        # decided, and have been decided by someone else.
+        if not isinstance(agrees, bool):
+            raise SurfaceRefusal(
+                f"second review refused: agrees must be a boolean, got "
+                f"{agrees!r} — a string such as 'yes' is rejected, not "
+                "coerced (Spec 013 CLM-013-34)")
         store, _, _ = self._load(study_id)
         event = store.log_second_review(queue_id, reviewer=self.actor,
-                                        agrees=bool(agrees))
+                                        agrees=agrees)
         return self._ok(event=event)
 
     # ------------------------------------------------------------ freeze / run
 
+    @_surface_guard
     def freeze_study(self, study_id: str, mode: str = "confirmation",
                      linked_exploratory: Optional[list[str]] = None,
                      controls: Optional[list[dict[str, Any]]] = None,
@@ -345,24 +491,49 @@ class Session:
         self._require("freeze_study")
         store, register, _ = self._load(study_id)
         fields = controls if controls is not None else _default_control_fields()
+        # `linked_exploratory` passes through exactly as given
+        # (Spec 013 CLM-013-35): in confirmation mode an omitted
+        # disclosure is not the same as an explicit empty one, and
+        # the freeze layer refuses the omission — converting None
+        # to [] here would silently make that disclosure for the
+        # caller.
         result = st.action_freeze(
             store, register, self.ws, study_id, self.actor, mode=mode,
-            linked_exploratory=list(linked_exploratory or []),
+            linked_exploratory=linked_exploratory,
             control_fields=fields, deployment_shape=deployment_shape)
         return self._ok(**result)
 
+    @_surface_guard
     def run_evaluation(self, study_id: str) -> dict[str, Any]:
         self._require("run_evaluation")
-        store, register, _ = self._load(study_id)
+        store, register, info = self._load(study_id)
         result = st.action_run(
             store, register, str(self.ws.ledger_path(study_id)),
             st.freeze_control_fields(self.ws, study_id, store), self.actor)
+        # A dead claim's verdict is computed but never issued — the
+        # issuance path skips it, so the ledger never receives it.
+        # The result marks it as not issued (Spec 013 CLM-013-35),
+        # so nobody quoting this result overstates what was issued.
+        dead = set(info.get("dead", {})) | {
+            cid for cid, claim in register.claims.items()
+            if claim.status == "dead"}
+        claim_verdicts = []
+        for verdict in result.claim_verdicts:
+            entry = verdict.as_dict()
+            entry["issued"] = (result.run_verdict == "valid"
+                               and verdict.claim_id not in dead)
+            if verdict.claim_id in dead:
+                entry["not_issued_reason"] = (
+                    "the claim is dead (withdrawn): this verdict was "
+                    "computed for the record and never issued")
+            claim_verdicts.append(entry)
         return self._ok(
             run_verdict=result.run_verdict,
             invalid_reasons=list(result.invalid_reasons),
-            claim_verdicts=[v.as_dict() for v in result.claim_verdicts],
+            claim_verdicts=claim_verdicts,
             mode=result.mode, disclosure=list(result.disclosure))
 
+    @_surface_guard
     def get_verdicts(self, study_id: str) -> dict[str, Any]:
         store, register, _ = self._load(study_id)
         run = st.run_projection(
@@ -374,6 +545,7 @@ class Session:
 
     # ------------------------------------------------------------ export / deposit
 
+    @_surface_guard
     def export_bundle(self, study_id: str) -> dict[str, Any]:
         self._require("export_bundle")
         store, register, _ = self._load(study_id)
@@ -384,18 +556,21 @@ class Session:
                                       "failures": list(verification.failures),
                                       "checks": verification.checks})
 
+    @_surface_guard
     def verify_bundle(self, bundle_dir: str) -> dict[str, Any]:
         self._require("verify_bundle")
         v = export_mod.verify_bundle(bundle_dir)
         return self._ok(ok=bool(v.ok), failures=list(v.failures),
                         checks=v.checks)
 
+    @_surface_guard
     def verify_anchor(self, bundle_dir: str,
                       public_record: dict[str, Any]) -> dict[str, Any]:
         v = export_mod.verify_anchor(bundle_dir, public_record)
         return self._ok(ok=bool(v.ok), failures=list(v.failures),
                         details=v.details)
 
+    @_surface_guard
     def deposit_bundle(self, study_id: str, approved_by: str = "") -> dict[str, Any]:
         self._require("deposit_bundle")
         transport = self._transport()
@@ -435,6 +610,7 @@ class Session:
         before = len(register.evidence.get(claim_id, [])) if claim_id else 0
         return store, register, before
 
+    @_surface_guard
     def run_checkcif(self, study_id: str, cif_path: Optional[str] = None,
                      recorded_output_path: Optional[str] = None,
                      claim_id: Optional[str] = None,
@@ -442,9 +618,11 @@ class Session:
                      origin_group: Optional[str] = None) -> dict[str, Any]:
         store, register, before = self._adapter_pre(
             "run_checkcif", study_id, claim_id)
-        cif_bytes = Path(cif_path).read_bytes() if cif_path else None
-        recorded = (Path(recorded_output_path).read_bytes()
-                    if recorded_output_path else None)
+        cif_bytes = (Path(self._confine_adapter_path(cif_path, "cif_path"))
+                     .read_bytes() if cif_path else None)
+        recorded = (Path(self._confine_adapter_path(
+            recorded_output_path, "recorded_output_path")).read_bytes()
+            if recorded_output_path else None)
         run = checkcif_mod.run_checkcif(
             store, cif_bytes=cif_bytes,
             cif_label=Path(cif_path).name if cif_path else "",
@@ -456,6 +634,7 @@ class Session:
         self._harvest_adapter_items(study_id, register, claim_id, before)
         return self._ok(run=run.as_dict())
 
+    @_surface_guard
     def run_codecheck(self, study_id: str, certificate_id: str,
                       claim_id: Optional[str] = None,
                       item_id: Optional[str] = None,
@@ -471,10 +650,19 @@ class Session:
         self._harvest_adapter_items(study_id, register, claim_id, before)
         return self._ok(run=run.as_dict())
 
+    @_surface_guard
     def run_grim(self, study_id: str, cases: list[dict[str, Any]],
                  claim_id: Optional[str] = None,
                  item_id: Optional[str] = None,
                  origin_group: Optional[str] = None) -> dict[str, Any]:
+        # An empty case list is refused (Spec 013 CLM-013-35): a run
+        # over zero cases would still be recorded as a run, and a
+        # recorded run that checked nothing reads as a check.
+        if not isinstance(cases, list) or not cases:
+            raise SurfaceRefusal(
+                "run_grim refused: the case list is empty — a GRIM run "
+                "over zero cases checks nothing and is not recorded "
+                "(Spec 013 CLM-013-35)")
         store, register, before = self._adapter_pre(
             "run_grim", study_id, claim_id)
         run = stat_mod.run_grim_family(
@@ -483,6 +671,7 @@ class Session:
         self._harvest_adapter_items(study_id, register, claim_id, before)
         return self._ok(run=run.as_dict())
 
+    @_surface_guard
     def run_statcheck(self, study_id: str,
                       manuscript_path: Optional[str] = None,
                       recorded_output_path: Optional[str] = None,
@@ -491,10 +680,12 @@ class Session:
                       origin_group: Optional[str] = None) -> dict[str, Any]:
         store, register, before = self._adapter_pre(
             "run_statcheck", study_id, claim_id)
-        text = (Path(manuscript_path).read_text(encoding="utf-8")
-                if manuscript_path else None)
-        recorded = (Path(recorded_output_path).read_bytes()
-                    if recorded_output_path else None)
+        text = (Path(self._confine_adapter_path(
+            manuscript_path, "manuscript_path")).read_text(encoding="utf-8")
+            if manuscript_path else None)
+        recorded = (Path(self._confine_adapter_path(
+            recorded_output_path, "recorded_output_path")).read_bytes()
+            if recorded_output_path else None)
         run = stat_mod.run_statcheck(
             store, text=text, actor=self.actor, claim_id=claim_id,
             register=register, item_id=item_id, origin_group=origin_group,
@@ -504,6 +695,7 @@ class Session:
         self._harvest_adapter_items(study_id, register, claim_id, before)
         return self._ok(run=run.as_dict())
 
+    @_surface_guard
     def list_adapter_runs(self, study_id: str,
                           adapter_id: Optional[str] = None) -> dict[str, Any]:
         store, _, _ = self._load(study_id)
@@ -511,6 +703,7 @@ class Session:
 
     # ------------------------------------------------------------ math (Spec 003)
 
+    @_surface_guard
     def register_theorem(self, study_id: str, parent_id: str, headline: str,
                          claimant: str, problem: str, margin: float = 0.1,
                          sufficiency_floor: int = 1,
@@ -526,53 +719,118 @@ class Session:
             store.register_claim(claim.claim_id, claim.as_dict(), actor=self.actor)
         return self._ok(claims={k: c.as_dict() for k, c in claims.items()})
 
+    @_surface_guard
     def pin_faithfulness(self, study_id: str, claim_id: str,
                          formal_statement: str, original_statement: str,
                          original_source: str) -> dict[str, Any]:
         self._require("pin_faithfulness")
-        store, _, _ = self._load(study_id)
+        store, register, _ = self._load(study_id)
+        # Pinning is validated (Spec 013 CLM-013-29): the claim must
+        # exist in the register (an empty pin for a claim whose
+        # registration failed pinned seq 1 of a study in the red-team
+        # probe), the fields must be non-empty (refused in
+        # mathclaims itself), and replacing an existing pair is an
+        # adjudicator act — a researcher cannot quietly re-pin a
+        # weaker pair over a stronger one.
+        if claim_id not in register.claims:
+            raise SurfaceRefusal(
+                f"faithfulness pin refused: no such claim in study "
+                f"{study_id}: {claim_id} — a pin can only attach to a "
+                "claim on the record (Spec 013 CLM-013-29)")
+        if mathclaims.faithfulness_pair(store, claim_id) is not None \
+                and self.role != "adjudicator":
+            raise SurfaceRefusal(
+                f"faithfulness re-pin refused: claim {claim_id} already "
+                f"has a pinned pair, and replacing it requires the "
+                f"adjudicator role — this instance runs as {self.actor!r} "
+                f"({self.role}). The existing pair stands; the full pin "
+                "history is on the record (Spec 013 CLM-013-29)")
         event = mathclaims.pin_faithfulness(
             store, claim_id=claim_id, formal_statement=formal_statement,
             original_statement=original_statement,
             original_source=original_source, actor=self.actor)
         return self._ok(event=event)
 
+    @_surface_guard
     def ingest_lean(self, study_id: str, url: str,
                     theorem_name: Optional[str] = None,
                     source_compile_claim: Optional[dict[str, Any]] = None
                     ) -> dict[str, Any]:
         self._require("ingest_lean")
+        # http/https only (Spec 013 CLM-013-33): a file:// URL turns
+        # the ingestion record into a fingerprint of a local file —
+        # its hash and length, on the record, for a file the study
+        # has no business reading.
+        scheme = urlparse(url or "").scheme.lower()
+        if scheme not in ("http", "https"):
+            raise SurfaceRefusal(
+                f"ingest_lean refused: only http and https URLs are "
+                f"ingested, got scheme {scheme!r} — local files and "
+                "other schemes are not artifacts the server fetches "
+                "(Spec 013 CLM-013-33)")
         store, _, _ = self._load(study_id)
         ingestion = mathclaims.ingest_lean_artifact(
             store, url=url, actor=self.actor, theorem_name=theorem_name,
             source_compile_claim=source_compile_claim)
         return self._ok(ingestion=ingestion.as_dict())
 
+    @_surface_guard
     def record_digestion(self, study_id: str, claim_id: str, explainer: str,
                          artifact_ref: str,
                          claimant_explanation: bool = False) -> dict[str, Any]:
+        # Adjudicator-only via TOOL_ROLES (Spec 013 CLM-013-28), and
+        # the explanation artifact must resolve to a record the
+        # study holds — an invented artifact reference would clear
+        # the verified-but-unexplained risk flag on nothing.
         self._require("record_digestion")
-        store, _, _ = self._load(study_id)
+        store, register, _ = self._load(study_id)
+        if not explainer or not explainer.strip():
+            raise SurfaceRefusal(
+                "digestion refused: name the human who explained the "
+                "result — digestion is a named human's work, and an "
+                "unnamed explanation is not one (Spec 013 CLM-013-28)")
+        self._require_resolvable(study_id, store, register,
+                                  artifact_ref, "artifact_ref")
         event = mathclaims.record_digestion(
             store, claim_id=claim_id, explainer=explainer,
             artifact_ref=artifact_ref, actor=self.actor,
             claimant_explanation=bool(claimant_explanation))
         return self._ok(event=event)
 
+    @_surface_guard
     def record_acceptance(self, study_id: str, claim_id: str, stage: str,
                           by: str, evidence_ref: str) -> dict[str, Any]:
+        # Adjudicator-only via TOOL_ROLES (Spec 013 CLM-013-28), and
+        # the evidence reference must resolve to a record the study
+        # holds — an invented reference would advance the claim's
+        # lane-2 stage on nothing.
         self._require("record_acceptance")
-        store, _, _ = self._load(study_id)
+        store, register, _ = self._load(study_id)
+        if not by or not by.strip():
+            raise SurfaceRefusal(
+                "acceptance refused: name the human the stage is "
+                "credited to — lane-2 stages are human acts, and an "
+                "unnamed one is not one (Spec 013 CLM-013-28)")
+        self._require_resolvable(study_id, store, register,
+                                  evidence_ref, "evidence_ref")
         event = mathclaims.record_acceptance(
             store, claim_id=claim_id, stage=stage, by=by,
             evidence_ref=evidence_ref, actor=self.actor)
         return self._ok(event=event)
 
+    @_surface_guard
     def get_theorem_state(self, study_id: str, claim_id: str) -> dict[str, Any]:
         store, _, _ = self._load(study_id)
         verdicts = st.verdicts_by_claim(store)
         parent = claim_id
         proof_id = mathclaims.subclaim_id(parent, "proof_verified")
+        # Pins are appended under the faithful sub-claim's id; the
+        # projection resolves it from the parent so the pair — and
+        # its history — is what the operator actually sees.
+        try:
+            faithful_id = mathclaims.subclaim_id(parent, mathclaims.FAITHFUL)
+        except ValueError:
+            faithful_id = claim_id
         proof_verdict = (verdicts.get(proof_id) or {}).get("verdict")
         return self._ok(
             claim_id=claim_id,
@@ -580,7 +838,10 @@ class Session:
                                            proof_verdict=proof_verdict),
             lane2=mathclaims.lane2_state(store, claim_id),
             digestion=mathclaims.digestion_state(store, claim_id),
-            faithfulness_pair=mathclaims.faithfulness_pair(store, claim_id),
+            acceptance=mathclaims.acceptance_state(store, claim_id),
+            faithfulness_pair=mathclaims.faithfulness_pair(store, faithful_id),
+            faithfulness_history=mathclaims.faithfulness_history(
+                store, faithful_id),
             ingestions=mathclaims.ingestions_for(store, ""),
         )
 
@@ -765,7 +1026,7 @@ def build_server(session: Session):
 
     @reg
     def deposit_bundle(study_id: str, approved_by: str = "") -> dict:
-        """Deposit the latest exported bundle through the configured transport (adjudicator only). The adjudicator-approval gate is mechanical: with approved_by empty the engine refuses and nothing is appended."""
+        """Deposit the latest exported bundle through the configured transport (adjudicator only). The adjudicator-approval gate is mechanical: with approved_by empty the engine refuses and nothing is appended, and an approver equal to the depositing actor is refused — approval is a second person's act."""
         return session.deposit_bundle(study_id, approved_by)
 
     @reg
@@ -833,7 +1094,7 @@ def build_server(session: Session):
     def pin_faithfulness(study_id: str, claim_id: str, formal_statement: str,
                          original_statement: str,
                          original_source: str) -> dict:
-        """Pin a formal statement beside the original problem statement, verbatim — the pair the faithful sub-claim is judged from."""
+        """Pin a formal statement beside the original problem statement, verbatim — the pair the faithful sub-claim is judged from. The claim must exist and every field must be non-empty; replacing an existing pair is adjudicator-only, and the pin history stays on the record."""
         return session.pin_faithfulness(
             study_id, claim_id, formal_statement, original_statement,
             original_source)
@@ -842,7 +1103,7 @@ def build_server(session: Session):
     def ingest_lean(study_id: str, url: str,
                     theorem_name: Optional[str] = None,
                     source_compile_claim: Optional[dict] = None) -> dict:
-        """Ingest a Lean artifact: fetch, SHA-256, sorry/admit counts, axiom audit where a toolchain exists. The compile state is recorded as it is (not_attempted / claimed_by_source / run_by_us / not_runnable_here) — never upgraded."""
+        """Ingest a Lean artifact from an http/https URL: fetch, SHA-256, sorry/admit counts, axiom audit where a toolchain exists. Other schemes (file:// and the rest) are refused. The compile state is recorded as it is (not_attempted / claimed_by_source / run_by_us / not_runnable_here) — never upgraded."""
         return session.ingest_lean(
             study_id, url, theorem_name=theorem_name,
             source_compile_claim=source_compile_claim)
@@ -851,7 +1112,7 @@ def build_server(session: Session):
     def record_digestion(study_id: str, claim_id: str, explainer: str,
                          artifact_ref: str,
                          claimant_explanation: bool = False) -> dict:
-        """Lane-2 record: a named human's explanation of a result. Claimant self-explanation is recorded but labeled as the claimant's."""
+        """Lane-2 record (adjudicator only): a named human's explanation of a result. The artifact_ref must resolve to a record the study holds. Claimant self-explanation is recorded but labeled as the claimant's."""
         return session.record_digestion(
             study_id, claim_id, explainer, artifact_ref,
             claimant_explanation)
@@ -859,7 +1120,7 @@ def build_server(session: Session):
     @reg
     def record_acceptance(study_id: str, claim_id: str, stage: str, by: str,
                           evidence_ref: str) -> dict:
-        """Lane-2 record: stage advancement (accepted|digested) on named human evidence. Lane-1 activity can never move lane 2."""
+        """Lane-2 record (adjudicator only): stage advancement (accepted|digested) on named human evidence — the evidence_ref must resolve to a record the study holds. Lane-1 activity can never move lane 2."""
         return session.record_acceptance(study_id, claim_id, stage, by,
                                          evidence_ref)
 
