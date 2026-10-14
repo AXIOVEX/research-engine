@@ -837,6 +837,13 @@ def queue_state(store: Any) -> dict[str, Any]:
         elif event["type"] == "adjudication.second_review" and payload["queue_id"] in items:
             items[payload["queue_id"]]["second_reviews"].append(
                 {"reviewer": event["actor"], "agrees": payload["agrees"]})
+    # Independence is part of the projection (Spec 013 CLM-013-34):
+    # a review written by the actor who decided the item is flagged
+    # as not independent wherever it appears, including on records
+    # written before the append gate existed.
+    for item in items.values():
+        for review in item["second_reviews"]:
+            review["independent"] = review["reviewer"] != item.get("decided_by")
     pending = [i for i in items.values() if i["status"] == "pending"]
     decided = [i for i in items.values() if i["status"] == "decided"]
     return {"pending": pending, "decided": decided, "items": items}

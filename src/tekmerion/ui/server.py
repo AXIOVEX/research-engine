@@ -13,11 +13,23 @@ arrive as `?actor=` / `?role=` (a header always wins). Roles are the
 WS6 §1 views: researcher, reviewer, adjudicator, integrity. The
 integrity view is offered no mutating control, and any forged POST
 under it is refused server-side as well.
+
+CSRF (Spec 013 CLM-013-31): every POST must carry the per-session
+CSRF token — a hidden field in every rendered form, keyed to the
+identity and to a per-process secret. On POSTs the identity comes
+from the session only (the SSO headers, or the identity cookies the
+session established): a query-string identity is not accepted on a
+POST, and a POST never plants identity cookies. A drive-by form on
+some other page — no token, identity in its query string — changes
+nothing and records nothing.
 """
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import re
+import secrets
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -94,6 +106,17 @@ class App:
         self.ws = st.Workspace(root)
         self._connector_factory = connector_factory or (lambda: [CrossrefConnector()])
         self._transport_factory = transport_factory or self._default_transport
+        self._csrf_secret = secrets.token_bytes(32)
+
+    def csrf_token(self, ident: dict) -> str:
+        """The per-session CSRF token for an identity. The UI's
+        session is its identity (the SSO header pair in deployment,
+        the identity cookies locally), so the token is keyed to the
+        identity and to this process's secret: a page that merely
+        knows who the operator is cannot compute it, and it is
+        embedded only in pages rendered for that identity."""
+        msg = f"{ident['actor']}\n{ident['role']}".encode("utf-8")
+        return hmac.new(self._csrf_secret, msg, hashlib.sha256).hexdigest()
 
     @staticmethod
     def _default_transport() -> Any:
@@ -623,6 +646,8 @@ def make_handler(app: App):
         def _send(self, status: int, body: bytes, *,
                   content_type: str = "text/html; charset=utf-8",
                   headers: Optional[dict] = None) -> None:
+            if content_type.startswith("text/html"):
+                body = self._inject_csrf(body)
             self.send_response(status)
             self.send_header("Content-Type", content_type)
             self.send_header("Content-Length", str(len(body)))
@@ -633,17 +658,42 @@ def make_handler(app: App):
             self.end_headers()
             self.wfile.write(body)
 
+        def _inject_csrf(self, body: bytes) -> bytes:
+            """Embed the session's CSRF token in the page: a hidden
+            field in every POST form, and a meta tag in the head for
+            programmatic clients (Spec 013 CLM-013-31). Neither
+            changes anything a page looks like; together they are
+            what lets the server tell its own forms from a drive-by
+            page's."""
+            token = getattr(self, "_csrf_token", None)
+            if not token:
+                return body
+            text = body.decode("utf-8")
+            if "<head>" in text:
+                text = text.replace(
+                    "<head>",
+                    f'<head><meta name="csrf-token" content="{token}">', 1)
+            text = re.sub(
+                r'(<form\s+method="post"[^>]*>)',
+                rf'\1<input type="hidden" name="csrf_token" value="{token}">',
+                text)
+            return text.encode("utf-8")
+
         def _remember_identity(self, query: dict) -> None:
             """Persist an explicitly supplied identity (the browser
             stand-in for the SSO header) so later form POSTs, which
-            carry no query, keep acting under it."""
+            carry no query, keep acting under it. The cookies are
+            SameSite=Strict: a cross-site request does not carry the
+            session's identity at all."""
             cookies = []
             actor = _first(query.get("actor"))
             role = _first(query.get("role"))
             if actor:
-                cookies.append(f"tekmerion_actor={quote(actor, safe='')}; Path=/")
+                cookies.append(
+                    f"tekmerion_actor={quote(actor, safe='')}; Path=/; SameSite=Strict")
             if role:
-                cookies.append(f"tekmerion_role={quote(role, safe='')}; Path=/")
+                cookies.append(
+                    f"tekmerion_role={quote(role, safe='')}; Path=/; SameSite=Strict")
             self._pending_cookies = cookies
 
         def _html(self, text: str, status: int = 200) -> None:
@@ -665,6 +715,7 @@ def make_handler(app: App):
             parsed = urlparse(self.path)
             query = parse_qs(parsed.query)
             ident = self._identity(query)
+            self._csrf_token = app.csrf_token(ident)
             self._remember_identity(query)
             path = parsed.path
             try:
@@ -693,9 +744,13 @@ def make_handler(app: App):
 
         def do_POST(self) -> None:
             parsed = urlparse(self.path)
-            query = parse_qs(parsed.query)
-            ident = self._identity(query)
-            self._remember_identity(query)
+            # Identity on a POST comes from the session only — the
+            # SSO headers or the identity cookies (Spec 013
+            # CLM-013-31). A query-string identity is not accepted
+            # on POST, and a POST never plants identity cookies: the
+            # drive-by form's ?actor=…&role=… buys it nothing.
+            ident = resolve_identity(self.headers, {})
+            self._csrf_token = app.csrf_token(ident)
             form = self._form()
             path = parsed.path
             with _LOCK:
@@ -705,6 +760,15 @@ def make_handler(app: App):
             sid_m = re.fullmatch(r"/studies/([^/]+)(/.*)?", path)
             sid = sid_m.group(1) if sid_m else None
             try:
+                supplied = form.get("csrf_token") or ""
+                if not hmac.compare_digest(
+                        supplied.encode("utf-8"),
+                        app.csrf_token(ident).encode("utf-8")):
+                    raise Refused(
+                        "this submission did not carry the session's CSRF "
+                        "token, so it was refused and nothing was recorded "
+                        "(Spec 013 CLM-013-31) — submit the form as the "
+                        "page renders it")
                 if path == "/studies":
                     new_sid = app.act_create_study(form, ident)
                     self._redirect(f"/studies/{new_sid}/")

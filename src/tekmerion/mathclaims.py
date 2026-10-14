@@ -140,7 +140,21 @@ def pin_faithfulness(store: Any, *, claim_id: str, formal_statement: str,
                      actor: str) -> dict:
     """Pin the formal statement beside the original problem statement,
     verbatim, with the original's source (Spec 003 §3). The pair — not
-    anyone's paraphrase — is what the faithful sub-claim is judged from."""
+    anyone's paraphrase — is what the faithful sub-claim is judged from.
+
+    An empty pin is refused (Spec 013 CLM-013-29): a pin with a blank
+    statement or source pins nothing, yet would read as a pin on the
+    record. Whether the claim exists, and who may re-pin over an
+    existing pair, is checked at the surface that holds the register
+    (the MCP tools) — this layer refuses the empty shape itself."""
+    for field, value in (("formal_statement", formal_statement),
+                         ("original_statement", original_statement),
+                         ("original_source", original_source)):
+        if not value or not value.strip():
+            raise ValueError(
+                f"faithfulness pin refused: {field} is empty — a pin must "
+                "carry the formal statement, the original statement, and "
+                "the original's source, all verbatim (Spec 013 CLM-013-29)")
     return store.db.append("math.faithfulness_pinned", {
         "claim_id": claim_id, "formal_statement": formal_statement,
         "original_statement": original_statement, "original_source": original_source,
@@ -153,6 +167,21 @@ def faithfulness_pair(store: Any, claim_id: str) -> Optional[dict[str, Any]]:
         if event["type"] == "math.faithfulness_pinned" and event["payload"]["claim_id"] == claim_id:
             found = event["payload"]
     return found
+
+
+def faithfulness_history(store: Any, claim_id: str) -> list[dict[str, Any]]:
+    """Every pin ever appended for the claim, in order, each with the
+    actor who appended it (`recorded_by`). A re-pin supersedes for
+    judging, but the earlier pairs stay on the record and stay
+    visible — a weaker pair can no longer silently replace a stronger
+    one (Spec 013 CLM-013-29)."""
+    out = []
+    for event in store.events():
+        if event["type"] == "math.faithfulness_pinned" \
+                and event["payload"]["claim_id"] == claim_id:
+            out.append({**event["payload"], "recorded_by": event["actor"],
+                        "seq": event.get("seq")})
+    return out
 
 
 # ---------------------------------------------------------------- Lean runner
@@ -542,17 +571,36 @@ def record_acceptance(store: Any, *, claim_id: str, stage: str, by: str,
 
 def digestion_state(store: Any, claim_id: str) -> dict[str, Any]:
     """UNEXPLAINED is an explicit state with a risk flag — verified
-    but unexplained must never be a silence (DN-010 point 3)."""
+    but unexplained must never be a silence (DN-010 point 3).
+
+    `recorded_by` is the actor who appended the digestion event,
+    surfaced next to the named explainer (Spec 013 CLM-013-28): the
+    human whose explanation it is, and the identity that put it on
+    the record, are different facts and both are shown."""
     found = None
+    found_actor = None
     for event in store.events():
         if event["type"] == "math.digestion" and event["payload"]["claim_id"] == claim_id:
             found = event["payload"]
+            found_actor = event["actor"]
     if found is None:
         return {"state": UNEXPLAINED, "risk_flag": True, "explainer": None,
-                "artifact_ref": None}
+                "artifact_ref": None, "recorded_by": None}
     return {"state": "explained", "risk_flag": False,
             "explainer": found["explainer"], "artifact_ref": found["artifact_ref"],
-            "claimant_explanation": found.get("claimant_explanation", False)}
+            "claimant_explanation": found.get("claimant_explanation", False),
+            "recorded_by": found_actor}
+
+
+def acceptance_state(store: Any, claim_id: str) -> Optional[dict[str, Any]]:
+    """The latest acceptance append for the claim, projected with
+    `recorded_by` — the actor who appended it — beside `by`, the
+    named human the stage is credited to (Spec 013 CLM-013-28)."""
+    found = None
+    for event in store.events():
+        if event["type"] == "math.acceptance" and event["payload"]["claim_id"] == claim_id:
+            found = {**event["payload"], "recorded_by": event["actor"]}
+    return found
 
 
 _LANE2_ORDER = {"unexplained": 0, "explained": 1, "accepted": 2, "digested": 3}

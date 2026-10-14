@@ -23,6 +23,15 @@ Sign-in is the platform's own machinery: the console calls
 the service's `complete_login` / `complete_saml_login` (ACS). There
 is no password field anywhere in the console (CLM-005-01).
 
+State-changing POSTs carry a per-session CSRF token (Spec 013
+CLM-013-32): a hidden field in every form the console renders for a
+session, keyed to the session token and a per-process secret, and
+verified before any service call — the console's defense does not
+rest on the session cookie's SameSite attribute alone. The login
+endpoints and the SAML ACS are exempt: they are how a session is
+created, and the ACS is posted by the identity provider and
+validated by its signature.
+
 Every response carries the §9 baseline headers
 (`tekmerion.platform.baseline.security_headers` — this console is
 the contract's first HTTP adapter) and the session cookie is the
@@ -33,7 +42,10 @@ from __future__ import annotations
 
 
 
+import hashlib
+import hmac
 import json
+import re
 import secrets
 import threading
 import time
@@ -142,6 +154,30 @@ def _first_seen(service: PlatformService, tenant_id: str) -> dict[str, Any]:
     return out
 
 
+#: POST endpoints that run before a session exists (login starts),
+#: or that are posted by the identity provider rather than by a
+#: console form (the SAML ACS). Every other POST requires the
+#: session's CSRF token (Spec 013 CLM-013-32).
+_CSRF_EXEMPT_POSTS = frozenset({
+    "/auth/platform/oidc", "/auth/tenant/start", "/auth/saml/acs",
+    "/fixture/idp/authorize",
+})
+
+
+def _inject_csrf_fields(body: str, token: str) -> str:
+    """Embed the session's CSRF token in a rendered page: a hidden
+    field in every POST form, and a meta tag in the head for
+    programmatic clients. Neither changes anything the page looks
+    like."""
+    if "<head>" in body:
+        body = body.replace(
+            "<head>", f'<head><meta name="csrf-token" content="{token}">', 1)
+    return re.sub(
+        r'(<form\s+method="post"[^>]*>)',
+        rf'\1<input type="hidden" name="csrf_token" value="{token}">',
+        body)
+
+
 class ConsoleApp:
     """Binds a PlatformService to the console's routes."""
 
@@ -152,6 +188,38 @@ class ConsoleApp:
         self.exports_dir = Path(exports_dir) if exports_dir else \
             Path(service.root) / "console-exports"
         self._stepup_pending: dict[str, dict] = {}
+        self._csrf_secret = secrets.token_bytes(32)
+        # The token for the session whose page is being rendered.
+        # `handle` runs under the module lock, so one value at a
+        # time is exact, never racy.
+        self._active_csrf: Optional[str] = None
+
+    # ------------------------------------------------------------ CSRF
+
+    def csrf_token_for(self, session_token: str) -> str:
+        """The per-session CSRF token: keyed to the session token
+        and to this process's secret, so a page that does not hold
+        the session cannot compute it (Spec 013 CLM-013-32)."""
+        msg = f"csrf:{session_token}".encode("utf-8")
+        return hmac.new(self._csrf_secret, msg, hashlib.sha256).hexdigest()
+
+    def _csrf_ok(self, session_token: Optional[str], form: dict) -> bool:
+        if not session_token:
+            return False
+        supplied = form.get("csrf_token") or ""
+        if not isinstance(supplied, str):
+            return False
+        return hmac.compare_digest(
+            supplied.encode("utf-8"),
+            self.csrf_token_for(session_token).encode("utf-8"))
+
+    @staticmethod
+    def _csrf_refusal():
+        raise PlatformError(
+            "this submission did not carry the session's CSRF token, "
+            "so it was refused and nothing was changed (Spec 013 "
+            "CLM-013-32) — reload the page and submit the form as "
+            "rendered")
 
     # ------------------------------------------------------ session/plane
 
@@ -210,6 +278,7 @@ class ConsoleApp:
                 f"console error: {type(exc).__name__}: {exc}".encode("utf-8")
 
     def _dispatch(self, method, path, query, form, cookies):
+        self._active_csrf = None
         token = cookies.get(_SESSION_COOKIE)
         # Public + identity surfaces.
         if path == "/build-id":
@@ -223,6 +292,8 @@ class ConsoleApp:
         if path.startswith("/auth/"):
             return self._auth(method, path, query, form, cookies)
         session, identity = self.session_identity(token)
+        if session is not None:
+            self._active_csrf = self.csrf_token_for(token)
         if path == "/":
             if session is None:
                 return self._html(views.render_signin(self._signin_ctx()))
@@ -238,6 +309,9 @@ class ConsoleApp:
                 {**self._ctx(token, identity, session)}))
         if session is None:
             return self._html(views.render_signin(self._signin_ctx()))
+        if method == "POST" and path not in _CSRF_EXEMPT_POSTS \
+                and not self._csrf_ok(token, form):
+            self._csrf_refusal()
         planes = self.planes_for(token, identity)
         if path.startswith("/platform/"):
             if not planes["platform"]:
@@ -277,6 +351,8 @@ class ConsoleApp:
     # ------------------------------------------------------------ helpers
 
     def _html(self, body: str, status: int = 200):
+        if self._active_csrf:
+            body = _inject_csrf_fields(body, self._active_csrf)
         return status, [("Content-Type", "text/html; charset=utf-8")], \
             body.encode("utf-8")
 
@@ -319,6 +395,9 @@ class ConsoleApp:
         svc = self.service
         if path == "/auth/logout" and method == "POST":
             token = cookies.get(_SESSION_COOKIE)
+            if token and self.session_identity(token)[0] is not None \
+                    and not self._csrf_ok(token, form):
+                self._csrf_refusal()
             if token:
                 try:
                     svc.logout(token)

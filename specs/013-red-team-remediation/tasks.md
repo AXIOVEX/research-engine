@@ -87,21 +87,21 @@ WS-4 — platform authority & seams (Lane C; Spec 005 amendments)
       (CLM-013-27).
 
 WS-5 — MCP & UI surfaces (Lane E; inherits T9/T10/T19–T21 gates)
-- [ ] T30 Lane-2 appends adjudicator-gated; recorded_by surfaced in
+- [x] T30 Lane-2 appends adjudicator-gated; recorded_by surfaced in
       projections; evidence_ref must resolve (CLM-013-28).
-- [ ] T31 Faithfulness pinning validated (claim exists, fields non-empty);
+- [x] T31 Faithfulness pinning validated (claim exists, fields non-empty);
       re-pin adjudicator-only; pin history surfaced (CLM-013-29).
-- [ ] T32 Deposit approver != depositing actor refused; skill gains the
+- [x] T32 Deposit approver != depositing actor refused; skill gains the
       operator-only approval rule (CLM-013-30).
-- [ ] T33 Phase 6 UI: per-session CSRF token on all POSTs; identity from
+- [x] T33 Phase 6 UI: per-session CSRF token on all POSTs; identity from
       session only on POST (CLM-013-31; no appearance change).
-- [ ] T34 Console: per-session CSRF tokens on state-changing POSTs
+- [x] T34 Console: per-session CSRF tokens on state-changing POSTs
       (CLM-013-32; no appearance change).
-- [ ] T35 ingest_lean http/https only; adapter file paths confined to the
+- [x] T35 ingest_lean http/https only; adapter file paths confined to the
       workspace root (CLM-013-33).
-- [ ] T36 Second reviews validate a real decided item; reviewer !=
+- [x] T36 Second reviews validate a real decided item; reviewer !=
       decider; agrees strictly boolean (CLM-013-34).
-- [ ] T37 Surface hygiene: OSError -> SurfaceRefusal without absolute
+- [x] T37 Surface hygiene: OSError -> SurfaceRefusal without absolute
       paths; empty GRIM refused; dead-claim run verdicts marked
       not-issued; confirmation freeze requires linked_exploratory
       explicitly (CLM-013-35).

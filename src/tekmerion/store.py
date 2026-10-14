@@ -77,7 +77,44 @@ class StudyStore:
 
     def log_second_review(self, queue_id: str, *, reviewer: str, agrees: bool) -> dict:
         """Record an independent second review of an adjudication
-        decision (RT-4 sampling)."""
+        decision (RT-4 sampling).
+
+        The review must be real (Spec 013 CLM-013-34): the queue item
+        must exist and already be decided — a review of nothing, or of
+        an open question, measures nothing; the reviewer must differ
+        from the actor who decided the item, or the "second" review
+        is the decider agreeing with themselves; and `agrees` must be
+        a genuine boolean, never a coerced string."""
+        if not isinstance(agrees, bool):
+            raise ValueError(
+                f"second review refused: agrees must be a boolean, got "
+                f"{agrees!r} — a string such as 'yes' is not coerced "
+                "(Spec 013 CLM-013-34)")
+        enqueued = False
+        decided_by: Optional[str] = None
+        for event in self.events():
+            payload = event["payload"]
+            if payload.get("queue_id") != queue_id:
+                continue
+            if event["type"] == "adjudication.enqueued":
+                enqueued = True
+            elif event["type"] == "adjudication.decided":
+                decided_by = event["actor"]
+        if not enqueued:
+            raise ValueError(
+                f"second review refused: unknown queue item {queue_id} — "
+                "a review can only attach to an item on the record "
+                "(Spec 013 CLM-013-34)")
+        if decided_by is None:
+            raise ValueError(
+                f"second review refused: queue item {queue_id} is not "
+                "decided yet — there is no decision to review "
+                "(Spec 013 CLM-013-34)")
+        if reviewer == decided_by:
+            raise ValueError(
+                f"second review refused: {reviewer!r} decided queue item "
+                f"{queue_id} — a second review must come from someone "
+                "other than the decider (Spec 013 CLM-013-34)")
         return self.db.append(
             "adjudication.second_review",
             {"queue_id": queue_id, "agrees": agrees},
