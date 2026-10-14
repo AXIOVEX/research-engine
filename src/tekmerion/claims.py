@@ -79,14 +79,28 @@ class ClaimRegister:
             )
         if not claim.claim_id.startswith("CLM-"):
             raise RegistrationError(f"{claim.claim_id}: claim ids are CLM-<study>-<nnn>")
+        if self.frozen:
+            # The wall is unconditional (Spec 013 CLM-013-06, answering
+            # RTA-03 / RTD-01): while frozen, NO registration is
+            # accepted — not for an existing id, and not for a brand-new
+            # id the freeze never saw. A changed design moves by a
+            # labeled freeze amendment (CLM-013-07), never by a
+            # registration slipping past the wall.
+            raise RegistrationError(
+                f"{claim.claim_id}: registration is frozen; no claim may be "
+                "registered against a frozen study (WS3 §4 wall)"
+            )
         existing = self.claims.get(claim.claim_id)
         if existing is not None:
-            if self.frozen:
-                raise RegistrationError(
-                    f"{claim.claim_id}: registration is frozen; a changed statement is a "
-                    "new claim that supersedes this one (WS2 §1)"
-                )
-            if existing.statement != claim.statement and existing.status != "proposed":
+            if (existing.statement != claim.statement
+                    or existing.falsifier != claim.falsifier):
+                # Statements and falsifiers are immutable by
+                # re-registration at EVERY status, including proposed
+                # (Spec 013 CLM-013-11, answering RTD-02): evidence
+                # gathered under one statement must never silently back
+                # another. A byte-identical re-registration is an
+                # idempotent retry, not a change, and is not refused;
+                # a real change is a new claim that supersedes.
                 raise RegistrationError(
                     f"{claim.claim_id}: statement is immutable after registration; "
                     "create a superseding claim"

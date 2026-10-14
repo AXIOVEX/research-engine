@@ -2935,6 +2935,14 @@ class PlatformService:
             "events": getattr(verification, "events", None),
             "break_seq": getattr(verification, "break_seq", None),
             "reason": getattr(verification, "reason", None),
+            # The signature state rides along (Axiomere Spec 003):
+            # how many signatures were checked, and which events
+            # carry none — an unsigned stretch of the record is a
+            # visible state in this result, never a silent pass.
+            "signatures_checked": getattr(verification, "signatures_checked", None),
+            "signatures_failed": getattr(verification, "signatures_failed", None),
+            "unsigned_events": list(getattr(verification, "unsigned_events", ()) or ()),
+            "untrusted_actors": list(getattr(verification, "untrusted_actors", ()) or ()),
         }
 
     def _verify_honestly(self, ledger: PlatformLedger) -> dict:
@@ -2945,7 +2953,9 @@ class PlatformService:
             return self._verification_dict(ledger.verify())
         except Exception as exc:  # noqa: BLE001 — reported, not hidden
             return {"ok": False, "events": None, "break_seq": None,
-                    "reason": f"ledger unreadable: {type(exc).__name__}: {exc}"}
+                    "reason": f"ledger unreadable: {type(exc).__name__}: {exc}",
+                    "signatures_checked": None, "signatures_failed": None,
+                    "unsigned_events": [], "untrusted_actors": []}
 
     def verify_tenant_audit(self, session_token: str, *,
                             tenant_id: str) -> dict:

@@ -24,10 +24,16 @@ the bundle alone.
 Anchoring (AR-1): anchor receipts recorded in the ledger
 (`anchor.recorded` events, appended by `tekmerion.deposit`) are
 carried in the manifest, and `verify_anchor` checks a bundle against
-the *public* anchor record: the anchored root must be a checkpoint
-root of the bundle's own ledger, and the public record must state
-that same root and the deposited bundle's hash (DN-005 layer 5 —
-rewriting history becomes detectable by anyone).
+the *public* anchor record (DN-005 layer 5 — rewriting history
+becomes detectable by anyone). Two bindings are checked: the
+receipt chain (a receipt the bundle carries must validate against
+the record it names) and, since Spec 013 (CLM-013-02), the
+**own-hash binding** — the record must state the presented bundle's
+own `bundle_hash` and checkpoint root. A successor bundle presented
+against its predecessor's record validates the chain but is
+reported *unanchored* and does not pass: a rehashed bundle whose
+hash no record states is indistinguishable from an honest one
+against that record, which is the gap RTA-02 demonstrated.
 """
 
 from __future__ import annotations
@@ -38,10 +44,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
 
-from .claims import Claim, ClaimRegister
-from .freeze import registration_document, registration_hash
+from .claims import Claim, ClaimRegister, EvidenceItem, RegistrationError
+from .freeze import (binding_frozen_event, registration_document,
+                    registration_hash)
 from .marking import banner_lines, normalize_marking
-from .verdicts import evaluate_run, run_controls_report, swap_control_report
+from .verdicts import (evaluate_claim, evaluate_run, fixture_identity,
+                      run_controls_report, swap_control_report)
 from .verification import queue_state, second_review_report
 
 BUNDLE_FORMAT = "tekmerion-audit-bundle/1"
@@ -243,10 +251,81 @@ def run_outcome_projection(
     against the committed registration and the verifier's own swap
     replay on the bundle's ledger copy); fixture-dependent control
     outcomes are attested by this replay and bound by the manifest
-    hashes, like every other projection the bundle carries."""
+    hashes, like every other projection the bundle carries.
+
+    Since Spec 013 (CLM-013-03) an issued run's outcomes are the
+    run's own `control.outcome` ledger events when the ledger
+    carries them (`controls_recorded: true`) — the projection then
+    restates the record, and the verifier compares it
+    payload-for-payload. Runs predating that issuance keep the
+    re-execution/attested path above and are labeled
+    operator-attested in the HUMAN-README. The projection also
+    states the regime (CLM-013-07): the binding registration hash
+    and whether it arrived by amendment."""
     issued = [e for e in events if e["type"] == "verdict.issued"]
     registered_kinds = [c.get("kind") for c in doc.get("controls", [])]
+    # The regime this run belongs to (Spec 013 CLM-013-07): the
+    # binding registration the verdicts were issued under, and whether
+    # it arrived by a labeled amendment.
+    binding = binding_frozen_event(events)
+    regime = {
+        "registration_hash": registration_hash(doc),
+        "regime": {
+            "frozen_event_seq": binding["seq"] if binding else None,
+            "amended": bool(binding and binding["type"] == "study.frozen.amended"),
+        },
+    }
+    # Control outcomes recorded at issuance (Spec 013 CLM-013-03):
+    # the `control.outcome` events following the latest `run.issued`
+    # event are that run's outcomes, appended when it issued.
+    recorded: list[dict[str, Any]] = []
+    run_event_indexes = [i for i, e in enumerate(events)
+                         if e["type"] == "run.issued"]
+    if run_event_indexes:
+        recorded = [e["payload"] for e in events[run_event_indexes[-1] + 1:]
+                    if e["type"] == "control.outcome"]
     if issued:
+        if recorded:
+            # The projection covers the committed control set (the
+            # Spec 011 discipline): controls the issuing run executed
+            # restate its own control.outcome ledger events verbatim
+            # (CLM-013-03) — the record wins over any export-time
+            # re-execution — and controls it did not execute are
+            # recorded as not executed, never as passed.
+            base = _issued_control_outcomes(controls, store, store_path)
+            by_key = {(o.get("kind"), o.get("failure_mode")): o
+                      for o in recorded}
+            merged: list[dict[str, Any]] = []
+            used: set = set()
+            for entry in base:
+                key = (entry.get("kind"), entry.get("failure_mode"))
+                if key in by_key:
+                    merged.append(by_key[key])
+                    used.add(key)
+                else:
+                    merged.append(entry)
+            for key, payload in by_key.items():
+                if key not in used:
+                    merged.append(payload)
+            return {
+                "outcome": "valid",
+                "basis": "verdict.issued events in the exported ledger "
+                         "(an invalid run issues none, WS3 §1); the "
+                         "control outcomes the issuing run executed are "
+                         "its own control.outcome ledger events, appended "
+                         "at issuance (Spec 013 CLM-013-03) and "
+                         "cross-checked against them by the standalone "
+                         "verifier; controls the run did not execute are "
+                         "recorded as not executed",
+                "mode": doc.get("mode"),
+                "verdicts_issued": len(issued),
+                "invalid_reasons": [],
+                "controls_replayed": [o["kind"] for o in merged if o["executed"]],
+                "controls_registered": registered_kinds,
+                "controls": merged,
+                "controls_recorded": True,
+                **regime,
+            }
         outcomes = _issued_control_outcomes(controls, store, store_path)
         return {
             "outcome": "valid",
@@ -261,6 +340,8 @@ def run_outcome_projection(
             "controls_replayed": [o["kind"] for o in outcomes if o["executed"]],
             "controls_registered": registered_kinds,
             "controls": outcomes,
+            "controls_recorded": False,
+            **regime,
         }
     replay = ClaimRegister()
     for cdoc in doc.get("claims", []):
@@ -293,6 +374,8 @@ def run_outcome_projection(
             "controls_replayed": replayed_kinds,
             "controls_registered": registered_kinds,
             "controls": result.control_outcomes,
+            "controls_recorded": False,
+            **regime,
         }
     return {
         "outcome": "not-run",
@@ -305,6 +388,8 @@ def run_outcome_projection(
         "controls_replayed": replayed_kinds,
         "controls_registered": registered_kinds,
         "controls": result.control_outcomes,
+        "controls_recorded": False,
+        **regime,
     }
 
 
@@ -334,10 +419,9 @@ def export_bundle(
                           "a broken record is evidence, not an export")
     events = store.events()
 
-    frozen = [e for e in events if e["type"] == "study.frozen"]
-    if not frozen:
+    frozen_event = binding_frozen_event(events)
+    if frozen_event is None:
         raise ExportError("study is not frozen — bundles export frozen registrations (WS4 §4)")
-    frozen_event = frozen[-1]
     committed_hash = frozen_event["payload"]["registration_hash"]
 
     # The registration this bundle binds to is the document freeze
@@ -352,9 +436,45 @@ def export_bundle(
             "presented registration does not hash to the frozen commitment "
             f"({committed_hash}); export refused rather than misbound")
 
+    # Fixture commitment (Spec 013 CLM-013-09): a fixture PRESENTED
+    # at export must be the fixture the registration committed. A
+    # fixture not presented at export is the recorded attested case
+    # (see _issued_control_outcomes), not a mismatch.
+    committed_fixtures: dict[tuple[Any, Any], Optional[str]] = {}
+    for entry in doc.get("controls", []):
+        if "fixture" not in entry:
+            continue  # a pre-Spec-013 document recorded no commitment
+        fixture = entry.get("fixture") or {}
+        committed_fixtures[(entry.get("kind"), entry.get("failure_mode"))] = \
+            fixture.get("sha256")
+    for ctl in controls:
+        identity = fixture_identity(ctl)
+        if identity is None:
+            continue
+        key = (ctl.kind, ctl.failure_mode)
+        if key not in committed_fixtures or committed_fixtures[key] != identity["sha256"]:
+            raise ExportError(
+                f"presented fixture for the {ctl.kind} control "
+                f"({ctl.failure_mode}) does not match the fixture identity "
+                "committed in the frozen registration (Spec 013 CLM-013-09); "
+                "export refused rather than misbound")
+
     checkpoints = _checkpoints(events)
     if not checkpoints:
         raise ExportError("no Merkle checkpoint in the ledger — freeze the study first")
+
+    # The root written into the manifest below is the value anchors
+    # bind to, so it is confirmed against the root the verifier
+    # recomputes from the ledger's events — never merely read out
+    # of the checkpoint event's payload (Axiomere Spec 003
+    # companion, AXM-003-15).
+    pin = store.verify(
+        expected_head={"checkpoint_root": checkpoints[-1]["merkle_root"]})
+    if not pin.ok:
+        raise ExportError(
+            "the ledger's latest checkpoint root does not match the root "
+            f"verification recomputes ({pin.reason}); export refused rather "
+            "than misbound")
 
     run_outcome = run_outcome_projection(
         store, store_path, register=register, controls=controls, doc=doc, events=events)
@@ -553,6 +673,19 @@ def _human_readme(manifest: dict[str, Any], register: ClaimRegister,
         f"- Merkle checkpoint root: `{study['checkpoint_root']}`",
         f"- Registration hash: `{study['registration_hash']}`",
         f"- Bundle hash: stated in `manifest.json` (`bundle_hash`).",
+        *(
+            ["- Control outcomes: **operator-attested** — this run "
+             "predates control-outcome issuance events (Spec 013 "
+             "CLM-013-03), so its per-control outcomes in "
+             "`verdicts.json` are not cross-checked against ledger "
+             "events the way a recorded run's are; they rest on the "
+             "operator's attestation, bound by the manifest hashes "
+             "only."]
+            if (run_outcome or {}).get("outcome") == "valid"
+            and (run_outcome or {}).get("controls")
+            and not (run_outcome or {}).get("controls_recorded")
+            else []
+        ),
         "",
         "## How citation outcomes become evidence",
         "",
@@ -649,6 +782,64 @@ def record_export(store: Any, manifest: dict[str, Any], *, actor: str) -> dict:
 
 # ------------------------------------------------------------------ standalone verification
 
+def _rederive_composite(register: ClaimRegister, parent_id: str,
+                        issued: dict[str, Any], failures: list[str]) -> None:
+    """Re-derive a math-layer composite verdict (Spec 003
+    TheoremVerdict payload) from the bundle alone: each embedded
+    sub-verdict must reproduce through verdicts.evaluate_claim on the
+    sub-claim's fold, and the parent must re-compose through
+    mathclaims.compose_parent from those sub-verdicts and the
+    payload's own composition inputs. Appends to `failures`."""
+    from . import mathclaims
+
+    subs: dict[str, dict[str, Any]] = {}
+    diffs: list[str] = []
+    try:
+        for role in mathclaims.ROLES:
+            sid = mathclaims.subclaim_id(parent_id, role)
+            if sid not in register.claims:
+                diffs.append(f"sub-claim {sid} ({role}) not in the register")
+                continue
+            cv = evaluate_claim(register.claims[sid],
+                                register.group_masses(sid))
+            subs[role] = {"verdict": cv.verdict, "reason": cv.reason}
+            embedded = (issued.get("sub_verdicts") or {}).get(role, {})
+            if cv.verdict != embedded.get("verdict") or \
+                    cv.reason != embedded.get("reason"):
+                diffs.append(
+                    f"sub-verdict {role}: issued {embedded.get('verdict')!r}, "
+                    f"re-derived {cv.verdict!r}")
+    except ValueError as exc:
+        failures.append(
+            f"standing verdict for {parent_id} cannot be re-derived: {exc}")
+        return
+    if diffs:
+        failures.append(
+            f"standing verdict for {parent_id} does not re-derive from "
+            "the bundle's evidence: " + "; ".join(diffs))
+        return
+    try:
+        composed = mathclaims.compose_parent(
+            parent_id, subs,
+            attribution_contested=issued.get("attribution") == "contested",
+            remains_not_understood=issued.get("remains_not_understood", ""),
+            digestion=issued.get("digestion", {}),
+            lane1_verification=issued.get("lane1_verification", ""),
+            lane2_acceptance=issued.get("lane2_acceptance", ""))
+    except ValueError as exc:
+        failures.append(
+            f"standing verdict for {parent_id} cannot be re-composed "
+            f"from its re-derived sub-verdicts: {exc}")
+        return
+    if composed.verdict != issued.get("verdict") or \
+            composed.reason != issued.get("reason"):
+        failures.append(
+            f"standing verdict for {parent_id} does not re-derive from "
+            "the bundle's evidence: composed verdict "
+            f"{composed.verdict!r} / reason {composed.reason!r} vs "
+            f"issued {issued.get('verdict')!r} / {issued.get('reason')!r}")
+
+
 @dataclass
 class BundleVerification:
     ok: bool
@@ -720,13 +911,22 @@ def verify_bundle(bundle_dir: str) -> BundleVerification:
     if ledger_path.exists():
         import axiomere as ax
 
-        ok, count, reason = ax.verify_file(str(ledger_path))
-        checks["ledger_verify"] = {"ok": ok, "events": count, "reason": reason}
-        if not ok:
-            failures.append(f"ledger fails production verification: {reason}")
-        if count != study.get("event_count"):
+        result = ax.verify_file(str(ledger_path))
+        checks["ledger_verify"] = {
+            "ok": result.ok, "events": result.events, "reason": result.reason,
+            # The signature state rides in the verification record
+            # (Axiomere Spec 003): an honestly unsigned ledger is a
+            # visible state here, never a silent pass.
+            "signatures_checked": result.signatures_checked,
+            "signatures_failed": result.signatures_failed,
+            "unsigned_events": list(result.unsigned_events),
+            "untrusted_actors": list(result.untrusted_actors),
+        }
+        if not result.ok:
+            failures.append(f"ledger fails production verification: {result.reason}")
+        if result.events != study.get("event_count"):
             failures.append(
-                f"ledger event count {count} != manifest {study.get('event_count')}")
+                f"ledger event count {result.events} != manifest {study.get('event_count')}")
         try:
             events = _ledger_events(ledger_path.read_bytes())
         except (ValueError, UnicodeDecodeError) as exc:
@@ -741,12 +941,37 @@ def verify_bundle(bundle_dir: str) -> BundleVerification:
             failures.append("manifest checkpoint root is not the ledger's latest checkpoint root")
         checks["checkpoint_root"] = study.get("checkpoint_root")
 
+        # Recomputed-root binding (Axiomere Spec 003 companion,
+        # AXM-003-15): the manifest's checkpoint root and head hash
+        # are also pinned through the production verifier, which
+        # compares them against the values it recomputes from the
+        # ledger's events. A root transplanted from another study's
+        # ledger fails here even when the presented file's chain and
+        # signatures are internally consistent — the comparison
+        # above, payload against payload, cannot see that lie.
+        pin_spec: dict[str, Any] = {}
+        if study.get("checkpoint_root"):
+            pin_spec["checkpoint_root"] = study["checkpoint_root"]
+        if study.get("head_hash"):
+            pin_spec["head_hash"] = study["head_hash"]
+        if pin_spec and result.ok:
+            pinned = ax.verify_file(str(ledger_path), expected_head=pin_spec)
+            checks["ledger_head_pin"] = {"ok": pinned.ok, "reason": pinned.reason}
+            if not pinned.ok:
+                failures.append(
+                    "manifest head does not match the recomputed head: "
+                    f"{pinned.reason}")
+
     frozen = [e for e in events if e["type"] == "study.frozen"]
     if not frozen:
         failures.append("no study.frozen event in the exported ledger")
         frozen_event = None
     else:
-        frozen_event = frozen[-1]
+        # Consumers bind through binding_frozen_event (Spec 013
+        # CLM-013-07): a labeled amendment when one exists, else the
+        # binding freeze — see that function for the legacy
+        # multi-freeze rule and its recorded limitation.
+        frozen_event = binding_frozen_event(events)
 
     # -- registration binding ---------------------------------------------
     registration = load_json("registration.json")
@@ -899,6 +1124,67 @@ def verify_bundle(bundle_dir: str) -> BundleVerification:
                     failures.append(
                         "verdicts.json run_outcome controls do not match the "
                         "registration's committed control set")
+                # Fixture identities committed in the registration
+                # (Spec 013 CLM-013-09): an outcome that names a
+                # fixture must name the committed one. Registrations
+                # predating the commitment carry no fixture field —
+                # nothing to check against, noted not failed.
+                committed_fixtures = {}
+                for entry in registration.get("controls", []):
+                    if "fixture" in entry:
+                        fixture = entry.get("fixture") or {}
+                        committed_fixtures[
+                            (entry.get("kind"), entry.get("failure_mode"))] = \
+                            fixture.get("sha256")
+                for o in outcomes:
+                    key = (o.get("kind"), o.get("failure_mode"))
+                    fixture = o.get("fixture") or {}
+                    if key in committed_fixtures and fixture.get("sha256") is not None \
+                            and fixture["sha256"] != committed_fixtures[key]:
+                        failures.append(
+                            "verdicts.json run_outcome records a fixture "
+                            "identity for the "
+                            f"{key[0]} control that differs from the "
+                            "registration's committed fixture (CLM-013-09)")
+            # Control outcomes recorded at issuance (Spec 013
+            # CLM-013-03): when the ledger carries control.outcome
+            # events for the latest run, the projection's EXECUTED
+            # outcomes must equal them payload-for-payload — the K2
+            # discipline, extended to outcomes (the projection also
+            # carries not-executed entries for committed controls the
+            # run never executed; those are projection statements, not
+            # record). Bundles of runs predating the issuance carry
+            # no such events: their outcomes are the operator-attested
+            # case, visible in checks, not failed.
+            run_indexes = [i for i, e in enumerate(events)
+                           if e["type"] == "run.issued"]
+            recorded_outcomes: list[dict[str, Any]] = []
+            if run_indexes:
+                recorded_outcomes = [
+                    e["payload"] for e in events[run_indexes[-1] + 1:]
+                    if e["type"] == "control.outcome"]
+            if recorded_outcomes:
+                checks["control_outcomes_recorded"] = len(recorded_outcomes)
+                canon = lambda lst: sorted(_canonical(o) for o in lst)
+                executed_outcomes = [o for o in outcomes if o.get("executed")]
+                if canon(executed_outcomes) != canon(recorded_outcomes):
+                    failures.append(
+                        "verdicts.json run_outcome executed controls do "
+                        "not match the ledger's control.outcome events "
+                        "(CLM-013-03)")
+                if not run_outcome.get("controls_recorded"):
+                    failures.append(
+                        "verdicts.json run_outcome does not mark its "
+                        "control outcomes as ledger-recorded but the "
+                        "ledger carries control.outcome events for the "
+                        "run (CLM-013-03)")
+            elif run_outcome.get("controls_recorded"):
+                failures.append(
+                    "verdicts.json run_outcome claims ledger-recorded "
+                    "control outcomes but the ledger carries no "
+                    "control.outcome events for the run (CLM-013-03)")
+            else:
+                checks["control_outcomes_recorded"] = 0
             failed_outcomes = [o for o in outcomes if o.get("passed") is False]
             if stated == "valid" and failed_outcomes:
                 failures.append(
@@ -1035,6 +1321,115 @@ def verify_bundle(bundle_dir: str) -> BundleVerification:
                 failures.append(f"coverage citation count for {cid} disagrees with the ledger")
         checks["coverage_claims"] = len(per_claim)
 
+    # -- evidence fold + verdict re-derivation (Spec 013 CLM-013-01;
+    # RTA-01). The K2 discipline that binds verdicts.json and
+    # queries.json payload-for-payload extends to the evidence
+    # projections: the fold of evidence/items.json through the
+    # production register must reproduce evidence/groups.json
+    # field-for-field, and every standing verdict (the latest
+    # verdict.issued per claim; superseded verdicts stay bound by the
+    # projection cross-check above) must re-derive from claims.json +
+    # the fold through the production verdict path. Citation-path
+    # verdicts re-derive through verdicts.evaluate_claim; the math
+    # layer's composite (TheoremVerdict) payloads re-derive per
+    # sub-claim through evaluate_claim and re-compose through
+    # mathclaims.compose_parent — the same functions that issued
+    # them. Before this check, items.json was bound only by the
+    # manifest hash: flipping an item's stance and rehashing the
+    # manifest produced a verifier-approved bundle whose own evidence
+    # re-derives the opposite verdict.
+    items_doc = None
+    if claims_doc is not None and groups_doc is not None and \
+            (root / "evidence" / "items.json").exists():
+        items_doc = load_json("evidence/items.json")
+    if items_doc is not None:
+        claim_fields = set(Claim.__dataclass_fields__)
+        item_fields = set(EvidenceItem.__dataclass_fields__)
+        register: Optional[ClaimRegister] = ClaimRegister()
+        try:
+            for c in claims_doc.get("claims", []):
+                register.register(Claim(
+                    **{k: c[k] for k in claim_fields if k in c}))
+            for it in items_doc.get("items", []):
+                register.add_evidence(it.get("claim_id"), EvidenceItem(
+                    **{k: it[k] for k in item_fields if k in it}))
+        except (RegistrationError, TypeError, KeyError) as exc:
+            failures.append(
+                "bundle register cannot be reconstructed from claims.json "
+                f"+ evidence/items.json: {exc}")
+            register = None
+        if register is not None:
+            folded: dict[tuple, dict[str, Any]] = {}
+            for cid in register.claims:
+                for g in register.group_masses(cid):
+                    folded[(cid, g["origin_group"])] = g
+            filed: dict[tuple, dict[str, Any]] = {}
+            for g in groups_doc.get("groups", []):
+                filed[(g.get("claim_id"), g.get("origin_group"))] = g
+            checks["evidence_fold_groups"] = len(filed)
+            if set(folded) != set(filed):
+                failures.append(
+                    "evidence/groups.json group set does not match the "
+                    "fold of evidence/items.json "
+                    f"(fold only: {sorted(set(folded) - set(filed), key=str)}; "
+                    f"file only: {sorted(set(filed) - set(folded), key=str)})")
+            for key in sorted(set(folded) & set(filed), key=str):
+                for fname, fval in folded[key].items():
+                    if filed[key].get(fname) != fval:
+                        failures.append(
+                            f"evidence/groups.json {key} field {fname} is "
+                            f"{filed[key].get(fname)!r} but the fold of "
+                            f"evidence/items.json gives {fval!r}")
+                        break
+            if verdicts is not None:
+                standing: dict[str, dict[str, Any]] = {}
+                for v in verdicts.get("verdicts", []):
+                    cid = v.get("claim_id")
+                    if cid not in standing or \
+                            v.get("seq", 0) >= standing[cid].get("seq", 0):
+                        standing[cid] = v
+                checks["verdicts_rederived"] = 0
+                for cid, issued in sorted(standing.items()):
+                    if cid not in register.claims:
+                        failures.append(
+                            f"verdicts.json issues a verdict for {cid}, "
+                            "which is not in the bundle's claim register")
+                        continue
+                    if "sub_verdicts" in issued:
+                        _rederive_composite(
+                            register, cid, issued, failures)
+                    else:
+                        derived = evaluate_claim(
+                            register.claims[cid], register.group_masses(cid))
+                        diffs = []
+                        if derived.verdict != issued.get("verdict"):
+                            diffs.append(
+                                f"verdict: issued {issued.get('verdict')!r}, "
+                                f"re-derived {derived.verdict!r}")
+                        if "reason" in issued and derived.reason != issued["reason"]:
+                            diffs.append("reason differs")
+                        if "origin_groups" in issued and \
+                                derived.groups != issued["origin_groups"]:
+                            diffs.append(
+                                f"origin_groups: issued "
+                                f"{issued['origin_groups']}, re-derived "
+                                f"{derived.groups}")
+                        if "interval" in issued and \
+                                list(derived.interval) != list(issued["interval"]):
+                            diffs.append(
+                                f"interval: issued {issued['interval']}, "
+                                f"re-derived {list(derived.interval)}")
+                        if "point" in issued and derived.point != issued["point"]:
+                            diffs.append(
+                                f"point: issued {issued['point']}, "
+                                f"re-derived {derived.point}")
+                        if diffs:
+                            failures.append(
+                                f"standing verdict for {cid} does not "
+                                "re-derive from the bundle's evidence: "
+                                + "; ".join(diffs))
+                    checks["verdicts_rederived"] += 1
+
     # -- anchors -------------------------------------------------------------
     anchor_events = [e["payload"] for e in events if e["type"] == "anchor.recorded"]
     manifest_anchors = manifest.get("anchors", [])
@@ -1064,11 +1459,32 @@ class AnchorVerification:
 def verify_anchor(bundle_dir: str, public_record: dict[str, Any], *,
                   package_path: Optional[str] = None) -> AnchorVerification:
     """Check a bundle against the public anchor record (e.g. the
-    Zenodo record JSON). Confirms: (a) the anchored root existed at
-    the record's creation time — the record is the external party's,
-    its timestamp is not the operator's to backdate; and (b) the
-    bundle's ledger carries that exact root as a checkpoint, and the
-    record states the root and the deposited bundle's hash."""
+    Zenodo record JSON). Two bindings, both required:
+
+    (a) **Own-hash binding (Spec 013 CLM-013-02).** The record must
+    state the *presented* bundle's own `bundle_hash` and checkpoint
+    root. The outcome is named in `details["own_hash_anchor"]`
+    ("anchored" / "unanchored"). Before this binding, the check
+    validated only an earlier bundle's receipt the presented bundle
+    happened to carry, so a rehashed bundle passed against a record
+    that anchors a different bundle entirely (RTA-02).
+
+    (b) **Receipt chain.** A receipt the bundle carries that names
+    this record must validate against it: its root must be a
+    checkpoint root of the bundle's ledger — the anchored root
+    existed at the record's creation time, and the record is the
+    external party's, its timestamp not the operator's to backdate —
+    and the record must state the receipt's root and hash, with the
+    deposited file's checksum matching the receipt (and the local
+    package, when presented).
+
+    A bundle carrying no receipt for this record is not failed for
+    that alone: a bundle's own deposit receipt is appended to the
+    study ledger only after deposit, so the deposited bundle itself
+    never carries it (it rides in the next export). When no carried
+    receipt names this record, the record is treated as the bundle's
+    own deposit record and a presented package is bound by the
+    record's own file list."""
     failures: list[str] = []
     details: dict[str, Any] = {}
 
@@ -1078,52 +1494,70 @@ def verify_anchor(bundle_dir: str, public_record: dict[str, Any], *,
         return AnchorVerification(False, failures, details)
     manifest = json.loads((Path(bundle_dir) / "manifest.json").read_text(encoding="utf-8"))
 
-    receipts = manifest.get("anchors", [])
-    if not receipts:
-        return AnchorVerification(False, ["bundle carries no anchor receipt"], details)
     record_id = public_record.get("id")
     record_doi = public_record.get("doi")
-    receipt = next(
-        (r for r in receipts
-         if (record_doi and r.get("doi") == record_doi)
-         or (record_id is not None and str(r.get("record_id")) == str(record_id))),
-        None)
-    if receipt is None:
-        failures.append("no anchor receipt in the bundle matches this public record")
-        receipt = receipts[-1]
-    details["receipt"] = receipt
-
-    checkpoint_roots = {c["merkle_root"] for c in manifest["study"]["checkpoints"]}
-    if receipt.get("root") not in checkpoint_roots:
-        failures.append("anchored root is not a checkpoint root of the bundle's ledger")
-
     metadata = public_record.get("metadata", {})
     stated = json.dumps(metadata, ensure_ascii=False)
-    if receipt.get("root") not in stated:
-        failures.append("public record does not state the anchored root")
-    if receipt.get("bundle_hash") not in stated:
-        failures.append("public record does not state the deposited bundle's hash")
-
     created = public_record.get("created")
     if not created:
         failures.append("public record carries no creation timestamp")
     details["record_created"] = created
     details["record_doi"] = record_doi
-
     files = {f.get("key"): f for f in public_record.get("files", [])}
-    receipt_file = receipt.get("file", {})
-    entry = files.get(receipt_file.get("name"))
-    if entry is None:
-        failures.append("deposited file not present in the public record")
+
+    # (a) own-hash binding
+    own_hash = manifest.get("bundle_hash")
+    own_root = manifest.get("study", {}).get("checkpoint_root")
+    details["bundle_hash"] = own_hash
+    details["checkpoint_root"] = own_root
+    if own_hash and own_hash in stated and own_root and own_root in stated:
+        details["own_hash_anchor"] = "anchored"
     else:
-        checksum = (entry.get("checksum") or "").removeprefix("md5:")
-        if checksum and receipt_file.get("md5") and checksum != receipt_file["md5"]:
-            failures.append("public record file checksum does not match the receipt")
-        if package_path is not None:
-            data = Path(package_path).read_bytes()
-            if hashlib.md5(data).hexdigest() != receipt_file.get("md5"):
-                failures.append("local package does not match the receipt's deposited file")
-            details["package_md5"] = hashlib.md5(data).hexdigest()
+        details["own_hash_anchor"] = "unanchored"
+        failures.append(
+            "presented bundle's own bundle_hash is not anchored in this "
+            f"record: the record does not state this bundle's bundle_hash "
+            f"({own_hash}) and checkpoint root ({own_root}) — it anchors "
+            "a different bundle, so a rehashed bundle is indistinguishable "
+            "from this one against this record (CLM-013-02)")
+
+    # (b) receipt chain, for a carried receipt naming this record
+    receipts = manifest.get("anchors", [])
+    receipt = next(
+        (r for r in receipts
+         if (record_doi and r.get("doi") == record_doi)
+         or (record_id is not None and str(r.get("record_id")) == str(record_id))),
+        None)
+    details["receipt"] = receipt
+    if receipt is not None:
+        checkpoint_roots = {c["merkle_root"] for c in manifest["study"]["checkpoints"]}
+        if receipt.get("root") not in checkpoint_roots:
+            failures.append("anchored root is not a checkpoint root of the bundle's ledger")
+        if receipt.get("root") not in stated:
+            failures.append("public record does not state the anchored root")
+        if receipt.get("bundle_hash") not in stated:
+            failures.append("public record does not state the deposited bundle's hash")
+        receipt_file = receipt.get("file", {})
+        entry = files.get(receipt_file.get("name"))
+        if entry is None:
+            failures.append("deposited file not present in the public record")
+        else:
+            checksum = (entry.get("checksum") or "").removeprefix("md5:")
+            if checksum and receipt_file.get("md5") and checksum != receipt_file["md5"]:
+                failures.append("public record file checksum does not match the receipt")
+            if package_path is not None:
+                data = Path(package_path).read_bytes()
+                if hashlib.md5(data).hexdigest() != receipt_file.get("md5"):
+                    failures.append("local package does not match the receipt's deposited file")
+                details["package_md5"] = hashlib.md5(data).hexdigest()
+    elif package_path is not None:
+        data = Path(package_path).read_bytes()
+        package_md5 = hashlib.md5(data).hexdigest()
+        details["package_md5"] = package_md5
+        checksums = {(f.get("checksum") or "").removeprefix("md5:")
+                     for f in files.values()}
+        if package_md5 not in checksums:
+            failures.append("local package does not match any file in the public record")
     return AnchorVerification(ok=not failures, failures=failures, details=details)
 
 
