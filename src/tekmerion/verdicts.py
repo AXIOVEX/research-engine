@@ -300,8 +300,8 @@ def swap_control_report(store_path: Optional[str]) -> dict[str, Any]:
                     "failures": ["swap control: ledger too short to swap provenance stubs"]}
         tampered, construction = built
         copy.write_text("\n".join(tampered) + "\n", encoding="utf-8")
-        ok, _count, _reason = ax.verify_file(str(copy))
-        if ok:
+        result = ax.verify_file(str(copy))
+        if result.ok:
             return {"detected": False, "construction": construction,
                     "failures": ["swap control failed: provenance swap NOT detected by "
                                  f"production verification (construction: {construction})"]}

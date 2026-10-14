@@ -52,8 +52,8 @@ def _old_style_swap_detected(path):
     lines[2] = json.dumps(e2, sort_keys=True, separators=(",", ":"))
     tampered = Path(path).with_suffix(".old-tamper.axmr")
     tampered.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    ok, _count, _reason = ax.verify_file(str(tampered))
-    return not ok
+    result = ax.verify_file(str(tampered))
+    return not result.ok
 
 
 # --------------------------------------------------------------- (a) the fix
@@ -97,16 +97,14 @@ def test_swap_tamper_alters_signed_bytes_on_both_constructions(tmp_path):
     and each construction's tampered copy fails verification."""
     for actors in (["researcher", "researcher", "adjudicator"], ["researcher"] * 3):
         _store, path = _ledger(tmp_path, actors, name=f"s-{len(actors)}-{actors[-1]}.axmr")
-        ok, _c, _r = ax.verify_file(path)
-        assert ok
+        assert ax.verify_file(path).ok
         lines = Path(path).read_text(encoding="utf-8").splitlines()
         built = _swap_tamper(lines)
         assert built is not None
         tampered_lines, _construction = built
         tampered = Path(path).with_suffix(".tamper.axmr")
         tampered.write_text("\n".join(tampered_lines) + "\n", encoding="utf-8")
-        ok, _c, _r = ax.verify_file(str(tampered))
-        assert not ok
+        assert not ax.verify_file(str(tampered)).ok
 
 
 def test_swap_control_passes_through_run_controls_on_demo_shapes(tmp_path):

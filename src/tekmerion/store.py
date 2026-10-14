@@ -109,5 +109,24 @@ class StudyStore:
     def current_claims(self, *, include_dead: bool = False) -> dict:
         return self.db.current(include_dead=include_dead)
 
-    def verify(self) -> "axiomere.Verification":
-        return self.db.verify()
+    def verify(self, *, trusted: Optional[dict] = None,
+               expected_head: Optional[dict] = None) -> "axiomere.Verification":
+        """Verify this study's ledger (Axiomere Spec 003 policy).
+
+        Bare mode (the default, `trusted=None`) is self-consistency:
+        the chain, the checkpoint roots — recomputed from the events,
+        never read from the checkpoint payloads — and any signatures
+        present are checked, and an honestly unsigned ledger verifies
+        with every unsigned event named in the result's
+        `unsigned_events` (a visible state, never a silent pass).
+
+        A study whose appends are signed under enrolled keys — a
+        store created/opened with `seed_hex` — is verified at the
+        study boundary in **trusted mode**: pass
+        `trusted={actor: public_key_hex}` and every event must carry
+        a signature by its actor's enrolled key; an unsigned append
+        or a signature by any other key fails, and the actor is named
+        in `untrusted_actors`. `expected_head` pins the recomputed
+        head (`head_hash`, `min_events`, `checkpoint_root`) for
+        callers comparing against an anchored value."""
+        return self.db.verify(trusted=trusted, expected_head=expected_head)
