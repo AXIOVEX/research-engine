@@ -397,7 +397,7 @@ class ConsoleApp:
             # the nonce is bound server-side to this session and the
             # callback discriminates step-up states from logins.
             from ..platform.oidc import pkce_pair
-            nonce = secrets.token_urlsafe(24)
+            nonce = svc.begin_step_up(token)  # Spec 013: server-issued challenge
             verifier, challenge = pkce_pair()
             state = secrets.token_urlsafe(24)
             self._stepup_pending[state] = {
@@ -722,12 +722,12 @@ class ConsoleApp:
         roleless = [i for i in assertion_created
                     if not svc.roles_of(i.identity_id, tenant_id)
                     and not svc.roles_of(i.identity_id, None)]
-        holds = svc.active_holds(tenant_id=tenant_id)
+        holds = svc.active_holds(token, tenant_id=tenant_id)
         return {**ctx, "variant": variant,
                 "tenant": {"tenant_id": t.tenant_id, "name": t.name,
                            "shape": t.shape, "region": t.region,
                            "active": t.active},
-                "pin": svc.residency_pin(tenant_id) if variant == "platform"
+                "pin": svc.residency_pin(token, tenant_id) if variant == "platform"
                        else {"region": t.region, "migrations": 0},
                 "created": created, "oidc": oidc, "saml": saml,
                 "scim": {"configured": bool(scim_state) and any(
@@ -892,7 +892,7 @@ class ConsoleApp:
                    if t.tenant_id != PLATFORM_TENANT_ID]
         open_bg = 0
         for t in tenants:
-            state = svc.break_glass_state(tenant_id=t.tenant_id)
+            state = svc.break_glass_state(token, tenant_id=t.tenant_id)
             open_bg += len([s for s in state["sessions"]
                             if s.state in ("pending", "active")])
         defaults = directory.tenant(PLATFORM_TENANT_ID).policy
@@ -911,7 +911,7 @@ class ConsoleApp:
                 "mfa_tenants": len([t for t in tenants if t.policy.require_mfa]),
                 "tenant_total": len(tenants),
                 "webhook_subscriptions": len(directory.webhook_subscriptions),
-                "pending_deliveries": len(svc.pending_deliveries())}
+                "pending_deliveries": len(svc.pending_deliveries(token))}
 
     # ------------------------------------------------------- break-glass
 
@@ -933,8 +933,8 @@ class ConsoleApp:
             "actions_taken": s.actions_taken, "actions": [],
             "viewer_can_authorize": False}
 
-    def _bg_state_for(self, svc, tenant_id, viewer_identity, viewer_plane):
-        state = svc.break_glass_state(tenant_id=tenant_id)
+    def _bg_state_for(self, svc, token, tenant_id, viewer_identity, viewer_plane):
+        state = svc.break_glass_state(token, tenant_id=tenant_id)
         policy = state["policy"]
         marked: dict[str, list[dict]] = {}
         for ev in _tenant_events(svc, tenant_id):
@@ -971,7 +971,7 @@ class ConsoleApp:
         for t in _tenants(svc.directory):
             if t.tenant_id == PLATFORM_TENANT_ID:
                 continue
-            state = self._bg_state_for(svc, t.tenant_id, identity, "platform_admin")
+            state = self._bg_state_for(svc, token, t.tenant_id, identity, "platform_admin")
             tenants.append({"tenant_id": t.tenant_id, "tenant_name": t.name,
                             "state": state,
                             "viewer_can_authorize": bool(
@@ -1222,7 +1222,7 @@ class ConsoleApp:
     def _break_glass(self, method, sub, query, form, token, identity, ctx):
         svc = self.service
         tenant_id = identity.tenant_id
-        base_ctx = self._bg_tenant_ctx(ctx, identity, query)
+        base_ctx = self._bg_tenant_ctx(ctx, token, identity, query)
         if method == "POST" and sub == "declare":
             svc.declare_break_glass_policy(
                 token, tenant_id=tenant_id,
@@ -1233,37 +1233,37 @@ class ConsoleApp:
                 max_duration_seconds=int(form.get("max_duration_minutes", "60")
                                          or 60) * 60)
             return self._html(views.render_break_glass_tenant(self._bg_tenant_ctx(
-                ctx, identity, query, notice="breakglass.policy_declared")))
+                ctx, token, identity, query, notice="breakglass.policy_declared")))
         if method == "POST" and sub == "revoke-policy":
             svc.revoke_break_glass_policy(token, tenant_id=tenant_id)
             return self._html(views.render_break_glass_tenant(self._bg_tenant_ctx(
-                ctx, identity, query, notice="breakglass.policy_revoked")))
+                ctx, token, identity, query, notice="breakglass.policy_revoked")))
         if method == "POST" and sub == "invoke":
             svc.invoke_break_glass(
                 token, tenant_id=tenant_id, reason=form.get("reason", ""),
                 duration_seconds=int(
                     form.get("duration_minutes", "60") or 60) * 60)
             return self._html(views.render_break_glass_tenant(self._bg_tenant_ctx(
-                ctx, identity, query, notice="breakglass.invoked")))
+                ctx, token, identity, query, notice="breakglass.invoked")))
         if method == "POST" and sub == "authorize":
             svc.authorize_break_glass(
                 token, bg_session_id=form.get("bg_session_id", ""))
             return self._html(views.render_break_glass_tenant(self._bg_tenant_ctx(
-                ctx, identity, query, notice="breakglass.authorized")))
+                ctx, token, identity, query, notice="breakglass.authorized")))
         if method == "POST" and sub == "deny":
             svc.deny_break_glass(
                 token, bg_session_id=form.get("bg_session_id", ""))
             return self._html(views.render_break_glass_tenant(self._bg_tenant_ctx(
-                ctx, identity, query,
+                ctx, token, identity, query,
                 notice="breakglass.authorization_denied")))
         if method == "POST" and sub == "close":
             svc.close_break_glass(
                 token, bg_session_id=form.get("bg_session_id", ""))
             return self._html(views.render_break_glass_tenant(self._bg_tenant_ctx(
-                ctx, identity, query, notice="breakglass.session_closed")))
+                ctx, token, identity, query, notice="breakglass.session_closed")))
         if method == "POST" and sub == "act":
             bg_id = form.get("bg_session_id", "")
-            state = svc.break_glass_state(tenant_id=tenant_id)
+            state = svc.break_glass_state(token, tenant_id=tenant_id)
             bg = next((s for s in state["sessions"]
                        if s.bg_session_id == bg_id), None)
             if bg is None or bg.invoker_actor_id != identity.actor_id:
@@ -1271,7 +1271,7 @@ class ConsoleApp:
                     "break-glass actions are exercised by the session's "
                     "invoker, under their own sign-in")
             result = svc.break_glass_act(
-                bg_id, action=form.get("action", ""),
+                bg_id, session_token=token, action=form.get("action", ""),
                 key_fingerprint=form.get("fingerprint") or "",
                 identity_id=form.get("identity_id") or "")
             note = "breakglass.action recorded"
@@ -1280,10 +1280,10 @@ class ConsoleApp:
                 note = (f"breakglass.action — tenant audit read under the "
                         f"session ({len(result)} events)")
             return self._html(views.render_break_glass_tenant(self._bg_tenant_ctx(
-                ctx, identity, query, notice=note)))
+                ctx, token, identity, query, notice=note)))
         if method == "POST" and sub == "review":
             item_id = form.get("review_item_id", "")
-            state = svc.break_glass_state(tenant_id=tenant_id)
+            state = svc.break_glass_state(token, tenant_id=tenant_id)
             bg = next((s for s in state["sessions"]
                        if s.review_item_id == item_id), None)
             if bg is None:
@@ -1294,13 +1294,13 @@ class ConsoleApp:
                 disposition=form.get("disposition", ""),
                 note=form.get("note", ""))
             return self._html(views.render_break_glass_tenant(self._bg_tenant_ctx(
-                ctx, identity, query, notice="breakglass.review_completed")))
+                ctx, token, identity, query, notice="breakglass.review_completed")))
         return self._html(views.render_break_glass_tenant(base_ctx))
 
-    def _bg_tenant_ctx(self, ctx, identity, query, refusal=None, notice=None):
+    def _bg_tenant_ctx(self, ctx, token, identity, query, refusal=None, notice=None):
         svc = self.service
         tenant_id = identity.tenant_id
-        state = self._bg_state_for(svc, tenant_id, identity, "tenant_admin")
+        state = self._bg_state_for(svc, token, tenant_id, identity, "tenant_admin")
         identities = [{"identity_id": i.identity_id,
                        "name": i.display_name or i.subject}
                       for i in _identities(svc.directory, tenant_id)

@@ -45,6 +45,7 @@ def enroll_self(w, session):
 def step_up(w, session, identity, nonce="su"):
     from e1_world import USERS_A
     config = w.service.directory.idp(identity.tenant_id, identity.issuer)
+    nonce = w.service.begin_step_up(session)  # Spec 013: server-issued challenge
     token = w.mock.issue_token(
         issuer=identity.issuer, subject=identity.subject,
         audience=config.client_id, nonce=nonce, profile=USERS_A[identity.subject])

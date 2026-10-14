@@ -342,7 +342,7 @@ def test_export_refuses_a_broken_ledger(tmp_path):
 def test_residency_pin_moves_only_through_the_flow(tmp_path):
     w = build_world(tmp_path)
     svc = w.service
-    pin = svc.residency_pin(w.tenant_id)
+    pin = svc.residency_pin(w.root_session, w.tenant_id)
     assert pin == {"tenant_id": w.tenant_id, "shape": "hosted",
                    "region": None, "migrations": 0, "last_migration_seq": None}
     # A bare field update is refused — and the refusal is a record.
@@ -403,7 +403,7 @@ def test_legal_hold_flow_and_enforcement(tmp_path):
     # Release is an event; afterwards erasure proceeds.
     svc.release_legal_hold(w.admin_session, tenant_id=w.tenant_id,
                            hold_id="HOLD-0001", note="order lifted")
-    assert svc.active_holds(w.tenant_id) == []
+    assert svc.active_holds(w.admin_session, tenant_id=w.tenant_id) == []
     assert svc.erase_directory_pii(w.admin_session,
                                    identity_id=rudy.identity_id)
 

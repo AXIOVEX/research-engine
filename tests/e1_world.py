@@ -152,6 +152,19 @@ USERS_A = {
 }
 
 
+def step_up_session(service, mock, session_token, tenant_id, issuer,
+                    subject, users) -> None:
+    """Drive the Spec 013 step-up ceremony for a world session:
+    the service issues the challenge (begin_step_up), the mock IdP
+    mints a token carrying it, the service consumes it."""
+    config = service.directory.idp(tenant_id, issuer)
+    nonce = service.begin_step_up(session_token)
+    token = mock.issue_token(
+        issuer=issuer, subject=subject, audience=config.client_id,
+        nonce=nonce, profile=users[subject])
+    service.step_up(session_token, id_token=token, nonce=nonce)
+
+
 def build_world(tmp_path, *, start_time: float = 1_760_000_000.0) -> SimpleNamespace:
     """A complete E1 world: platform admin bootstrapped and logged in,
     tenant uni-a created, its IdP provisioned, tenant admin granted.
@@ -183,6 +196,11 @@ def build_world(tmp_path, *, start_time: float = 1_760_000_000.0) -> SimpleNames
     w.root_session = login(PLATFORM_TENANT_ID, ISSUER_PLATFORM, "root")
     root = service.directory.find_identity(PLATFORM_TENANT_ID, ISSUER_PLATFORM, "root")
     w.root = root
+    # Spec 013: the platform admin's standing session is stepped up
+    # at world build — provisioning and role grants are sensitive
+    # admin-plane mutations now (CLM-013-16/-17).
+    step_up_session(service, mock, w.root_session, PLATFORM_TENANT_ID,
+                    ISSUER_PLATFORM, "root", USERS_PLATFORM)
     service.create_tenant(w.root_session, tenant_id=TENANT_A, name="University A")
     service.provision_tenant_idp(w.root_session, IdPConfig(
         tenant_id=TENANT_A, issuer=ISSUER_A, client_id="tekmerion-uni-a",
@@ -196,6 +214,10 @@ def build_world(tmp_path, *, start_time: float = 1_760_000_000.0) -> SimpleNames
     service.grant_role(w.root_session, identity_id=admin_ident.identity_id,
                        role=authz.TENANT_ADMIN, tenant_id=TENANT_A)
     w.admin_session = login(TENANT_A, ISSUER_A, "admin-a")  # fresh session post-grant
+    # Spec 013: the tenant admin's standing session is stepped up at
+    # world build for the same reason as the root session above.
+    step_up_session(service, mock, w.admin_session, TENANT_A,
+                    ISSUER_A, "admin-a", USERS_A)
     return w
 
 

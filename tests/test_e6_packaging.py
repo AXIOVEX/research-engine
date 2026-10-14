@@ -69,7 +69,7 @@ def _scenario(svc, admin_session, tenant_id, out_dir, *, weakness="w"):
         "score": report["score"],
         "export_ok": verification.ok,
         "marking": manifest["cui_marking"]["status"],
-        "pin": svc.residency_pin(tenant_id),
+        "pin": svc.residency_pin(admin_session, tenant_id),
     }
 
 

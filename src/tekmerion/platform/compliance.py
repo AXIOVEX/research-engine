@@ -60,8 +60,11 @@ import json
 from typing import Any, Optional
 
 from .ledger import (
+    AUDIT_EXPORTED,
     COMPLIANCE_STATE_SET,
     COMPLIANCE_STATES_SEEDED,
+    LEGAL_HOLD_PLACED,
+    POAM_ITEM_CREATED,
     PlatformLedger,
 )
 from .matrix_data import MATRIX_CLASSES
@@ -322,6 +325,93 @@ def agreement_failures(states: dict[str, dict[str, Any]]) -> list[str]:
     return failures
 
 
+# -- Evidence-link resolution (Spec 013 CLM-013-25) ---------------------
+#
+# An evidence link is a *reference*, and a reference that claims a
+# platform-recorded target must resolve: the named target exists in
+# the same scope's ledger and matches the identity the link claims.
+# Three link forms claim platform targets:
+#
+#   poam:<item-id>     a POA&M item created in this scope's ledger
+#   export:<export-id> an audit export recorded in this scope's ledger
+#   hold:<hold-id>     a legal hold placed in this scope's ledger
+#   <doc>#<req>        an anchor into a platform document (the
+#                      responsibility matrix or the crypto
+#                      inventory); the anchor must name the very
+#                      requirement the link is offered as evidence
+#                      for — a link to a different requirement's row
+#                      is a different claim, not evidence for this one
+#
+# Any other whitespace-free token (conventionally `org/...`) is the
+# operating organization's own evidence reference: the platform
+# cannot verify the organization's store, so such a link is recorded
+# and reported as *operator-attested* — visibly distinct from a
+# resolved link in the computed record, never silently equivalent.
+# A value with whitespace, or an empty value, is not a reference at
+# all: it is a bare assertion, and the SPRS machinery refuses it —
+# the score cannot be moved by assertion alone (red-team probe p12).
+
+_PLATFORM_DOC_REFS = frozenset({MATRIX_REF, CRYPTO_INVENTORY_REF})
+_PLATFORM_ID_PREFIXES = ("poam:", "export:", "hold:")
+
+
+def _platform_form(link: str) -> bool:
+    return link.startswith(_PLATFORM_ID_PREFIXES) or "#" in link
+
+
+def evidence_link_problem(requirement: str, link: str,
+                          known_ids: dict[str, set]) -> Optional[str]:
+    """Why `link` cannot stand as evidence for `requirement`, or
+    None when it can. `known_ids` maps "poam"/"export"/"hold" to the
+    ids recorded in the scope's ledger."""
+    if not link or any(ch.isspace() for ch in link):
+        return (f"evidence link {link!r} is not a reference: an "
+                "evidence link names a record (a single reference "
+                "token), not an assertion")
+    if link.startswith("poam:"):
+        if link[5:] not in known_ids.get("poam", set()):
+            return (f"evidence link {link!r} names no POA&M item "
+                    "recorded in this scope")
+        return None
+    if link.startswith("export:"):
+        if link[7:] not in known_ids.get("export", set()):
+            return (f"evidence link {link!r} names no audit export "
+                    "recorded in this scope")
+        return None
+    if link.startswith("hold:"):
+        if link[5:] not in known_ids.get("hold", set()):
+            return (f"evidence link {link!r} names no legal hold "
+                    "recorded in this scope")
+        return None
+    if "#" in link:
+        path, _, anchor = link.rpartition("#")
+        if path not in _PLATFORM_DOC_REFS:
+            return (f"evidence link {link!r} anchors into a document "
+                    "the platform does not maintain")
+        if anchor != requirement:
+            return (f"evidence link {link!r} anchors requirement "
+                    f"{anchor}, not the requirement it is offered "
+                    f"for ({requirement})")
+        return None
+    return None
+
+
+def evidence_link_status(requirement: str, link: Optional[str],
+                         known_ids: dict[str, set]) -> str:
+    """The recorded standing of one input's evidence link:
+    "resolved" (a platform-form link whose target was verified),
+    "unresolved" (a platform-form link whose target does not
+    exist or does not match), "operator-attested" (the
+    organization's own reference, not platform-verifiable), or
+    "none" (no link — the state rests on a gap marker)."""
+    if not link:
+        return "none"
+    if not _platform_form(link):
+        return "operator-attested"
+    return ("unresolved" if evidence_link_problem(requirement, link, known_ids)
+            else "resolved")
+
+
 class ControlStateStore:
     """Control states as ledger events over one scope's platform
     ledger (deployment scope in the deployment ledger, tenant scope
@@ -334,6 +424,20 @@ class ControlStateStore:
 
     def is_seeded(self) -> bool:
         return any(e["type"] == COMPLIANCE_STATES_SEEDED for e in self.ledger.events())
+
+    def _known_ids(self) -> dict[str, set]:
+        """The platform-recorded ids in this scope's ledger that an
+        evidence link can resolve against (Spec 013 CLM-013-25)."""
+        known: dict[str, set] = {"poam": set(), "export": set(), "hold": set()}
+        for event in self.ledger.events():
+            payload = event["payload"]
+            if event["type"] == POAM_ITEM_CREATED and payload.get("item_id"):
+                known["poam"].add(payload["item_id"])
+            elif event["type"] == AUDIT_EXPORTED and payload.get("export_id"):
+                known["export"].add(payload["export_id"])
+            elif event["type"] == LEGAL_HOLD_PLACED and payload.get("hold_id"):
+                known["hold"].add(payload["hold_id"])
+        return known
 
     def ensure_seeded(self, *, actor_id: str) -> bool:
         """Record the seed event once. Returns True when this call
@@ -366,6 +470,13 @@ class ControlStateStore:
             raise ValueError(
                 "a control state requires an evidence link or an explicit "
                 "gap marker (CLM-005-29 completeness)")
+        if evidence_link:
+            # Spec 013 CLM-013-25: a link that claims a platform
+            # target must resolve, at write time, loudly.
+            problem = evidence_link_problem(
+                requirement, evidence_link, self._known_ids())
+            if problem:
+                raise ValueError(problem)
         return self.ledger.record(
             COMPLIANCE_STATE_SET, actor_id=actor_id,
             target=f"requirement:{requirement}",
@@ -402,20 +513,43 @@ class ControlStateStore:
 
     def sprs_report(self) -> dict[str, Any]:
         """The scope's full SPRS-input record: per-requirement form,
-        the computed score, and the two standing checks (completeness
-        + matrix agreement) evaluated over the same inputs."""
+        the computed score, and the standing checks (completeness,
+        matrix agreement, and evidence resolution — Spec 013
+        CLM-013-25) evaluated over the same inputs."""
         states = self.current_states()
         score = compute_score(states)
+        # Spec 013 CLM-013-25: every input's evidence link carries
+        # its resolution standing in the parallel "evidence" section
+        # (the inputs themselves stay the pure, replayable form the
+        # export verifier recomputes — evidence standing is derived
+        # from the same ledger and travels alongside, never inside),
+        # and a platform-form link whose target no longer resolves
+        # is a named check failure — the evidenced and the merely
+        # attested are never presented as the same thing.
+        known_ids = self._known_ids()
+        inputs = sprs_input_form(states)
+        evidence: dict[str, str] = {}
+        evidence_failures = []
+        for entry in inputs:
+            status = evidence_link_status(
+                entry["requirement"], entry.get("evidence_link"), known_ids)
+            evidence[entry["requirement"]] = status
+            if status == "unresolved":
+                evidence_failures.append(
+                    f"{entry['requirement']}: evidence link does not "
+                    f"resolve: {entry.get('evidence_link')!r}")
         return {
             "seed_version": SEED_VERSION,
             "methodology": METHODOLOGY,
-            "inputs": sprs_input_form(states),
+            "inputs": inputs,
             "score": score["score"],
             "total_deduction": score["total_deduction"],
             "deductions": score["deductions"],
             "unscored": score["unscored"],
             "completeness_failures": completeness_failures(states),
             "agreement_failures": agreement_failures(states),
+            "evidence": evidence,
+            "evidence_failures": evidence_failures,
             "submission": "operator's act — the platform computes and "
                           "maintains these inputs; it never submits to SPRS",
         }
