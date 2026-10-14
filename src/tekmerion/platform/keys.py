@@ -139,6 +139,15 @@ class KeyRegistry:
         payload's `subject_actor_id`; the countersign is additive."""
         if custody not in CUSTODY_MODES:
             raise GateDenied(f"unknown custody mode: {custody}")
+        if not ed25519.is_prime_order_key(public_key):
+            # Spec 013 CLM-013-21 (red-team probe p07): a public key
+            # outside the prime-order subgroup — a small-order key —
+            # makes the verification equation forgeable, so it is
+            # refused by name BEFORE the proof of possession is even
+            # checked: possession of such a key proves nothing.
+            raise GateDenied(
+                "public key is not in the prime-order subgroup: "
+                "small-order keys are refused at enrollment")
         pending = self._nonces.pop(nonce, None)
         if pending is None or pending[0] != identity_id or pending[1] < self._now():
             raise GateDenied("enrollment nonce unknown, mismatched, or expired")

@@ -407,6 +407,12 @@ def test_users_screen_grant_revoke_deactivate(serve, app, admin_client,
     world.login(world.tenant_id, world.issuer_a, "rudy")
     world.login(world.tenant_id, world.issuer_a, "ivy")
     rudy = svc.directory.find_identity(world.tenant_id, world.issuer_a, "rudy")
+    # Spec 013 (CLM-013-16): role grants are sensitive admin-plane
+    # mutations at the service layer — the console operator steps up
+    # first, through the console's own step-up round trip.
+    _, headers, _ = admin_client.get("/auth/step-up")
+    code, state = world.mock.authorize(headers["Location"], "admin-a")
+    admin_client.get(f"/auth/oidc/callback?code={code}&state={state}")
     _, _, body = admin_client.post(
         "/tenant/users/grant", {"identity_id": rudy.identity_id,
                                 "role": "reviewer"})
@@ -479,6 +485,14 @@ def test_no_phase_chips_ship(serve, app, root_client, admin_client):
 
 # ------------------------------------------------------------- break-glass
 
+def _fixture_bg_state(svc, fx):
+    """Direct service read for assertions: the read requires an
+    authenticated identity now (Spec 013 CLM-013-23), so log the
+    fixture tenant admin in at the service layer."""
+    from tekmerion.console.fixture import TENANT_A_ISSUER, _login
+    token = _login(svc, fx.idp, "uni-a", TENANT_A_ISSUER, "admin-a")
+    return svc.break_glass_state(token, tenant_id="uni-a")
+
 def test_break_glass_full_lifecycle_over_http(serve, fixture_app):
     fx, app = fixture_app
     svc = fx.service
@@ -487,7 +501,7 @@ def test_break_glass_full_lifecycle_over_http(serve, fixture_app):
                    {"issuer": "https://idp-platform.fixture"}, "root")
     _, _, body = root.get("/platform/break-glass")
     assert "policy declared" in body
-    pending = [s for s in svc.break_glass_state(tenant_id="uni-a")["sessions"]
+    pending = [s for s in _fixture_bg_state(svc, fx)["sessions"]
                if s.state == "pending"][0]
     _, _, body = root.post("/platform/break-glass/authorize",
                            {"bg_session_id": pending.bg_session_id})
@@ -505,7 +519,7 @@ def test_break_glass_full_lifecycle_over_http(serve, fixture_app):
     _, _, body = alice.post("/tenant/break-glass/close",
                             {"bg_session_id": pending.bg_session_id})
     assert "breakglass.session_closed" in body
-    state = svc.break_glass_state(tenant_id="uni-a")
+    state = _fixture_bg_state(svc, fx)
     closed = [s for s in state["sessions"]
               if s.bg_session_id == pending.bg_session_id][0]
     assert closed.review_item_id and not closed.review_completed
@@ -519,7 +533,7 @@ def test_break_glass_full_lifecycle_over_http(serve, fixture_app):
          "disposition": "reviewed — actions appropriate to the stated reason",
          "note": "console battery"})
     assert "breakglass.review_completed" in body
-    state = svc.break_glass_state(tenant_id="uni-a")
+    state = _fixture_bg_state(svc, fx)
     done = [s for s in state["sessions"]
             if s.bg_session_id == pending.bg_session_id][0]
     assert done.review_completed
@@ -541,6 +555,16 @@ def test_break_glass_undeclared_state_and_bad_scope_refusal(serve,
     _, _, body = admin_b.get("/tenant/break-glass")
     assert "no declaration" in body
     assert "Break-glass cannot be invoked for this tenant" in body
+    # Spec 013 (CLM-013-16): policy declaration is a sensitive
+    # admin-plane mutation — step up first so the refusal under
+    # test is the scope validation, not the step-up gate.
+    _, headers, _ = admin_b.get("/auth/step-up")
+    _, _, body = admin_b.get(headers["Location"])
+    hidden = dict(re.findall(
+        r'<input type="hidden" name="([^"]+)" value="([^"]*)">', body))
+    hidden["subject"] = "admin-b"
+    _, headers, _ = admin_b.post("/fixture/idp/authorize", hidden)
+    admin_b.get(headers["Location"])
     _, _, body = admin_b.post(
         "/tenant/break-glass/declare",
         {"invoker_roles": ["tenant_admin"],

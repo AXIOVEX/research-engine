@@ -51,6 +51,7 @@ def step_up_oidc(w, session, identity, users, nonce="su-e4"):
     svc = w.service
     config = svc.directory.idp(identity.tenant_id, identity.issuer)
     profile = users[identity.subject]
+    nonce = svc.begin_step_up(session)  # Spec 013: server-issued challenge
     token = w.mock.issue_token(
         issuer=identity.issuer, subject=identity.subject,
         audience=config.client_id, nonce=nonce, profile=profile)

@@ -39,6 +39,7 @@ def tenant_types(w):
 
 def step_up(w, session, identity, nonce="stepup-nonce"):
     config = w.service.directory.idp(identity.tenant_id, identity.issuer)
+    nonce = w.service.begin_step_up(session)  # Spec 013: server-issued challenge
     token = w.mock.issue_token(
         issuer=identity.issuer, subject=identity.subject,
         audience=config.client_id, nonce=nonce,
@@ -141,11 +142,12 @@ def test_step_up_requires_mfa_and_records(world):
 def test_step_up_with_non_mfa_token_refused(world):
     session, nomfa = login_user(world, "nomfa", role=authz.RESEARCHER)
     config = world.service.directory.idp(world.tenant_id, world.issuer_a)
+    nonce = world.service.begin_step_up(session)  # Spec 013 challenge
     token = world.mock.issue_token(
         issuer=world.issuer_a, subject="nomfa", audience=config.client_id,
-        nonce="n", profile=USERS_A["nomfa"])
+        nonce=nonce, profile=USERS_A["nomfa"])
     with pytest.raises(AuthenticationError):
-        world.service.step_up(session, id_token=token, nonce="n")
+        world.service.step_up(session, id_token=token, nonce=nonce)
 
 
 # -- planes and service-layer RBAC (T508/T509) -------------------------------
@@ -419,9 +421,11 @@ def test_au_event_class_completeness_sweep(world):
         svc.authorize_break_glass(world.root_session,
                                   bg_session_id=bg.bg_session_id)
     svc.authorize_break_glass(admin2_session, bg_session_id=bg.bg_session_id)
-    svc.break_glass_act(bg.bg_session_id, action=authz.TENANT_AUDIT_EXPORT)
+    svc.break_glass_act(bg.bg_session_id, session_token=world.root_session,
+                        action=authz.TENANT_AUDIT_EXPORT)
     with pytest.raises(GateDenied):
-        svc.break_glass_act(bg.bg_session_id, action=authz.TENANT_MEMBER_MANAGE,
+        svc.break_glass_act(bg.bg_session_id, session_token=world.root_session,
+                        action=authz.TENANT_MEMBER_MANAGE,
                             identity_id=_alice.identity_id)
     svc.close_break_glass(world.root_session, bg_session_id=bg.bg_session_id)
     svc.record_break_glass_review(admin2_session, tenant_id=world.tenant_id,
