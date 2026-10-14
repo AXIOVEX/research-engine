@@ -75,6 +75,7 @@ def ext_id(doc):
 
 def step_up(w, session, identity, nonce="stepup-nonce"):
     config = w.service.directory.idp(identity.tenant_id, identity.issuer)
+    nonce = w.service.begin_step_up(session)  # Spec 013: server-issued challenge
     idtok = w.mock.issue_token(
         issuer=identity.issuer, subject=identity.subject,
         audience=config.client_id, nonce=nonce,

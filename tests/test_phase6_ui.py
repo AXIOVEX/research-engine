@@ -10,6 +10,8 @@ Claims under test: CLM-002-31 … CLM-002-40.
 """
 
 import http.client
+import io
+import urllib.error
 import json
 import shutil
 import threading
@@ -55,7 +57,7 @@ class RoutingHttp(HttpJson):
         for marker, work in (("xyz123", REAL_WORK), ("metaonly", META_WORK)):
             if marker in url:
                 return {"message": work}
-        raise RuntimeError("404 from source of record")
+        raise urllib.error.HTTPError(url, 404, "Not Found", hdrs=None, fp=io.BytesIO(b"{}"))
 
 
 class Client:

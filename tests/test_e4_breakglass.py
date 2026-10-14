@@ -77,7 +77,8 @@ def test_undeclared_tenant_cannot_be_invoked(world):
     dep = [e for e in svc.deployment_ledger.events()
            if e["type"] == "breakglass.invocation_refused"]
     assert len(dep) == 1
-    state = svc.break_glass_state(world.tenant_id)
+    state = svc.break_glass_state(world.root_session,
+                                  tenant_id=world.tenant_id)
     assert state["policy"] is None and state["sessions"] == []
 
 
@@ -132,7 +133,8 @@ def test_dual_authorization_flow_and_actions(world, tmp_path):
     assert bg.state == STATE_PENDING
     # A pending session confers nothing.
     with pytest.raises(GateDenied):
-        svc.break_glass_act(bg.bg_session_id, action=authz.TENANT_AUDIT_EXPORT)
+        svc.break_glass_act(bg.bg_session_id, session_token=world.root_session,
+                        action=authz.TENANT_AUDIT_EXPORT)
     # The invoker cannot be their own second authorizer.
     with pytest.raises(GateDenied):
         svc.authorize_break_glass(world.root_session, bg_session_id=bg.bg_session_id)
@@ -151,11 +153,13 @@ def test_dual_authorization_flow_and_actions(world, tmp_path):
     assert any(e["payload"]["event_class"] == "security.break_glass_use"
                for e in emitted)
     # In-scope action: audit export returns the tenant's record.
-    events = svc.break_glass_act(bg.bg_session_id, action=authz.TENANT_AUDIT_EXPORT)
+    events = svc.break_glass_act(bg.bg_session_id, session_token=world.root_session,
+                        action=authz.TENANT_AUDIT_EXPORT)
     assert any(e["type"] == "breakglass.invoked" for e in events)
     # In-scope action: key management revokes a live key — and the
     # gate then refuses that key, while history still verifies.
-    svc.break_glass_act(bg.bg_session_id, action=authz.TENANT_KEY_MANAGE,
+    svc.break_glass_act(bg.bg_session_id, session_token=world.root_session,
+                        action=authz.TENANT_KEY_MANAGE,
                         key_fingerprint=a_record.fingerprint,
                         reason="compromised during incident")
     assert svc.registry(world.tenant_id).get(a_record.fingerprint).status == "revoked"
@@ -170,7 +174,8 @@ def test_dual_authorization_flow_and_actions(world, tmp_path):
     assert svc._tenant_ledger(world.tenant_id).verify().ok
     # Out-of-scope action: refused, ledgered, nothing changes.
     with pytest.raises(GateDenied):
-        svc.break_glass_act(bg.bg_session_id, action=authz.TENANT_MEMBER_MANAGE,
+        svc.break_glass_act(bg.bg_session_id, session_token=world.root_session,
+                        action=authz.TENANT_MEMBER_MANAGE,
                             identity_id=alice.identity_id)
     assert svc.directory.identity(alice.identity_id).active
     refused = bg_events(svc, world.tenant_id, "breakglass.action_refused")
@@ -194,7 +199,8 @@ def test_authorizer_can_deny(world):
                          note="no incident in progress")
     assert bg.state == STATE_DENIED
     with pytest.raises(GateDenied):
-        svc.break_glass_act(bg.bg_session_id, action=authz.TENANT_AUDIT_EXPORT)
+        svc.break_glass_act(bg.bg_session_id, session_token=world.root_session,
+                        action=authz.TENANT_AUDIT_EXPORT)
 
 
 def test_expiry_closes_session_and_creates_review(world):
@@ -203,11 +209,13 @@ def test_expiry_closes_session_and_creates_review(world):
     bg = svc.invoke_break_glass(world.root_session, tenant_id=world.tenant_id,
                                 reason="short drill", duration_seconds=300)
     svc.authorize_break_glass(world.admin_session, bg_session_id=bg.bg_session_id)
-    svc.break_glass_act(bg.bg_session_id, action=authz.TENANT_AUDIT_EXPORT)
+    svc.break_glass_act(bg.bg_session_id, session_token=world.root_session,
+                        action=authz.TENANT_AUDIT_EXPORT)
     world.clock_box[0] += 301
     # The first touch after the box runs out closes the session.
     with pytest.raises(GateDenied):
-        svc.break_glass_act(bg.bg_session_id, action=authz.TENANT_AUDIT_EXPORT)
+        svc.break_glass_act(bg.bg_session_id, session_token=world.root_session,
+                        action=authz.TENANT_AUDIT_EXPORT)
     assert bg.state == STATE_EXPIRED
     assert bg.review_item_id is not None
     created = bg_events(svc, world.tenant_id, "breakglass.review_created")
@@ -238,7 +246,8 @@ def test_policy_revocation_closes_live_sessions(world):
     svc.revoke_break_glass_policy(world.admin_session, tenant_id=world.tenant_id)
     assert bg.state == STATE_CLOSED and bg.review_item_id is not None
     with pytest.raises(GateDenied):
-        svc.break_glass_act(bg.bg_session_id, action=authz.TENANT_AUDIT_EXPORT)
+        svc.break_glass_act(bg.bg_session_id, session_token=world.root_session,
+                        action=authz.TENANT_AUDIT_EXPORT)
     # And with the declaration withdrawn, invocation is gone again.
     with pytest.raises(GateDenied):
         svc.invoke_break_glass(world.root_session, tenant_id=world.tenant_id,
@@ -269,9 +278,11 @@ def test_tenant_plane_authorizer_and_member_action(world):
     svc.authorize_break_glass(world.root_session, bg_session_id=bg.bg_session_id)
     # Cross-tenant target: refused even under an active session.
     with pytest.raises(GateDenied):
-        svc.break_glass_act(bg.bg_session_id, action=authz.TENANT_MEMBER_MANAGE,
+        svc.break_glass_act(bg.bg_session_id, session_token=world.admin_session,
+                        action=authz.TENANT_MEMBER_MANAGE,
                             identity_id=bob.identity_id)
-    svc.break_glass_act(bg.bg_session_id, action=authz.TENANT_MEMBER_MANAGE,
+    svc.break_glass_act(bg.bg_session_id, session_token=world.admin_session,
+                        action=authz.TENANT_MEMBER_MANAGE,
                         identity_id=ivy.identity_id, reason="takeover response")
     assert not svc.directory.identity(ivy.identity_id).active
     deactivated = [e for e in svc._tenant_ledger(world.tenant_id).events()
@@ -290,7 +301,8 @@ def test_f005_10_no_use_without_audit_trail(world):
     bg = svc.invoke_break_glass(world.root_session, tenant_id=world.tenant_id,
                                 reason="f10 sweep", duration_seconds=600)
     svc.authorize_break_glass(world.admin_session, bg_session_id=bg.bg_session_id)
-    svc.break_glass_act(bg.bg_session_id, action=authz.TENANT_AUDIT_EXPORT)
+    svc.break_glass_act(bg.bg_session_id, session_token=world.root_session,
+                        action=authz.TENANT_AUDIT_EXPORT)
     svc.close_break_glass(world.root_session, bg_session_id=bg.bg_session_id)
     assert bg.state == STATE_CLOSED
     tenant_types = {e["type"] for e in bg_events(svc, world.tenant_id)}
@@ -303,7 +315,8 @@ def test_f005_10_no_use_without_audit_trail(world):
     assert expected <= dep_types
     # Unknown session ids cannot act, and the refusal is on record.
     with pytest.raises(GateDenied):
-        svc.break_glass_act("bg_nonexistent", action=authz.TENANT_AUDIT_EXPORT)
+        svc.break_glass_act("bg_nonexistent", session_token=world.root_session,
+                        action=authz.TENANT_AUDIT_EXPORT)
     dep_refusals = [e for e in svc.deployment_ledger.events()
                     if e["type"] == "breakglass.action_refused"]
     assert dep_refusals

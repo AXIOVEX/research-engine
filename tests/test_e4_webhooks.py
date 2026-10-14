@@ -200,7 +200,7 @@ def test_delivery_retries_backoff_and_exhaustion(world):
                           subscription_id=sub.subscription_id)
     transport = CapturingTransport(statuses=[500, 500, 500, 500])
     svc.deliver_webhooks(transport)
-    (delivery,) = svc.pending_deliveries()
+    (delivery,) = svc.pending_deliveries(world.root_session)
     assert delivery.attempts == 1
     # Not due yet: an immediate second pass attempts nothing.
     svc.deliver_webhooks(transport)
@@ -248,9 +248,9 @@ def test_security_event_auth_failure_burst(world):
     sub, secret = register_security_sub(world)
     fail_login(world)
     fail_login(world)
-    assert not svc.pending_deliveries()
+    assert not svc.pending_deliveries(world.root_session)
     fail_login(world)  # third: threshold reached
-    pending = svc.pending_deliveries()
+    pending = svc.pending_deliveries(world.root_session)
     assert len(pending) == 1
     assert pending[0].event_type == SEC_AUTH_FAILURE_BURST
     emitted = [e for e in svc._tenant_ledger(world.tenant_id).events()
@@ -260,7 +260,7 @@ def test_security_event_auth_failure_burst(world):
     fail_login(world)
     fail_login(world)
     fail_login(world)
-    assert len(svc.pending_deliveries()) == 1
+    assert len(svc.pending_deliveries(world.root_session)) == 1
     # The egress is verifiable end-to-end.
     transport = CapturingTransport()
     svc.deliver_webhooks(transport)
@@ -274,7 +274,7 @@ def test_security_event_auth_failure_burst(world):
     for _ in range(3):
         fail_login(world)
     assert any(d.event_type == SEC_AUTH_FAILURE_BURST
-               for d in svc.pending_deliveries())
+               for d in svc.pending_deliveries(world.root_session))
 
 
 def test_security_event_revocation_storm(world):
@@ -294,7 +294,7 @@ def test_security_event_revocation_storm(world):
         keys = svc.registry(world.tenant_id).keys_for_identity(identity.identity_id)
         svc.revoke_key(session, key_fingerprint=keys[0].fingerprint,
                        reason="storm battery")
-    pending = [d for d in svc.pending_deliveries()
+    pending = [d for d in svc.pending_deliveries(world.root_session)
                if d.event_type == SEC_REVOCATION_STORM]
     assert len(pending) == 1
 
@@ -310,7 +310,7 @@ def test_security_event_break_glass_use_egress(world):
     bg = svc.invoke_break_glass(world.root_session, tenant_id=world.tenant_id,
                                 reason="egress drill", duration_seconds=300)
     svc.authorize_break_glass(world.admin_session, bg_session_id=bg.bg_session_id)
-    pending = [d for d in svc.pending_deliveries()
+    pending = [d for d in svc.pending_deliveries(world.root_session)
                if d.event_type == SEC_BREAK_GLASS_USE]
     assert len(pending) == 1
     transport = CapturingTransport()
@@ -348,7 +348,7 @@ def test_security_event_audit_verification_failure(world):
                                      tenant_id=world.tenant_id)
     assert result["ok"] is False
     assert result["reason"] == "hash-mismatch"
-    pending = [d for d in svc.pending_deliveries()
+    pending = [d for d in svc.pending_deliveries(world.root_session)
                if d.event_type == SEC_AUDIT_VERIFICATION_FAILURE]
     assert len(pending) == 1
 
@@ -371,7 +371,7 @@ def test_event_class_matching(world):
     fail_login(world)
     fail_login(world)
     by_sub = {}
-    for d in svc.pending_deliveries():
+    for d in svc.pending_deliveries(world.root_session):
         by_sub.setdefault(d.subscription_id, set()).add(d.event_type)
     assert by_sub.get(bursts.subscription_id) == {SEC_AUTH_FAILURE_BURST}
     assert storms.subscription_id not in by_sub

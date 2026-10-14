@@ -101,6 +101,19 @@ STEPUP_MFA_CONTEXT_REF = "https://refeds.org/profile/mfa"
 PLATFORM_TENANT_ID = "__platform__"
 SYSTEM_ACTOR = "system"
 
+#: Spec 013 CLM-013-27 (red-team probe p17): SCIM failures against
+#: tenant ids that do not exist are ledgered in the deployment
+#: ledger, which an unauthenticated caller could otherwise grow
+#: without bound by rotating tenant ids. Failure recording for
+#: unknown tenants is capped deployment-wide at this many per
+#: minute; beyond it the request is rate-limited BEFORE anything
+#: is appended.
+UNKNOWN_TENANT_SCIM_LIMIT_PER_MINUTE = 10
+_UNKNOWN_TENANT_BUCKET = "__unknown_tenant__"
+
+#: How long a step-up challenge (begin_step_up) stays redeemable.
+STEPUP_CHALLENGE_SECONDS = 300
+
 
 @dataclass
 class AppendAuthorization:
@@ -155,6 +168,10 @@ class PlatformService:
         self._tenant_ledgers: dict[str, PlatformLedger] = {}
         self._registries: dict[str, KeyRegistry] = {}
         self._pending_auth: dict[str, dict] = {}
+        # Spec 013 CLM-013-18: step-up challenges the service itself
+        # issued, keyed by session id — {nonce, expires}. Single-use:
+        # presenting a challenge consumes it, success or failure.
+        self._pending_stepup: dict[str, dict] = {}
         self._ensure_platform_tenant()
 
     # -- internal plumbing -------------------------------------------------
@@ -245,6 +262,42 @@ class PlatformService:
             )
             raise AuthorizationDenied(decision.reason)
         return session, identity
+
+    def _require_admin_stepup(self, session: Session, identity: Identity,
+                              *, action: str,
+                              tenant_id: Optional[str]) -> None:
+        """Spec 013 CLM-013-16/-17 (Spec 005 §2; red-team probes
+        p01/p02): the sensitive admin-plane mutations — role grants
+        and revocations, IdP configuration (tenant and provisioning
+        paths, OIDC and SAML), API-key issuance, break-glass policy
+        declaration and revocation — require, at the SERVICE layer
+        (not merely in a UI):
+
+        - MFA evidence on the session, whenever the actor's tenant
+          policy requires MFA (a password-only session cannot
+          perform them, whatever its roles); and
+        - a fresh step-up on the session, within the same policy's
+          freshness window.
+
+        Denials are recorded in the action's scope ledger before
+        the raise, like every other authorization denial here."""
+        policy = self.directory.tenant(session.tenant_id).policy
+        reason: Optional[str] = None
+        if policy.require_mfa and not session.mfa:
+            reason = ("admin-plane mutations require MFA evidence "
+                      "under this tenant's policy (CLM-013-17): the "
+                      "session authenticated without MFA")
+        elif not session.has_fresh_stepup(policy, self._now()):
+            reason = ("admin-plane mutations require a fresh step-up "
+                      "at the service layer (CLM-013-16): step the "
+                      "session up and retry")
+        if reason is not None:
+            self._ledger_for_scope(tenant_id).record(
+                AUTHZ_DENIED, actor_id=identity.actor_id,
+                target=f"action:{action}", outcome="denied",
+                action=action, reason=reason, at=self._now(),
+            )
+            raise AuthorizationDenied(reason)
 
     # -- E4 plumbing: rate limits (T530) + security events (T554) -------------
 
@@ -362,6 +415,27 @@ class PlatformService:
     def create_tenant(self, session_token: str, *, tenant_id: str, name: str,
                       shape: str = "hosted", region: Optional[str] = None) -> Tenant:
         _, admin = self._require(session_token, authz.PLATFORM_TENANT_CREATE, tenant_id=None)
+        if tenant_id in self.directory.tenants:
+            # Spec 013 CLM-013-26 (red-team probe p16; first recorded
+            # by the E5 console pass): tenant ids are unique for the
+            # life of the deployment. Re-creating an existing id used
+            # to silently REPLACE the directory record — name, shape,
+            # region/residency pin, marking default, and tenant
+            # policy all reset under a live ledger whose legal holds,
+            # break-glass policy, and exports still name the tenant.
+            # The refusal is typed and ledgered; nothing is reset.
+            self.deployment_ledger.record(
+                AUTHZ_DENIED, actor_id=admin.actor_id,
+                target=f"tenant:{tenant_id}", outcome="denied",
+                action=authz.PLATFORM_TENANT_CREATE,
+                reason=f"tenant already exists: {tenant_id} — "
+                       "re-creation refused (CLM-013-26)",
+                at=self._now())
+            raise ConfigurationError(
+                f"tenant already exists: {tenant_id} — tenant ids "
+                "are unique for the life of the deployment; "
+                "re-creating one would silently reset its residency "
+                "pin, marking default, and policy under its ledger")
         tenant = self.directory.add_tenant(Tenant(
             tenant_id=tenant_id, name=name, shape=shape, region=region))
         self._tenant_ledger(tenant_id)  # create the tenant's audit ledger now
@@ -407,7 +481,10 @@ class PlatformService:
         a platform act (tenant lifecycle), recorded in the tenant's
         ledger. After this, the tenant's own admin manages IdP
         configuration via configure_idp; the planes stay disjoint."""
-        _, admin = self._require(session_token, authz.PLATFORM_TENANT_MANAGE, tenant_id=None)
+        session, admin = self._require(session_token, authz.PLATFORM_TENANT_MANAGE, tenant_id=None)
+        self._require_admin_stepup(session, admin,
+                                   action=authz.PLATFORM_TENANT_MANAGE,
+                                   tenant_id=None)
         self.secrets.put(config.client_secret_ref, client_secret)
         self.directory.add_idp(config)
         self._tenant_ledger(config.tenant_id).record(
@@ -419,7 +496,10 @@ class PlatformService:
 
     def configure_idp(self, session_token: str, config: IdPConfig, *,
                       client_secret: str) -> IdPConfig:
-        _, admin = self._require(session_token, authz.TENANT_IDP_MANAGE, tenant_id=config.tenant_id)
+        session, admin = self._require(session_token, authz.TENANT_IDP_MANAGE, tenant_id=config.tenant_id)
+        self._require_admin_stepup(session, admin,
+                                   action=authz.TENANT_IDP_MANAGE,
+                                   tenant_id=config.tenant_id)
         existing = (config.tenant_id, config.issuer) in self.directory.idps
         self.secrets.put(config.client_secret_ref, client_secret)
         self.directory.add_idp(config)
@@ -480,7 +560,10 @@ class PlatformService:
                                   allow_idp_initiated: bool = True) -> SamlIdPConfig:
         """Platform provisioning of a tenant's SAML IdP (tenant
         lifecycle act, like provision_tenant_idp)."""
-        _, admin = self._require(session_token, authz.PLATFORM_TENANT_MANAGE, tenant_id=None)
+        session, admin = self._require(session_token, authz.PLATFORM_TENANT_MANAGE, tenant_id=None)
+        self._require_admin_stepup(session, admin,
+                                   action=authz.PLATFORM_TENANT_MANAGE,
+                                   tenant_id=None)
         return self._register_saml_idp(
             admin, tenant_id=tenant_id, sp_entity_id=sp_entity_id, acs_url=acs_url,
             metadata_xml=metadata_xml, attribute_map=attribute_map,
@@ -492,7 +575,10 @@ class PlatformService:
                            attribute_map: Optional[dict] = None,
                            subject_source: str = "nameid",
                            allow_idp_initiated: bool = True) -> SamlIdPConfig:
-        _, admin = self._require(session_token, authz.TENANT_IDP_MANAGE, tenant_id=tenant_id)
+        session, admin = self._require(session_token, authz.TENANT_IDP_MANAGE, tenant_id=tenant_id)
+        self._require_admin_stepup(session, admin,
+                                   action=authz.TENANT_IDP_MANAGE,
+                                   tenant_id=tenant_id)
         return self._register_saml_idp(
             admin, tenant_id=tenant_id, sp_entity_id=sp_entity_id, acs_url=acs_url,
             metadata_xml=metadata_xml, attribute_map=attribute_map,
@@ -510,21 +596,47 @@ class PlatformService:
         # the tenant's ledger, where the role has effect. Study roles
         # are granted by the tenant's own tenant admin.
         if role == authz.PLATFORM_ADMIN:
-            _, grantor = self._require(session_token, authz.PLATFORM_ADMIN_GRANT, tenant_id=None)
+            session, grantor = self._require(session_token, authz.PLATFORM_ADMIN_GRANT, tenant_id=None)
             scope_ledger, scope_tenant = self.deployment_ledger, None
+            grant_action = authz.PLATFORM_ADMIN_GRANT
         elif role == authz.TENANT_ADMIN:
             if tenant_id is None:
                 raise ConfigurationError("tenant_admin grants require tenant_id")
-            _, grantor = self._require(session_token, authz.PLATFORM_ADMIN_GRANT, tenant_id=None)
+            session, grantor = self._require(session_token, authz.PLATFORM_ADMIN_GRANT, tenant_id=None)
             scope_ledger, scope_tenant = self._tenant_ledger(tenant_id), tenant_id
+            grant_action = authz.PLATFORM_ADMIN_GRANT
         else:
             if tenant_id is None:
                 raise ConfigurationError("tenant-scoped role grants require tenant_id")
-            _, grantor = self._require(session_token, authz.TENANT_MEMBER_MANAGE, tenant_id=tenant_id)
+            session, grantor = self._require(session_token, authz.TENANT_MEMBER_MANAGE, tenant_id=tenant_id)
             scope_ledger, scope_tenant = self._tenant_ledger(tenant_id), tenant_id
+            grant_action = authz.TENANT_MEMBER_MANAGE
+        # Spec 013 CLM-013-16/-17: a role grant is a sensitive
+        # admin-plane mutation — fresh step-up + MFA evidence.
+        self._require_admin_stepup(session, grantor, action=grant_action,
+                                   tenant_id=scope_tenant)
         grantee = self.directory.identity(identity_id)
         if scope_tenant is not None and grantee.tenant_id != scope_tenant:
             raise ConfigurationError("cannot grant a tenant role to an identity of another tenant")
+        if identity_id == grantor.identity_id and \
+                role not in self.roles_of(identity_id, scope_tenant):
+            # Spec 013 CLM-013-19 (red-team probe p05): no identity
+            # may grant ITSELF a role it does not already hold — the
+            # adjudicator case by name, and plane separation with
+            # self as counterparty everywhere else (a platform admin
+            # may not hand themselves a tenant-plane role either).
+            # Re-granting a role already held stays the recorded
+            # no-op it has always been. The refusal is ledgered.
+            reason = (
+                "an identity cannot grant itself the adjudicator role"
+                if role == authz.ADJUDICATOR else
+                "an identity cannot grant itself a role it does not "
+                "already hold") + " — grants require a second party (CLM-013-19)"
+            scope_ledger.record(
+                AUTHZ_DENIED, actor_id=grantor.actor_id,
+                target=f"identity:{identity_id}", outcome="denied",
+                action=grant_action, reason=reason, at=self._now())
+            raise AuthorizationDenied(reason)
         scope_ledger.record(
             ROLE_GRANTED, actor_id=grantor.actor_id, target=f"identity:{identity_id}",
             identity_id=identity_id, subject_actor_id=grantee.actor_id, role=role,
@@ -533,18 +645,26 @@ class PlatformService:
     def revoke_role(self, session_token: str, *, identity_id: str, role: str,
                     tenant_id: Optional[str]) -> None:
         if role == authz.PLATFORM_ADMIN:
-            _, grantor = self._require(session_token, authz.PLATFORM_ADMIN_GRANT, tenant_id=None)
+            session, grantor = self._require(session_token, authz.PLATFORM_ADMIN_GRANT, tenant_id=None)
             scope_ledger, scope_tenant = self.deployment_ledger, None
+            grant_action = authz.PLATFORM_ADMIN_GRANT
         elif role == authz.TENANT_ADMIN:
             if tenant_id is None:
                 raise ConfigurationError("tenant_admin revocations require tenant_id")
-            _, grantor = self._require(session_token, authz.PLATFORM_ADMIN_GRANT, tenant_id=None)
+            session, grantor = self._require(session_token, authz.PLATFORM_ADMIN_GRANT, tenant_id=None)
             scope_ledger, scope_tenant = self._tenant_ledger(tenant_id), tenant_id
+            grant_action = authz.PLATFORM_ADMIN_GRANT
         else:
             if tenant_id is None:
                 raise ConfigurationError("tenant-scoped role revocations require tenant_id")
-            _, grantor = self._require(session_token, authz.TENANT_MEMBER_MANAGE, tenant_id=tenant_id)
+            session, grantor = self._require(session_token, authz.TENANT_MEMBER_MANAGE, tenant_id=tenant_id)
             scope_ledger, scope_tenant = self._tenant_ledger(tenant_id), tenant_id
+            grant_action = authz.TENANT_MEMBER_MANAGE
+        # Revocations carry the same step-up + MFA requirement as
+        # grants (CLM-013-16/-17): stripping roles is an admin-plane
+        # mutation of the same sensitivity.
+        self._require_admin_stepup(session, grantor, action=grant_action,
+                                   tenant_id=scope_tenant)
         grantee = self.directory.identity(identity_id)
         scope_ledger.record(
             ROLE_REVOKED, actor_id=grantor.actor_id, target=f"identity:{identity_id}",
@@ -812,11 +932,41 @@ class PlatformService:
             AUTH_LOGOUT, actor_id=identity.actor_id, target=f"session:{session.session_id}",
             identity_id=identity.identity_id, subject_actor_id=identity.actor_id, at=self._now())
 
+    def begin_step_up(self, session_token: str) -> str:
+        """Issue the step-up challenge for a session (Spec 013
+        CLM-013-18; the OIDC sibling of begin_saml_step_up): the
+        service mints a single-use nonce bound to this session and
+        returns it; the caller presents it to the IdP as the
+        authorization request's nonce, and step_up() accepts only a
+        token carrying the nonce of a live, unconsumed challenge.
+        A caller-asserted nonce — one the service never issued for
+        this session — is not accepted."""
+        session, identity = self._resolve_session(session_token)
+        nonce = _secrets.token_urlsafe(24)
+        self._pending_stepup[session.session_id] = {
+            "nonce": nonce, "expires": self._now() + STEPUP_CHALLENGE_SECONDS}
+        return nonce
+
     def step_up(self, session_token: str, *, id_token: str, nonce: str) -> None:
         """Record a fresh step-up authentication for the session
         (fresh assertion for the same identity, MFA-evidencing);
-        verdict-class and admin actions consult its freshness (§2)."""
+        verdict-class and admin actions consult its freshness (§2).
+
+        Spec 013 CLM-013-18 (red-team probe p03): the nonce must be
+        a live challenge this service issued via begin_step_up for
+        THIS session — it is consumed by the presentation, success
+        or failure, so a captured ID token cannot be replayed — and
+        the assertion's auth_time must fall inside the tenant's
+        step-up freshness window, so a token minted for an earlier
+        ceremony cannot step a session up later in its lifetime."""
         session, identity = self._resolve_session(session_token)
+        challenge = self._pending_stepup.pop(session.session_id, None)
+        if challenge is None or challenge["expires"] < self._now() \
+                or challenge["nonce"] != nonce:
+            raise AuthenticationError(
+                "step-up requires a live server-issued challenge "
+                "(begin_step_up): caller-asserted or consumed nonces "
+                "are not accepted")
         config = self.directory.idp(identity.tenant_id, identity.issuer)
         claims = self.oidc.validate_id_token(
             id_token, issuer=identity.issuer, client_id=config.client_id,
@@ -825,6 +975,11 @@ class PlatformService:
             raise AuthenticationError("step-up assertion is for a different identity")
         if not claims.mfa:
             raise AuthenticationError("step-up requires MFA evidence")
+        policy = self.directory.tenant(identity.tenant_id).policy
+        if self._now() - claims.auth_time > policy.stepup_freshness_seconds:
+            raise AuthenticationError(
+                "step-up assertion is stale: its auth_time is outside "
+                "the tenant's step-up freshness window")
         session.stepped_up_at = self._now()
         session.amr = claims.amr
         session.mfa = True
@@ -925,6 +1080,7 @@ class PlatformService:
         session, identity = self._resolve_session(session_token)
         self._require_stepup_if_adjudicator(identity, session)
         self._guard_adjudicator_reenrollment(identity)
+        self._guard_revoked_key_reenrollment(identity, public_key)
         return self.registry(identity.tenant_id).enroll(
             identity_id=identity.identity_id, actor_id=identity.actor_id,
             public_key=public_key, custody="self",
@@ -939,6 +1095,7 @@ class PlatformService:
         self._require_stepup_if_adjudicator(identity, session)
         self._guard_adjudicator_reenrollment(identity)
         public_key = ed25519.publickey_from_seed(bytes.fromhex(seed_hex))
+        self._guard_revoked_key_reenrollment(identity, public_key)
         fp = self.delegated_signer.hold(seed_hex)
         assert fp == fingerprint(public_key)
         nonce = self.registry(identity.tenant_id).issue_nonce(identity.identity_id)
@@ -975,6 +1132,26 @@ class PlatformService:
                 "adjudicator re-enrollment after key revocation/closure "
                 "requires a tenant-admin countersign (T522)")
 
+    def _guard_revoked_key_reenrollment(self, identity: Identity,
+                                        public_key: bytes) -> None:
+        """Spec 013 CLM-013-20 (red-team probe p06): a key that was
+        REVOKED or CLOSED is burned — for EVERY role, not only
+        adjudicators. The holder cannot quietly undo an incident-
+        response revocation by re-enrolling the same public key
+        through the self-service door; the way back for that exact
+        key is a tenant-admin countersign (enroll_key_countersigned),
+        which records the admin's judgment on the event. Enrolling
+        a NEW key is unaffected: reactivation after a revocation
+        proceeds with fresh key material, as §4 describes."""
+        fp = fingerprint(public_key)
+        existing = self.registry(identity.tenant_id).get(fp)
+        if existing is not None and existing.status in (STATUS_REVOKED, STATUS_CLOSED):
+            raise GateDenied(
+                "this public key was revoked or closed; re-enrolling "
+                "it requires a tenant-admin countersign "
+                "(enroll_key_countersigned) — for every role "
+                "(CLM-013-20)")
+
     def rotate_key(self, session_token: str, *, old_fingerprint: str,
                    new_public_key: bytes, proof_signature: bytes, nonce: str) -> KeyRecord:
         session, identity = self._resolve_session(session_token)
@@ -985,6 +1162,9 @@ class PlatformService:
             raise GateDenied("only the key's owner can rotate it")
         if rec.custody != "self":
             raise GateDenied("delegated keys rotate through the custody provider, not self-service")
+        # Rotation enrolls a key: the burned-key rule applies to the
+        # presented key exactly as at enrollment (CLM-013-20).
+        self._guard_revoked_key_reenrollment(identity, new_public_key)
         return registry.rotate(
             old_fingerprint=old_fingerprint, new_public_key=new_public_key,
             proof_signature=proof_signature, nonce=nonce,
@@ -1008,7 +1188,12 @@ class PlatformService:
     def issue_api_key(self, session_token: str, *, tenant_id: str,
                       principal_identity_id: str, role_class: str,
                       scopes: list[str], lifetime_seconds: float) -> tuple[ApiKeyRecord, str]:
-        _, admin = self._require(session_token, authz.TENANT_KEY_MANAGE, tenant_id=tenant_id)
+        session, admin = self._require(session_token, authz.TENANT_KEY_MANAGE, tenant_id=tenant_id)
+        # API-key issuance is a sensitive admin-plane mutation
+        # (CLM-013-16/-17): fresh step-up + MFA evidence.
+        self._require_admin_stepup(session, admin,
+                                   action=authz.TENANT_KEY_MANAGE,
+                                   tenant_id=tenant_id)
         AuthorizationService.validate_key_scopes(role_class, scopes)
         principal = self.directory.identity(principal_identity_id)
         if principal.tenant_id != tenant_id:
@@ -1101,6 +1286,18 @@ class PlatformService:
         actor = f"scim:{credential_id}"
         target = f"tenant:{tenant_id}"
         if tenant_id not in self.directory.tenants:
+            # Spec 013 CLM-013-27 (red-team probe p17): recording the
+            # failure is right; recording it WITHOUT LIMIT is a
+            # ledger-growth attack — the deployment ledger is the
+            # scope these records land in, and rotating tenant ids
+            # or credentials must not mint unbounded history. One
+            # deployment-wide bucket caps the recording rate BEFORE
+            # anything is appended; past the cap the request is
+            # rate-limited and nothing is recorded.
+            self.rate_limiter.check(
+                _UNKNOWN_TENANT_BUCKET, "scim",
+                limit_per_minute=UNKNOWN_TENANT_SCIM_LIMIT_PER_MINUTE,
+                now=self._now())
             self._record_scim_failure(tenant_id, actor_id=actor, op=op,
                                       target=target, reason="unknown tenant")
             raise ScimNotFoundError(f"unknown tenant: {tenant_id}")
@@ -1879,22 +2076,32 @@ class PlatformService:
                                  identity_id: str, public_key: bytes,
                                  proof_signature: bytes, nonce: str,
                                  custody: str = "self") -> KeyRecord:
-        """Adjudicator re-enrollment (T522): the subject proves
-        possession of the new key (nonce from their own
+        """Countersigned re-enrollment: the subject proves
+        possession of the key (nonce from their own
         begin_enrollment); a tenant admin countersigns — the
-        enrollment event names both actors. This is the only
-        enrollment path for an adjudicator whose prior key was
-        revoked or closed (§3 recovery is re-enrollment, never
-        retrieval)."""
+        enrollment event names both actors. This path exists for
+        exactly the cases self-service refuses: an adjudicator
+        re-enrolling after a revocation/closure (T522, §3), and —
+        Spec 013 CLM-013-20 — ANY identity re-enrolling a public
+        key that was itself revoked or closed, where an admin's
+        recorded judgment is what un-burns the key. Ordinary
+        first enrollments of fresh keys are not this path's
+        business and are refused here, as before."""
         identity = self.directory.identity(identity_id)
         _, admin = self._require(admin_session_token, authz.TENANT_KEY_MANAGE,
                                  tenant_id=identity.tenant_id)
         if not identity.active:
             raise GateDenied("cannot enroll keys for a deactivated identity")
-        if authz.ADJUDICATOR not in self.roles_of(identity_id, identity.tenant_id):
+        registry = self.registry(identity.tenant_id)
+        existing = registry.get(fingerprint(public_key))
+        key_is_burned = existing is not None and \
+            existing.status in (STATUS_REVOKED, STATUS_CLOSED)
+        if authz.ADJUDICATOR not in self.roles_of(identity_id, identity.tenant_id) \
+                and not key_is_burned:
             raise ConfigurationError(
-                "countersigned enrollment is the adjudicator re-enrollment "
-                "path; other identities enroll through their own session")
+                "countersigned enrollment is the re-enrollment path "
+                "for adjudicators and for revoked/closed keys; other "
+                "identities enroll fresh keys through their own session")
         return self.registry(identity.tenant_id).enroll(
             identity_id=identity_id, actor_id=identity.actor_id,
             public_key=public_key, custody=custody,
@@ -2000,6 +2207,13 @@ class PlatformService:
         if rec is None or rec.identity_id != identity.identity_id:
             raise self._deny_append(tenant_id, identity.actor_id, action,
                                     "key is not enrolled for this identity")
+        if not ed25519.is_prime_order_key(bytes.fromhex(rec.public_key_hex)):
+            # Defense in depth for CLM-013-21: enrollment refuses
+            # small-order keys, and an append under one — however it
+            # reached the registry — is refused here too.
+            raise self._deny_append(tenant_id, identity.actor_id, action,
+                                    "enrolled key is not in the prime-order "
+                                    "subgroup (small-order keys are refused)")
         if not registry.is_accepted(key_fingerprint):
             raise self._deny_append(tenant_id, identity.actor_id, action,
                                     f"key is {registry.status(key_fingerprint)}, not enrolled")
@@ -2049,6 +2263,18 @@ class PlatformService:
         if action not in record.scopes:
             raise self._deny_append(tenant_id, principal.actor_id, action,
                                     f"action {action} outside API key scopes")
+        if action in authz.VERDICT_CLASS_ACTIONS:
+            # Spec 013 CLM-013-15 (red-team probe p04): verdict-class
+            # appends require an enrolled-key intent signature and a
+            # fresh step-up on EVERY path (§2/§3). An API key has no
+            # session, no step-up, and no enrolled key — a bearer key
+            # alone can never issue a verdict, whatever scopes it was
+            # issued with. Non-verdict appends are unaffected.
+            raise self._deny_append(
+                tenant_id, principal.actor_id, action,
+                "verdict-class appends require an enrolled-key intent "
+                "signature and a fresh step-up; a bearer API key alone "
+                "cannot issue a verdict (CLM-013-15)")
         record.last_used_at = self._now()
         return AppendAuthorization(
             identity=principal, role_basis=record.role_class,
@@ -2100,8 +2326,13 @@ class PlatformService:
         """Declare (or re-declare) a tenant's break-glass policy.
         Until this act exists, break-glass cannot be invoked for the
         tenant — by construction (the wireframe's undeclared state)."""
-        _, admin = self._require(session_token, authz.TENANT_POLICY_MANAGE,
-                                 tenant_id=tenant_id)
+        session, admin = self._require(session_token, authz.TENANT_POLICY_MANAGE,
+                                       tenant_id=tenant_id)
+        # Policy declaration is a sensitive admin-plane mutation
+        # (CLM-013-16/-17): fresh step-up + MFA evidence.
+        self._require_admin_stepup(session, admin,
+                                   action=authz.TENANT_POLICY_MANAGE,
+                                   tenant_id=tenant_id)
         if second_authorizer_plane not in AUTHORIZER_PLANES:
             raise ConfigurationError(
                 f"second authorizer must be one of {AUTHORIZER_PLANES}")
@@ -2139,8 +2370,11 @@ class PlatformService:
         """Withdraw a tenant's declaration. Pending sessions are
         denied and active sessions closed on the spot — revocation
         never leaves a live session behind."""
-        _, admin = self._require(session_token, authz.TENANT_POLICY_MANAGE,
-                                 tenant_id=tenant_id)
+        session, admin = self._require(session_token, authz.TENANT_POLICY_MANAGE,
+                                       tenant_id=tenant_id)
+        self._require_admin_stepup(session, admin,
+                                   action=authz.TENANT_POLICY_MANAGE,
+                                   tenant_id=tenant_id)
         policy = self.directory.break_glass_policies.get(tenant_id)
         if policy is None or not policy.active:
             raise ConfigurationError(f"no active break-glass policy for {tenant_id}")
@@ -2190,11 +2424,21 @@ class PlatformService:
             raise refuse(
                 f"break-glass cannot be invoked for tenant {tenant_id}: "
                 "no policy declared")
-        held = self.all_roles_of(invoker)
-        if not (held & set(policy.invoker_roles)):
+        # Spec 013 CLM-013-22 (red-team probe p09): each declared
+        # invoker role is checked in ITS OWN scope — a tenant role
+        # counts only as granted in the TARGET tenant's ledger, the
+        # platform role only on the platform plane. A role held in
+        # some OTHER tenant (the probe's cross-tenant union) counts
+        # for nothing here. (The authorizer check below already
+        # scoped its plane this way; invocation now matches.)
+        def _holds_in_scope(role: str) -> bool:
+            if role == authz.PLATFORM_ADMIN:
+                return role in self.roles_of(invoker.identity_id, None)
+            return role in self.roles_of(invoker.identity_id, tenant_id)
+        if not any(_holds_in_scope(r) for r in policy.invoker_roles):
             raise refuse(
                 f"invoker holds none of the declared invoker roles "
-                f"{sorted(policy.invoker_roles)}")
+                f"{sorted(policy.invoker_roles)} in tenant {tenant_id}'s scope")
         if not (0 < duration_seconds <= policy.max_duration_seconds):
             raise refuse(
                 f"requested time box {duration_seconds}s is outside the "
@@ -2339,11 +2583,19 @@ class PlatformService:
                                actor_id=actor_id)
         return bg
 
-    def break_glass_act(self, bg_session_id: str, *, action: str, **kwargs):
+    def break_glass_act(self, bg_session_id: str, *, session_token: str,
+                        action: str, **kwargs):
         """Exercise one declared-scope action under an active
         break-glass session. The tenant comes from the session —
         never from a parameter (T526 discipline) — and every act,
-        granted or refused, is a marked event in both ledgers."""
+        granted or refused, is a marked event in both ledgers.
+
+        Spec 013 CLM-013-22 (red-team probe p09): acting requires
+        presenting a session credential AT ACT TIME, and it must be
+        the INVOKER's — a bare break-glass session id (a uuid in two
+        ledgers) is a bearer token for tenant-admin powers no
+        longer. A credential belonging to anyone else is refused
+        and recorded under the caller's own actor id."""
         bg = self.directory.break_glass_sessions.get(bg_session_id)
         if bg is None:
             self.deployment_ledger.record(
@@ -2354,6 +2606,17 @@ class PlatformService:
             raise GateDenied(f"unknown break-glass session: {bg_session_id}")
         self._rate_guard(bg.tenant_id, "breakglass")
         self._touch_bg_session(bg)
+        _, actor = self._resolve_session(session_token)
+        if actor.identity_id != bg.invoker_identity_id:
+            self._bg_record(
+                bg.tenant_id, BREAKGLASS_ACTION_REFUSED,
+                actor_id=actor.actor_id, bg=bg, outcome="denied",
+                action=action,
+                reason="the act-time session credential does not "
+                       "belong to the break-glass invoker (CLM-013-22)")
+            raise GateDenied(
+                "break-glass actions require the invoker's own "
+                "session credential at act time (CLM-013-22)")
 
         def refuse(message: str) -> GateDenied:
             self._bg_record(bg.tenant_id, BREAKGLASS_ACTION_REFUSED,
@@ -2372,6 +2635,19 @@ class PlatformService:
                 f"scopes {sorted(policy.scopes)}")
         result = None
         if action == authz.TENANT_AUDIT_EXPORT:
+            # Spec 013 CLM-013-24 (red-team probe p11): the legal
+            # hold's access restriction binds EVERY export path —
+            # break-glass is an emergency door into the same records,
+            # not an exemption from a preservation order. The
+            # platform-plane exception in export_tenant_audit does
+            # not extend here: this act is exercised in the tenant's
+            # name, under the tenant's own declaration.
+            hold = self._active_hold(bg.tenant_id)
+            if hold is not None:
+                raise refuse(
+                    f"legal hold {hold['hold_id']} covers tenant "
+                    "audit export; the hold binds the break-glass "
+                    "path too (CLM-013-24)")
             result = self._tenant_ledger(bg.tenant_id).events()
             target = f"tenant:{bg.tenant_id}"
         elif action == authz.TENANT_MEMBER_MANAGE:
@@ -2399,10 +2675,16 @@ class PlatformService:
                         action=action, target=target)
         return result
 
-    def break_glass_state(self, tenant_id: str) -> dict:
+    def break_glass_state(self, session_token: str, *, tenant_id: str) -> dict:
         """The tenant's break-glass posture: current policy (or the
         honest undeclared state) + its sessions. This is the data the
-        console's break-glass screen (E5) renders."""
+        console's break-glass screen (E5) renders.
+
+        Spec 013 CLM-013-23 (red-team probe p10): like every
+        service-layer read, this requires an authenticated identity
+        with audit access to the tenant — it is not callable
+        credential-free."""
+        self._require_audit_access(session_token, tenant_id)
         for bg in self.directory.break_glass_sessions.values():
             if bg.tenant_id == tenant_id:
                 self._touch_bg_session(bg)
@@ -2533,8 +2815,28 @@ class PlatformService:
         return [d for d in self._deliveries if d not in before
                 and self._deliveries[d].subscription_id == subscription_id]
 
-    def pending_deliveries(self) -> list[Delivery]:
-        return [d for d in self._deliveries.values() if d.state == "pending"]
+    def pending_deliveries(self, session_token: str, *,
+                           tenant_id: Optional[str] = None) -> list[Delivery]:
+        """The egress queue's pending deliveries (Spec 013
+        CLM-013-23: an authenticated read, like every other). The
+        platform plane sees the whole queue (or one tenant's slice);
+        a tenant-plane caller sees only their own tenant's
+        deliveries — the queue is operational data about other
+        tenants' egress otherwise."""
+        _, identity = self._resolve_session(session_token)
+        try:
+            self._require(session_token, authz.PLATFORM_CONFIG_MANAGE,
+                          tenant_id=None)
+            scope = tenant_id  # platform plane: any tenant, or all
+        except AuthorizationDenied:
+            if tenant_id is not None and tenant_id != identity.tenant_id:
+                raise AuthorizationDenied(
+                    "pending deliveries of another tenant are not "
+                    "visible from this session")
+            scope = identity.tenant_id
+        return [d for d in self._deliveries.values()
+                if d.state == "pending"
+                and (scope is None or d.tenant_id == scope)]
 
     def deliver_webhooks(self, transport) -> list[Delivery]:
         """Attempt every due delivery once. `transport(url, body,
@@ -2821,10 +3123,13 @@ class PlatformService:
 
     # -- residency pin (T541) ----------------------------------------------
 
-    def residency_pin(self, tenant_id: str) -> dict:
+    def residency_pin(self, session_token: str, tenant_id: str) -> dict:
         """The tenant's recorded pin: shape + region as recorded at
         creation, plus the migration history (pin changes exist
-        only as migration events — there is no other write path)."""
+        only as migration events — there is no other write path).
+        An authenticated read (Spec 013 CLM-013-23): audit access
+        to the tenant, as for the tenant's other record reads."""
+        self._require_audit_access(session_token, tenant_id)
         tenant = self.directory.tenant(tenant_id)
         migrations = [
             e for e in self.deployment_ledger.events()
@@ -2880,7 +3185,7 @@ class PlatformService:
         self._tenant_ledger(tenant_id).record(
             TENANT_RESIDENCY_MIGRATED, actor_id=admin.actor_id,
             target=f"tenant:{tenant_id}", at=self._now(), **fields)
-        return self.residency_pin(tenant_id)
+        return self.residency_pin(session_token, tenant_id)
 
     # -- audit export + anchor (T542/T543) ---------------------------------
 
@@ -2998,7 +3303,17 @@ class PlatformService:
             return None
         return next(iter(active.values()))
 
-    def active_holds(self, tenant_id: Optional[str] = None) -> list[dict]:
+    def active_holds(self, session_token: str, *,
+                     tenant_id: Optional[str] = None) -> list[dict]:
+        """The scope's active legal holds (Spec 013 CLM-013-23: an
+        authenticated read — hold state is compliance data, not
+        public posture). Tenant scope rides the audit-access rule;
+        the deployment scope requires the platform plane."""
+        if tenant_id is None:
+            self._require(session_token, authz.PLATFORM_CONFIG_MANAGE,
+                          tenant_id=None)
+        else:
+            self._require_audit_access(session_token, tenant_id)
         hold = self._active_hold(tenant_id)
         return [hold] if hold is not None else []
 

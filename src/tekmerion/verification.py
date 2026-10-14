@@ -45,7 +45,7 @@ from dataclasses import dataclass, field
 from typing import Any, Optional
 
 from .claims import Claim, EvidenceItem
-from .connectors import RetrievedItem
+from .connectors import RetrievedItem, normalize_doi
 
 RESOLVED = "resolved"
 NOT_FOUND = "not_found"
@@ -75,7 +75,19 @@ DEFAULT_ANOMALY_MIN_REVIEWS = 5        # window below this cannot acquit a queue
 @dataclass
 class Citation:
     """What a study cites, as the citing context states it. Stage 2
-    exists because these fields can be wrong about a real paper."""
+    exists because these fields can be wrong about a real paper.
+
+    The DOI is normalized ONCE, here at intake, by the shared
+    normalizer (Spec 013, CLM-013-14): `doi` carries the normalized
+    form that resolution, origin grouping, and falsifier matching
+    all consume, so the same work behaves identically whether it
+    was cited bare, as a doi.org URL, or in uppercase (RTA-09).
+    The string exactly as cited survives verbatim in
+    `doi_as_cited` — the preserved input record (Spec 011), used
+    for nothing else. `as_dict` emits the as-cited form, so the
+    records built from a citation (the bundle's as-cited section,
+    the workspace citation cache) keep carrying what the
+    researcher actually typed."""
     citation_id: str
     claim_id: str
     proposition: str                       # the finding attributed to the source
@@ -86,11 +98,23 @@ class Citation:
     venue: Optional[str] = None
     dataset_id: Optional[str] = None      # WS2 grouping key 2 (dataset / registration)
     derived_from: Optional[str] = None    # WS2 grouping key 3 (citation_id this derives from)
+    #: The DOI exactly as cited (verbatim, pre-normalization).
+    #: Intake assigns it from the as-passed `doi`; callers leave it
+    #: alone — it is a constructor field only so a citation can be
+    #: rehydrated from its own fields without losing the record.
+    doi_as_cited: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        if self.doi_as_cited is None:
+            self.doi_as_cited = self.doi
+        if self.doi is not None:
+            self.doi = normalize_doi(self.doi) or None
 
     def as_dict(self) -> dict[str, Any]:
         return {
             "citation_id": self.citation_id, "claim_id": self.claim_id,
-            "proposition": self.proposition, "doi": self.doi, "title": self.title,
+            "proposition": self.proposition, "doi": self.doi_as_cited,
+            "title": self.title,
             "authors": list(self.authors), "year": self.year, "venue": self.venue,
             "dataset_id": self.dataset_id, "derived_from": self.derived_from,
         }
@@ -109,13 +133,27 @@ class CitationResult:
     source: Optional[str] = None           # connector that resolved it
     source_id: Optional[str] = None        # retrieved record's native id
     detail: str = ""                       # error text / notes
+    #: Retraction state the source of record asserts (Spec 013,
+    #: CLM-013-36), surfaced from the retrieved item onto the
+    #: citation's — and through it the claim's — record.
+    retraction: Optional[str] = None
+    #: Every connector resolution consulted (Spec 013, CLM-013-40):
+    #: the resolution record names its sources.
+    sources_consulted: list[str] = field(default_factory=list)
+    #: Material disagreement BETWEEN sources about the same work
+    #: (Spec 013, CLM-013-40): its own quarantine trigger, distinct
+    #: from the citation-vs-record mismatches above.
+    source_disagreement: list[str] = field(default_factory=list)
     retrieved: Optional[RetrievedItem] = field(default=None, repr=False)
 
     @property
     def quarantined(self) -> bool:
         """Quarantined items contribute no evidence until adjudicated:
-        unresolved (not_found / error) or materially disagreeing."""
-        return self.resolution != RESOLVED or self.agreement == DISAGREE
+        unresolved (not_found / error), materially disagreeing with
+        the citation, carrying a retraction state, or the subject of
+        a material disagreement between sources."""
+        return (self.resolution != RESOLVED or self.agreement == DISAGREE
+                or self.retraction is not None or bool(self.source_disagreement))
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -124,6 +162,9 @@ class CitationResult:
             "mismatches": list(self.mismatches), "content": self.content,
             "origin_group": self.origin_group, "extractor": self.extractor,
             "source": self.source, "source_id": self.source_id, "detail": self.detail,
+            "retraction": self.retraction,
+            "sources_consulted": list(self.sources_consulted),
+            "source_disagreement": list(self.source_disagreement),
         }
 
 
@@ -147,10 +188,23 @@ def _key(token: str) -> str:
 class KeywordStanceChecker:
     """Deterministic lexical stance baseline. A sentence of the content
     supports the proposition when it carries most of the proposition's
-    key terms; the same sentence carrying a negation contradicts it;
-    anything else is contextual. Crude by design — its value is that
-    it is inspectable, reproducible, and honestly labeled; model-based
-    extraction replaces it at this seam, with its identity recorded."""
+    key terms and matches the proposition's negation parity; the same
+    sentence at the opposite parity contradicts it; anything else is
+    contextual. Crude by design — its value is that it is inspectable,
+    reproducible, and honestly labeled; model-based extraction replaces
+    it at this seam, with its identity recorded.
+
+    Parity (Spec 013, CLM-013-13, answering RTA-07): the historical
+    rule — any negation in a matching sentence means CONTRADICTS —
+    inverted every verdict for a proposition that itself carries a
+    negation ("the treatment does not reduce symptoms"), the natural
+    phrasing of a null result, and an inverted CONTRADICTS feeds the
+    falsifier path. For an unnegated proposition the historical rule
+    applies unchanged. For a negated proposition, matching sentences
+    are sorted by parity: same-parity sentences affirm the
+    proposition as stated (SUPPORTS), opposite-parity sentences deny
+    it (CONTRADICTS), and when both parities match, parity cannot
+    decide — the checker abstains (CONTEXTUAL) rather than guess."""
 
     name = "tekmerion.keyword-stance/1"
 
@@ -160,18 +214,24 @@ class KeywordStanceChecker:
         if not prop_keys or not content:
             return CONTEXTUAL
         need = math.ceil(0.6 * len(prop_keys))
-        hit = False
-        negated = False
+        prop_negated = bool(_NEGATIONS & set(_tokens(proposition)))
+        hit_plain = False      # a matching sentence without a negation
+        hit_negated = False    # a matching sentence carrying a negation
         for sentence in re.split(r"[.!?]", content):
             toks = _tokens(sentence)
             keys = {_key(t) for t in toks}
             if len(prop_keys & keys) >= need:
-                hit = True
                 if _NEGATIONS & set(toks):
-                    negated = True
-        if not hit:
+                    hit_negated = True
+                else:
+                    hit_plain = True
+        if not (hit_plain or hit_negated):
             return CONTEXTUAL
-        return CONTRADICTS if negated else SUPPORTS
+        if not prop_negated:
+            return CONTRADICTS if hit_negated else SUPPORTS
+        if hit_plain and hit_negated:
+            return CONTEXTUAL
+        return SUPPORTS if hit_negated else CONTRADICTS
 
 
 # ------------------------------------------------------------------ stage 2
@@ -181,8 +241,34 @@ def _norm(text: str) -> str:
 
 
 def _surname(author: str) -> str:
-    parts = _tokens(author)
+    """The surname token of an author string. Both citation forms
+    occur in the wild: "Firstname Lastname" (surname last) and the
+    bibliographic "Lastname, F." (surname before the comma). The
+    comma form is read off the part before the first comma;
+    without that, "Wandel, S." keys as "s" and surname matching
+    silently disables itself for exactly the form reference lists
+    use (RTA-06)."""
+    text = author or ""
+    if "," in text:
+        parts = _tokens(text.split(",", 1)[0])
+    else:
+        parts = _tokens(text)
     return parts[-1] if parts else ""
+
+
+def _given_name(author: str) -> str:
+    """The given-name token of an author string, either form
+    ("Firstname Lastname", "Lastname, Firstname"); "" when the
+    string carries nothing usable (an initial alone is too weak
+    to identify anyone, so it does not count)."""
+    text = author or ""
+    if "," in text:
+        parts = _tokens(text.split(",", 1)[1])
+        given = parts[0] if parts else ""
+    else:
+        parts = _tokens(text)
+        given = parts[0] if len(parts) > 1 else ""
+    return given if len(given) >= 3 and given not in _STOPWORDS else ""
 
 
 def _text_match(cited: str, retrieved: str) -> bool:
@@ -224,10 +310,23 @@ def _enrich(citation: Citation, primary: RetrievedItem,
     source never manufactures a disagreement the primary record did
     not produce. Failures never un-resolve a resolved citation: the
     primary stands and the failure is noted."""
-    doi = citation.doi or _norm_doi(primary.source_id)
+    item, note, _fetched = _enrich_collect(citation, primary, candidates)
+    return item, note
+
+
+def _enrich_collect(citation: Citation, primary: RetrievedItem,
+                    candidates: list) -> tuple[RetrievedItem, str, list]:
+    """`_enrich`, also returning every record the candidates produced
+    (the resolution layer compares them for CLM-013-40). Identity is
+    asserted HERE, in the pipeline (Spec 013, CLM-013-41): a
+    candidate whose record id is not the requested normalized DOI is
+    passed over before any agreement test runs, whatever the
+    candidate connector enforces internally."""
+    doi = normalize_doi(citation.doi) or normalize_doi(primary.source_id)
     if not doi or not doi.startswith("10."):
-        return primary, ""
+        return primary, "", []
     notes: list[str] = []
+    fetched: list[RetrievedItem] = []
     for conn in candidates:
         name = getattr(conn, "name", "connector")
         try:
@@ -235,7 +334,14 @@ def _enrich(citation: Citation, primary: RetrievedItem,
         except Exception as exc:
             notes.append(f"enrichment via {name} failed: {exc}")
             continue
-        if cand is None or not cand.abstract:
+        if cand is None:
+            continue
+        fetched.append(cand)
+        if normalize_doi(cand.source_id) != doi:
+            notes.append(f"enrichment via {name} passed over: its record "
+                         f"id {cand.source_id} is not the cited DOI")
+            continue
+        if not cand.abstract:
             continue
         if check_agreement(citation, cand)[0] != AGREE:
             notes.append(f"enrichment via {name} passed over: its record "
@@ -243,40 +349,123 @@ def _enrich(citation: Citation, primary: RetrievedItem,
             continue
         return cand, (f"resolved via {primary.source} without "
                       f"licence-permitted content; content via {cand.source} "
-                      f"(same DOI)")
-    return primary, "; ".join(notes)
+                      f"(same DOI)"), fetched
+    return primary, "; ".join(notes), fetched
 
 
-def _resolve(citation: Citation, connectors: list) -> tuple[Optional[RetrievedItem], str, str]:
-    """Resolve against a source of record. Returns (item, outcome,
-    detail); an exception from every attempted route is an explicit
-    `error` outcome, never a silent skip."""
+def _item_disagreements(a: RetrievedItem, b: RetrievedItem) -> list[str]:
+    """Material disagreement between two sources' records of the
+    same work (Spec 013, CLM-013-40), judged with stage 2's field
+    discipline: only fields present on both sides are judged, and
+    absence is a coverage fact, not a mismatch."""
+    out: list[str] = []
+    if a.title and b.title and not _text_match(a.title, b.title):
+        out.append("title")
+    if a.authors and b.authors:
+        if not ({_surname(x) for x in a.authors} & {_surname(x) for x in b.authors}):
+            out.append("authors")
+    if a.year and b.year and a.year != b.year:
+        out.append("year")
+    if a.venue and b.venue and not _text_match(a.venue, b.venue):
+        out.append("venue")
+    return out
+
+
+def _source_disagreement(items: list[RetrievedItem]) -> list[str]:
+    """Every material field on which any two consulted records of
+    the same work disagree, in stage-2 field order."""
+    fields: list[str] = []
+    for i, a in enumerate(items):
+        for b in items[i + 1:]:
+            for f in _item_disagreements(a, b):
+                if f not in fields:
+                    fields.append(f)
+    return fields
+
+
+@dataclass
+class _Resolution:
+    item: Optional[RetrievedItem]
+    outcome: str
+    detail: str
+    sources_consulted: list[str] = field(default_factory=list)
+    source_disagreement: list[str] = field(default_factory=list)
+
+
+def _resolve_full(citation: Citation, connectors: list) -> _Resolution:
+    """Resolve against sources of record, comparing what they say
+    (Spec 013, CLM-013-40). First-answer-wins no longer decides the
+    record: whenever the first record cannot stand on its own —
+    it carries no licence-permitted content (the Spec 012
+    enrichment case) or it disagrees with the citation — the
+    remaining configured sources are consulted, their records are
+    compared against each other, and any material inter-source
+    disagreement is recorded as its own quarantine trigger. A
+    primary that resolves, agrees with the citation, and carries
+    content stands without further calls: nothing is left for a
+    second source to decide (the Spec 012 call discipline)."""
     last_error = ""
     if citation.doi:
+        doi = normalize_doi(citation.doi)
+        consulted: list[str] = []
         primary: Optional[RetrievedItem] = None
         primary_at = -1
         for idx, conn in enumerate(connectors):
+            name = getattr(conn, "name", "connector")
+            consulted.append(name)
             try:
-                item = conn.resolve(citation.doi)
-            except Exception as exc:  # transport/parse failure = explicit outcome
-                last_error = f"{getattr(conn, 'name', 'connector')}: {exc}"
+                item = conn.resolve(doi)
+            except Exception as exc:  # connector error = explicit outcome
+                last_error = f"{name}: {exc}"
                 continue
             if item is not None:
                 primary, primary_at = item, idx
                 break
         if primary is None:
-            return None, (ERROR if last_error else NOT_FOUND), last_error
-        if primary.abstract:
-            return primary, RESOLVED, ""
-        enriched, note = _enrich(citation, primary, connectors[primary_at + 1:])
-        return enriched, RESOLVED, note
+            return _Resolution(None, (ERROR if last_error else NOT_FOUND),
+                               last_error, consulted)
+        if primary.abstract and check_agreement(citation, primary)[0] == AGREE:
+            return _Resolution(primary, RESOLVED, "", consulted)
+        if not primary.abstract:
+            rest = connectors[primary_at + 1:]
+            consulted += [getattr(c, "name", "connector") for c in rest]
+            enriched, note, fetched = _enrich_collect(citation, primary, rest)
+            disagreement = _source_disagreement([primary, *fetched])
+            detail = note
+            if disagreement:
+                detail = (f"{detail}; " if detail else "") + (
+                    "inter-source disagreement on: " + ", ".join(disagreement))
+            return _Resolution(enriched, RESOLVED, detail, consulted, disagreement)
+        # The primary carries content but disagrees with the citation:
+        # consult the remaining sources and compare records before
+        # the disagreement is laid at the citation's door.
+        fetched = []
+        errors: list[str] = []
+        for conn in connectors[primary_at + 1:]:
+            name = getattr(conn, "name", "connector")
+            consulted.append(name)
+            try:
+                other = conn.resolve(doi)
+            except Exception as exc:
+                errors.append(f"{name}: {exc}")
+                continue
+            if other is not None:
+                fetched.append(other)
+        disagreement = _source_disagreement([primary, *fetched])
+        detail = "; ".join(errors)
+        if disagreement:
+            detail = (f"{detail}; " if detail else "") + (
+                "inter-source disagreement on: " + ", ".join(disagreement))
+        return _Resolution(primary, RESOLVED, detail, consulted, disagreement)
     # No DOI: source-native record matched on title + authors + venue +
     # year (WS5 §1.1) — the first agreeing candidate resolves; if the
     # source answers but nothing agrees, the best candidate is carried
     # forward and stage 2 renders the disagreement explicitly.
     best: Optional[RetrievedItem] = None
     best_from: Any = None
+    consulted = []
     for conn in connectors:
+        consulted.append(getattr(conn, "name", "connector"))
         try:
             candidates = conn.search(citation.title)
         except Exception as exc:
@@ -287,29 +476,38 @@ def _resolve(citation: Citation, connectors: list) -> tuple[Optional[RetrievedIt
                 best, best_from = cand, conn
             if check_agreement(citation, cand)[0] == AGREE:
                 if cand.abstract:
-                    return cand, RESOLVED, ""
+                    return _Resolution(cand, RESOLVED, "", consulted)
                 enriched, note = _enrich(citation, cand,
                                          [c for c in connectors if c is not conn]
                                          + [conn])
-                return enriched, RESOLVED, note
+                return _Resolution(enriched, RESOLVED, note, consulted)
     if best is not None:
         if not best.abstract:
             enriched, note = _enrich(citation, best,
                                      [c for c in connectors if c is not best_from]
                                      + [best_from])
-            return enriched, RESOLVED, note
-        return best, RESOLVED, ""
-    return None, (ERROR if last_error else NOT_FOUND), last_error
+            return _Resolution(enriched, RESOLVED, note, consulted)
+        return _Resolution(best, RESOLVED, "", consulted)
+    return _Resolution(None, (ERROR if last_error else NOT_FOUND),
+                       last_error, consulted)
+
+
+def _resolve(citation: Citation, connectors: list) -> tuple[Optional[RetrievedItem], str, str]:
+    """Resolve against a source of record. Returns (item, outcome,
+    detail); an exception from every attempted route is an explicit
+    `error` outcome, never a silent skip."""
+    full = _resolve_full(citation, connectors)
+    return full.item, full.outcome, full.detail
 
 
 # ------------------------------------------------------------------ grouping (WS2 §2)
 
 def _norm_doi(doi: Optional[str]) -> str:
-    raw = (doi or "").strip().lower()
-    for prefix in ("https://doi.org/", "http://doi.org/", "doi:"):
-        if raw.startswith(prefix):
-            raw = raw[len(prefix):]
-    return raw
+    """Pipeline DOI normalization is the connectors' one shared
+    normalizer (Spec 013, CLM-013-42) — grouping, falsifier
+    matching, and enrichment all see the same normalized form the
+    connectors resolve by."""
+    return normalize_doi(doi)
 
 
 def assign_origin_groups(
@@ -389,15 +587,22 @@ def assign_origin_groups(
 # ------------------------------------------------------------------ the pipeline
 
 def _run_stages(citation: Citation, connectors: list, checker: Any) -> CitationResult:
-    item, outcome, detail = _resolve(citation, connectors)
+    full = _resolve_full(citation, connectors)
+    item, outcome, detail = full.item, full.outcome, full.detail
     result = CitationResult(citation_id=citation.citation_id, claim_id=citation.claim_id,
                             resolution=outcome, detail=detail,
-                            extractor=getattr(checker, "name", type(checker).__name__))
+                            extractor=getattr(checker, "name", type(checker).__name__),
+                            sources_consulted=full.sources_consulted,
+                            source_disagreement=full.source_disagreement)
     if item is None:
         return result
     result.retrieved = item
     result.source = item.source
     result.source_id = item.source_id
+    result.retraction = item.retraction
+    if item.degradation_reason:
+        note = f"{item.source} degradation: {item.degradation_reason}"
+        result.detail = f"{result.detail}; {note}" if result.detail else note
     result.agreement, result.mismatches = check_agreement(citation, item)
     if not item.abstract:
         # No licence-permitted content survived the connectors' rules:
@@ -461,6 +666,9 @@ def verify_citations(
         store.log_citation_check(r.as_dict(), actor=actor)
         if r.quarantined:
             reason = ("resolution failed" if r.resolution != RESOLVED
+                      else f"retracted record ({r.retraction})" if r.retraction
+                      else f"inter-source disagreement: {', '.join(r.source_disagreement)}"
+                      if r.source_disagreement
                       else f"metadata disagreement: {', '.join(r.mismatches)}")
             enqueue("quarantine", {"citation_id": r.citation_id, "claim_id": r.claim_id,
                                    "result": r.as_dict()}, reason)
@@ -471,6 +679,54 @@ def verify_citations(
     return VerificationReport(results=results, origin_groups=groups,
                               queue_item_ids=queue_ids,
                               second_review_fraction=second_review_fraction)
+
+
+#: A DOI-shaped span in prose: the registrant prefix and the suffix
+#: up to the next delimiter. Candidate spans are normalized and
+#: compared EXACTLY against the cited DOI (Spec 013, CLM-013-12):
+#: a span that merely *contains* the cited DOI — 10.1000/xyz22 for
+#: a cited 10.1000/xyz2 — is a different DOI and never fires
+#: (RTA-06, where the naming test was a raw substring check).
+_DOI_SPAN = re.compile(r"10\.\d{4,9}/[^\s()\[\]{}<>\"']+")
+
+
+def _doi_named_in(text: str, doi: str) -> bool:
+    """Whether `text` names `doi` (already normalized) as an exact
+    delimited token — bare, behind a `doi:`/doi.org prefix, or with
+    sentence punctuation attached; all normalize to the same form."""
+    return any(normalize_doi(m.group(0)) == doi
+               for m in _DOI_SPAN.finditer(text))
+
+
+def _surname_year_adjacent(text: str, surname: str, year: int) -> bool:
+    """Whether "Surname YYYY" appears as one citation-shaped unit —
+    adjacent, with only whitespace, an opening parenthesis, or a
+    possessive between the surname and the year ("Wandel 2010",
+    "Smith (2019)", "Wandel's 2010"). A surname in one sentence and
+    a year in another do not name a work."""
+    pattern = (re.escape(surname) + r"(?:\s|\(|'s|’s)+"
+               + str(year) + r"\b")
+    return re.search(pattern, text) is not None
+
+
+def _second_identity_element(falsifier: str, retrieved: RetrievedItem) -> bool:
+    """Whether the falsifier ties itself to *this* record by an
+    identity element beyond surname+year (Spec 013, CLM-013-12).
+    Surname+year alone cannot identify a work — a different
+    same-surname same-year paper is common in exactly the
+    literatures this engine serves (RTA-06 case B). Either of
+    these counts: a content word from the record's title appears
+    in the falsifier (the naming discusses the named work's
+    subject), or the first author's given name appears in it
+    (the naming names the person, not just the surname)."""
+    toks = set(_tokens(falsifier))
+    surname = _surname(retrieved.authors[0])
+    for tok in set(_tokens(retrieved.title or "")):
+        if (len(tok) >= 4 and tok not in _STOPWORDS
+                and tok != surname and tok in toks):
+            return True
+    given = _given_name(retrieved.authors[0])
+    return bool(given) and given in toks
 
 
 def falsifier_names_record(claim: Claim, citation: Citation,
@@ -486,9 +742,15 @@ def falsifier_names_record(claim: Claim, citation: Citation,
       contradict the proposition (the observation was checked, not
       inferred);
     - the falsifier text names the resolved record by one of the two
-      conventional citation forms: the citation's normalized DOI
-      appears in it, or the resolved record's **first-author surname
-      and year** both appear in it.
+      conventional citation forms, held to identity-grade exactness
+      (Spec 013, CLM-013-12, answering RTA-06): the citation's
+      normalized DOI as an exact delimited token, or the resolved
+      record's **first-author surname and year** as a citation-shaped
+      adjacent pair accompanied by a second identity element from
+      the record (a title content word or the author's given name).
+      A DOI that is a prefix of the named DOI never fires, and
+      neither does a bare surname+year that could name a different
+      same-surname same-year work.
 
     Identity is read only from the resolved record (and the cited
     DOI) — never from the as-cited fields, which are precisely what
@@ -506,15 +768,17 @@ def falsifier_names_record(claim: Claim, citation: Citation,
         return False
     text = falsifier.lower()
     doi = _norm_doi(citation.doi)
-    if doi and doi in text:
+    if doi and _doi_named_in(text, doi):
         return True
     retrieved = result.retrieved
     if retrieved is None or not retrieved.authors or retrieved.year is None:
         return False
     surname = _surname(retrieved.authors[0])
-    if not surname or surname not in set(_tokens(falsifier)):
+    if not surname:
         return False
-    return str(retrieved.year) in set(re.findall(r"[0-9]+", falsifier))
+    if not _surname_year_adjacent(text, surname, retrieved.year):
+        return False
+    return _second_identity_element(falsifier, retrieved)
 
 
 def to_evidence_item(citation: Citation, result: CitationResult, *,

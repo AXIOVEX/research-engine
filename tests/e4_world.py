@@ -12,7 +12,7 @@ from types import SimpleNamespace
 import tekmerion.platform.authz as authz
 from tekmerion.platform.directory import IdPConfig
 
-from e1_world import TENANT_A, ISSUER_A, build_world, login_user
+from e1_world import TENANT_A, ISSUER_A, build_world, login_user, step_up_session
 
 TENANT_B = "uni-b"
 ISSUER_B = "https://idp-b.test"
@@ -37,6 +37,10 @@ def build_two_tenant_world(tmp_path) -> SimpleNamespace:
     svc.grant_role(w.root_session, identity_id=admin_b.identity_id,
                    role=authz.TENANT_ADMIN, tenant_id=TENANT_B)
     admin_b_session, admin_b = login_b(w, "admin-b")
+    # Spec 013: tenant B's admin standing session is stepped up at
+    # world build, like tenant A's (CLM-013-16/-17 gates).
+    step_up_session(svc, w.mock, admin_b_session, TENANT_B, ISSUER_B,
+                    "admin-b", USERS_B)
     w.tenant_b, w.issuer_b = TENANT_B, ISSUER_B
     w.admin_b, w.admin_b_session = admin_b, admin_b_session
     return w

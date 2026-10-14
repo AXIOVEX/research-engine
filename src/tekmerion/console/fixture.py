@@ -265,7 +265,9 @@ def _login(svc: PlatformService, idp: FixtureIdP, tenant_id: str,
                           nonce=params["nonce"])
     token = svc.complete_login(params["state"], code)
     if step_up:
-        svc.step_up(token, id_token=idp.issue_token(issuer, subject), nonce="n-1")
+        challenge = svc.begin_step_up(token)
+        svc.step_up(token, id_token=idp.issue_token(issuer, subject, nonce=challenge),
+                    nonce=challenge)
     return token
 
 
@@ -415,9 +417,10 @@ def build_fixture_world(root: str | Path, base_url: str) -> FixtureWorld:
         reason="IdP signing-certificate rotation — emergency membership repair",
         duration_seconds=3600)
     svc.authorize_break_glass(root_session, bg_session_id=bg1.bg_session_id)
-    svc.break_glass_act(bg1.bg_session_id, action="tenant.audit_export")
+    svc.break_glass_act(bg1.bg_session_id, session_token=alice,
+                        action="tenant.audit_export")
     svc.close_break_glass(alice, bg_session_id=bg1.bg_session_id)
-    state = svc.break_glass_state(tenant_id="uni-a")
+    state = svc.break_glass_state(alice, tenant_id="uni-a")
     review_item = [s for s in state["sessions"]
                    if s.bg_session_id == bg1.bg_session_id][0].review_item_id
     assert review_item
